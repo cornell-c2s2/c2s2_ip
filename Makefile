@@ -32,6 +32,9 @@ ifndef IP_NAME
 	@echo -e "[ERROR] replacing <name> with your desired IP name"
 
 else
+	@echo -ne "${GREEN}"
+	@echo -e " - IP Name Set to ${IP_NAME}"
+	
 	@echo -ne "${CYAN}"
 	@echo -e "Checking for IP names similar to ${IP_NAME}..."
 
@@ -41,7 +44,7 @@ ifeq (${IP_USED},1)
 	@echo -e "[ERROR] Please choose a different name"
 	@echo -e "[ERROR] (Use 'git branch -a' to see all of the existing"
 	@echo -e "[ERROR] branches, corresponding to existing IP)"
-	
+
 else
 	@echo -ne "${GREEN}"
 	@echo -e " - No similar-named IP exists!"
