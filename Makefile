@@ -18,7 +18,7 @@ CYAN   =\033[0;36m
 WHITE  =\033[0;37m
 
 # Check if our IP has already been used in a branch
-IP_USED = $(shell git pull 2>&1 /dev/null; git branch -a | grep -cm 1 ${IP_NAME})
+IP_USED = $(shell git pull -q; git branch -a | grep -cm 1 ${IP_NAME})
 
 # Recipe for making new IP
 new_ip:
