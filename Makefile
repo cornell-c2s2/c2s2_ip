@@ -20,6 +20,34 @@ WHITE  =\033[0;37m
 # Check if our IP has already been used in a branch
 IP_USED = $(shell git pull -q; git branch -a | grep -cm 1 ${IP_NAME})
 
+# Recipe to check whether an IP already exists
+check_ip:
+	@echo -ne "${CYAN}"
+	@echo -e "Checking IP Name is set..."
+
+ifndef IP_NAME
+	@echo -ne "${RED}"
+	@echo -e "[ERROR] Looks like you didn't specify a name for the IP!"
+	@echo -e "[ERROR] Try running 'make new_ip IP_NAME=<name>'' instead,"
+	@echo -e "[ERROR] replacing <name> with your desired IP name"
+
+else
+	@echo -ne "${CYAN}"
+	@echo -e "Checking for IP names similar to ${IP_NAME}..."
+
+ifeq (${IP_USED},1)
+	@echo -ne "${RED}"
+	@echo -e "[ERROR] A similar-named IP already exists!"
+	@echo -e "[ERROR] Please choose a different name"
+	@echo -e "[ERROR] (Use 'git branch -a' to see all of the existing"
+	@echo -e "[ERROR] branches, corresponding to existing IP)"
+	
+else
+	@echo -ne "${GREEN}"
+	@echo -e " - No similar-named IP exists!"
+endif
+endif
+
 # Recipe for making new IP
 new_ip:
 	@echo -ne "${PURPLE}"
