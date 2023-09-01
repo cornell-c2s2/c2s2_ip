@@ -99,26 +99,26 @@ else
 	@echo -ne "${CYAN}"
 	@echo -e "Creating starter IP"
 
-	@mkdir ${IP_NAME}
-	@touch ${IP_NAME}/${IP_NAME}.v
-	@echo "//================================================" >> ${IP_NAME}/${IP_NAME}.v
-	@echo "// ${IP_NAME}.v"                                    >> ${IP_NAME}/${IP_NAME}.v
-	@echo "//================================================" >> ${IP_NAME}/${IP_NAME}.v
-	@echo ""                                                   >> ${IP_NAME}/${IP_NAME}.v
-	@echo "module ${IP_NAME}"                                  >> ${IP_NAME}/${IP_NAME}.v
-	@echo "("                                                  >> ${IP_NAME}/${IP_NAME}.v
-	@echo "  input  logic clk;"                                >> ${IP_NAME}/${IP_NAME}.v
-	@echo "  input  logic q;"                                  >> ${IP_NAME}/${IP_NAME}.v
-	@echo "  output logic d;"                                  >> ${IP_NAME}/${IP_NAME}.v
-	@echo ");"                                                 >> ${IP_NAME}/${IP_NAME}.v
-	@echo ""                                                   >> ${IP_NAME}/${IP_NAME}.v
-	@echo "always_ff @( posedge clk )"                         >> ${IP_NAME}/${IP_NAME}.v
-	@echo "  q <= d;"                                          >> ${IP_NAME}/${IP_NAME}.v
-	@echo ""                                                   >> ${IP_NAME}/${IP_NAME}.v
-	@echo "endmodule"                                          >> ${IP_NAME}/${IP_NAME}.v
+	@mkdir src/${IP_NAME}
+	@touch src/${IP_NAME}/${IP_NAME}.v
+	@echo "//================================================" >> src/${IP_NAME}/${IP_NAME}.v
+	@echo "// ${IP_NAME}.v"                                    >> src/${IP_NAME}/${IP_NAME}.v
+	@echo "//================================================" >> src/${IP_NAME}/${IP_NAME}.v
+	@echo ""                                                   >> src/${IP_NAME}/${IP_NAME}.v
+	@echo "module ${IP_NAME}"                                  >> src/${IP_NAME}/${IP_NAME}.v
+	@echo "("                                                  >> src/${IP_NAME}/${IP_NAME}.v
+	@echo "  input  logic clk;"                                >> src/${IP_NAME}/${IP_NAME}.v
+	@echo "  input  logic q;"                                  >> src/${IP_NAME}/${IP_NAME}.v
+	@echo "  output logic d;"                                  >> src/${IP_NAME}/${IP_NAME}.v
+	@echo ");"                                                 >> src/${IP_NAME}/${IP_NAME}.v
+	@echo ""                                                   >> src/${IP_NAME}/${IP_NAME}.v
+	@echo "always_ff @( posedge clk )"                         >> src/${IP_NAME}/${IP_NAME}.v
+	@echo "  q <= d;"                                          >> src/${IP_NAME}/${IP_NAME}.v
+	@echo ""                                                   >> src/${IP_NAME}/${IP_NAME}.v
+	@echo "endmodule"                                          >> src/${IP_NAME}/${IP_NAME}.v
 
 	@echo -ne "${GREEN}"
-	@echo -e " - Starter IP created at ${IP_NAME}/${IP_NAME}.v"
+	@echo -e " - Starter IP created at src/${IP_NAME}/${IP_NAME}.v"
 
 	@echo -ne "${CYAN}"
 	@echo -e "Updating remote..."
