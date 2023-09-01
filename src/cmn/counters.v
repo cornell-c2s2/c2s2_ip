@@ -6,6 +6,7 @@
 `define CMN_COUNTER_V
 
 `include "cmn/regs.v"
+`include "cmn/assert.v"
 
 module cmn_BasicCounter
 #(
