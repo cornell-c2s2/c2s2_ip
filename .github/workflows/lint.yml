@@ -10,10 +10,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Install svlint
-      uses: actions-rs/cargo@v1
+      uses: actions-rs/install@v0.1.2
       with:
-        command: install
-        args: svlint
+        crate: svlint
+        version: latest
+        use-tool-cache: true
     - name: Check svlint Installed
       run: svlint --version
     - name: Enable Recursive Glob
