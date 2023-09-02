@@ -9,15 +9,19 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+    - name: Create Build Directory
+      run: mkdir build
     - name: Install svlint
-      uses: actions-rs/install@v0.1.2
-      with:
-        crate: svlint
-        version: latest
-        use-tool-cache: true
-    - name: Check svlint Installed
-      run: svlint --version
+      run: wget -O build/svlint.zip https://github.com/dalance/svlint/releases/download/v0.9.0/svlint-v0.9.0-x86_64-lnx.zip
+    - name: Unzip svlint
+      run: unzip build/svlint.zip -d build
+    - name: Check svlint installed
+      run: build/bin/svlint --version
     - name: Enable Recursive Glob
       run: shopt -s globstar
+    - name: List verilog files
+      run: ls **/*.v
     - name: Run svlint
-      run: svlint **/*.v
+      run: build/bin/svlint **/*.v
+    - name: Cleanup
+      run: rm -r build
