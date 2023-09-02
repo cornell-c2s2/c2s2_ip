@@ -9,7 +9,7 @@ from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
-from template import TemplateVRTL
+from template import Template
 
 # Creates a test harness class for the `Template` module.
 class Harness( Component ):
@@ -28,7 +28,7 @@ class Harness( Component ):
 
 # Initialize a simulatable model
 def create_model(n):
-	model = TemplateVRTL(n)
+	model = Template(n)
 
     # Create a harness wrapping our `Template` module.
 	return Harness(model, n)
