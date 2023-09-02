@@ -20,4 +20,4 @@ jobs:
     - name: Enable Recursive Glob
       run: shopt -s globstar
     - name: Run svlint
-      run: svlint **/*.sv
+      run: svlint **/*.v
