@@ -11,28 +11,27 @@
 // 1rw Combinational Bit-level SRAM
 //------------------------------------------------------------------------
 
-module cmn_CombinationalBitSRAM_1rw
-#(
+module cmn_CombinationalBitSRAM_1rw #(
   parameter p_data_nbits  = 1,
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits  = $clog2(p_num_entries)
-)(
-  input  logic                     clk,
-  input  logic                     reset,
+  parameter c_addr_nbits = $clog2(p_num_entries)
+) (
+  input logic clk,
+  input logic reset,
 
   // Read port (combinational read)
 
-  input  logic                     read_en,
-  input  logic [c_addr_nbits-1:0]  read_addr,
-  output logic [p_data_nbits-1:0]  read_data,
+  input  logic                    read_en,
+  input  logic [c_addr_nbits-1:0] read_addr,
+  output logic [p_data_nbits-1:0] read_data,
 
   // Write port (sampled on the rising clock edge)
 
-  input  logic                     write_en,
-  input  logic [c_addr_nbits-1:0]  write_addr,
-  input  logic [p_data_nbits-1:0]  write_data
+  input logic                    write_en,
+  input logic [c_addr_nbits-1:0] write_addr,
+  input logic [p_data_nbits-1:0] write_data
 );
 
   logic [p_data_nbits-1:0] mem[p_num_entries-1:0];
@@ -46,17 +45,14 @@ module cmn_CombinationalBitSRAM_1rw
   /* verilator lint_off WIDTH */
 
   always_comb begin
-    if ( read_en )
-      read_data = mem[read_addr];
-    else
-      read_data = 'hx;
+    if (read_en) read_data = mem[read_addr];
+    else read_data = 'hx;
   end
 
   /* verilator lint_on WIDTH */
 
   always_ff @(posedge clk) begin
-    if (write_en)
-      mem[write_addr] = write_data;
+    if (write_en) mem[write_addr] = write_data;
   end
 
   // Assertions
@@ -84,37 +80,36 @@ module cmn_CombinationalBitSRAM_1rw
     end
   end
   */
-  
+
 endmodule
 
 //------------------------------------------------------------------------
 // 1rw Combinational SRAM
 //------------------------------------------------------------------------
 
-module cmn_CombinationalSRAM_1rw
-#(
+module cmn_CombinationalSRAM_1rw #(
   parameter p_data_nbits  = 1,
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
   parameter c_addr_nbits  = $clog2(p_num_entries),
-  parameter c_data_nbytes = (p_data_nbits+7)/8 // $ceil(p_data_nbits/8)
-)(
-  input  logic                     clk,
-  input  logic                     reset,
+  parameter c_data_nbytes = (p_data_nbits + 7) / 8  // $ceil(p_data_nbits/8)
+) (
+  input logic clk,
+  input logic reset,
 
   // Read port (combinational read)
 
-  input  logic                     read_en,
-  input  logic [c_addr_nbits-1:0]  read_addr,
-  output logic [p_data_nbits-1:0]  read_data,
+  input  logic                    read_en,
+  input  logic [c_addr_nbits-1:0] read_addr,
+  output logic [p_data_nbits-1:0] read_data,
 
   // Write port (sampled on the rising clock edge)
 
-  input  logic                     write_en,
-  input  logic [c_data_nbytes-1:0] write_byte_en,
-  input  logic [c_addr_nbits-1:0]  write_addr,
-  input  logic [p_data_nbits-1:0]  write_data
+  input logic                     write_en,
+  input logic [c_data_nbytes-1:0] write_byte_en,
+  input logic [ c_addr_nbits-1:0] write_addr,
+  input logic [ p_data_nbits-1:0] write_data
 );
 
   logic [p_data_nbits-1:0] mem[p_num_entries-1:0];
@@ -128,10 +123,8 @@ module cmn_CombinationalSRAM_1rw
   /* verilator lint_off WIDTH */
 
   always_comb begin
-    if ( read_en )
-      read_data = mem[read_addr];
-    else
-      read_data = 'hx;
+    if (read_en) read_data = mem[read_addr];
+    else read_data = 'hx;
   end
 
   /* verilator lint_on WIDTH */
@@ -140,11 +133,10 @@ module cmn_CombinationalSRAM_1rw
 
   genvar i;
   generate
-    for ( i = 0; i < c_data_nbytes; i = i + 1 )
-    begin : test
-      always_ff @( posedge clk ) begin
-        if ( write_en && write_byte_en[i] )
-          mem[write_addr][ (i+1)*8-1 : i*8 ] <= write_data[ (i+1)*8-1 : i*8 ];
+    for (i = 0; i < c_data_nbytes; i = i + 1) begin : test
+      always_ff @(posedge clk) begin
+        if (write_en && write_byte_en[i])
+          mem[write_addr][(i+1)*8-1 : i*8] <= write_data[(i+1)*8-1 : i*8];
       end
     end
   endgenerate
@@ -174,37 +166,36 @@ module cmn_CombinationalSRAM_1rw
     end
   end
   */
-  
+
 endmodule
 
 //------------------------------------------------------------------------
 // 1rw Synchronous SRAM
 //------------------------------------------------------------------------
 
-module cmn_SynchronousSRAM_1rw
-#(
+module cmn_SynchronousSRAM_1rw #(
   parameter p_data_nbits  = 1,
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
   parameter c_addr_nbits  = $clog2(p_num_entries),
-  parameter c_data_nbytes = (p_data_nbits+7)/8 // $ceil(p_data_nbits/8)
-)(
-  input  logic                     clk,
-  input  logic                     reset,
+  parameter c_data_nbytes = (p_data_nbits + 7) / 8  // $ceil(p_data_nbits/8)
+) (
+  input logic clk,
+  input logic reset,
 
   // Read port (synchronous read)
 
-  input  logic                     read_en,
-  input  logic [c_addr_nbits-1:0]  read_addr,
-  output logic [p_data_nbits-1:0]  read_data,
+  input  logic                    read_en,
+  input  logic [c_addr_nbits-1:0] read_addr,
+  output logic [p_data_nbits-1:0] read_data,
 
   // Write port (sampled on the rising clock edge)
 
-  input  logic                     write_en,
-  input  logic [c_data_nbytes-1:0] write_byte_en,
-  input  logic [c_addr_nbits-1:0]  write_addr,
-  input  logic [p_data_nbits-1:0]  write_data
+  input logic                     write_en,
+  input logic [c_data_nbytes-1:0] write_byte_en,
+  input logic [ c_addr_nbits-1:0] write_addr,
+  input logic [ p_data_nbits-1:0] write_data
 );
 
   logic [p_data_nbits-1:0] mem[p_num_entries-1:0];
@@ -215,22 +206,19 @@ module cmn_SynchronousSRAM_1rw
   // read data is all X's if the read is not enable at all to avoid
   // (potentially) incorrectly assuming the SRAM latches the read data.
 
-  always_ff @( posedge clk ) begin
-    if ( read_en )
-      read_data <= mem[read_addr];
-    else
-      read_data <= 'hx;
+  always_ff @(posedge clk) begin
+    if (read_en) read_data <= mem[read_addr];
+    else read_data <= 'hx;
   end
 
   // Inspired by http://www.xilinx.com/support/documentation/sw_manuals/xilinx11/xst.pdf, page 159
 
   genvar i;
   generate
-    for ( i = 0; i < c_data_nbytes; i = i + 1 )
-    begin : test
-      always_ff @( posedge clk ) begin
-        if ( write_en && write_byte_en[i] )
-          mem[write_addr][ (i+1)*8-1 : i*8 ] <= write_data[ (i+1)*8-1 : i*8 ];
+    for (i = 0; i < c_data_nbytes; i = i + 1) begin : test
+      always_ff @(posedge clk) begin
+        if (write_en && write_byte_en[i])
+          mem[write_addr][(i+1)*8-1 : i*8] <= write_data[(i+1)*8-1 : i*8];
       end
     end
   endgenerate
@@ -263,5 +251,5 @@ module cmn_SynchronousSRAM_1rw
 
 endmodule
 
-`endif /* CMN_SRAMS_V */
+`endif  /* CMN_SRAMS_V */
 

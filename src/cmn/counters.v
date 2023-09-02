@@ -8,20 +8,19 @@
 `include "cmn/regs.v"
 `include "cmn/assert.v"
 
-module cmn_BasicCounter
-#(
+module cmn_BasicCounter #(
   parameter p_count_nbits       = 3,
   parameter p_count_clear_value = 0,
   parameter p_count_max_value   = 4
-)(
-  input  logic                     clk,
-  input  logic                     reset,
+) (
+  input logic clk,
+  input logic reset,
 
   // Operations
 
-  input  logic                     clear,
-  input  logic                     increment,
-  input  logic                     decrement,
+  input logic clear,
+  input logic increment,
+  input logic decrement,
 
   // Outputs
 
@@ -37,12 +36,11 @@ module cmn_BasicCounter
 
   logic [p_count_nbits-1:0] count_next;
 
-  cmn_ResetReg#( p_count_nbits, p_count_clear_value ) count_reg
-  (
-    .clk   (clk),
-    .reset (reset),
-    .d     (count_next),
-    .q     (count)
+  cmn_ResetReg #(p_count_nbits, p_count_clear_value) count_reg (
+    .clk  (clk),
+    .reset(reset),
+    .d    (count_next),
+    .q    (count)
   );
 
   //----------------------------------------------------------------------
@@ -50,10 +48,10 @@ module cmn_BasicCounter
   //----------------------------------------------------------------------
 
   logic do_increment;
-  assign do_increment = ( increment && (count < p_count_max_value) );
+  assign do_increment = (increment && (count < p_count_max_value));
 
   logic do_decrement;
-  assign do_decrement = ( decrement && (count > 0) );
+  assign do_decrement = (decrement && (count > 0));
 
   assign count_next
     = clear        ? (p_count_clear_value)
@@ -62,7 +60,7 @@ module cmn_BasicCounter
     : count;
 
   assign count_is_zero = (count == 0);
-  assign count_is_max  = (count == p_count_max_value);
+  assign count_is_max = (count == p_count_max_value);
 
   //----------------------------------------------------------------------
   // Assertions
@@ -79,5 +77,5 @@ module cmn_BasicCounter
 
 endmodule
 
-`endif /* CMN_COUNTER_V */
+`endif  /* CMN_COUNTER_V */
 

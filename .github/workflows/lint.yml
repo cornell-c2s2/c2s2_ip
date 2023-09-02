@@ -1,10 +1,10 @@
-name: Lint
+name: Linter
 
 on: [push]
 
 jobs:
-  lint:
-    name: Check Style Conventions
+  svlint:
+    name: Check Style Conventions using svlint
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -22,4 +22,15 @@ jobs:
     - name: Lint files
       run: tools/lint.sh
     - name: Cleanup
-      run: rm -r build
+      run: rm -r build 
+  verible:
+    name: Check Style Conventions using Verible
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: chipsalliance/verible-linter-action@main
+      with:
+        config_file: '.verible-lint'
+        paths: |
+          ./src
+        extra_args: "--waiver_files=.verible-waiver"
