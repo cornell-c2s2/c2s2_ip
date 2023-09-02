@@ -22,114 +22,94 @@ IP_USED = $(shell git pull -q; git branch -a | grep -cm 1 ${IP_NAME})
 
 # Recipe to check whether an IP already exists
 check_ip:
-	@echo -ne "${CYAN}"
-	@echo -e "Checking IP Name is set..."
+	@printf "${CYAN}"
+	@printf "Checking IP Name is set...\n"
 
 ifndef IP_NAME
-	@echo -ne "${RED}"
-	@echo -e "[ERROR] Looks like you didn't specify a name for the IP!"
-	@echo -e "[ERROR] Try running 'make new_ip IP_NAME=<name>'' instead,"
-	@echo -e "[ERROR] replacing <name> with your desired IP name"
+	@printf " ${RED}""
+	@printf "[ERROR] Looks like you didn't specify a name for the IP!\n"
+	@printf "[ERROR] Try running 'make new_ip IP_NAME=<name>'' instead,\n"
+	@printf "[ERROR] replacing <name> with your desired IP name\n"
 
 else
-	@echo -ne "${GREEN}"
-	@echo -e " - IP Name Set to ${IP_NAME}"
+	@printf "${GREEN}"
+	@printf " - IP Name Set to ${IP_NAME}\n"
 	
-	@echo -ne "${CYAN}"
-	@echo -e "Checking for IP names similar to ${IP_NAME}..."
+	@printf "${CYAN}"
+	@printf "Checking for IP names similar to %s...\n" ${IP_NAME}
 
 ifeq (${IP_USED},1)
-	@echo -ne "${RED}"
-	@echo -e "[ERROR] A similar-named IP already exists!"
-	@echo -e "[ERROR] Please choose a different name"
-	@echo -e "[ERROR] (Use 'git branch -a' to see all of the existing"
-	@echo -e "[ERROR] branches, corresponding to existing IP)"
+	@printf "${RED}"
+	@printf "[ERROR] A similar-named IP already exists!\n"
+	@printf "[ERROR] Please choose a different name\n"
+	@printf "[ERROR] (Use 'git branch -a' to see all of the existing\n"
+	@printf "[ERROR] branches, corresponding to existing IP)\n"
 
 else
-	@echo -ne "${GREEN}"
-	@echo -e " - No similar-named IP exists!"
+	@printf "${GREEN}"
+	@printf " - No similar-named IP exists!\n"
 endif
 endif
 
 # Recipe for making new IP
 new_ip:
-	@echo -ne "${PURPLE}"
-	@echo -e "========================================"
-	@echo -e "C2S2 IP CREATOR"
-	@echo -e "========================================\n"
-	@echo -ne "${RESET}"
+	@printf "${PURPLE}"
+	@printf "========================================\n"
+	@printf "C2S2 IP CREATOR\n"
+	@printf "========================================\n"
+	@printf "${RESET}"
 
-	@echo -ne "${CYAN}"
-	@echo -e "Checking IP Name is set..."
+	@printf "${CYAN}"
+	@printf "Checking IP Name is set...\n"
 
 ifndef IP_NAME
-	@echo -ne "${RED}"
-	@echo -e "[ERROR] Looks like you didn't specify a name for the IP!"
-	@echo -e "[ERROR] Try running 'make new_ip IP_NAME=<name>'' instead,"
-	@echo -e "[ERROR] replacing <name> with your desired IP name"
+	@printf "${RED}"
+	@printf "[ERROR] Looks like you didn't specify a name for the IP!\n"
+	@printf "[ERROR] Try running 'make new_ip IP_NAME=<name>'' instead,\n"
+	@printf "[ERROR] replacing <name> with your desired IP name\n"
 else
 	
 # Get name of IP
-	@echo -ne "${GREEN}"
-	@echo -e " - IP Name Set to ${IP_NAME}"
+	@printf "${GREEN}"
+	@printf " - IP Name Set to ${IP_NAME}\n"
 
 # Check if already used
-	@echo -ne "${CYAN}"
-	@echo -e "Checking previously-existing IP..."
+	@printf "${CYAN}"
+	@printf "Checking previously-existing IP...\n"
 ifeq (${IP_USED},1)
-	@echo -ne "${RED}"
-	@echo -e "[ERROR] A similar-named IP already exists!"
-	@echo -e "[ERROR] Please choose a different name"
-	@echo -e "[ERROR] (Use 'git branch -a' to see all of the existing"
-	@echo -e "[ERROR] branches, corresponding to existing IP)"
+	@printf "${RED}"
+	@printf "[ERROR] A similar-named IP already exists!\n"
+	@printf "[ERROR] Please choose a different name\n"
+	@printf "[ERROR] (Use 'git branch -a' to see all of the existing\n"
+	@printf "[ERROR] branches, corresponding to existing IP)\n"
 else
-	@echo -ne "${GREEN}"
-	@echo -e " - No similar-named IP exists!"
-
-# Make a new branch for the IP
-	@echo -ne "${CYAN}"
-	@echo -e "Creating new IP branch..."
-	
-	@echo -e "${RESET}"
-	@git checkout -b ${IP_NAME}
-	@echo -e ""
+	@printf "${GREEN}"
+	@printf " - No similar-named IP exists!\n"
 
 # Create new IP directory
 
-	@echo -ne "${CYAN}"
-	@echo -e "Creating starter IP"
+	@printf "${CYAN}"
+	@printf "Creating starter IP\n"
 
-	@mkdir ${IP_NAME}
-	@touch ${IP_NAME}/${IP_NAME}.v
-	@echo "//================================================" >> ${IP_NAME}/${IP_NAME}.v
-	@echo "// ${IP_NAME}.v"                                    >> ${IP_NAME}/${IP_NAME}.v
-	@echo "//================================================" >> ${IP_NAME}/${IP_NAME}.v
-	@echo ""                                                   >> ${IP_NAME}/${IP_NAME}.v
-	@echo "module ${IP_NAME}"                                  >> ${IP_NAME}/${IP_NAME}.v
-	@echo "("                                                  >> ${IP_NAME}/${IP_NAME}.v
-	@echo "  input  logic clk;"                                >> ${IP_NAME}/${IP_NAME}.v
-	@echo "  input  logic q;"                                  >> ${IP_NAME}/${IP_NAME}.v
-	@echo "  output logic d;"                                  >> ${IP_NAME}/${IP_NAME}.v
-	@echo ");"                                                 >> ${IP_NAME}/${IP_NAME}.v
-	@echo ""                                                   >> ${IP_NAME}/${IP_NAME}.v
-	@echo "always_ff @( posedge clk )"                         >> ${IP_NAME}/${IP_NAME}.v
-	@echo "  q <= d;"                                          >> ${IP_NAME}/${IP_NAME}.v
-	@echo ""                                                   >> ${IP_NAME}/${IP_NAME}.v
-	@echo "endmodule"                                          >> ${IP_NAME}/${IP_NAME}.v
+	@python tools/new_ip.py ${IP_NAME}
 
-	@echo -ne "${GREEN}"
-	@echo -e " - Starter IP created at ${IP_NAME}/${IP_NAME}.v"
+# Make a new branch for the IP
+	@printf "${CYAN}"
+	@printf "Creating new IP branch...\n"
+	
+	@printf "${RESET}"
+	@git checkout -b ${IP_NAME}
 
-	@echo -ne "${CYAN}"
-	@echo -e "Updating remote..."
+	@printf "${CYAN}"
+	@printf "Updating remote...\n"
 
-	@echo -e "${RESET}"
+	@printf "${RESET}"
 	@git add .
 	@git commit -m "Initial IP: ${IP_NAME}"
 	@git push --set-upstream origin ${IP_NAME}
 
-	@echo -ne "${GREEN}"
-	@echo -e "[SUCCESS] New IP successfully created!"
+	@printf "${GREEN}"
+	@printf "[SUCCESS] New IP successfully created!\n"
 
 endif
 endif

@@ -9,6 +9,7 @@
 `include "cmn/muxes.v"
 `include "cmn/regfiles.v"
 `include "cmn/trace.v"
+`include "cmn/assert.v"
 
 //------------------------------------------------------------------------
 // Defines
