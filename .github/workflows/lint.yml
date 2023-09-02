@@ -34,3 +34,4 @@ jobs:
         paths: |
           ./src
         extra_args: "--waiver_files=.verible-waiver"
+        verible_version: "v0.0-3410-g398a8505"
