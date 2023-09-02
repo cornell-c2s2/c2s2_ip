@@ -10,9 +10,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Install svlint
-      uses: dtolnay/install@master
+      uses: actions-rs/cargo@v1
       with:
-        crate: svlint
+        command: install
+        args: svlint
     - name: Check svlint Installed
       run: svlint --version
     - name: Enable Recursive Glob
