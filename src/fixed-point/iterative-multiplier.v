@@ -5,8 +5,8 @@
 `ifndef FP_ITERATIVE_MULTIPLIER
 `define FP_ITERATIVE_MULTIPLIER
 
-`include "cmn/muxes.v"
-`include "cmn/regs.v"
+`include "src/cmn/muxes.v"
+`include "src/cmn/regs.v"
 
 module FPIterativeMultiplier
 # (
@@ -23,7 +23,7 @@ module FPIterativeMultiplier
 
     input  logic send_rdy,
     output logic send_val,
-    output logic [width-1:0] send_msg,
+    output logic [width-1:0] send_msg
 );
 	// performs the operation c = a*b
 	// Equivalent to taking the integer representations of both numbers,
