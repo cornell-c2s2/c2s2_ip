@@ -1,0 +1,21 @@
+name: Lint
+
+on: [push]
+
+jobs:
+  lint:
+    name: Check Style Conventions
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Install svlint
+      uses: dtolnay/install@master
+      with:
+        crate: svlint
+    - name: Check svlint Installed
+      run: svlint --version
+    - name: Enable Recursive Glob
+      run: shopt -s globstar
+    - name: Run svlint
+      run: svlint **/*.sv
