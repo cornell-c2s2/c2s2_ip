@@ -11,17 +11,15 @@ jobs:
       uses: actions/checkout@v3
     - name: Create Build Directory
       run: mkdir build
-    - name: Install svlint
+    - name: Download svlint
       run: wget -O build/svlint.zip https://github.com/dalance/svlint/releases/download/v0.9.0/svlint-v0.9.0-x86_64-lnx.zip
-    - name: Unzip svlint
-      run: unzip build/svlint.zip -d build
+    - name: Install svlint
+      run: |
+        unzip build/svlint.zip -d build
+        echo "${PWD}/build/bin" >> $GITHUB_PATH
     - name: Check svlint installed
-      run: build/bin/svlint --version
-    - name: Enable Recursive Glob
-      run: shopt -s globstar
-    - name: List verilog files
-      run: ls **/*.v
-    - name: Run svlint
-      run: build/bin/svlint **/*.v
+      run: svlint --version
+    - name: Lint files
+      run: tools/lint.sh
     - name: Cleanup
       run: rm -r build
