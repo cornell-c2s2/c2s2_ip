@@ -5,7 +5,7 @@
 `ifndef CMN_SRAMS_V
 `define CMN_SRAMS_V
 
-`include "cmn/assert.v"
+`include "src/cmn/assert.v"
 
 //------------------------------------------------------------------------
 // 1rw Combinational Bit-level SRAM
