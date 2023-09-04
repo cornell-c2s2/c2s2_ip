@@ -5,8 +5,8 @@
 `ifndef CMN_COUNTER_V
 `define CMN_COUNTER_V
 
-`include "cmn/regs.v"
-`include "cmn/assert.v"
+`include "src/cmn/regs.v"
+`include "src/cmn/assert.v"
 
 module cmn_BasicCounter
 #(
