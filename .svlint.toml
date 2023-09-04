@@ -8,6 +8,7 @@ style_textwidth = true
 style_semicolon = true
 
 [syntaxrules]
+style_operator_integer_leading_space = true
 uppercamelcase_module = true
 uppercamelcase_package = true
 tab_character = true
@@ -18,21 +19,18 @@ style_operator_integer = true
 style_operator_unary = true
 style_operator_arithmetic_leading_space = true
 style_operator_boolean_leading_space = true
-style_operator_integer_leading_space = true
-
 style_keyword_0or1space = true
 style_keyword_0space = true
 style_keyword_1or2space = true
 style_keyword_1space = true
 style_keyword_construct = true
-style_keyword_datatype = false  # Overly restrictive.
+style_keyword_datatype = false                 # Overly restrictive.
 style_keyword_end = true
 style_keyword_maybelabel = true
 style_keyword_new = true
 style_keyword_newline = true
 style_commaleading = false
 eventlist_or = true
-
 blocking_assignment_in_always_ff = true
 non_blocking_assignment_in_always_comb = true
 enum_with_type = true
@@ -58,16 +56,14 @@ keyword_required_generate = false
 multiline_for_begin = true
 multiline_if_begin = true
 inout_with_tri = true
-input_with_var = false                        # Currently set to false until more discussion
-output_with_var = false                       # Currently set to false until more discussion
+input_with_var = false                         # Currently set to false until more discussion
+output_with_var = false                        # Currently set to false until more discussion
 interface_port_with_modport = true
-
 blocking_assignment_in_always_latch = true
 case_default = true
 function_with_automatic = true
 level_sensitive_always = true
 operator_case_equality = true
-
 keyword_forbidden_always = true
 generate_case_with_label = true
 generate_for_with_label = true
