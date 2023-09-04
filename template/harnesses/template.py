@@ -15,4 +15,4 @@ class Template( VerilogPlaceholder, Component ):
     # Name of the top level module to be imported
     s.set_metadata( VerilogPlaceholderPass.top_module, 'Template' )
     # Source file path
-    s.set_metadata( VerilogPlaceholderPass.src_file, 'template/template.v' )
+    s.set_metadata( VerilogPlaceholderPass.src_file, 'src/template/template.v' )
