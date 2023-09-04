@@ -1,10 +1,10 @@
-name: Lint
+name: Check
 
 on: [push]
 
 jobs:
-  lint:
-    name: Check Style Conventions
+  svlint:
+    name: Check Style Conventions using svlint
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -23,3 +23,4 @@ jobs:
       run: tools/lint.sh
     - name: Cleanup
       run: rm -r build
+    
