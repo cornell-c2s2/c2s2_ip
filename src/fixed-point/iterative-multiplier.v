@@ -23,7 +23,7 @@ module FPIterativeMultiplier #(
 
   input logic send_rdy,
   output logic send_val,
-  output logic [wnidth-1:0] c
+  output logic [n - 1:0] c
 );
   // performs the operation c = a*b
   // Equivalent to taking the integer representations of both numbers,
@@ -56,8 +56,8 @@ module FPIterativeMultiplier #(
 endmodule
 
 module fpmult_control #(
-  parameter n,
-  parameter d
+  parameter int n = 32,
+  parameter int d = 16
 ) (
   input  logic clk,
   input  logic reset,
@@ -151,8 +151,8 @@ module fpmult_control #(
 endmodule
 
 module fpmult_datapath #(
-  parameter n,
-  parameter d
+  parameter int n = 32,
+  parameter int d = 16
 ) (
   input logic clk,
   input logic reset,
@@ -169,17 +169,16 @@ module fpmult_datapath #(
   cmn_ResetReg #(n + d) acc_reg (
     .clk(clk),
     .reset(in_wait | reset),
-    .w(1),
     .d(acc_in),
     .q(acc_out)
   );
 
   logic [(n+d)-1:0] a_const_out;
 
-  cmn_ResetReg #(n + d) a_const_reg (
+  cmn_EnResetReg #(n + d) a_const_reg (
     .clk(clk),
     .reset(reset),
-    .w(in_wait),
+    .en(in_wait),
     .d(a),
     .q(a_const_out)
   );
@@ -190,18 +189,16 @@ module fpmult_datapath #(
   cmn_ResetReg #(n + d) a_reg (
     .clk(clk),
     .reset(reset),
-    .w(1),
     .d(a_in),
     .q(a_out)
   );
 
-  logic [(n+d)-1:0] b_in;
-  logic [(n+d)-1:0] b_out;
+  logic [n-1:0] b_in;
+  logic [n-1:0] b_out;
 
   cmn_ResetReg #(n) b_reg (
     .clk(clk),
     .reset(reset),
-    .w(1),
     .d(b_in),
     .q(b_out)
   );
