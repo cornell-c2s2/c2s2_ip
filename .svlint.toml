@@ -9,7 +9,8 @@ style_semicolon = true
 
 [syntaxrules]
 uppercamelcase_module = true
-tab_character = false
+uppercamelcase_package = true
+tab_character = true
 style_indent = true
 style_operator_arithmetic = true
 style_operator_boolean = true
@@ -24,7 +25,7 @@ style_keyword_0space = true
 style_keyword_1or2space = true
 style_keyword_1space = true
 style_keyword_construct = true
-style_keyword_datatype = false # Overly restrictive.
+style_keyword_datatype = false  # Overly restrictive.
 style_keyword_end = true
 style_keyword_maybelabel = true
 style_keyword_new = true
@@ -57,9 +58,8 @@ keyword_required_generate = false
 multiline_for_begin = true
 multiline_if_begin = true
 inout_with_tri = true
-# Currently set to false until more discussion
-input_with_var = false
-output_with_var = false
+input_with_var = false                        # Currently set to false until more discussion
+output_with_var = false                       # Currently set to false until more discussion
 interface_port_with_modport = true
 
 blocking_assignment_in_always_latch = true
