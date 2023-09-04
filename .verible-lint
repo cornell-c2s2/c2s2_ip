@@ -1,5 +1,0 @@
-+line-length=length:120
-+always-comb
-+always-comb-blocking
-+always-ff-non-blocking
-+explicit-parameter-storage-type
