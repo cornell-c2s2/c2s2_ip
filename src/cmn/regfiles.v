@@ -5,7 +5,7 @@
 `ifndef CMN_REGFILES_V
 `define CMN_REGFILES_V
 
-`include "cmn/assert.v"
+`include "src/cmn/assert.v"
 
 //------------------------------------------------------------------------
 // 1r1w register file

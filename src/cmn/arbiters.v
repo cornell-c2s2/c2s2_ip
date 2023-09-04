@@ -9,7 +9,7 @@
 `ifndef CMN_ARBITERS_V
 `define CMN_ARBITERS_V
 
-`include "cmn/regs.v"
+`include "src/cmn/regs.v"
 
 //------------------------------------------------------------------------
 // cmn_FixedArbChain
