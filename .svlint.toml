@@ -1,5 +1,6 @@
 [option]
-indent = 2
+exclude_paths = ["src/cmn/*.v"]
+indent = 4
 textwidth = 120
 
 [textrules]
