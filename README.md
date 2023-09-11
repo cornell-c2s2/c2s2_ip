@@ -1,6 +1,9 @@
 # c2s2_ip
 C2S2_IP is a repository for keeping track of all of C2S2's IP
 
+## Getting Started
+For new members, check out [this tutorial](docs/getting-started.md) for some helpful quickstart information.
+
 ## Basic Usage
 We use Makefile recipies and Git to help automate a lot of the functionality.
 
