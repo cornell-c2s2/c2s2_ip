@@ -28,5 +28,3 @@ This requires `svlint` to be installed and in your `PATH`.
 Note: Github actions has an automated script that already runs this on push, so installing `svlint` is entirely optional.
 
 There is a tutorial [here](./svlint.md) on how to do so, if you want to.
-
-(**TODO:** add tutorial on how to do this).
