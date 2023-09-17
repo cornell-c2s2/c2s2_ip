@@ -113,3 +113,6 @@ else
 
 endif
 endif
+
+lint:
+	tools/lint.sh
