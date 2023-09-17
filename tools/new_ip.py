@@ -25,23 +25,25 @@ if ip_pascal is None:
 
 # Split ip_name into words
 ip_name_words = re.findall(r"[A-Z]+(?:[a-z0-9]+|$)", ip_name)
-# ip_name in lowercase, with words separated by dashes
-ip_name_lower = "-".join(ip_name_words).lower()
+# ip_name in lowercase, with words separated by underscores
+ip_name_lower = "_".join(ip_name_words).lower()
 # ip_name in PascalCase
 ip_name_pascal = ip_name
 # ip_name in all caps, separated by underscores
 ip_name_upper = "_".join(ip_name_words).upper()
+
 
 # Replaces all instances of "template" with the ip name
 #   instances in lowercase are replaced by the ip name in lowercase, with words separated by dashes
 #   capitalized instances are replaced by the ip name in PascalCase
 #   instances in all caps are replaced by the ip name in all caps, separated by underscores
 def replace_template(s):
-    return s                                    \
-        .replace("template", ip_name_lower)     \
-        .replace("Template", ip_name_pascal)    \
-        .replace("TEMPLATE", ip_name_upper)     \
-    
+    return (
+        s.replace("template", ip_name_lower)
+        .replace("Template", ip_name_pascal)
+        .replace("TEMPLATE", ip_name_upper)
+    )
+
 
 print(f"{green} - Starter IP created at src/{ip_name_lower}/{ip_name_lower}.v")
 for dir in os.walk(template_dir):
