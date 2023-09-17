@@ -1,6 +1,6 @@
-`include "src/fixed-point/iterative-multiplier.v"
+`include "src/fixed_point/iterative_multiplier.v"
 
-module HarnessPFIM #(
+module HarnessFPIM #(
   parameter n = 32,
   parameter d = 16
 ) (
