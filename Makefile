@@ -21,16 +21,16 @@ WHITE  =\033[0;37m
 --parse-name:
 	@printf "${CYAN}"
 	@printf "Checking IP Name is set...\n"
-ifndef IP_NAME
+ifndef IP
 	@printf "${RED}"
 	@printf "[ERROR] Looks like you didn't specify a name for the IP!\n"
-	@printf "[ERROR] Try running 'make new_ip IP_NAME=<name>'' instead,\n"
+	@printf "[ERROR] Try running 'make check-ip IP=<name>' or 'make new-ip IP=<name>' instead,\n"
 	@printf "[ERROR] replacing <name> with your desired IP name\n"
 	@exit 1
 else
 	@mkdir -p build
 	@set -o pipefail
-	@python tools/parse-ip-name.py ${IP_NAME} | tee /dev/tty | tail -n 1 > build/ip_name.txt
+	@python tools/parse-ip-name.py ${IP} | tee /dev/tty | tail -n 1 > build/ip_name.txt
 	@set +o pipefail
 endif
 
@@ -85,22 +85,22 @@ else
 	@printf "${CYAN}"
 	@printf "Creating starter IP\n"
 
-	@python tools/new_ip.py ${IP_NAME_PARSED}
+	@python tools/new-ip.py ${IP_NAME_PARSED}
 
 # Make a new branch for the IP
 	@printf "${CYAN}"
 	@printf "Creating new IP branch...\n"
 	
 	@printf "${RESET}"
-#	@git checkout -b ${IP_NAME_PARSED}
+	@git checkout -b ${IP_NAME_PARSED}
 
 	@printf "${CYAN}"
 	@printf "Updating remote...\n"
 
 	@printf "${RESET}"
-#	@git add .
-#	@git commit -m "Initial IP: ${IP_NAME_PARSED}"
-#	@git push --set-upstream origin ${IP_NAME_PARSED}
+	@git add .
+	@git commit -m "Initial IP: ${IP_NAME_PARSED}"
+	@git push --set-upstream origin ${IP_NAME_PARSED}
 
 	@printf "${GREEN}"
 	@printf "[SUCCESS] New IP successfully created!\n"
@@ -109,6 +109,15 @@ endif
 
 lint:
 	tools/lint.sh
+
+INCLUDE = "."
+test:
+	@mkdir -p build
+ifndef IP
+	@pytest -k ${INCLUDE} --suppress-no-test-exit-code
+else
+	@pytest src/${IP} -k ${INCLUDE} --suppress-no-test-exit-code
+endif
 
 # Redundant rules to help with user typos
 new_ip: new-ip

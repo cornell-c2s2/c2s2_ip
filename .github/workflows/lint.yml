@@ -20,7 +20,7 @@ jobs:
     - name: Check svlint installed
       run: svlint --version
     - name: Lint files
-      run: tools/lint.sh
+      run: make lint
     - name: Cleanup
       run: rm -r build
   black:

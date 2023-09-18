@@ -2,3 +2,4 @@ fixedpt
 numpy
 pymtl3
 pytest
+pytest-custom_exit_code
