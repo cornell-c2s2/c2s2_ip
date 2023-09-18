@@ -85,22 +85,22 @@ else
 	@printf "${CYAN}"
 	@printf "Creating starter IP\n"
 
-	@python tools/new_ip.py ${IP_NAME_PARSED}
+	@python tools/new-ip.py ${IP_NAME_PARSED}
 
 # Make a new branch for the IP
 	@printf "${CYAN}"
 	@printf "Creating new IP branch...\n"
 	
 	@printf "${RESET}"
-#	@git checkout -b ${IP_NAME_PARSED}
+	@git checkout -b ${IP_NAME_PARSED}
 
 	@printf "${CYAN}"
 	@printf "Updating remote...\n"
 
 	@printf "${RESET}"
-#	@git add .
-#	@git commit -m "Initial IP: ${IP_NAME_PARSED}"
-#	@git push --set-upstream origin ${IP_NAME_PARSED}
+	@git add .
+	@git commit -m "Initial IP: ${IP_NAME_PARSED}"
+	@git push --set-upstream origin ${IP_NAME_PARSED}
 
 	@printf "${GREEN}"
 	@printf "[SUCCESS] New IP successfully created!\n"
