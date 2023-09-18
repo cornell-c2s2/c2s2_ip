@@ -21,16 +21,16 @@ WHITE  =\033[0;37m
 --parse-name:
 	@printf "${CYAN}"
 	@printf "Checking IP Name is set...\n"
-ifndef IP_NAME
+ifndef IP
 	@printf "${RED}"
 	@printf "[ERROR] Looks like you didn't specify a name for the IP!\n"
-	@printf "[ERROR] Try running 'make new_ip IP_NAME=<name>'' instead,\n"
+	@printf "[ERROR] Try running 'make check-ip IP=<name>' or 'make new-ip IP=<name>' instead,\n"
 	@printf "[ERROR] replacing <name> with your desired IP name\n"
 	@exit 1
 else
 	@mkdir -p build
 	@set -o pipefail
-	@python tools/parse-ip-name.py ${IP_NAME} | tee /dev/tty | tail -n 1 > build/ip_name.txt
+	@python tools/parse-ip-name.py ${IP} | tee /dev/tty | tail -n 1 > build/ip_name.txt
 	@set +o pipefail
 endif
 
@@ -109,6 +109,15 @@ endif
 
 lint:
 	tools/lint.sh
+
+INCLUDE = "."
+test:
+	@mkdir -p build
+ifndef IP
+	@pytest -k ${INCLUDE}
+else
+	@pytest src/${IP} -k ${INCLUDE}
+endif
 
 # Redundant rules to help with user typos
 new_ip: new-ip
