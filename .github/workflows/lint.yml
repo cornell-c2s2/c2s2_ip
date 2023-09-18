@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   svlint:
-    name: Check Style Conventions using svlint
+    name: Check Verilog Style Conventions using svlint
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -23,4 +23,15 @@ jobs:
       run: tools/lint.sh
     - name: Cleanup
       run: rm -r build
+  black:
+    name: Check Python Style Conventions using black
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Run Black
+      uses: psf/black@stable
+      with:
+        options: "--check --verbose"
+        src: "./src"
     
