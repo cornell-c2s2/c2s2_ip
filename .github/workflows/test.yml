@@ -10,7 +10,8 @@ jobs:
       matrix:
         python-version: ["3.8", "3.11"]
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -20,6 +21,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Install verilator
+        run: sudo apt-get install -y verilator
       - name: Test with pytest
         run: |
           make test
