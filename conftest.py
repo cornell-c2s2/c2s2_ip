@@ -22,6 +22,12 @@ def fix_randseed():
     random.seed(0xDEADBEEF)
 
 
+@pytest.fixture(autouse=True)
+def change_test_dir(request, monkeypatch):
+    """Change the working directory to the src directory."""
+    monkeypatch.chdir("build")
+
+
 @pytest.fixture()
 def dump_asm(request):
     """Dump Assembly File for each test."""
