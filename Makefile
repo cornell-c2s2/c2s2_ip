@@ -114,9 +114,9 @@ INCLUDE = "."
 test:
 	@mkdir -p build
 ifndef IP
-	@pytest -k ${INCLUDE}
+	@pytest -k ${INCLUDE} --suppress-no-test-exit-code
 else
-	@pytest src/${IP} -k ${INCLUDE}
+	@pytest src/${IP} -k ${INCLUDE} --suppress-no-test-exit-code
 endif
 
 # Redundant rules to help with user typos
