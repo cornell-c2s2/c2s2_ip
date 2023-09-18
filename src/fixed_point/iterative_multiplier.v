@@ -1,7 +1,7 @@
 //================================================
 // iterative-multiplier.v
 //================================================
-
+`default_nettype none
 `ifndef FP_ITERATIVE_MULTIPLIER
 `define FP_ITERATIVE_MULTIPLIER
 
@@ -9,9 +9,9 @@
 `include "src/cmn/regs.v"
 
 module FPIterativeMultiplier #(
-  parameter n = 32,  // bit width
-  parameter d = 16,  // number of decimal bits
-  parameter sign = 1  // 1 if signed, 0 otherwise.
+  parameter int n = 32,  // bit width
+  parameter int d = 16,  // number of decimal bits
+  parameter bit sign = 1  // 1 if signed, 0 otherwise.
 ) (
   input logic clk,
   input logic reset,
@@ -30,7 +30,7 @@ module FPIterativeMultiplier #(
   // multiplying, and then shifting right
   logic do_carry, do_add, in_wait;
 
-  fpmult_control #(n, d) control (
+  FPIterMultControl #(n, d) control (
     .clk(clk),
     .reset(reset),
     .recv_val(recv_val),
@@ -42,20 +42,20 @@ module FPIterativeMultiplier #(
     .do_carry(do_carry)
   );
 
-  fpmult_datapath #(n, d) datapath (
+  FPIterMultDatapath #(n, d) datapath (
     .clk(clk),
     .reset(reset),
     .in_wait(in_wait),
     .do_add(do_add),
     .do_carry((sign != 0) & do_carry),
-    .a({{d{(sign != 0) & a[n-1]}}, a}),
+    .a({{d{(sign != 0) & a[n - 1]}}, a}),
     .b(b),
     .c(c)
   );
 
 endmodule
 
-module fpmult_control #(
+module FPIterMultControl #(
   parameter int n = 32,
   parameter int d = 16
 ) (
@@ -69,14 +69,14 @@ module fpmult_control #(
   output logic do_add,
   output logic do_carry
 );
-  localparam [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
+  localparam byte IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
 
   logic [1:0] state, next_state;
   logic [$clog2(n)-1:0] counter;
   logic counter_reset;
 
   // manage state
-  always @(*) begin
+  always_comb begin
     case (state)
       IDLE: begin
         if (recv_val) next_state = CALC;
@@ -97,7 +97,7 @@ module fpmult_control #(
   end
 
   // manage datapath
-  always @(*) begin
+  always_comb begin
     case (state)
       IDLE: begin
         in_wait = 1;
@@ -129,7 +129,7 @@ module fpmult_control #(
   end
 
   // reset logic
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       state <= IDLE;
     end else begin
@@ -138,7 +138,7 @@ module fpmult_control #(
   end
 
   // counter logic
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset || counter_reset) begin
       counter <= 0;
     end else if (state == CALC) begin
@@ -150,7 +150,7 @@ module fpmult_control #(
 
 endmodule
 
-module fpmult_datapath #(
+module FPIterMultDatapath #(
   parameter int n = 32,
   parameter int d = 16
 ) (

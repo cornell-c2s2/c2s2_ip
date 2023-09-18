@@ -1,8 +1,9 @@
+`default_nettype none
 `include "src/fixed_point/iterative_multiplier.v"
 
 module HarnessFPIM #(
-  parameter n = 32,
-  parameter d = 16
+  parameter int n = 32,
+  parameter int d = 16
 ) (
   input logic clk,
   input logic reset,
