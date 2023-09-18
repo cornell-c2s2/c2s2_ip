@@ -9,8 +9,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: Create Build Directory
-      run: mkdir build
     - name: Download svlint
       run: wget -O build/svlint.zip https://github.com/dalance/svlint/releases/download/v0.9.0/svlint-v0.9.0-x86_64-lnx.zip
     - name: Install svlint
@@ -20,7 +18,7 @@ jobs:
     - name: Check svlint installed
       run: svlint --version
     - name: Lint files
-      run: tools/lint.sh
+      run: make lint
     - name: Cleanup
       run: rm -r build
   black:
