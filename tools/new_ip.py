@@ -20,11 +20,7 @@ if ip_pascal is None:
     if re.match(r"^[0-9]", ip_name) is not None:
         print(f"{red}Error: IP_NAME {ip_name} cannot start with a number")
     else:
-        print(f"{red}Error: IP_NAME {ip_name} was not in PascalCase")
-    exit(1)
-
-if re.match(r"^[A-Z0-9]+$", ip_name) is not None:
-    print(f"{red}Error: IP_NAME {ip_name} should not be in all caps.")
+        print(f"{red}Error: IP_NAME {ip_name} was not in PascalCase (First letter of every word must be capitalized).")
     exit(1)
 
 # Split ip_name into words

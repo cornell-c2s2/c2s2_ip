@@ -1,2 +1,5 @@
+[verilog]
+include_paths = ["src/*/*.v"]
+
 [option]
 linter = true

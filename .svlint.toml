@@ -1,4 +1,5 @@
 [option]
+exclude_paths = ["src/cmn/*.v"]
 indent = 2
 textwidth = 120
 
