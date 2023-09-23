@@ -1,4 +1,5 @@
 [option]
+exclude_paths = ["src/cmn/*"]
 indent = 2
 textwidth = 120
 
@@ -9,7 +10,7 @@ style_semicolon = true
 
 [syntaxrules]
 style_operator_integer_leading_space = true
-uppercamelcase_module = true
+uppercamelcase_module = false
 uppercamelcase_package = true
 tab_character = true
 style_indent = true
@@ -17,8 +18,8 @@ style_operator_arithmetic = true
 style_operator_boolean = true
 style_operator_integer = true
 style_operator_unary = true
-style_operator_arithmetic_leading_space = true
-style_operator_boolean_leading_space = true
+style_operator_arithmetic_leading_space = false
+style_operator_boolean_leading_space = false
 style_keyword_0or1space = true
 style_keyword_0space = true
 style_keyword_1or2space = true
