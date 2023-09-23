@@ -1,7 +1,7 @@
 `default_nettype none
 `include "src/fixed_point/iterative/multiplier.v"
 
-module HarnessFPIM #(
+module HarnessFXPIM #(
   parameter int n = 32,
   parameter int d = 16
 ) (
@@ -17,7 +17,7 @@ module HarnessFPIM #(
   output logic [n-1:0] send_msg
 );
 
-  FPIterativeMultiplier #(n, d) mult (
+  FixedPointIterativeMultiplier #(n, d) mult (
     .clk  (clk),
     .reset(reset),
 

@@ -1,18 +1,19 @@
 //================================================
-// multiplier.v
+// Iterative Multiplier
+// --------------------
 // Unpipelined fixed point iterative multiplier
 // using Val/Rdy interface. This is a simple
 // unpipelined multiplier that takes `n` cycles
 // to complete a multiplication.
 //================================================
 `default_nettype none
-`ifndef FP_ITERATIVE_MULTIPLIER
-`define FP_ITERATIVE_MULTIPLIER
+`ifndef FIXED_POINT_ITERATIVE_MULTIPLIER
+`define FIXED_POINT_ITERATIVE_MULTIPLIER
 
 `include "src/cmn/muxes.v"
 `include "src/cmn/regs.v"
 
-module FPIterativeMultiplier #(
+module FixedPointIterativeMultiplier #(
   parameter int n = 32,  // bit width
   parameter int d = 16,  // number of decimal bits
   parameter bit sign = 1  // 1 if signed, 0 otherwise.

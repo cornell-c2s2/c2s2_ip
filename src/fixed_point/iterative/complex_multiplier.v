@@ -1,11 +1,19 @@
+//================================================
+// Iterative Complex Multiplier
+// -----------------------------------------------
+// This module performs complex multiplication
+// using an iterative approach, using three
+// fixed-point multipliers.
+// One multiplication takes 3*n cycles.
+//================================================
 `default_nettype none
-`ifndef FP_ITERATIVE_COMPLEX_MULTIPLIER
-`define FP_ITERATIVE_COMPLEX_MULTIPLIER
+`ifndef FIXED_POINT_ITERATIVE_COMPLEX_MULTIPLIER
+`define FIXED_POINT_ITERATIVE_COMPLEX_MULTIPLIER
 `include "src/fixed_point/iterative/multiplier.v"
 `include "src/cmn/regs.v"
 `include "src/cmn/muxes.v"
 
-module FPIterativeComplexMultiplier
+module FixedPointIterativeComplexMultiplier
 # (
   parameter int n = 32, // bit width
   parameter int d = 16 // number of decimal bits
@@ -233,7 +241,7 @@ module fpcmult_datapath
     .q(c_arac)
   );
 
-  FPIterativeMultiplier #(n, d, 1) multiplier (
+  FixedPointIterativeMultiplier #(n, d, 1) multiplier (
     .clk(clk),
     .reset(reset),
     .a(mul_a),

@@ -20,4 +20,4 @@ class FPIterativeMultiplier(VerilogPlaceholder, Component):
         )
 
         # Name of the top level module to be imported
-        s.set_metadata(VerilogPlaceholderPass.top_module, "HarnessFPIM")
+        s.set_metadata(VerilogPlaceholderPass.top_module, "HarnessFXPIM")
