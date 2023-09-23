@@ -90,6 +90,8 @@ else
 	@printf "Creating new IP branch...\n"
 	
 	@printf "${RESET}"
+	@git checkout master
+	@git pull
 	@git checkout -b ${IP_NAME_PARSED}
 
 	@printf "${CYAN}"
