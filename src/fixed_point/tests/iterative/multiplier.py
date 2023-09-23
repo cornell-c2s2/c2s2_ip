@@ -7,7 +7,7 @@ from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import Fixed
 
-from src.fixed_point.harnesses.iterative_multiplier import FPIterativeMultiplier
+from src.fixed_point.harnesses.iterative.multiplier import FPIterativeMultiplier
 from random import randint
 
 

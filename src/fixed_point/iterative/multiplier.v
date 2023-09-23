@@ -1,5 +1,9 @@
 //================================================
-// iterative-multiplier.v
+// iterative_multiplier.v
+// Unpipelined fixed point iterative multiplier
+// using Val/Rdy interface. This is a simple
+// unpipelined multiplier that takes `n` cycles
+// to complete a multiplication.
 //================================================
 `default_nettype none
 `ifndef FP_ITERATIVE_MULTIPLIER

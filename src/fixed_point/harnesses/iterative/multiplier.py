@@ -16,7 +16,7 @@ class FPIterativeMultiplier(VerilogPlaceholder, Component):
         # The ../ is necessary here because pytest is run from the build directory
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            "../src/fixed_point/harnesses/iterative_multiplier.v",
+            "../src/fixed_point/harnesses/iterative/multiplier.v",
         )
 
         # Name of the top level module to be imported

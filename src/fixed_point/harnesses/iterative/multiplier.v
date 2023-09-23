@@ -1,5 +1,5 @@
 `default_nettype none
-`include "src/fixed_point/iterative_multiplier.v"
+`include "src/fixed_point/iterative/multiplier.v"
 
 module HarnessFPIM #(
   parameter int n = 32,
