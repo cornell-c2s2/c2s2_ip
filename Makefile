@@ -29,9 +29,7 @@ ifndef IP
 	@exit 1
 else
 	@mkdir -p build
-	@set -o pipefail
-	@python tools/parse-ip-name.py ${IP} | tee /dev/tty | tail -n 1 > build/ip_name.txt
-	@set +o pipefail
+	@python3 tools/parse-ip-name.py ${IP} | tee /dev/tty | tail -n 1 > build/ip_name.txt
 endif
 
 clean:
@@ -85,7 +83,7 @@ else
 	@printf "${CYAN}"
 	@printf "Creating starter IP\n"
 
-	@python tools/new-ip.py ${IP_NAME_PARSED}
+	@python3 tools/new-ip.py ${IP_NAME_PARSED}
 
 # Make a new branch for the IP
 	@printf "${CYAN}"
