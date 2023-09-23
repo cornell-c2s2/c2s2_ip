@@ -1,5 +1,5 @@
 //================================================
-// iterative_multiplier.v
+// multiplier.v
 // Unpipelined fixed point iterative multiplier
 // using Val/Rdy interface. This is a simple
 // unpipelined multiplier that takes `n` cycles
