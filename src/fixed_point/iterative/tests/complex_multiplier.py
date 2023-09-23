@@ -1,19 +1,33 @@
 import pytest
-
 from pymtl3 import *
 from pymtl3.passes.PassGroups import DefaultPassGroup
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
-from fixedpt import Fixed
-
-from src.fixed_point.harnesses.iterative.multiplier import FPIterativeMultiplier
+from fixedpt import CFixed
+from src.fixed_point.iterative.harnesses.complex_multiplier import HarnessVRTL
 from random import randint
+
+
+# Complex multiplication with fixed precision
+def cmul(n, d, a, b):
+    ac = (a.real * b.real).resize(None, n, d)
+    bc = (a.imag * b.imag).resize(None, n, d)
+
+    c = (
+        (a.real + a.imag).resize(None, n, d) * (b.real + b.imag).resize(None, n, d)
+    ).resize(None, n, d)
+
+    return CFixed.cast((ac - bc, c - ac - bc)).resize(n, d)
 
 
 # Merge a and b into a larger number
 def mk_msg(n, a, b):
-    return (a << n) | b
+    return (a[0] << 3 * n) | (a[1] << 2 * n) | (b[0] << n) | b[1]
+
+
+def mk_ret(n, c):
+    return (c[0] << n) | c[1]
 
 
 # Create test parametrization information
@@ -33,9 +47,9 @@ class Harness(Component):
     def construct(s, mult, n):
         s.mult = mult
 
-        s.src = stream.SourceRTL(mk_bits(2 * n))
+        s.src = stream.SourceRTL(mk_bits(4 * n))
 
-        s.sink = stream.SinkRTL(mk_bits(n))
+        s.sink = stream.SinkRTL(mk_bits(2 * n))
 
         s.src.send //= s.mult.recv
         s.mult.send //= s.sink.recv
@@ -45,13 +59,13 @@ class Harness(Component):
 
 
 # return a random fxp value
-def rand_fixed(n, d):
-    return Fixed(randint(0, (1 << n) - 1), 1, n, d, raw=True)
+def rand_cfixed(n, d):
+    return CFixed((randint(0, (1 << n) - 1), randint(0, (1 << n) - 1)), n, d, raw=True)
 
 
 # Initialize a simulatable model
 def create_model(n, d):
-    model = FPIterativeMultiplier(n, d)
+    model = HarnessVRTL(n, d)
 
     return Harness(model, n)
 
@@ -59,15 +73,16 @@ def create_model(n, d):
 @pytest.mark.parametrize(
     "n, d, a, b",
     [
-        (3, 0, 3, 3),  # overflow check
-        (2, 1, 0.5, -0.5),
-        (6, 3, -4, -0.125),  # 100.000 * 111.111 = 000.100
-        (6, 3, 3.875, -0.125),  # -0.375
+        (3, 0, (0, 1), (0, 1)),  # i * i = -1
+        (2, 1, (1, 0), (1, 0)),  # 1 * 1 = 1
+        (8, 4, (1, 1), (1, 1)),
+        (8, 4, (0.5, 0.5), (0.5, 0.5)),
+        (6, 3, (3, 3), (3, 3)),  # overflow check
     ],
 )
 def test_edge(n, d, a, b):
-    a = Fixed(a, 1, n, d)
-    b = Fixed(b, 1, n, d)
+    a = CFixed(a, n, d)
+    b = CFixed(b, n, d)
 
     model = create_model(n, d)
 
@@ -80,7 +95,7 @@ def test_edge(n, d, a, b):
 
     model.set_param(
         "top.sink.construct",
-        msgs=[(a * b).resize(None, n, d).get()],
+        msgs=[mk_ret(n, cmul(n, d, a, b).get())],
         initial_delay=0,
         interval_delay=0,
     )
@@ -99,6 +114,8 @@ def test_edge(n, d, a, b):
 
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d",
+    # Runs tests on smaller number sizes
+    mk_params(50, [1, 50], (2, 8), (0, 8)) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
     mk_params(20, [1, 10, 50, 100], (16, 64), (0, 64)) +
     # Extensively tests numbers with certain important bit sizes.
@@ -122,20 +139,23 @@ def test_random(
     n = randint(n[0], n[1])
     d = randint(d[0], min(n - 1, d[1]))  # decimal bits
 
-    dat = [
-        {"a": rand_fixed(n, d), "b": rand_fixed(n, d)} for i in range(sequence_length)
-    ]
-    solns = [(i["a"] * i["b"]).resize(None, n, d) for i in dat]
+    dat = [(rand_cfixed(n, d), rand_cfixed(n, d)) for i in range(sequence_length)]
+    solns = [cmul(n, d, i[0], i[1]) for i in dat]
+    print(
+        "Testing",
+        [(i[0].bin(dot=True), i[1].bin(dot=True)) for i in dat],
+        [i.bin(dot=True) for i in solns],
+    )
 
     model = create_model(n, d)
 
-    dat = [mk_msg(n, i["a"].get(), i["b"].get()) for i in dat]
+    dat = [mk_msg(n, i[0].get(), i[1].get()) for i in dat]
 
     model.set_param("top.src.construct", msgs=dat, initial_delay=5, interval_delay=5)
 
     model.set_param(
         "top.sink.construct",
-        msgs=[c.get() for c in solns],
+        msgs=[mk_ret(n, c.get()) for c in solns],
         initial_delay=5,
         interval_delay=5,
     )
@@ -146,7 +166,7 @@ def test_random(
             "dump_textwave": False,
             "dump_vcd": f"rand_{execution_number}_{sequence_length}_{n}_{d}",
             "max_cycles": (
-                30 + (n + 2) * len(dat)
-            ),  # makes sure the time taken grows linearly with respect to n
+                30 + (3 * (n + 2) + 2) * len(dat)
+            ),  # makes sure the time taken grows linearly with respect to 3n
         },
     )
