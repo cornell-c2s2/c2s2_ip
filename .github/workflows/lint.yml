@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   svlint:
-    name: Check Verilog Style Conventions using svlint
+    name: Check Verilog Compilation and Style
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
