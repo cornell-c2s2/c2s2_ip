@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Create Build Directory
+        run: mkdir build
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -25,5 +27,5 @@ jobs:
         run: sudo apt-get install -y verilator
       - name: Test with pytest
         run: |
-          make test
+          pytest --tb=no -v
     
