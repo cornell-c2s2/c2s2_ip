@@ -1,9 +1,11 @@
-`include "../../../C2S2-Module-Library/lib/sim/nbitregister/RegisterV_Reset.v"
+`ifndef SERIALIZER
+`define SERIALIZER
+`include "src/cmn/regs.v"
 
-module SerializerVRTL
+module Serializer
    #(
-        BIT_WIDTH  = 32,
-        N_SAMPLES  = 8
+        parameter int BIT_WIDTH  = 32,
+        parameter int N_SAMPLES  = 8
     )
     (
         input  logic [BIT_WIDTH - 1:0] recv_msg [N_SAMPLES - 1:0],
@@ -25,7 +27,7 @@ module SerializerVRTL
     generate
         genvar i;
         for( i = 0; i < N_SAMPLES; i++) begin
-            RegisterV_Reset #( .N(BIT_WIDTH) ) register ( .clk(clk), .reset(reset), .w(reg_en), .d(recv_msg[i]), .q(reg_out[i]) );
+            cmn_EnResetReg #( BIT_WIDTH ) register ( .clk(clk), .reset(reset), .en(reg_en), .d(recv_msg[i]), .q(reg_out[i]) );
         end
     endgenerate
 
@@ -40,7 +42,7 @@ endmodule
 
 module SerializerControl
     #(
-        N_SAMPLES = 8
+        parameter int N_SAMPLES = 8
     )
     (
         input  logic                           recv_val,
@@ -65,7 +67,7 @@ module SerializerControl
 
     logic [$clog2(N_SAMPLES):0] mux_sel_next;
 
-    always @(*) begin
+    always_comb begin
         case(state)
             INIT:
                 begin
@@ -104,12 +106,14 @@ module SerializerControl
         endcase
     end
 
-    always @(posedge clk) begin
+    always_ff @(posedge clk) begin
         if(reset) begin
             state <= INIT;
+            mux_sel <= 0;
         end else begin
             mux_sel <= mux_sel_next;
             state   <= next_state;
         end
     end
 endmodule
+`endif

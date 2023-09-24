@@ -1,4 +1,54 @@
-`include "../../../C2S2-Module-Library/lib/sim/nbitregister/RegisterV_Reset.v"
+`ifndef DESERIALIZER
+`define DESERIALIZER
+`include "src/cmn/regs.v"
+
+module Deserializer
+    #(
+        parameter N_SAMPLES = 8,
+        parameter BIT_WIDTH  = 32
+    )(
+        
+        input  logic recv_val,
+        output logic recv_rdy, 	 
+        input  logic [BIT_WIDTH - 1:0] recv_msg,
+    
+        output logic send_val, 
+        input  logic send_rdy,
+        output logic [BIT_WIDTH - 1:0] send_msg [N_SAMPLES - 1:0],
+    
+        input logic clk, 
+        input logic reset
+    );
+        
+        logic [N_SAMPLES - 1:0] en_sel;
+    
+        //body of code
+        ControlVRTL #(.N_SAMPLES(N_SAMPLES)) c
+            (
+                .recv_val(recv_val), 
+                .send_rdy(send_rdy),
+                
+                .send_val(send_val),
+                .recv_rdy(recv_rdy), 
+    
+                .reset(reset),
+                .clk(clk),
+    
+                .en_sel(en_sel)
+            );
+    
+        generate
+            genvar i;
+            for( i = 0; i < N_SAMPLES; i++) begin
+                cmn_EnResetReg #( BIT_WIDTH ) register ( .clk(clk), .reset(reset), .en(en_sel[i]), .d(recv_msg), .q(send_msg[i]) );
+            end
+        endgenerate
+    
+    endmodule
+    
+    
+
+    
 module ControlVRTL 
 #(
     parameter N_SAMPLES = 8
@@ -10,7 +60,7 @@ module ControlVRTL
     output  logic send_val,
     output  logic recv_rdy,
 
-    output  logic [N_SAMPLES - 1:0] en_sel,
+    output  logic [N_SAMPLES-1:0] en_sel,
 
     input   logic reset,
     input   logic clk
@@ -19,13 +69,13 @@ module ControlVRTL
     localparam [1:0] STATE1 = 2'b01;
     localparam [1:0] STATE2 = 2'b10; 
 
-    logic [$clog2(N_SAMPLES) + 1:0] count; //counter
-    logic [$clog2(N_SAMPLES) + 1:0] count_next;
+    logic [$clog2(N_SAMPLES) - 1:0] count; //counter
+    logic [$clog2(N_SAMPLES) - 1:0] count_next;
 
     logic [1:0] next_state;
     logic [1:0] state;
 
-    DecoderVRTL #( .BIT_WIDTH( $clog2(N_SAMPLES) ) ) decoder ( .in(count), .out(en_sel));
+    Decoder #( .BIT_WIDTH( $clog2(N_SAMPLES) ) ) decoder ( .in(count), .out(en_sel));
 
     always @(*) begin 
        case(state)
@@ -94,59 +144,14 @@ module ControlVRTL
 
 endmodule
 
-module DecoderVRTL #(
+module Decoder #(
     parameter BIT_WIDTH = 3
 )(
 	input  logic [BIT_WIDTH - 1:0] in,
 	output logic [(1 << BIT_WIDTH) - 1:0] out
 );
 
-	always @(*) out = {{1 << BIT_WIDTH - 1 {1'b0}}, 1'b1} << in;
+	always @(*) out = {{1 << (BIT_WIDTH - 1) {1'b0}}, 1'b1} << in;
     
 endmodule
-
-module DeserializerVRTL
-#(
-    parameter N_SAMPLES = 8,
-	parameter BIT_WIDTH  = 32
-)(
-	
-	input  logic recv_val,
-    output logic recv_rdy, 	 
-	input  logic [BIT_WIDTH - 1:0] recv_msg,
-
-	output logic send_val, 
-    input  logic send_rdy,
-    output logic [BIT_WIDTH - 1:0] send_msg [N_SAMPLES - 1:0],
-
-    input logic clk, 
-	input logic reset
-);
-    
-    logic [N_SAMPLES - 1:0] en_sel;
-
-    //body of code
-	ControlVRTL #(.N_SAMPLES(N_SAMPLES)) c
-		(
-			.recv_val(recv_val), 
-			.send_rdy(send_rdy),
-			
-			.send_val(send_val),
-			.recv_rdy(recv_rdy), 
-
-            .reset(reset),
-			.clk(clk),
-
-			.en_sel(en_sel)
-		);
-
-    generate
-        genvar i;
-        for( i = 0; i < N_SAMPLES; i++) begin
-            RegisterV_Reset #( .N(BIT_WIDTH) ) register ( .clk(clk), .reset(reset), .w(en_sel[i]), .d(recv_msg), .q(send_msg[i]) );
-        end
-    endgenerate
-
-endmodule
-
-
+`endif
