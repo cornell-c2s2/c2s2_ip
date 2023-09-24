@@ -4,12 +4,12 @@ on: [push]
 
 jobs:
   svlint:
-    name: pytest
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.11"]
-        pytest-markers: ["not slow"]
+        pytest-markers: ["", "not slow"]
+    name: pytest filtered by "${{ matrix.pytest-markers }}" with Python ${{ matrix.python-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
