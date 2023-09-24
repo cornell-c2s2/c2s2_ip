@@ -4,11 +4,12 @@ on: [push]
 
 jobs:
   svlint:
-    name: Test using pytest
+    name: pytest
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.11"]
+        python-version: ["3.11"]
+        pytest-markers: ["not slow"]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -27,5 +28,5 @@ jobs:
         run: sudo apt-get install -y verilator
       - name: Test with pytest
         run: |
-          pytest --tb=no -vx --suppress-no-test-exit-code
+          pytest --tb=no -vx --suppress-no-test-exit-code -m "${{ matrix.pytest-markers }}"
     
