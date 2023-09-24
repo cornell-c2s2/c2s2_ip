@@ -35,7 +35,7 @@ module FixedPointIterativeMultiplier #(
   // multiplying, and then shifting right
   logic do_carry, do_add, in_wait;
 
-  FPIterMultControl #(n, d) control (
+  FXPIterMultControl #(n, d) control (
     .clk(clk),
     .reset(reset),
     .recv_val(recv_val),
@@ -47,7 +47,7 @@ module FixedPointIterativeMultiplier #(
     .do_carry(do_carry)
   );
 
-  FPIterMultDatapath #(n, d) datapath (
+  FXPIterMultDatapath #(n, d) datapath (
     .clk(clk),
     .reset(reset),
     .in_wait(in_wait),
@@ -60,7 +60,7 @@ module FixedPointIterativeMultiplier #(
 
 endmodule
 
-module FPIterMultControl #(
+module FXPIterMultControl #(
   parameter int n = 32,
   parameter int d = 16
 ) (
@@ -155,7 +155,7 @@ module FPIterMultControl #(
 
 endmodule
 
-module FPIterMultDatapath #(
+module FXPIterMultDatapath #(
   parameter int n = 32,
   parameter int d = 16
 ) (

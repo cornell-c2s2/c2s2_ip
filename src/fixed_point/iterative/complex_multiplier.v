@@ -250,7 +250,7 @@ module fpcmult_datapath
     .recv_val(mul_stage != 3),
     .recv_rdy(mul_recv_rdy),
     .send_val(mul_send_val),
-    .send_rdy(1)
+    .send_rdy(1'b1)
   );
 
   // Used to select between storing arbr multiplication output and input
