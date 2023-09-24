@@ -31,18 +31,37 @@ def mk_ret(n, c, d):
 
 
 # Create test parametrization information
-def mk_params(execution_number, sequence_lengths, n, d, m=[0]):
+# execution_number: number of times to run the test
+# sequence_lengths: numbers of inputs to stream through the block
+# n: bounds on number of bits in the fixed point number
+# d: bounds on number of decimal bits in the fixed point number
+# m: optimization parameter
+def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
     if isinstance(n, int):
         n = (n, n)
     if isinstance(d, int):
         d = (d, d)
 
-    return [
-        (j, i, n, d, k)
-        for i in sequence_lengths
-        for j in range(execution_number)
-        for k in m
-    ]
+    res = []
+
+    for k in m:
+        for j in range(execution_number):
+            for i in sequence_lengths:
+                rn = randint(n[0], n[1])
+                rd = randint(d[0], min(rn - 2, d[1]))
+                res.append(
+                    pytest.param(
+                        j,  # execution_number index (unused)
+                        i,  # number of inputs to stream
+                        rn,  # randomly generated `n`
+                        rd,  # randomly generated `d`
+                        k,  # optimization parameter
+                        id=f"{i} {rn}-bit, {rd}-decimal-bit numbers"
+                        + (f", {k}-optimized " if k != 0 else ""),
+                        marks=pytest.mark.slow if slow else [],
+                    )
+                )
+    return res
 
 
 # Test harness for streaming data
@@ -123,13 +142,13 @@ def test_edge(n, d, a, b, w):
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d, m",
     # Runs tests on smaller number sizes
-    mk_params(50, [1, 5, 50], (2, 8), (0, 8)) +
+    mk_params(50, [1, 50], (2, 8), (0, 8)) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 10, 50, 100], (16, 64), (0, 64)) +
+    mk_params(20, [1, 100], (16, 64), (0, 64)) +
     # Extensively tests numbers with certain important bit sizes.
     sum(
         [
-            mk_params(1, [1, 100, 1000], n, d)
+            mk_params(1, [1000], n, d)
             for (n, d) in [
                 (8, 4),
                 (24, 8),
@@ -145,9 +164,6 @@ def test_random(
     execution_number, sequence_length, n, d, m
 ):  # test individual and sequential multiplications to assure stream system works
     assert m == 0
-
-    n = randint(n[0], n[1])
-    d = randint(d[0], min(n - 1, d[1]))  # decimal bits
 
     dat = [
         (rand_cfixed(n, d), rand_cfixed(n, d), rand_cfixed(n, d))
@@ -183,14 +199,14 @@ def test_random(
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d, m",
     # Runs tests on smaller number sizes
-    mk_params(50, [1, 50], (2, 8), (0, 8), range(1, 5)) +
+    mk_params(50, [1, 100], (2, 8), (0, 8), m=range(1, 5)) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 10, 50, 100], (16, 64), (0, 64), range(1, 5)) +
+    mk_params(20, [1, 100], (16, 64), (0, 64), m=range(1, 5)) +
     # Extensively tests numbers with certain important bit sizes.
     # Uses
     sum(
         [
-            mk_params(1, [1, 100, 1000], n, d, range(1, 5))
+            mk_params(1, [1000], n, d, m=range(1, 5))
             for (n, d) in [
                 (8, 4),
                 (24, 8),
@@ -205,130 +221,6 @@ def test_random(
 def test_optimizations(
     execution_number, sequence_length, n, d, m
 ):  # test modules without multiplication
-    n = randint(n[0], n[1])
-    d = randint(d[0], min(n - 2, d[1]))  # decimal bits
-
-    opt_omega = [CFixed(i, n, d) for i in [(1, 0), (-1, 0), (0, 1), (0, -1)]]
-
-    dat = [
-        (rand_cfixed(n, d), rand_cfixed(n, d), rand_cfixed(n, d))
-        for i in range(sequence_length)
-    ]
-    solns = [butterfly(n, d, i[0], i[1], opt_omega[m - 1]) for i in dat]
-
-    model = create_model(n, d, m)
-
-    dat = [mk_msg(n, i[0].get(), i[1].get(), i[2].get()) for i in dat]
-
-    model.set_param("top.src.construct", msgs=dat, initial_delay=0, interval_delay=0)
-
-    model.set_param(
-        "top.sink.construct",
-        msgs=[mk_ret(n, c.get(), d.get()) for (c, d) in solns],
-        initial_delay=0,
-        interval_delay=0,
-    )
-
-    run_sim(
-        model,
-        cmdline_opts={
-            "dump_textwave": False,
-            "dump_vcd": f"opt_{execution_number}_{sequence_length}_{n}_{d}_{m}",
-            "max_cycles": (
-                30 + 6 * len(dat)
-            ),  # makes sure the time taken grows constantly
-        },
-    )
-
-
-@pytest.mark.parametrize(
-    "execution_number, sequence_length, n, d, m",
-    # Runs tests on smaller number sizes
-    mk_params(50, [1, 5, 50], (2, 8), (0, 8)) +
-    # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 10, 50, 100], (16, 64), (0, 64)) +
-    # Extensively tests numbers with certain important bit sizes.
-    sum(
-        [
-            mk_params(1, [1, 100, 1000], n, d)
-            for (n, d) in [
-                (8, 4),
-                (24, 8),
-                (32, 24),
-                (32, 16),
-                (64, 32),
-            ]
-        ],
-        [],
-    ),
-)
-def test_random(
-    execution_number, sequence_length, n, d, m
-):  # test individual and sequential multiplications to assure stream system works
-    assert m == 0
-
-    n = randint(n[0], n[1])
-    d = randint(d[0], min(n - 1, d[1]))  # decimal bits
-
-    dat = [
-        (rand_cfixed(n, d), rand_cfixed(n, d), rand_cfixed(n, d))
-        for i in range(sequence_length)
-    ]
-    solns = [butterfly(n, d, i[0], i[1], i[2]) for i in dat]
-
-    model = create_model(n, d)
-
-    dat = [mk_msg(n, i[0].get(), i[1].get(), i[2].get()) for i in dat]
-
-    model.set_param("top.src.construct", msgs=dat, initial_delay=5, interval_delay=5)
-
-    model.set_param(
-        "top.sink.construct",
-        msgs=[mk_ret(n, c.get(), d.get()) for (c, d) in solns],
-        initial_delay=5,
-        interval_delay=5,
-    )
-
-    run_sim(
-        model,
-        cmdline_opts={
-            "dump_textwave": False,
-            "dump_vcd": f"rand_{execution_number}_{sequence_length}_{n}_{d}_m",
-            "max_cycles": (
-                30 + ((n + 2) * 3 + 4) * len(dat)
-            ),  # makes sure the time taken grows linearly with respect to n
-        },
-    )
-
-
-@pytest.mark.parametrize(
-    "execution_number, sequence_length, n, d, m",
-    # Runs tests on smaller number sizes
-    mk_params(50, [1, 50], (2, 8), (0, 8), range(1, 5)) +
-    # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 10, 50, 100], (16, 64), (0, 64), range(1, 5)) +
-    # Extensively tests numbers with certain important bit sizes.
-    # Uses
-    sum(
-        [
-            mk_params(1, [1, 100, 1000], n, d, range(1, 5))
-            for (n, d) in [
-                (8, 4),
-                (24, 8),
-                (32, 24),
-                (32, 16),
-                (64, 32),
-            ]
-        ],
-        [],
-    ),
-)
-def test_optimizations(
-    execution_number, sequence_length, n, d, m
-):  # test modules without multiplication
-    n = randint(n[0], n[1])
-    d = randint(d[0], min(n - 2, d[1]))  # decimal bits
-
     opt_omega = [CFixed(i, n, d) for i in [(1, 0), (-1, 0), (0, 1), (0, -1)]]
 
     dat = [
