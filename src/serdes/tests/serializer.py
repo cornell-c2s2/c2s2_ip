@@ -29,15 +29,6 @@ class TestHarness(Component):
     def done(s):
         return s.src.done() and s.sink.done()
 
-    def line_trace(s):
-        return (
-            s.src.line_trace()
-            + " > "
-            + s.serializer.line_trace()
-            + " > "
-            + s.sink.line_trace()
-        )
-
 
 # ----------------------------------------------------------------------
 # Test Case Table

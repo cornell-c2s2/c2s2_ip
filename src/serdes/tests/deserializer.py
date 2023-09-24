@@ -82,6 +82,8 @@ def eight_point_two_transaction(BIT_WIDTH, N_SAMPLES):
     ]
 
 
+# Creates a list of `N_QUERIES` random transactions
+# for a deserializer with `BIT_WIDTH` bits and `N_SAMPLES` samples
 def create_transactions(BIT_WIDTH, N_SAMPLES, N_QUERIES):
     def pack_transaction(vals):
         total = 0
@@ -93,7 +95,7 @@ def create_transactions(BIT_WIDTH, N_SAMPLES, N_QUERIES):
     return sum(
         [
             pack_transaction(
-                [random.randrange(0, 2**BIT_WIDTH) for __ in range(N_SAMPLES)]
+                [random.randint(0, (1 << BIT_WIDTH) - 1) for __ in range(N_SAMPLES)]
             )
             for _ in range(N_QUERIES)
         ],
@@ -101,10 +103,21 @@ def create_transactions(BIT_WIDTH, N_SAMPLES, N_QUERIES):
     )
 
 
+# Returns a function that takes the number of bits and number of samples
+# and creates a list of `N_QUERIES` random transactions
 def create_transaction_lmbda(N_QUERIES):
     return lambda BIT_WIDTH, N_SAMPLES: create_transactions(
         BIT_WIDTH, N_SAMPLES, N_QUERIES
     )
+
+
+# Return `N_SAMPLES and `BIT_WIDTH` for `n` random deserializers
+def random_deserializers(n):
+    for _ in range(n):
+        n_samples = random.randint(1, 128)
+        # n_bits is capped here because pymtl3 does not support bit widths greater than 1024
+        n_bits = random.randint(1, 1024 // n_samples)
+        yield (n_samples, n_bits)
 
 
 test_case_table = mk_test_case_table(
@@ -120,11 +133,22 @@ test_case_table = mk_test_case_table(
                 create_transaction_lmbda(n_queries),
                 0,
                 0,
-                8,
+                n_bits,
                 n_samples,
             ]
-            for n_samples in [4, 8, 16, 32, 64]
-            for n_queries in [1, 2]
+            # Creates a test case for each combination of (n_samples, n_bits) and n_queries
+            for (n_samples, n_bits) in [
+                (1, 128),
+                (2, 64),
+                (8, 32),
+                (16, 32),
+                (32, 16),
+                (64, 8),
+                (128, 4),
+                (256, 2),
+                *random_deserializers(10),
+            ]
+            for n_queries in [1, 2, 10]
         ],
     ]
 )
