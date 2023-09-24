@@ -19,12 +19,12 @@ class TestHarness(Component):
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.sink = stream.SinkRTL(mk_bits(BIT_WIDTH))
-        s.connect = connect
+        s.con = connect
 
         # Connect
 
-        s.src.send //= s.connect.recv
-        s.connect.send //= s.sink.recv
+        s.src.send //= s.con.recv
+        s.con.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
@@ -33,7 +33,7 @@ class TestHarness(Component):
         return (
             s.src.line_trace()
             + " > "
-            + s.connect.line_trace()
+            + s.con.line_trace()
             + " > "
             + s.sink.line_trace()
         )

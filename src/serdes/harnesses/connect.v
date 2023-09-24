@@ -3,7 +3,7 @@
 `include "src/serdes/deserializer.v"
 
 
-module ConnectVRTL
+module ConnectHarness
 #(
   parameter int BIT_WIDTH  = 32,
   parameter int N_SAMPLES  = 8

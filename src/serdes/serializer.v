@@ -1,3 +1,4 @@
+`default_nettype none
 `ifndef SERIALIZER
 `define SERIALIZER
 `include "src/cmn/regs.v"
@@ -20,7 +21,7 @@ module Serializer
         input  logic                   clk
     );
 
-    logic [$clog2(N_SAMPLES) - 1:0] mux_sel;
+    logic [$clog2(N_SAMPLES+1) - 1:0] mux_sel;
     logic reg_en;
     logic [BIT_WIDTH - 1:0] reg_out [N_SAMPLES - 1:0];
     
@@ -35,7 +36,7 @@ module Serializer
         send_msg = reg_out[mux_sel];
     end
 
-    SerializerControl #(.N_SAMPLES(N_SAMPLES)) ctrl ( .clk(clk), .reset(reset), .recv_val(recv_val), .recv_rdy(recv_rdy), .send_val(send_val), .send_rdy(send_rdy), .mux_sel(mux_sel), .reg_en(reg_en));     
+    SerializerControl #(.N_SAMPLES(N_SAMPLES+1)) ctrl ( .clk(clk), .reset(reset), .recv_val(recv_val), .recv_rdy(recv_rdy), .send_val(send_val), .send_rdy(send_rdy), .mux_sel(mux_sel), .reg_en(reg_en));     
 
 endmodule
 
@@ -51,7 +52,7 @@ module SerializerControl
         output logic                           send_val,
         input  logic                           send_rdy,
 
-        output logic [$clog2(N_SAMPLES) - 1:0] mux_sel,
+        output logic [$clog2(N_SAMPLES+1) - 1:0] mux_sel,
         output logic                           reg_en,
 
         input logic                            clk,
@@ -65,7 +66,7 @@ module SerializerControl
     logic next_state;
     logic state;
 
-    logic [$clog2(N_SAMPLES):0] mux_sel_next;
+    logic [$clog2(N_SAMPLES+1)-1:0] mux_sel_next;
 
     always_comb begin
         case(state)

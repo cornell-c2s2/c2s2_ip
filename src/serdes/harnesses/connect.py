@@ -11,9 +11,9 @@ class ConnectHarnessVRTL(VerilogPlaceholder, Component):
         s.send = stream.ifcs.SendIfcRTL(mk_bits(BIT_WIDTH))
 
         # Name of the top level module to be imported
-        s.set_metadata(VerilogPlaceholderPass.top_module, "Deserializer")
+        s.set_metadata(VerilogPlaceholderPass.top_module, "ConnectHarness")
         # Source file path
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            "src/serdes/deserializer.v",
+            "../src/serdes/harnesses/connect.v",
         )

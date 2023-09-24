@@ -13,9 +13,9 @@ class SerializerTestHarnessVRTL(VerilogPlaceholder, Component):
         s.send = stream.ifcs.SendIfcRTL(mk_bits(BIT_WIDTH))
 
         # Name of the top level module to be imported
-        s.set_metadata(VerilogPlaceholderPass.top_module, "Serializer")
+        s.set_metadata(VerilogPlaceholderPass.top_module, "SerializerHarness")
         # Source file path
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            "../src/serdes/serializer.v",
+            "../src/serdes/harnesses/serializer.v",
         )
