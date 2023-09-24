@@ -31,13 +31,33 @@ def mk_ret(n, c):
 
 
 # Create test parametrization information
-def mk_params(execution_number, sequence_lengths, n, d):
+# execution_number: number of times to run the test
+# sequence_lengths: numbers of inputs to stream through the block
+# n: bounds on number of bits in the fixed point number
+# d: bounds on number of decimal bits in the fixed point number
+def mk_params(execution_number, sequence_lengths, n, d, slow=False):
     if isinstance(n, int):
         n = (n, n)
     if isinstance(d, int):
         d = (d, d)
 
-    return [(j, i, n, d) for i in sequence_lengths for j in range(execution_number)]
+    res = []
+
+    for j in range(execution_number):
+        for i in sequence_lengths:
+            rn = randint(n[0], n[1])
+            rd = randint(d[0], min(rn - 2, d[1]))
+            res.append(
+                pytest.param(
+                    j,  # execution_number index (unused)
+                    i,  # number of inputs to stream
+                    rn,  # randomly generated `n`
+                    rd,  # randomly generated `d`
+                    id=f"{i} {rn}-bit, {rd}-decimal-bit numbers",
+                    marks=pytest.mark.slow if slow else [],
+                )
+            )
+    return res
 
 
 # Test harness for streaming data
@@ -115,13 +135,16 @@ def test_edge(n, d, a, b):
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d",
     # Runs tests on smaller number sizes
-    mk_params(50, [1, 50], (2, 8), (0, 8)) +
+    mk_params(50, [1, 50], (2, 8), (0, 8), slow=True) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 10, 50, 100], (16, 64), (0, 64)) +
+    mk_params(20, [1, 10, 50, 100], (16, 64), (0, 64), slow=True) +
     # Extensively tests numbers with certain important bit sizes.
     sum(
         [
-            mk_params(1, [1, 100, 1000], n, d)
+            [
+                *mk_params(1, [100], n, d, slow=False),
+                *mk_params(1, [1000], n, d, slow=True),
+            ]
             for (n, d) in [
                 (8, 4),
                 (24, 8),
