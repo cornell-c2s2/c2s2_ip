@@ -5,7 +5,7 @@ module HarnessFXPIB
 #(
   parameter int n = 32,
   parameter int d = 16,
-  parameter bit mult = 1
+  parameter byte mult = 1
 )
 (
   input logic clk,
