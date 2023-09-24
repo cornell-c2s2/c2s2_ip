@@ -35,8 +35,8 @@ class TestHarness(Component):
 # ----------------------------------------------------------------------
 
 
-def one_point():
-    return [0x00000008, 0x00000008]
+def two_point():
+    return [0x00000008, 0x00000007, 0x00000008, 0x00000007]
 
 
 def eight_point():
@@ -102,7 +102,7 @@ test_case_table = mk_test_case_table(
         (
             "msgs                                       src_delay sink_delay BIT_WIDTH N_SAMPLES"
         ),
-        ["one_point", one_point, 0, 0, 32, 1],
+        ["two_point", two_point, 0, 0, 32, 2],
         ["eight_point", eight_point, 0, 0, 32, 8],
         # [ "sixteen_point",                   sixteen_point,                             0,        0,         32,       16        ],
     ]

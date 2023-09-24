@@ -7,26 +7,23 @@ module DeserializerHarness
     parameter int N_SAMPLES  = 8
   )
   (
-    input  logic [BIT_WIDTH - 1:0] recv_msg,
-    input  logic                   recv_val,
-    output logic                   recv_rdy,
+    input logic [BIT_WIDTH - 1:0] recv_msg,
+    input logic recv_val,
+    output logic recv_rdy,
 
     output logic [BIT_WIDTH * N_SAMPLES - 1:0] send_msg,
-    input  logic                   send_rdy,
-    output logic                   send_val,
+    input logic send_rdy,
+    output logic send_val,
 
-    input  logic                   reset,
-    input  logic                   clk
+    input logic reset,
+    input logic clk
   );
   
   logic [BIT_WIDTH - 1:0] send_msg_intermediate [N_SAMPLES - 1:0];
 
-  generate
-    genvar i;
-    for(i = 0; i < N_SAMPLES; i = i + 1) begin
-      assign send_msg [BIT_WIDTH * i +: BIT_WIDTH] = send_msg_intermediate [i][BIT_WIDTH - 1:0];
-    end
-  endgenerate
+  for (genvar i = 0; i < N_SAMPLES; i = i + 1) begin: l_pack
+    assign send_msg [BIT_WIDTH * i +: BIT_WIDTH] = send_msg_intermediate [i][BIT_WIDTH - 1:0];
+  end
 
   Deserializer #(.N_SAMPLES(N_SAMPLES), .BIT_WIDTH(BIT_WIDTH)) deserializer
   (

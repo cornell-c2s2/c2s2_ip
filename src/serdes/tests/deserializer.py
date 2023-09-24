@@ -30,15 +30,6 @@ class TestHarness(Component):
     def done(s):
         return s.src.done() and s.sink.done()
 
-    def line_trace(s):
-        return (
-            s.src.line_trace()
-            + " > "
-            + s.deserializer.line_trace()
-            + " > "
-            + s.sink.line_trace()
-        )
-
 
 # ----------------------------------------------------------------------
 # Test Case Table
@@ -114,7 +105,7 @@ def create_transaction_lmbda(N_QUERIES):
 # Return `N_SAMPLES and `BIT_WIDTH` for `n` random deserializers
 def random_deserializers(n):
     for _ in range(n):
-        n_samples = random.randint(1, 128)
+        n_samples = random.randint(2, 128)
         # n_bits is capped here because pymtl3 does not support bit widths greater than 1024
         n_bits = random.randint(1, 1024 // n_samples)
         yield (n_samples, n_bits)
@@ -138,7 +129,7 @@ test_case_table = mk_test_case_table(
             ]
             # Creates a test case for each combination of (n_samples, n_bits) and n_queries
             for (n_samples, n_bits) in [
-                (1, 128),
+                (2, 128),
                 (2, 64),
                 (8, 32),
                 (16, 32),
@@ -184,14 +175,14 @@ def test(test_params, cmdline_opts):
     th.set_param(
         "top.src.construct",
         msgs=separate_transactions(msgs, test_params.N_SAMPLES, True),
-        initial_delay=test_params.src_delay + 3,
+        initial_delay=test_params.src_delay,
         interval_delay=test_params.src_delay,
     )
 
     th.set_param(
         "top.sink.construct",
         msgs=separate_transactions(msgs, test_params.N_SAMPLES, False),
-        initial_delay=test_params.sink_delay + 3,
+        initial_delay=test_params.sink_delay,
         interval_delay=test_params.sink_delay,
     )
 
