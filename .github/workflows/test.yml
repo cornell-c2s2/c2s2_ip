@@ -3,7 +3,7 @@ name: Test
 on: [push]
 
 jobs:
-  svlint:
+  pytest:
     runs-on: ubuntu-latest
     strategy:
       matrix:
