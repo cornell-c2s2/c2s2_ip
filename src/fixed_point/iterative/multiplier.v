@@ -168,6 +168,7 @@ module FXPIterMultDatapath #(
   input logic [n-1:0] b,
   output logic [n-1:0] c
 );
+  // accumulator for the current product
   logic [(n+d)-1:0] acc_in;
   logic [(n+d)-1:0] acc_out;
 
@@ -178,6 +179,7 @@ module FXPIterMultDatapath #(
     .q(acc_out)
   );
 
+  // holds the `a` input in a register
   logic [(n+d)-1:0] a_const_out;
 
   cmn_EnResetReg #(n + d) a_const_reg (
@@ -188,6 +190,7 @@ module FXPIterMultDatapath #(
     .q(a_const_out)
   );
 
+  // holds the shifting `a` input
   logic [(n+d)-1:0] a_in;
   logic [(n+d)-1:0] a_out;
 
@@ -198,6 +201,7 @@ module FXPIterMultDatapath #(
     .q(a_out)
   );
 
+  // holds the shifting `b` input
   logic [n-1:0] b_in;
   logic [n-1:0] b_out;
 
@@ -208,6 +212,7 @@ module FXPIterMultDatapath #(
     .q(b_out)
   );
 
+  // shifts `a` to the left every cycle during calculation
   cmn_Mux2 #(n + d) a_sel (
     .in0(a_out << 1),
     .in1(a),
@@ -215,6 +220,7 @@ module FXPIterMultDatapath #(
     .out(a_in)
   );
 
+  // shifts `b` to the right every cycle during calculation
   cmn_Mux2 #(n) b_sel (
     .in0(b_out >> 1),
     .in1(b),
@@ -225,10 +231,18 @@ module FXPIterMultDatapath #(
   logic [n+d-1:0] add_tmp;
   logic [n+d-1:0] carry;
 
+  // stores the extra carry information, which allows us to skip the additional
+  // `d` cycles we would usually need.
   logic [2*n-1:0] carry_tmp, carry_tmp2;
-  assign carry_tmp  = {{(n - d) {a_const_out[n+d-1]}}, a_const_out};  // sign extend a
-  assign carry_tmp2 = ((carry_tmp << n) - carry_tmp) << (n - 1);
+  // a sign-extended to the right length
+  assign carry_tmp  = {{(n - d) {a_const_out[n+d-1]}}, a_const_out};
+  // left shift by n, then subtract to get the carry
+  // this is equivalent to multiplying `a` by `d+1` ones, which is equivalent to the last
+  // `d+1` cycles in the multiplication, because `b` is either one-extended or zero-extended
+  // from `n` bits to `n+d` bits. This allows us to do the multiplication in `n` cycles only.
+  assign carry_tmp2 = ((carry_tmp << (d+1)) - carry_tmp) << (n - 1);
 
+  // choose between the carry and the add
   cmn_Mux2 #(n + d) carry_sel (
     .in0(a_out),
     .in1(carry_tmp2[n+d-1:0]),
@@ -236,6 +250,7 @@ module FXPIterMultDatapath #(
     .out(add_tmp)
   );
 
+  // add to the accumulator
   cmn_Mux2 #(n + d) add_sel (
     .in0(acc_out),
     .in1(acc_out + add_tmp),

@@ -11,7 +11,7 @@ from src.fixed_point.iterative.harnesses.multiplier import FPIterativeMultiplier
 from random import randint
 
 
-# Merge a and b into a larger number
+# Merge a and b into a single bus
 def mk_msg(n, a, b):
     return (a << n) | b
 
@@ -32,7 +32,7 @@ def mk_params(execution_number, sequence_lengths, n, d, slow=False):
     for j in range(execution_number):
         for i in sequence_lengths:
             rn = randint(n[0], n[1])
-            rd = randint(d[0], min(rn - 2, d[1]))
+            rd = randint(d[0], min(rn - 1, d[1]))
             res.append(
                 pytest.param(
                     j,  # execution_number index (unused)
@@ -117,6 +117,8 @@ def test_edge(n, d, a, b):
     # assert c.bin() == out.bin()
 
 
+# Test individual and sequential multiplications to assure stream system works
+# Generates random data to stream through the multiplier with random bit width information
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d",
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
@@ -139,12 +141,7 @@ def test_edge(n, d, a, b):
         [],
     ),
 )
-def test_random(
-    execution_number, sequence_length, n, d
-):  # test individual and sequential multiplications to assure stream system works
-    n = randint(n[0], n[1])
-    d = randint(d[0], min(n - 1, d[1]))  # decimal bits
-
+def test_random(execution_number, sequence_length, n, d):
     dat = [
         {"a": rand_fixed(n, d), "b": rand_fixed(n, d)} for i in range(sequence_length)
     ]

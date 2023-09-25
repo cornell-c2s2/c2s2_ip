@@ -88,13 +88,14 @@ module fpcmult_control
   localparam byte
     IDLE = 3'd0,
     DONE = 3'd1,
-    ARBR = 3'd2,
-    ACBC = 3'd3,
-    AABB = 3'd4,
+    ARBR = 3'd2, // calculating a * c (in the multiplication (a + bi) * (c + di))
+    ACBC = 3'd3, // calculating b * d
+    AABB = 3'd4, // calculating (a + b)(c + d)
     STALL = 3'd5;
 
   logic [2:0] state, next_state, post_idle;
   
+  // stateflow graph
   always_comb begin
     case (state)
       IDLE: begin
@@ -136,6 +137,7 @@ module fpcmult_control
     endcase
   end
 
+  // set ports for each state
   always_comb begin
     case (state)
       IDLE: begin
@@ -165,6 +167,7 @@ module fpcmult_control
     endcase
   end
 
+  // reset logic
   always_ff @(posedge clk) begin
     if (reset) begin
       state <= IDLE;
@@ -193,14 +196,16 @@ module fpcmult_datapath
   output logic mul_recv_rdy,
   output logic mul_send_val
 );
-
   logic [n-1:0] c_ar, c_ac, c_br, c_bc, c_arac;
   logic [n-1:0] i_ar, i_ac, i_arac;
   logic [n-1:0] mul_a, mul_b, mul_c;
 
+  // real part = ac - bd
   assign cr = c_ar - c_ac;
+  // imaginary part = (a+c)(b+d) - ac - bd
   assign cc = c_arac - c_ar - c_ac;
 
+  // stores either a or the output of ac
   cmn_EnResetReg #(n) reg_c_ar (
     .clk(clk),
     .reset(reset),
@@ -209,6 +214,7 @@ module fpcmult_datapath
     .q(c_ar)
   );
 
+  // stores c (b real)
   cmn_EnResetReg #(n) reg_c_br (
     .clk(clk),
     .reset(reset),
@@ -217,6 +223,7 @@ module fpcmult_datapath
     .q(c_br)
   );
 
+  // stores either b (a imag) or the output of bd
   cmn_EnResetReg #(n) reg_c_ac (
     .clk(clk),
     .reset(reset),
@@ -225,6 +232,7 @@ module fpcmult_datapath
     .q(c_ac)
   );
 
+  // stores d (b imag)
   cmn_EnResetReg #(n) reg_c_bc (
     .clk(clk),
     .reset(reset),
@@ -233,6 +241,7 @@ module fpcmult_datapath
     .q(c_bc)
   );
 
+  // stores the output of (a + c)(b + d)
   cmn_EnResetReg #(n) reg_c_arac (
     .clk(clk),
     .reset(reset),
@@ -261,6 +270,7 @@ module fpcmult_datapath
     .out(i_ar)
   );
 
+  // Used to select between storing acbc multiplication output and input
   cmn_Mux2 #(n) iomul_ac_sel (
     .in0(ac),
     .in1(mul_c),
@@ -268,18 +278,19 @@ module fpcmult_datapath
     .out(i_ac)
   );
 
+  // Used to select between the inputs to the multiplier
   cmn_Mux3 #(n) mul_a_sel (
-    .in0(c_ar + c_ac),
-    .in1(c_ar),
-    .in2(c_ac),
+    .in0(c_ar + c_ac), // a + b
+    .in1(c_ar), // a
+    .in2(c_ac), // b
     .sel(mul_stage),
     .out(mul_a)
   );
 
   cmn_Mux3 #(n) mul_b_sel (
-    .in0(c_br + c_bc),
-    .in1(c_br),
-    .in2(c_bc),
+    .in0(c_br + c_bc), // c + d
+    .in1(c_br), // c
+    .in2(c_bc), // d
     .sel(mul_stage),
     .out(mul_b)
   );

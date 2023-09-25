@@ -21,11 +21,12 @@ def cmul(n, d, a, b):
     return CFixed.cast((ac - bc, c - ac - bc)).resize(n, d)
 
 
-# Merge a and b into a larger number
+# Merge a and b into a single bus
 def mk_msg(n, a, b):
     return (a[0] << 3 * n) | (a[1] << 2 * n) | (b[0] << n) | b[1]
 
 
+# Merge the real and imaginary parts of c into one bus
 def mk_ret(n, c):
     return (c[0] << n) | c[1]
 
@@ -46,7 +47,7 @@ def mk_params(execution_number, sequence_lengths, n, d, slow=False):
     for j in range(execution_number):
         for i in sequence_lengths:
             rn = randint(n[0], n[1])
-            rd = randint(d[0], min(rn - 2, d[1]))
+            rd = randint(d[0], min(rn - 1, d[1]))
             res.append(
                 pytest.param(
                     j,  # execution_number index (unused)
@@ -61,8 +62,6 @@ def mk_params(execution_number, sequence_lengths, n, d, slow=False):
 
 
 # Test harness for streaming data
-
-
 class Harness(Component):
     def construct(s, mult, n):
         s.mult = mult
@@ -71,16 +70,12 @@ class Harness(Component):
 
         s.sink = stream.SinkRTL(mk_bits(2 * n))
 
+        # Hook up source to receiver and sink to sender
         s.src.send //= s.mult.recv
         s.mult.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
-
-
-# return a random fxp value
-def rand_cfixed(n, d):
-    return CFixed((randint(0, (1 << n) - 1), randint(0, (1 << n) - 1)), n, d, raw=True)
 
 
 # Initialize a simulatable model
@@ -90,6 +85,12 @@ def create_model(n, d):
     return Harness(model, n)
 
 
+# return a random fixed point value
+def rand_cfixed(n, d):
+    return CFixed((randint(0, (1 << n) - 1), randint(0, (1 << n) - 1)), n, d, raw=True)
+
+
+# Tests some edge cases
 @pytest.mark.parametrize(
     "n, d, a, b",
     [
@@ -132,6 +133,8 @@ def test_edge(n, d, a, b):
     # assert c.bin() == out.bin()
 
 
+# Test individual and sequential multiplications to assure stream system works
+# Generates random data to stream through the multiplier with random bit width information
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d",
     # Runs tests on smaller number sizes
@@ -156,12 +159,7 @@ def test_edge(n, d, a, b):
         [],
     ),
 )
-def test_random(
-    execution_number, sequence_length, n, d
-):  # test individual and sequential multiplications to assure stream system works
-    n = randint(n[0], n[1])
-    d = randint(d[0], min(n - 1, d[1]))  # decimal bits
-
+def test_random(execution_number, sequence_length, n, d):
     dat = [(rand_cfixed(n, d), rand_cfixed(n, d)) for i in range(sequence_length)]
     solns = [cmul(n, d, i[0], i[1]) for i in dat]
     print(

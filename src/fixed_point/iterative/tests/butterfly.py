@@ -10,11 +10,14 @@ from src.fixed_point.iterative.tests.complex_multiplier import cmul
 from random import randint
 
 
+# Performs the butterfly operation on two complex numbers
+# Used to generate the expected output
 def butterfly(n, d, a, b, w):
     t = cmul(n, d, b, w)
     return ((a + t).resize(n, d), (a - t).resize(n, d))
 
 
+# Merge inputs into a single bus
 def mk_msg(n, a, b, w):
     return (
         (a[0] << 5 * n)
@@ -26,6 +29,7 @@ def mk_msg(n, a, b, w):
     )
 
 
+# Merge outputs into a single bus
 def mk_ret(n, c, d):
     return (c[0] << 3 * n) | (c[1] << 2 * n) | (d[0] << n) | d[1]
 
@@ -65,8 +69,6 @@ def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
 
 
 # Test harness for streaming data
-
-
 class Harness(Component):
     def construct(s, mult, n):
         s.mult = mult
@@ -82,16 +84,16 @@ class Harness(Component):
         return s.src.done() and s.sink.done()
 
 
-# return a random fxp value
-def rand_cfixed(n, d):
-    return CFixed((randint(0, (1 << n) - 1), randint(0, (1 << n) - 1)), n, d, raw=True)
-
-
 # Initialize a simulatable model
 def create_model(n, d, mult=0):
     model = HarnessVRTL(n, d, mult)
 
     return Harness(model, n)
+
+
+# return a random fixed point value
+def rand_cfixed(n, d):
+    return CFixed((randint(0, (1 << n) - 1), randint(0, (1 << n) - 1)), n, d, raw=True)
 
 
 @pytest.mark.parametrize(

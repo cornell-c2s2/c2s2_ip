@@ -57,6 +57,9 @@ module FixedPointIterativeButterfly #(
   logic [n-1:0] tr, tc;
 
   case (mult)
+    // w = 1
+    // | 1  1 |   | a |   | a + b |
+    // | 1 -1 | * | b | = | a - b |
     1: begin: l_omega_1
       always_ff @(posedge clk) begin
         if (reset) begin
@@ -74,6 +77,9 @@ module FixedPointIterativeButterfly #(
       end
       assign recv_rdy = ~send_val;
     end
+    // w = -1
+    // | 1 -1 |   | a |   | a - b |
+    // | 1  1 | * | b | = | a + b |
     2: begin: l_omega_neg_1
       always_ff @(posedge clk) begin
         if (reset) begin
@@ -91,6 +97,9 @@ module FixedPointIterativeButterfly #(
       end
       assign recv_rdy = ~send_val;
     end
+    // w = i (j)
+    // | 1  i |   | a |   | a + bi |
+    // | 1 -i | * | b | = | a - bi |
     3: begin: l_omega_i
       always_ff @(posedge clk) begin
         if (reset) begin
@@ -108,6 +117,9 @@ module FixedPointIterativeButterfly #(
       end
       assign recv_rdy = ~send_val;
     end
+    // w = -i (-j)
+    // | 1 -i |   | a |   | a - bi |
+    // | 1  i | * | b | = | a + bi |
     4: begin: l_omega_neg_i
       always_ff @(posedge clk) begin
         if (reset) begin
@@ -125,6 +137,7 @@ module FixedPointIterativeButterfly #(
       end
       assign recv_rdy = ~send_val;
     end
+    // default case: use the complex multiplier
     default: begin: l_no_omega
       FixedPointIterativeComplexMultiplier #(.n(n), .d(d)) mul ( // ar * br
         .clk(clk),
@@ -140,6 +153,7 @@ module FixedPointIterativeButterfly #(
         .send_val(send_val),
         .send_rdy(send_rdy)
       );
+      // registers to hold `a` until the complex multiplier is done
       cmn_EnResetReg #(n) ac_reg(.clk(clk), .en(recv_rdy), .d(ac), .q(ac_imm), .reset(reset)); 
       cmn_EnResetReg #(n) ar_reg(.clk(clk), .en(recv_rdy), .d(ar), .q(ar_imm), .reset(reset));
 
