@@ -151,7 +151,7 @@ def test_edge(n, d, a, b, w):
     sum(
         [
             [
-                *mk_params(1, [100], n, d, slow=False),
+                *mk_params(1, [20], n, d, slow=False),
                 *mk_params(1, [1000], n, d, slow=True),
             ]
             for (n, d) in [
@@ -212,7 +212,7 @@ def test_random(
     sum(
         [
             [
-                *mk_params(1, [100], n, d, m=range(1, 5), slow=False),
+                *mk_params(1, [20], n, d, m=range(1, 5), slow=False),
                 *mk_params(1, [1000], n, d, m=range(1, 5), slow=True),
             ]
             for (n, d) in [
@@ -254,7 +254,8 @@ def test_optimizations(
         model,
         cmdline_opts={
             "dump_textwave": False,
-            "dump_vcd": f"opt_{execution_number}_{sequence_length}_{n}_{d}_{m}",
+            # "dump_vcd": f"opt_{execution_number}_{sequence_length}_{n}_{d}_{m}",
+            "dump_vcd": False,
             "max_cycles": (
                 30 + 6 * len(dat)
             ),  # makes sure the time taken grows constantly
