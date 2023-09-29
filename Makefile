@@ -1,3 +1,4 @@
+SHELL=/bin/bash -o pipefail
 #==========================================
 # c2s2_ip Makefile
 #==========================================
@@ -17,61 +18,52 @@ PURPLE =\033[0;35m
 CYAN   =\033[0;36m
 WHITE  =\033[0;37m
 
-# Check if our IP has already been used in a branch
-IP_USED = $(shell git pull -q; git branch -a | grep -cm 1 ${IP_NAME})
-
-# Recipe to check whether an IP already exists
-check_ip:
+--parse-name:
 	@printf "${CYAN}"
 	@printf "Checking IP Name is set...\n"
-
-ifndef IP_NAME
-	@printf " ${RED}""
-	@printf "[ERROR] Looks like you didn't specify a name for the IP!\n"
-	@printf "[ERROR] Try running 'make new_ip IP_NAME=<name>'' instead,\n"
-	@printf "[ERROR] replacing <name> with your desired IP name\n"
-
-else
-	@printf "${GREEN}"
-	@printf " - IP Name Set to ${IP_NAME}\n"
-	
-	@printf "${CYAN}"
-	@printf "Checking for IP names similar to %s...\n" ${IP_NAME}
-
-ifeq (${IP_USED},1)
+ifndef IP
 	@printf "${RED}"
-	@printf "[ERROR] A similar-named IP already exists!\n"
-	@printf "[ERROR] Please choose a different name\n"
-	@printf "[ERROR] (Use 'git branch -a' to see all of the existing\n"
-	@printf "[ERROR] branches, corresponding to existing IP)\n"
-
+	@printf "[ERROR] Looks like you didn't specify a name for the IP!\n"
+	@printf "[ERROR] Try running 'make check-ip IP=<name>' or 'make new-ip IP=<name>' instead,\n"
+	@printf "[ERROR] replacing <name> with your desired IP name\n"
+	@exit 1
 else
+	@mkdir -p build
+	@python3 tools/parse-ip-name.py ${IP} | tee /dev/tty | tail -n 1 > build/ip_name.txt
+endif
+
+clean:
+	@printf "${CYAN} Cleaning up build directory...${RESET}\n"
+	@rm -rf build/* || true
+	@printf "${GREEN} - Done!${RESET}\n"
+
+IP_NAME_PARSED = $(shell cat build/ip_name.txt)
+
+# Recipe to check whether an IP already exists
+check-ip: --parse-name
+	@printf "${CYAN}"
+	@printf "Checking for IP already named %s...\n" ${IP_NAME_PARSED}
+	@if [ -d "src/${IP_NAME_PARSED}" ]; then \
+		printf "${RED}" \
+		printf "[ERROR] This IP already exists!\n" \
+		printf "[ERROR] Please choose a different name\n" \
+		printf "[ERROR] (Check if you have a branch with this name in the src directory)\n" \
+		exit 1; \
+	fi
 	@printf "${GREEN}"
 	@printf " - No similar-named IP exists!\n"
-endif
-endif
 
 # Recipe for making new IP
-new_ip:
+new-ip: check-ip
 	@printf "${PURPLE}"
 	@printf "========================================\n"
 	@printf "C2S2 IP CREATOR\n"
 	@printf "========================================\n"
 	@printf "${RESET}"
 
-	@printf "${CYAN}"
-	@printf "Checking IP Name is set...\n"
-
-ifndef IP_NAME
-	@printf "${RED}"
-	@printf "[ERROR] Looks like you didn't specify a name for the IP!\n"
-	@printf "[ERROR] Try running 'make new_ip IP_NAME=<name>'' instead,\n"
-	@printf "[ERROR] replacing <name> with your desired IP name\n"
-else
-	
 # Get name of IP
 	@printf "${GREEN}"
-	@printf " - IP Name Set to ${IP_NAME}\n"
+	@printf " - IP Name Set to ${IP_NAME_PARSED}\n"
 
 # Check if already used
 	@printf "${CYAN}"
@@ -91,28 +83,42 @@ else
 	@printf "${CYAN}"
 	@printf "Creating starter IP\n"
 
-	@python tools/new_ip.py ${IP_NAME}
+	@python3 tools/new-ip.py ${IP_NAME_PARSED}
 
 # Make a new branch for the IP
 	@printf "${CYAN}"
 	@printf "Creating new IP branch...\n"
 	
 	@printf "${RESET}"
-	@git checkout -b ${IP_NAME}
+	@git checkout master
+	@git pull
+	@git checkout -b ${IP_NAME_PARSED}
 
 	@printf "${CYAN}"
 	@printf "Updating remote...\n"
 
 	@printf "${RESET}"
 	@git add .
-	@git commit -m "Initial IP: ${IP_NAME}"
-	@git push --set-upstream origin ${IP_NAME}
+	@git commit -m "Initial IP: ${IP_NAME_PARSED}"
+	@git push --set-upstream origin ${IP_NAME_PARSED}
 
 	@printf "${GREEN}"
 	@printf "[SUCCESS] New IP successfully created!\n"
 
 endif
-endif
 
 lint:
 	tools/lint.sh
+
+INCLUDE = "."
+test:
+	@mkdir -p build
+ifndef IP
+	@pytest -k ${INCLUDE} --suppress-no-test-exit-code
+else
+	@pytest src/${IP} -k ${INCLUDE} --suppress-no-test-exit-code
+endif
+
+# Redundant rules to help with user typos
+new_ip: new-ip
+check_ip: check-ip
