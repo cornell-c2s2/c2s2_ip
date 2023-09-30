@@ -1,12 +1,10 @@
 `default_nettype none
 `include "src/fixed_point/iterative/complex_multiplier.v"
 
-module HarnessFXPICM
-#(
+module HarnessFXPICM #(
   parameter int n = 32,
   parameter int d = 16
-)
-(
+) (
   input logic clk,
   input logic reset,
 
@@ -19,9 +17,8 @@ module HarnessFXPICM
   output logic [2*n-1:0] send_msg
 );
 
-  FixedPointIterativeComplexMultiplier #(n, d) cmult
-  (
-    .clk(clk),
+  FixedPointIterativeComplexMultiplier #(n, d) cmult (
+    .clk  (clk),
     .reset(reset),
 
     .recv_val(recv_val),
