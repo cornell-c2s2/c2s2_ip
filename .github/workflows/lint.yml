@@ -1,16 +1,24 @@
-name: Linter
+name: Check
 
 on: [push]
 
 jobs:
   svlint:
-    name: Check Style Conventions using svlint
+    name: Check Verilog Compilation and Style
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Create Build Directory
       run: mkdir build
+    - name: Install iverilog and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+            iverilog \
+            moreutils
+    - name: Check iverilog installed
+      run: iverilog -V
     - name: Download svlint
       run: wget -O build/svlint.zip https://github.com/dalance/svlint/releases/download/v0.9.0/svlint-v0.9.0-x86_64-lnx.zip
     - name: Install svlint
@@ -20,15 +28,9 @@ jobs:
     - name: Check svlint installed
       run: svlint --version
     - name: Lint files
-      run: tools/lint.sh
-    - name: Cleanup
-      run: rm -r build 
-  verible:
-    name: Check Style Conventions using Verible
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - uses: chipsalliance/verible-linter-action@main
+      run: make lint
+    - name: Lint with Verible
+      uses: chipsalliance/verible-linter-action@main
       with:
         config_file: '.verible-lint'
         paths: |
@@ -36,3 +38,17 @@ jobs:
         extra_args: "--waiver_files=.verible-waiver"
         verible_version: "v0.0-3410-g398a8505"
         reviewdog_reporter: local
+    - name: Cleanup
+      run: rm -r build
+  black:
+    name: Check Python Style Conventions using black
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Run Black
+      uses: psf/black@stable
+      with:
+        options: "--check --verbose"
+        src: "./src"
+    
