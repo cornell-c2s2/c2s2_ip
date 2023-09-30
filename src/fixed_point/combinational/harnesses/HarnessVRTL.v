@@ -2,8 +2,8 @@
 `include "src/fixed_point/combinational/FpCMultVRTL.v"
 
 module HarnessVRTL #(
-    parameter n = 32,
-    parameter d = 16
+    parameter int n = 32,
+    parameter int d = 16
 ) (
     input logic clk,
     input logic reset,

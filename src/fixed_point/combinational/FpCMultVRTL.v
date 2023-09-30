@@ -31,11 +31,11 @@ module FpCMultVRTL #(
 
   logic [n-1:0] arXbr, acXbc, arcXbrc;
 
-  localparam IDLE = 3'd0;
-  localparam MUL1 = 3'd1;
-  localparam MUL2 = 3'd2;
-  localparam MUL3 = 3'd3;
-  localparam DONE = 3'd4;
+  localparam bit IDLE = 3'd0;
+  localparam bit MUL1 = 3'd1;
+  localparam bit MUL2 = 3'd2;
+  localparam bit MUL3 = 3'd3;
+  localparam bit DONE = 3'd4;
 
   generate
     // 3 multiplier implementation, completes computations in a single cycle, no sequential logic required.
