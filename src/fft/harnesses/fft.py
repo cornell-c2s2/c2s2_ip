@@ -14,7 +14,7 @@ class Fft(VerilogPlaceholder, Component):
         s.send = stream.ifcs.SendIfcRTL(mk_bits(n))
 
         # Name of the top level module to be imported
-        s.set_metadata(VerilogPlaceholderPass.top_module, "Fft")
+        s.set_metadata(VerilogPlaceholderPass.top_module, "FFTHarness")
         # Source file path
         # The ../ is necessary here because pytest is run from the build directory
-        s.set_metadata(VerilogPlaceholderPass.src_file, "../src/fft/fft.v")
+        s.set_metadata(VerilogPlaceholderPass.src_file, "../src/fft/harnesses/fft.v")

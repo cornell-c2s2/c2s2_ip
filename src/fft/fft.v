@@ -12,7 +12,7 @@
 `include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_2VRTL.v"
 `include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_4VRTL.v"
 `include "src/fft/fft_stage.v"
-module FFTVRTL #(
+module FFT #(
   parameter int BIT_WIDTH  = 32,
   parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES  = 8
