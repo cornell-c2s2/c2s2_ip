@@ -53,7 +53,7 @@ module FixedPointIterativeMultiplier #(
     .in_wait(in_wait),
     .do_add(do_add),
     .do_carry((sign != 0) & do_carry),
-    .a({{d{(sign != 0) & a[n - 1]}}, a}),
+    .a({{d{(sign != 0) & a[n-1]}}, a}),
     .b(b),
     .c(c)
   );
@@ -240,7 +240,7 @@ module FXPIterMultDatapath #(
   // this is equivalent to multiplying `a` by `d+1` ones, which is equivalent to the last
   // `d+1` cycles in the multiplication, because `b` is either one-extended or zero-extended
   // from `n` bits to `n+d` bits. This allows us to do the multiplication in `n` cycles only.
-  assign carry_tmp2 = ((carry_tmp << (d+1)) - carry_tmp) << (n - 1);
+  assign carry_tmp2 = ((carry_tmp << (d + 1)) - carry_tmp) << (n - 1);
 
   // choose between the carry and the add
   cmn_Mux2 #(n + d) carry_sel (
