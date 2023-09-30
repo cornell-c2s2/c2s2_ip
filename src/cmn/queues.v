@@ -15,9 +15,9 @@
 // Defines
 //------------------------------------------------------------------------
 
-`define CMN_QUEUE_NORMAL   4'b0000
-`define CMN_QUEUE_PIPE     4'b0001
-`define CMN_QUEUE_BYPASS   4'b0010
+`define CMN_QUEUE_NORMAL 4'b0000
+`define CMN_QUEUE_PIPE 4'b0001
+`define CMN_QUEUE_BYPASS 4'b0010
 
 //------------------------------------------------------------------------
 // Single-Element Queue Control Logic
@@ -32,22 +32,21 @@
 // deq_val signal allowing elements to bypass the storage element if the
 // storage element is empty.
 
-module cmn_QueueCtrl1
-#(
+module cmn_QueueCtrl1 #(
   parameter p_type = `CMN_QUEUE_NORMAL
-)(
-  input  logic clk,
-  input  logic reset,
+) (
+  input logic clk,
+  input logic reset,
 
-  input  logic enq_val,        // Enqueue data is valid
-  output logic enq_rdy,        // Ready for producer to do an enqueue
+  input  logic enq_val,  // Enqueue data is valid
+  output logic enq_rdy,  // Ready for producer to do an enqueue
 
-  output logic deq_val,        // Dequeue data is valid
-  input  logic deq_rdy,        // Consumer is ready to do a dequeue
+  output logic deq_val,  // Dequeue data is valid
+  input  logic deq_rdy,  // Consumer is ready to do a dequeue
 
-  output logic write_en,       // Write en signal to wire up to storage element
-  output logic bypass_mux_sel, // Used to control bypass mux for bypass queues
-  output logic num_free_entries // Either zero or one
+  output logic write_en,         // Write en signal to wire up to storage element
+  output logic bypass_mux_sel,   // Used to control bypass mux for bypass queues
+  output logic num_free_entries  // Either zero or one
 );
 
   // Status register
@@ -63,30 +62,30 @@ module cmn_QueueCtrl1
 
   // Determine if pipeline or bypass behavior is enabled
 
-  localparam c_pipe_en   = |( p_type & `CMN_QUEUE_PIPE   );
-  localparam c_bypass_en = |( p_type & `CMN_QUEUE_BYPASS );
+  localparam c_pipe_en = |(p_type & `CMN_QUEUE_PIPE);
+  localparam c_bypass_en = |(p_type & `CMN_QUEUE_BYPASS);
 
   // We enq/deq only when they are both ready and valid
 
-  logic  do_enq;
+  logic do_enq;
   assign do_enq = enq_rdy && enq_val;
 
-  logic  do_deq;
+  logic do_deq;
   assign do_deq = deq_rdy && deq_val;
 
   // Determine if we have pipeline or bypass behaviour and
   // set the write enable accordingly.
 
-  logic  empty;
+  logic empty;
   assign empty = ~full;
 
-  logic  do_pipe;
-  assign do_pipe = c_pipe_en   && full  && do_enq && do_deq;
+  logic do_pipe;
+  assign do_pipe = c_pipe_en && full && do_enq && do_deq;
 
-  logic  do_bypass;
-  assign do_bypass = c_bypass_en && empty && do_enq && do_deq;
+  logic do_bypass;
+  assign do_bypass      = c_bypass_en && empty && do_enq && do_deq;
 
-  assign write_en = do_enq && ~do_bypass;
+  assign write_en       = do_enq && ~do_bypass;
 
   // Regardless of the type of queue or whether or not we are actually
   // doing a bypass, if the queue is empty then we select the enq bits,
@@ -100,14 +99,12 @@ module cmn_QueueCtrl1
   // enabled then the deq_val signal is also calculated combinationally
   // from the enq_val signal.
 
-  assign enq_rdy  = ~full  || ( c_pipe_en   && full  && deq_rdy );
-  assign deq_val  = ~empty || ( c_bypass_en && empty && enq_val );
+  assign enq_rdy        = ~full || (c_pipe_en && full && deq_rdy);
+  assign deq_val        = ~empty || (c_bypass_en && empty && enq_val);
 
   // Control logic for the full register input
 
-  assign full_next = ( do_deq && ~do_pipe )   ? 1'b0
-                   : ( do_enq && ~do_bypass ) ? 1'b1
-                   :                            full;
+  assign full_next      = (do_deq && ~do_pipe) ? 1'b0 : (do_enq && ~do_bypass) ? 1'b1 : full;
 
 endmodule
 
@@ -117,11 +114,10 @@ endmodule
 // This is the datpath for single element queues. It includes a register
 // and a bypass mux if needed.
 
-module cmn_QueueDpath1
-#(
+module cmn_QueueDpath1 #(
   parameter p_type      = `CMN_QUEUE_NORMAL,
   parameter p_msg_nbits = 1
-)(
+) (
   input  logic                   clk,
   input  logic                   reset,
   input  logic                   write_en,
@@ -134,30 +130,27 @@ module cmn_QueueDpath1
 
   logic [p_msg_nbits-1:0] qstore;
 
-  cmn_EnReg#(p_msg_nbits) qstore_reg
-  (
-    .clk   (clk),
-    .reset (reset),
-    .en    (write_en),
-    .d     (enq_msg),
-    .q     (qstore)
+  cmn_EnReg #(p_msg_nbits) qstore_reg (
+    .clk  (clk),
+    .reset(reset),
+    .en   (write_en),
+    .d    (enq_msg),
+    .q    (qstore)
   );
 
   // Bypass muxing
 
   generate
-  if ( |(p_type & `CMN_QUEUE_BYPASS ) )
+    if (|(p_type & `CMN_QUEUE_BYPASS))
 
-    cmn_Mux2#(p_msg_nbits) bypass_mux
-    (
-      .in0 (qstore),
-      .in1 (enq_msg),
-      .sel (bypass_mux_sel),
-      .out (deq_msg)
-    );
+      cmn_Mux2 #(p_msg_nbits) bypass_mux (
+        .in0(qstore),
+        .in1(enq_msg),
+        .sel(bypass_mux_sel),
+        .out(deq_msg)
+      );
 
-  else
-    assign deq_msg = qstore;
+    else assign deq_msg = qstore;
   endgenerate
 
 endmodule
@@ -175,27 +168,27 @@ endmodule
 // elements to bypass the storage element if the storage element is
 // empty.
 
-module cmn_QueueCtrl
-#(
+module cmn_QueueCtrl #(
   parameter p_type     = `CMN_QUEUE_NORMAL,
   parameter p_num_msgs = 2,
 
   // Local constants not meant to be set from outside the module
   parameter c_addr_nbits = $clog2(p_num_msgs)
-)(
-  input  logic                    clk, reset,
+) (
+  input logic clk,
+  reset,
 
-  input  logic                    enq_val,        // Enqueue data is valid
-  output logic                    enq_rdy,        // Ready for producer to enqueue
+  input  logic enq_val,  // Enqueue data is valid
+  output logic enq_rdy,  // Ready for producer to enqueue
 
-  output logic                    deq_val,        // Dequeue data is valid
-  input  logic                    deq_rdy,        // Consumer is ready to dequeue
+  output logic deq_val,  // Dequeue data is valid
+  input  logic deq_rdy,  // Consumer is ready to dequeue
 
-  output logic                    write_en,       // Wen to wire to regfile
-  output logic [c_addr_nbits-1:0] write_addr,     // Waddr to wire to regfile
-  output logic [c_addr_nbits-1:0] read_addr,      // Raddr to wire to regfile
-  output logic                    bypass_mux_sel, // Control mux for bypass queues
-  output logic [c_addr_nbits:0]   num_free_entries // Num of free entries in queue
+  output logic                    write_en,         // Wen to wire to regfile
+  output logic [c_addr_nbits-1:0] write_addr,       // Waddr to wire to regfile
+  output logic [c_addr_nbits-1:0] read_addr,        // Raddr to wire to regfile
+  output logic                    bypass_mux_sel,   // Control mux for bypass queues
+  output logic [  c_addr_nbits:0] num_free_entries  // Num of free entries in queue
 );
 
   // Enqueue and dequeue pointers
@@ -203,23 +196,21 @@ module cmn_QueueCtrl
   logic [c_addr_nbits-1:0] enq_ptr;
   logic [c_addr_nbits-1:0] enq_ptr_next;
 
-  cmn_ResetReg#(c_addr_nbits) enq_ptr_reg
-  (
-    .clk     (clk),
-    .reset   (reset),
-    .d       (enq_ptr_next),
-    .q       (enq_ptr)
+  cmn_ResetReg #(c_addr_nbits) enq_ptr_reg (
+    .clk  (clk),
+    .reset(reset),
+    .d    (enq_ptr_next),
+    .q    (enq_ptr)
   );
 
   logic [c_addr_nbits-1:0] deq_ptr;
   logic [c_addr_nbits-1:0] deq_ptr_next;
 
-  cmn_ResetReg#(c_addr_nbits) deq_ptr_reg
-  (
-    .clk   (clk),
-    .reset (reset),
-    .d     (deq_ptr_next),
-    .q     (deq_ptr)
+  cmn_ResetReg #(c_addr_nbits) deq_ptr_reg (
+    .clk  (clk),
+    .reset(reset),
+    .d    (deq_ptr_next),
+    .q    (deq_ptr)
   );
 
   assign write_addr = enq_ptr;
@@ -230,37 +221,36 @@ module cmn_QueueCtrl
   logic full;
   logic full_next;
 
-  cmn_ResetReg#(1) full_reg
-  (
-    .clk   (clk),
-    .reset (reset),
-    .d     (full_next),
-    .q     (full)
+  cmn_ResetReg #(1) full_reg (
+    .clk  (clk),
+    .reset(reset),
+    .d    (full_next),
+    .q    (full)
   );
 
   // Determine if pipeline or bypass behavior is enabled
 
-  localparam c_pipe_en   = |( p_type & `CMN_QUEUE_PIPE   );
-  localparam c_bypass_en = |( p_type & `CMN_QUEUE_BYPASS );
+  localparam c_pipe_en = |(p_type & `CMN_QUEUE_PIPE);
+  localparam c_bypass_en = |(p_type & `CMN_QUEUE_BYPASS);
 
   // We enq/deq only when they are both ready and valid
 
-  logic  do_enq;
+  logic do_enq;
   assign do_enq = enq_rdy && enq_val;
 
-  logic  do_deq;
+  logic do_deq;
   assign do_deq = deq_rdy && deq_val;
 
   // Determine if we have pipeline or bypass behaviour and
   // set the write enable accordingly.
 
-  logic  empty;
+  logic empty;
   assign empty = ~full && (enq_ptr == deq_ptr);
 
-  logic  do_pipe;
-  assign do_pipe = c_pipe_en   && full  && do_enq && do_deq;
+  logic do_pipe;
+  assign do_pipe = c_pipe_en && full && do_enq && do_deq;
 
-  logic  do_bypass;
+  logic do_bypass;
   assign do_bypass = c_bypass_en && empty && do_enq && do_deq;
 
   assign write_en = do_enq && ~do_bypass;
@@ -277,8 +267,8 @@ module cmn_QueueCtrl
   // enabled then the deq_val signal is also calculated combinationally
   // from the enq_val signal.
 
-  assign enq_rdy  = ~full  || ( c_pipe_en   && full  && deq_rdy );
-  assign deq_val  = ~empty || ( c_bypass_en && empty && enq_val );
+  assign enq_rdy = ~full || (c_pipe_en && full && deq_rdy);
+  assign deq_val = ~empty || (c_bypass_en && empty && enq_val);
 
   // Control logic for the enq/deq pointers and full register
 
@@ -298,11 +288,9 @@ module cmn_QueueCtrl
 
   /* verilator lint_on WIDTH */
 
-  assign deq_ptr_next
-    = ( do_deq && ~do_bypass ) ? ( deq_ptr_inc ) : deq_ptr;
+  assign deq_ptr_next = (do_deq && ~do_bypass) ? (deq_ptr_inc) : deq_ptr;
 
-  assign enq_ptr_next
-    = ( do_enq && ~do_bypass ) ? ( enq_ptr_inc ) : enq_ptr;
+  assign enq_ptr_next = (do_enq && ~do_bypass) ? (enq_ptr_inc) : enq_ptr;
 
   assign full_next
     = ( do_enq && ~do_deq && ( enq_ptr_inc == deq_ptr ) ) ? 1'b1
@@ -326,55 +314,51 @@ endmodule
 // This is the datpath for multi-element queues. It includes a register
 // and a bypass mux if needed.
 
-module cmn_QueueDpath
-#(
+module cmn_QueueDpath #(
   parameter p_type      = `CMN_QUEUE_NORMAL,
   parameter p_msg_nbits = 4,
   parameter p_num_msgs  = 2,
 
   // Local constants not meant to be set from outside the module
   parameter c_addr_nbits = $clog2(p_num_msgs)
-)(
+) (
   input  logic                    clk,
   input  logic                    reset,
   input  logic                    write_en,
   input  logic                    bypass_mux_sel,
   input  logic [c_addr_nbits-1:0] write_addr,
   input  logic [c_addr_nbits-1:0] read_addr,
-  input  logic [p_msg_nbits-1:0]  enq_msg,
-  output logic [p_msg_nbits-1:0]  deq_msg
+  input  logic [ p_msg_nbits-1:0] enq_msg,
+  output logic [ p_msg_nbits-1:0] deq_msg
 );
 
   // Queue storage
 
   logic [p_msg_nbits-1:0] read_data;
 
-  cmn_Regfile_1r1w#(p_msg_nbits,p_num_msgs) qstore
-  (
-    .clk        (clk),
-    .reset      (reset),
-    .read_addr  (read_addr),
-    .read_data  (read_data),
-    .write_en   (write_en),
-    .write_addr (write_addr),
-    .write_data (enq_msg)
+  cmn_Regfile_1r1w #(p_msg_nbits, p_num_msgs) qstore (
+    .clk       (clk),
+    .reset     (reset),
+    .read_addr (read_addr),
+    .read_data (read_data),
+    .write_en  (write_en),
+    .write_addr(write_addr),
+    .write_data(enq_msg)
   );
 
   // Bypass muxing
 
   generate
-  if ( |(p_type & `CMN_QUEUE_BYPASS ) )
+    if (|(p_type & `CMN_QUEUE_BYPASS))
 
-    cmn_Mux2#(p_msg_nbits) bypass_mux
-    (
-      .in0 (read_data),
-      .in1 (enq_msg),
-      .sel (bypass_mux_sel),
-      .out (deq_msg)
-    );
+      cmn_Mux2 #(p_msg_nbits) bypass_mux (
+        .in0(read_data),
+        .in1(enq_msg),
+        .sel(bypass_mux_sel),
+        .out(deq_msg)
+      );
 
-  else
-    assign deq_msg = read_data;
+    else assign deq_msg = read_data;
   endgenerate
 
 endmodule
@@ -383,17 +367,16 @@ endmodule
 // Queue
 //------------------------------------------------------------------------
 
-module cmn_Queue
-#(
+module cmn_Queue #(
   parameter p_type      = `CMN_QUEUE_NORMAL,
   parameter p_msg_nbits = 1,
   parameter p_num_msgs  = 2,
 
   // parameters not meant to be set outside this module
   parameter c_addr_nbits = $clog2(p_num_msgs)
-)(
-  input  logic                   clk,
-  input  logic                   reset,
+) (
+  input logic clk,
+  input logic reset,
 
   input  logic                   enq_val,
   output logic                   enq_rdy,
@@ -403,77 +386,70 @@ module cmn_Queue
   input  logic                   deq_rdy,
   output logic [p_msg_nbits-1:0] deq_msg,
 
-  output logic [c_addr_nbits:0]  num_free_entries
+  output logic [c_addr_nbits:0] num_free_entries
 );
 
 
   generate
-  if ( p_num_msgs == 1 )
-  begin
+    if (p_num_msgs == 1) begin
 
-    logic write_en;
-    logic bypass_mux_sel;
+      logic write_en;
+      logic bypass_mux_sel;
 
-    cmn_QueueCtrl1#(p_type) ctrl
-    (
-      .clk              (clk),
-      .reset            (reset),
-      .enq_val          (enq_val),
-      .enq_rdy          (enq_rdy),
-      .deq_val          (deq_val),
-      .deq_rdy          (deq_rdy),
-      .write_en         (write_en),
-      .bypass_mux_sel   (bypass_mux_sel),
-      .num_free_entries (num_free_entries)
-    );
+      cmn_QueueCtrl1 #(p_type) ctrl (
+        .clk             (clk),
+        .reset           (reset),
+        .enq_val         (enq_val),
+        .enq_rdy         (enq_rdy),
+        .deq_val         (deq_val),
+        .deq_rdy         (deq_rdy),
+        .write_en        (write_en),
+        .bypass_mux_sel  (bypass_mux_sel),
+        .num_free_entries(num_free_entries)
+      );
 
-    cmn_QueueDpath1#(p_type,p_msg_nbits) dpath
-    (
-      .clk            (clk),
-      .reset          (reset),
-      .write_en       (write_en),
-      .bypass_mux_sel (bypass_mux_sel),
-      .enq_msg        (enq_msg),
-      .deq_msg        (deq_msg)
-    );
+      cmn_QueueDpath1 #(p_type, p_msg_nbits) dpath (
+        .clk           (clk),
+        .reset         (reset),
+        .write_en      (write_en),
+        .bypass_mux_sel(bypass_mux_sel),
+        .enq_msg       (enq_msg),
+        .deq_msg       (deq_msg)
+      );
 
-  end
-  else
-  begin
+    end else begin
 
-    logic                    write_en;
-    logic                    bypass_mux_sel;
-    logic [c_addr_nbits-1:0] write_addr;
-    logic [c_addr_nbits-1:0] read_addr;
+      logic                    write_en;
+      logic                    bypass_mux_sel;
+      logic [c_addr_nbits-1:0] write_addr;
+      logic [c_addr_nbits-1:0] read_addr;
 
-    cmn_QueueCtrl#(p_type,p_num_msgs) ctrl
-    (
-      .clk              (clk),
-      .reset            (reset),
-      .enq_val          (enq_val),
-      .enq_rdy          (enq_rdy),
-      .deq_val          (deq_val),
-      .deq_rdy          (deq_rdy),
-      .write_en         (write_en),
-      .write_addr       (write_addr),
-      .read_addr        (read_addr),
-      .bypass_mux_sel   (bypass_mux_sel),
-      .num_free_entries (num_free_entries)
-    );
+      cmn_QueueCtrl #(p_type, p_num_msgs) ctrl (
+        .clk             (clk),
+        .reset           (reset),
+        .enq_val         (enq_val),
+        .enq_rdy         (enq_rdy),
+        .deq_val         (deq_val),
+        .deq_rdy         (deq_rdy),
+        .write_en        (write_en),
+        .write_addr      (write_addr),
+        .read_addr       (read_addr),
+        .bypass_mux_sel  (bypass_mux_sel),
+        .num_free_entries(num_free_entries)
+      );
 
-    cmn_QueueDpath#(p_type,p_msg_nbits,p_num_msgs) dpath
-    (
-      .clk              (clk),
-      .reset            (reset),
-      .write_en         (write_en),
-      .bypass_mux_sel   (bypass_mux_sel),
-      .write_addr       (write_addr),
-      .read_addr        (read_addr),
-      .enq_msg          (enq_msg),
-      .deq_msg          (deq_msg)
-    );
+      cmn_QueueDpath #(p_type, p_msg_nbits, p_num_msgs) dpath (
+        .clk           (clk),
+        .reset         (reset),
+        .write_en      (write_en),
+        .bypass_mux_sel(bypass_mux_sel),
+        .write_addr    (write_addr),
+        .read_addr     (read_addr),
+        .enq_msg       (enq_msg),
+        .deq_msg       (deq_msg)
+      );
 
-  end
+    end
   endgenerate
 
   // Assertions
@@ -512,5 +488,5 @@ module cmn_Queue
 
 endmodule
 
-`endif /* CMN_QUEUES_V */
+`endif  /* CMN_QUEUES_V */
 
