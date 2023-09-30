@@ -7,7 +7,8 @@ import random
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
-from .fft_sim import fixed_point_fft
+from src.fft.tests.fft_sim import fixed_point_fft
+from src.fft.harnesses.fft import FFTTestHarness
 import math
 
 
@@ -471,13 +472,32 @@ def random_stream(bits, fft_size, frac_bits):
 # ----------------------------------------------------------------------
 
 
-test_case_table = mk_test_case_table(
+# Helper function that does the same thing as `mk_test_case_table` but allows for marking tests slow
+def mk_tests(test_cases):
+    table = mk_test_case_table(test_cases)
+
+    params = {
+        "argnames": table["argnames"],
+        "argvalues": [],
+    }
+
+    for i in range(len(table["ids"])):
+        params["argvalues"].append(
+            pytest.param(
+                table["argvalues"][i],
+                id=table["ids"][i],
+                marks=pytest.mark.slow if table["argvalues"][i].slow else [],
+            )
+        )
+
+    return params
+
+
+test_case_table = mk_tests(
     [
-        (
-            "msgs                                       src_delay sink_delay BIT_WIDTH DECIMAL_PT N_SAMPLES"
-        ),
-        ["two_point_dc", two_point_dc, 0, 0, 32, 16, 2],
-        ["two_point_dc_generated", two_point_dc_generated, 0, 0, 32, 16, 2],
+        ("msgs src_delay sink_delay BIT_WIDTH DECIMAL_PT N_SAMPLES slow"),
+        ["two_point_dc", two_point_dc, 0, 0, 32, 16, 2, False],
+        ["two_point_dc_generated", two_point_dc_generated, 0, 0, 32, 16, 2, False],
         [
             "two_point_dc_generated_negative",
             two_point_dc_generated_negative,
@@ -486,49 +506,43 @@ test_case_table = mk_test_case_table(
             32,
             16,
             2,
+            False,
         ],
-        ["eight_point_dc", eight_point_dc, 0, 0, 32, 16, 8],
-        ["eight_point_offset_sine", eight_point_offset_sine, 0, 0, 32, 16, 8],
-        ["two_point_random", random_signal, 0, 0, 32, 16, 2],
-        ["two_points_random_stream", random_stream, 0, 0, 32, 16, 2],
-        ["four_point_assorted", four_point_assorted, 0, 0, 32, 16, 4],
+        ["eight_point_dc", eight_point_dc, 0, 0, 32, 16, 8, False],
+        ["eight_point_offset_sine", eight_point_offset_sine, 0, 0, 32, 16, 8, False],
+        ["two_point_random", random_signal, 0, 0, 32, 16, 2, False],
+        ["two_points_random_stream", random_stream, 0, 0, 32, 16, 2, False],
+        ["four_point_assorted", four_point_assorted, 0, 0, 32, 16, 4, False],
+        ["four_point_offset_sine", four_point_offset_sine, 0, 0, 32, 16, 4, False],
+        ["four_point_non_sine", four_point_non_sine, 0, 0, 32, 16, 4, False],
+        ["eight_point_random", random_signal, 0, 0, 32, 16, 8, False],
+        ["two_point_two_samples", two_point_two_samples, 0, 0, 32, 16, 2, False],
+        ["eight_point_two_ops", eight_point_two_samples, 0, 0, 32, 16, 8, False],
         [
-            "four_point_offset_sine",
-            four_point_offset_sine,
+            "eight_point_ones_alt_twos",
+            eight_point_ones_alt_twos,
             0,
             0,
             32,
             16,
-            4,
+            8,
+            False,
         ],
-        [
-            "four_point_non_sine",
-            four_point_non_sine,
-            0,
-            0,
-            32,
-            16,
-            4,
-        ],
-        ["eight_point_random", random_signal, 0, 0, 32, 16, 8],
-        ["two_point_two_samples", two_point_two_samples, 0, 0, 32, 16, 2],
-        ["eight_point_two_ops", eight_point_two_samples, 0, 0, 32, 16, 8],
-        ["eight_point_ones_alt_twos", eight_point_ones_alt_twos, 0, 0, 32, 16, 8],
-        ["eight_point_one_to_eight", eight_point_one_to_eight, 0, 0, 32, 16, 8],
+        ["eight_point_one_to_eight", eight_point_one_to_eight, 0, 0, 32, 16, 8, False],
         # [ "eight_point_assorted",            eight_point_assorted,                      0,        0,         32,        16,       8         ],
-        ["four_point_dc", four_point_dc, 0, 0, 32, 16, 4],
-        ["four_point_one_to_four", four_point_one_to_four, 0, 0, 32, 16, 4],
-        ["sixteen_point_dc", sixteen_point_dc, 0, 0, 32, 16, 16],
-        ["thirtytwo_point_dc", thirtytwo_point_dc, 0, 0, 32, 16, 32],
-        ["descend_signal_2", descend_signal, 0, 0, 32, 16, 2],
-        ["descend_signal_4", descend_signal, 0, 0, 32, 16, 4],
-        ["descend_signal_16", descend_signal, 0, 0, 32, 16, 16],
+        ["four_point_dc", four_point_dc, 0, 0, 32, 16, 4, False],
+        ["four_point_one_to_four", four_point_one_to_four, 0, 0, 32, 16, 4, False],
+        ["sixteen_point_dc", sixteen_point_dc, 0, 0, 32, 16, 16, True],
+        ["thirtytwo_point_dc", thirtytwo_point_dc, 0, 0, 32, 16, 32, True],
+        ["descend_signal_2", descend_signal, 0, 0, 32, 16, 2, False],
+        ["descend_signal_4", descend_signal, 0, 0, 32, 16, 4, False],
+        ["descend_signal_16", descend_signal, 0, 0, 32, 16, 16, False],
         *[
-            [f"{n}_point_dc_generated", n_point_dc, 0, 0, 32, 16, n]
+            [f"{n}_point_dc_generated", n_point_dc, 0, 0, 32, 16, n, True]
             for n in [16, 32, 64, 128, 256]
         ],
         *[
-            [f"{n}_point_{f.__name__}", f, 0, 0, 32, 16, n]
+            [f"{n}_point_{f.__name__}", f, 0, 0, 32, 16, n, True]
             for n in [16, 32, 64, 128, 256]
             for f in [random_signal]
         ],
@@ -561,7 +575,7 @@ def make_signed(i, n):
 @pytest.mark.parametrize(**test_case_table)
 def test(request, test_params, cmdline_opts):
     th = TestHarness(
-        FFTTestHarnessVRTL(
+        FFTTestHarness(
             test_params.BIT_WIDTH, test_params.DECIMAL_PT, test_params.N_SAMPLES
         ),
         test_params.BIT_WIDTH,
