@@ -47,12 +47,11 @@ module FFT #(
 
 
 
-  always @(*) begin
-    int i;
-    for (i = 0; i < N_SAMPLES; i++) begin
-      complex_msg[0][i] = 0;
+  generate
+    for (genvar i = 0; i < N_SAMPLES; i++) begin
+      assign complex_msg[0][i] = 0;
     end
-  end
+  endgenerate
 
   //Manual 8-bit bit reversal TODO make parametrized
   generate
@@ -1124,12 +1123,8 @@ module FFT #(
     end
   endgenerate
 
-
-
   generate
-    genvar i;
-    genvar b;
-    for (i = 0; i < $clog2(N_SAMPLES); i++) begin
+    for (genvar i = 0; i < $clog2(N_SAMPLES); i++) begin
       FFTStage #(
         .BIT_WIDTH (BIT_WIDTH),
         .DECIMAL_PT(DECIMAL_PT),
@@ -1154,16 +1149,11 @@ module FFT #(
     end
   endgenerate
 
-  always @(*) begin
-    int i;
-    for (i = 0; i < N_SAMPLES; i++) begin
-
-      send_msg[i] = real_msg[$clog2(N_SAMPLES)][i];
-
+  generate
+    for (genvar i = 0; i < N_SAMPLES; i++) begin
+      assign send_msg[i] = real_msg[$clog2(N_SAMPLES)][i];
     end
-  end
-
-
+  endgenerate
 endmodule
 
 `endif

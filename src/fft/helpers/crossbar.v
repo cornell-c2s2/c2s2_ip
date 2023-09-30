@@ -24,10 +24,8 @@ module FFTCrossbar #(
   input  logic                   send_rdy      [SIZE_FFT - 1:0]
 );
   generate
-    genvar m;
-    for (m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin
-      genvar i;
-      for (i = m; i < SIZE_FFT; i = i + 2 ** (STAGE_FFT + 1)) begin
+    for (genvar m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin
+      for (genvar i = m; i < SIZE_FFT; i = i + 2 ** (STAGE_FFT + 1)) begin
         if (FRONT == 1) begin
           assign send_real[i+m]        = recv_real[i];
           assign send_imaginary[i+m]   = recv_imaginary[i];
