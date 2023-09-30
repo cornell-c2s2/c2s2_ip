@@ -1,53 +1,60 @@
 `default_nettype none
 `ifndef DESERIALIZER
-`define DESERIALIZER
+`define DESERIALIZER 
 `include "src/cmn/regs.v"
 
-module Deserializer
-#(
+module Deserializer #(
   parameter int N_SAMPLES = 8,
-  parameter int BIT_WIDTH  = 32
-)(
-  
-  input  logic recv_val,
+  parameter int BIT_WIDTH = 32
+) (
+
+  input logic recv_val,
   output logic recv_rdy,
-  input  logic [BIT_WIDTH - 1:0] recv_msg,
+  input logic [BIT_WIDTH - 1:0] recv_msg,
 
-  output logic send_val, 
-  input  logic send_rdy,
-  output logic [BIT_WIDTH - 1:0] send_msg [N_SAMPLES - 1:0],
+  output logic send_val,
+  input logic send_rdy,
+  output logic [BIT_WIDTH - 1:0] send_msg[N_SAMPLES - 1:0],
 
-  input logic clk, 
+  input logic clk,
   input logic reset
 );
-  
+
   logic [N_SAMPLES - 1:0] en_sel;
 
   //body of code
-  Control #(.N_SAMPLES(N_SAMPLES)) c
-    (
-      .recv_val(recv_val), 
-      .send_rdy(send_rdy),
-      
-      .send_val(send_val),
-      .recv_rdy(recv_rdy), 
+  Control #(
+    .N_SAMPLES(N_SAMPLES)
+  ) c (
+    .recv_val(recv_val),
+    .send_rdy(send_rdy),
 
-      .reset(reset),
-      .clk(clk),
+    .send_val(send_val),
+    .recv_rdy(recv_rdy),
 
-      .en_sel(en_sel)
-    );
+    .reset(reset),
+    .clk  (clk),
 
-  for (genvar i = 0; i < N_SAMPLES; i++) begin: l_regs
-    cmn_EnResetReg #( BIT_WIDTH ) register ( .clk(clk), .reset(reset), .en(en_sel[i]), .d(recv_msg), .q(send_msg[i]) );
-  end
+    .en_sel(en_sel)
+  );
+
+  generate
+    for (genvar i = 0; i < N_SAMPLES; i++) begin : l_regs
+      cmn_EnResetReg #(BIT_WIDTH) register (
+        .clk(clk),
+        .reset(reset),
+        .en(en_sel[i]),
+        .d(recv_msg),
+        .q(send_msg[i])
+      );
+    end
+  endgenerate
 
 endmodule
-  
-module Control 
-#(
+
+module Control #(
   parameter int N_SAMPLES = 8
-)(
+) (
   input logic recv_val,
   input logic send_rdy,
 
@@ -59,18 +66,23 @@ module Control
   input logic reset,
   input logic clk
 );
-  localparam byte INIT =   2'b00;
+  localparam byte INIT = 2'b00;
   localparam byte STATE1 = 2'b01;
-  localparam byte STATE2 = 2'b10; 
+  localparam byte STATE2 = 2'b10;
 
-  logic [$clog2(N_SAMPLES)-1:0] count; //counter
+  logic [$clog2(N_SAMPLES)-1:0] count;  //counter
   // Extra bit needed here for count_next to avoid overflow
   logic [$clog2(N_SAMPLES+1)-1:0] count_next;
 
   logic [1:0] next_state;
   logic [1:0] state;
 
-  Decoder #( $clog2(N_SAMPLES) ) decoder ( .in(count), .out(en_sel));
+  Decoder #($clog2(
+      N_SAMPLES
+  )) decoder (
+    .in (count),
+    .out(en_sel)
+  );
 
   always_comb begin
     case (state)
@@ -106,15 +118,15 @@ module Control
       end
 
       STATE1: begin
-      count_next = 0;
-      recv_rdy = 1'b0;
-      send_val = 1'b1;
+        count_next = 0;
+        recv_rdy   = 1'b0;
+        send_val   = 1'b1;
       end
 
       default: begin
         count_next = 0;
-        recv_rdy = 1'b1;
-        send_val = 1'b0;
+        recv_rdy   = 1'b1;
+        send_val   = 1'b0;
       end
 
     endcase
@@ -134,10 +146,10 @@ endmodule
 
 module Decoder #(
   parameter int BIT_WIDTH = 3
-)(
-  input  logic [BIT_WIDTH - 1:0] in,
+) (
+  input logic [BIT_WIDTH - 1:0] in,
   output logic [(1 << BIT_WIDTH) - 1:0] out
 );
-  assign out = {{(1 << BIT_WIDTH) - 1 {1'b0}}, 1'b1} << in;
+  assign out = {{(1 << BIT_WIDTH) - 1{1'b0}}, 1'b1} << in;
 endmodule
 `endif
