@@ -88,7 +88,7 @@ module FpCMultVRTL #(
       logic [2:0] next_state;
       logic [n-1:0] mul_a, mul_b, mul_c;
 
-      always @(posedge clk) begin
+      always_ff @(posedge clk) begin
         if (reset) begin
           state <= IDLE;
           c_ar <= 0;
@@ -114,6 +114,7 @@ module FpCMultVRTL #(
             acXbc <= mul_c;
           end else if (state == MUL3) begin
             arcXbrc <= mul_c;
+          end else begin
           end
         end
       end
