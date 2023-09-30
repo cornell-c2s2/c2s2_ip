@@ -1,3 +1,4 @@
+`default_nettype none
 `include "src/fixed_point/combinational/FpCMultVRTL.v"
 
 module HarnessVRTL
