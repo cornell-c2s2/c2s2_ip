@@ -30,20 +30,20 @@ module FixedPointIterativeButterfly #(
   // 3 if omega = i (j)
   // 4 if omega = -i (-j)
 ) (
-  input logic clk,
-  input logic reset,
-  input logic recv_val,
+  input  logic clk,
+  input  logic reset,
+  input  logic recv_val,
   output logic recv_rdy,
   output logic send_val,
-  input logic send_rdy,
-  
+  input  logic send_rdy,
+
   input logic [n-1:0] ar,
   input logic [n-1:0] ac,
   input logic [n-1:0] br,
   input logic [n-1:0] bc,
   input logic [n-1:0] wr,
-  input logic [n-1:0] wc, 
-  
+  input logic [n-1:0] wc,
+
   output logic [n-1:0] cr,
   output logic [n-1:0] cc,
   output logic [n-1:0] dr,
@@ -56,112 +56,166 @@ module FixedPointIterativeButterfly #(
   logic [n-1:0] ar_imm, ac_imm;
   logic [n-1:0] tr, tc;
 
-  case (mult)
-    // w = 1
-    // | 1  1 |   | a |   | a + b |
-    // | 1 -1 | * | b | = | a - b |
-    1: begin: l_omega_1
-      always_ff @(posedge clk) begin
-        if (reset) begin
-          cr <= 0; cc <= 0; dr <= 0; dc <= 0;
-          send_val <= 0;
-        end else if (recv_val & recv_rdy) begin
-          cr <= ar + br; cc <= ac + bc; dr <= ar - br; dc <= ac - bc;
-          send_val <= 1;
-        end else if (send_val & send_rdy) begin
-          send_val <= 0;
-        end else begin
-          cr <= cr; cc <= cc; dr <= dr; dc <= dc;
-          send_val <= send_val;
+  generate
+    case (mult)
+      // w = 1
+      // | 1  1 |   | a |   | a + b |
+      // | 1 -1 | * | b | = | a - b |
+      1: begin
+        always_ff @(posedge clk) begin
+          if (reset) begin
+            cr <= 0;
+            cc <= 0;
+            dr <= 0;
+            dc <= 0;
+            send_val <= 0;
+          end else if (recv_val & recv_rdy) begin
+            cr <= ar + br;
+            cc <= ac + bc;
+            dr <= ar - br;
+            dc <= ac - bc;
+            send_val <= 1;
+          end else if (send_val & send_rdy) begin
+            send_val <= 0;
+          end else begin
+            cr <= cr;
+            cc <= cc;
+            dr <= dr;
+            dc <= dc;
+            send_val <= send_val;
+          end
         end
+        assign recv_rdy = ~send_val;
       end
-      assign recv_rdy = ~send_val;
-    end
-    // w = -1
-    // | 1 -1 |   | a |   | a - b |
-    // | 1  1 | * | b | = | a + b |
-    2: begin: l_omega_neg_1
-      always_ff @(posedge clk) begin
-        if (reset) begin
-          cr <= 0; cc <= 0; dr <= 0; dc <= 0;
-          send_val <= 0;
-        end else if (recv_val & recv_rdy) begin
-          cr <= ar - br; cc <= ac - bc; dr <= ar + br; dc <= ac + bc;
-          send_val <= 1;
-        end else if (send_val & send_rdy) begin
-          send_val <= 0;
-        end else begin
-          cr <= cr; cc <= cc; dr <= dr; dc <= dc;
-          send_val <= send_val;
+      // w = -1
+      // | 1 -1 |   | a |   | a - b |
+      // | 1  1 | * | b | = | a + b |
+      2: begin
+        always_ff @(posedge clk) begin
+          if (reset) begin
+            cr <= 0;
+            cc <= 0;
+            dr <= 0;
+            dc <= 0;
+            send_val <= 0;
+          end else if (recv_val & recv_rdy) begin
+            cr <= ar - br;
+            cc <= ac - bc;
+            dr <= ar + br;
+            dc <= ac + bc;
+            send_val <= 1;
+          end else if (send_val & send_rdy) begin
+            send_val <= 0;
+          end else begin
+            cr <= cr;
+            cc <= cc;
+            dr <= dr;
+            dc <= dc;
+            send_val <= send_val;
+          end
         end
+        assign recv_rdy = ~send_val;
       end
-      assign recv_rdy = ~send_val;
-    end
-    // w = i (j)
-    // | 1  i |   | a |   | a + bi |
-    // | 1 -i | * | b | = | a - bi |
-    3: begin: l_omega_i
-      always_ff @(posedge clk) begin
-        if (reset) begin
-          cr <= 0; cc <= 0; dr <= 0; dc <= 0;
-          send_val <= 0;
-        end else if (recv_val & recv_rdy) begin
-          cr <= ar - bc; cc <= ac + br; dr <= ar + bc; dc <= ac - br;
-          send_val <= 1;
-        end else if (send_val & send_rdy) begin
-          send_val <= 0;
-        end else begin
-          cr <= cr; cc <= cc; dr <= dr; dc <= dc;
-          send_val <= send_val;
+      // w = i (j)
+      // | 1  i |   | a |   | a + bi |
+      // | 1 -i | * | b | = | a - bi |
+      3: begin
+        always_ff @(posedge clk) begin
+          if (reset) begin
+            cr <= 0;
+            cc <= 0;
+            dr <= 0;
+            dc <= 0;
+            send_val <= 0;
+          end else if (recv_val & recv_rdy) begin
+            cr <= ar - bc;
+            cc <= ac + br;
+            dr <= ar + bc;
+            dc <= ac - br;
+            send_val <= 1;
+          end else if (send_val & send_rdy) begin
+            send_val <= 0;
+          end else begin
+            cr <= cr;
+            cc <= cc;
+            dr <= dr;
+            dc <= dc;
+            send_val <= send_val;
+          end
         end
+        assign recv_rdy = ~send_val;
       end
-      assign recv_rdy = ~send_val;
-    end
-    // w = -i (-j)
-    // | 1 -i |   | a |   | a - bi |
-    // | 1  i | * | b | = | a + bi |
-    4: begin: l_omega_neg_i
-      always_ff @(posedge clk) begin
-        if (reset) begin
-          cr <= 0; cc <= 0; dr <= 0; dc <= 0;
-          send_val <= 0;
-        end else if (recv_val & recv_rdy) begin
-          cr <= ar + bc; cc <= ac - br; dr <= ar - bc; dc <= ac + br;
-          send_val <= 1;
-        end else if (send_val & send_rdy) begin
-          send_val <= 0;
-        end else begin
-          cr <= cr; cc <= cc; dr <= dr; dc <= dc;
-          send_val <= send_val;
+      // w = -i (-j)
+      // | 1 -i |   | a |   | a - bi |
+      // | 1  i | * | b | = | a + bi |
+      4: begin
+        always_ff @(posedge clk) begin
+          if (reset) begin
+            cr <= 0;
+            cc <= 0;
+            dr <= 0;
+            dc <= 0;
+            send_val <= 0;
+          end else if (recv_val & recv_rdy) begin
+            cr <= ar + bc;
+            cc <= ac - br;
+            dr <= ar - bc;
+            dc <= ac + br;
+            send_val <= 1;
+          end else if (send_val & send_rdy) begin
+            send_val <= 0;
+          end else begin
+            cr <= cr;
+            cc <= cc;
+            dr <= dr;
+            dc <= dc;
+            send_val <= send_val;
+          end
         end
+        assign recv_rdy = ~send_val;
       end
-      assign recv_rdy = ~send_val;
-    end
-    // default case: use the complex multiplier
-    default: begin: l_no_omega
-      FixedPointIterativeComplexMultiplier #(.n(n), .d(d)) mul ( // ar * br
-        .clk(clk),
-        .reset(reset),
-        .ar(br),
-        .ac(bc),
-        .br(wr),
-        .bc(wc),
-        .cr(tr),
-        .cc(tc),
-        .recv_val(recv_val),
-        .recv_rdy(recv_rdy),
-        .send_val(send_val),
-        .send_rdy(send_rdy)
-      );
-      // registers to hold `a` until the complex multiplier is done
-      cmn_EnResetReg #(n) ac_reg(.clk(clk), .en(recv_rdy), .d(ac), .q(ac_imm), .reset(reset)); 
-      cmn_EnResetReg #(n) ar_reg(.clk(clk), .en(recv_rdy), .d(ar), .q(ar_imm), .reset(reset));
+      // default case: use the complex multiplier
+      default:
+      begin
+        FixedPointIterativeComplexMultiplier #(
+          .n(n),
+          .d(d)
+        ) mul (  // ar * br
+          .clk(clk),
+          .reset(reset),
+          .ar(br),
+          .ac(bc),
+          .br(wr),
+          .bc(wc),
+          .cr(tr),
+          .cc(tc),
+          .recv_val(recv_val),
+          .recv_rdy(recv_rdy),
+          .send_val(send_val),
+          .send_rdy(send_rdy)
+        );
+        // registers to hold `a` until the complex multiplier is done
+        cmn_EnResetReg #(n) ac_reg (
+          .clk(clk),
+          .en(recv_rdy),
+          .d(ac),
+          .q(ac_imm),
+          .reset(reset)
+        );
+        cmn_EnResetReg #(n) ar_reg (
+          .clk(clk),
+          .en(recv_rdy),
+          .d(ar),
+          .q(ar_imm),
+          .reset(reset)
+        );
 
-      assign cr = ar_imm + tr;
-      assign cc = ac_imm + tc;
-      assign dr = ar_imm - tr;
-      assign dc = ac_imm - tc;
-    end
-  endcase
+        assign cr = ar_imm + tr;
+        assign cc = ac_imm + tc;
+        assign dr = ar_imm - tr;
+        assign dc = ac_imm - tc;
+      end
+    endcase
+  endgenerate
 endmodule
 `endif
