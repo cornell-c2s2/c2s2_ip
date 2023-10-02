@@ -53,8 +53,6 @@ module FixedPointIterativeButterfly #(
     | 1  w |   | a |   | c |
     | 1 -w | * | b | = | d |
   */
-  logic [n-1:0] ar_imm, ac_imm;
-  logic [n-1:0] tr, tc;
 
   generate
     case (mult)
@@ -62,6 +60,10 @@ module FixedPointIterativeButterfly #(
       // | 1  1 |   | a |   | a + b |
       // | 1 -1 | * | b | = | a - b |
       1: begin
+        // ignores the omega value when an optimization parameter is present
+        /* verilator lint_off UNUSED */
+        logic unused = &{1'd0, wr, wc, 1'd0};
+        /* verilator lint_on UNUSED */
         always_ff @(posedge clk) begin
           if (reset) begin
             cr <= 0;
@@ -91,6 +93,10 @@ module FixedPointIterativeButterfly #(
       // | 1 -1 |   | a |   | a - b |
       // | 1  1 | * | b | = | a + b |
       2: begin
+        // ignores the omega value when an optimization parameter is present
+        /* verilator lint_off UNUSED */
+        logic unused = &{1'd0, wr, wc, 1'd0};
+        /* verilator lint_on UNUSED */
         always_ff @(posedge clk) begin
           if (reset) begin
             cr <= 0;
@@ -120,6 +126,10 @@ module FixedPointIterativeButterfly #(
       // | 1  i |   | a |   | a + bi |
       // | 1 -i | * | b | = | a - bi |
       3: begin
+        // ignores the omega value when an optimization parameter is present
+        /* verilator lint_off UNUSED */
+        logic unused = &{1'd0, wr, wc, 1'd0};
+        /* verilator lint_on UNUSED */
         always_ff @(posedge clk) begin
           if (reset) begin
             cr <= 0;
@@ -149,6 +159,10 @@ module FixedPointIterativeButterfly #(
       // | 1 -i |   | a |   | a - bi |
       // | 1  i | * | b | = | a + bi |
       4: begin
+        // ignores the omega value when an optimization parameter is present
+        /* verilator lint_off UNUSED */
+        logic unused = &{1'd0, wr, wc, 1'd0};
+        /* verilator lint_on UNUSED */
         always_ff @(posedge clk) begin
           if (reset) begin
             cr <= 0;
@@ -177,6 +191,9 @@ module FixedPointIterativeButterfly #(
       // default case: use the complex multiplier
       default:
       begin
+        logic [n-1:0] ar_imm, ac_imm;
+        logic [n-1:0] tr, tc;
+
         FixedPointIterativeComplexMultiplier #(
           .n(n),
           .d(d)

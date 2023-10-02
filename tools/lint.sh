@@ -19,7 +19,7 @@ while IFS= read -r -d '' line; do
         has_errors=true
     fi
 
-    verilator "${line}" --lint-only -Wall \
+    verilator "${line}" --lint-only -Wall -Wno-DECLFILENAME -Wno-MULTITOP \
         |& tee /dev/stderr \
         | ifne false
 
