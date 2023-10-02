@@ -19,11 +19,11 @@ while IFS= read -r -d '' line; do
         has_errors=true
     fi
 
-    iverilog "${line}" -o build/tmp.out -g2012 -Wall \
+    verilator "${line}" --lint-only -Wall \
         |& tee /dev/stderr \
         | ifne false
 
-    # Check the exit code of iverilog
+    # Check the exit code of verilator
     if [ $? -ne 0 ]; then
         echo -e "${RED}Verilog compilation error(s) found in $line${RESET}"
         has_errors=true
