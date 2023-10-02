@@ -28,7 +28,7 @@ while IFS= read -r -d '' line; do
         echo -e "${RED}Verilog compilation error(s) found in $line${RESET}"
         has_errors=true
     fi
-done < <(find "./src" "./template" -name "*.v" -not -path "./src/cmn/*" -print0)
+done < <(find "./src" -name "*.v" -not -path "./src/cmn/*" -print0)
 
 
 # Check if there were any errors
