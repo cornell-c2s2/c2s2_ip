@@ -5,9 +5,9 @@
 // Macro to generate a sine table for N evenly spaced values from 0 to 2pi.
 // Returns values in a fixedpoint format with D fractional bits and W total bits.
 module SineWave #(
-  parameter integer N = 8,
-  parameter integer W = 32,
-  parameter integer D = 16
+  parameter int N = 8,
+  parameter int W = 32,
+  parameter int D = 16
 ) (
   output logic [W - 1:0] sine_wave_out[0:N - 1]
 );
