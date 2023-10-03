@@ -1,12 +1,4 @@
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_512VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_256VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_128VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_64VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_32VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_16VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_8VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_4VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_2VRTL.v"
+`include "src/fft/helpers/sine_wave.v"
 `include "src/serdes/deserializer.v"
 `include "src/serdes/serializer.v"
 `include "src/fft/helpers/fft_stage.v"
@@ -31,21 +23,13 @@ module FFTStageHarness #(
 
   logic [BIT_WIDTH - 1:0] sine_wave_out[0:N_SAMPLES - 1];
 
-  generate
-    if (BIT_WIDTH == 32 && DECIMAL_PT == 16) begin
-      case (N_SAMPLES)
-        512: SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_512VRTL SineWave (.sine_wave_out(sine_wave_out));
-        256: SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_256VRTL SineWave (.sine_wave_out(sine_wave_out));
-        128: SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_128VRTL SineWave (.sine_wave_out(sine_wave_out));
-        64:  SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_64VRTL SineWave (.sine_wave_out(sine_wave_out));
-        32:  SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_32VRTL SineWave (.sine_wave_out(sine_wave_out));
-        16:  SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_16VRTL SineWave (.sine_wave_out(sine_wave_out));
-        8:   SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_8VRTL SineWave (.sine_wave_out(sine_wave_out));
-        4:   SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_4VRTL SineWave (.sine_wave_out(sine_wave_out));
-        2:   SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_2VRTL SineWave (.sine_wave_out(sine_wave_out));
-      endcase
-    end
-  endgenerate
+  SineWave #(
+    .N(N_SAMPLES),
+    .W(BIT_WIDTH),
+    .D(DECIMAL_PT)
+  ) sine_wave (
+    .sine_wave_out(sine_wave_out)
+  );
 
   logic recv_val_t;
   logic recv_rdy_t;

@@ -2,15 +2,7 @@
 `ifndef FIXED_POINT_FFT
 `define FIXED_POINT_FFT
 
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_512VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_256VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_128VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_64VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_32VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_16VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_8VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_2VRTL.v"
-`include "src/fft/helpers/sinewaves/SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_4VRTL.v"
+`include "src/fft/helpers/sine_wave.v"
 `include "src/fft/helpers/fft_stage.v"
 module FFT #(
   parameter int BIT_WIDTH  = 32,
@@ -52,6 +44,14 @@ module FFT #(
       assign complex_msg[0][i] = 0;
     end
   endgenerate
+
+  SineWave #(
+    .N(N_SAMPLES),
+    .W(BIT_WIDTH),
+    .D(DECIMAL_PT)
+  ) sine_wave (
+    .sine_wave_out(sine_wave_out)
+  );
 
   //Manual 8-bit bit reversal TODO make parametrized
   generate
@@ -568,9 +568,6 @@ module FFT #(
       assign real_msg[0][383] = recv_msg[509];
       assign real_msg[0][255] = recv_msg[510];
       assign real_msg[0][511] = recv_msg[511];
-      SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_512VRTL SineWave (
-        .sine_wave_out(sine_wave_out)
-      );
     end else if (N_SAMPLES == 256) begin
       assign real_msg[0][0]   = recv_msg[0];
       assign real_msg[0][128] = recv_msg[1];
@@ -828,10 +825,6 @@ module FFT #(
       assign real_msg[0][191] = recv_msg[253];
       assign real_msg[0][127] = recv_msg[254];
       assign real_msg[0][255] = recv_msg[255];
-      SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_256VRTL SineWave (
-        .sine_wave_out(sine_wave_out)
-      );
-
     end else if (N_SAMPLES == 128) begin
       assign real_msg[0][0]   = recv_msg[0];
       assign real_msg[0][64]  = recv_msg[1];
@@ -961,9 +954,6 @@ module FFT #(
       assign real_msg[0][95]  = recv_msg[125];
       assign real_msg[0][63]  = recv_msg[126];
       assign real_msg[0][127] = recv_msg[127];
-      SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_128VRTL SineWave (
-        .sine_wave_out(sine_wave_out)
-      );
     end else if (N_SAMPLES == 64) begin
       assign real_msg[0][0]  = recv_msg[0];
       assign real_msg[0][32] = recv_msg[1];
@@ -1029,10 +1019,6 @@ module FFT #(
       assign real_msg[0][47] = recv_msg[61];
       assign real_msg[0][31] = recv_msg[62];
       assign real_msg[0][63] = recv_msg[63];
-      SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_64VRTL SineWave (
-        .sine_wave_out(sine_wave_out)
-      );
-
     end else if (N_SAMPLES == 32) begin
       assign real_msg[0][0]  = recv_msg[0];
       assign real_msg[0][16] = recv_msg[1];
@@ -1066,10 +1052,6 @@ module FFT #(
       assign real_msg[0][23] = recv_msg[29];
       assign real_msg[0][15] = recv_msg[30];
       assign real_msg[0][31] = recv_msg[31];
-      SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_32VRTL SineWave (
-        .sine_wave_out(sine_wave_out)
-      );
-
     end else if (N_SAMPLES == 16) begin
       assign real_msg[0][0]  = recv_msg[0];
       assign real_msg[0][8]  = recv_msg[1];
@@ -1087,10 +1069,6 @@ module FFT #(
       assign real_msg[0][11] = recv_msg[13];
       assign real_msg[0][7]  = recv_msg[14];
       assign real_msg[0][15] = recv_msg[15];
-      SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_16VRTL SineWave (
-        .sine_wave_out(sine_wave_out)
-      );
-
     end else if (N_SAMPLES == 8) begin
       assign real_msg[0][0] = recv_msg[0];
       assign real_msg[0][4] = recv_msg[1];
@@ -1100,26 +1078,14 @@ module FFT #(
       assign real_msg[0][5] = recv_msg[5];
       assign real_msg[0][3] = recv_msg[6];
       assign real_msg[0][7] = recv_msg[7];
-      SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_8VRTL SineWave (
-        .sine_wave_out(sine_wave_out)
-      );
-
     end else if (N_SAMPLES == 4) begin
       assign real_msg[0][0] = recv_msg[0];
       assign real_msg[0][2] = recv_msg[1];
       assign real_msg[0][1] = recv_msg[2];
       assign real_msg[0][3] = recv_msg[3];
-      SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_4VRTL SineWave (
-        .sine_wave_out(sine_wave_out)
-      );
-
     end else if (N_SAMPLES == 2) begin
       assign real_msg[0][0] = recv_msg[0];
       assign real_msg[0][1] = recv_msg[1];
-      SineWave__BIT_WIDTH_32__DECIMAL_POINT_16__SIZE_FFT_2VRTL SineWave (
-        .sine_wave_out(sine_wave_out)
-      );
-
     end
   endgenerate
 
