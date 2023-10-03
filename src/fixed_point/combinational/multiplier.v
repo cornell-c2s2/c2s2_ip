@@ -27,6 +27,11 @@ module FixedPointCombMultiplier #(
 
   assign c = prod[n-1:0];
 
+  /* verilator lint_off UNUSED */
+  logic unused;
+  /* verilator lint_on UNUSED */
+  // The upper n bits of prod are discarded.
+  assign unused = &{1'b0, prod[2*n-1:n], 1'b0};
 endmodule
 
 `endif

@@ -31,11 +31,7 @@ module FixedPointCombComplexMultiplier #(
 
   logic [n-1:0] arXbr, acXbc, arcXbrc;
 
-  localparam int IDLE = 3'd0;
-  localparam int MUL1 = 3'd1;
-  localparam int MUL2 = 3'd2;
-  localparam int MUL3 = 3'd3;
-  localparam int DONE = 3'd4;
+  logic [2:0] IDLE = 3'd0, MUL1 = 3'd1, MUL2 = 3'd2, MUL3 = 3'd3, DONE = 3'd4;
 
   generate
     // 3 multiplier implementation, completes computations in a single cycle, no sequential logic required.
@@ -44,8 +40,6 @@ module FixedPointCombComplexMultiplier #(
       assign c_ac = ac;
       assign c_br = br;
       assign c_bc = bc;
-
-      logic [n-1:0] arXbr, acXbc, arcXbrc;
 
       FixedPointCombMultiplier #(
         .n(n),
