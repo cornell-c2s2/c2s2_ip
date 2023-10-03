@@ -9,26 +9,20 @@ module BitReverse #(
   parameter int BIT_WIDTH = 32,
   parameter int N_SAMPLES = 8
 ) (
-  input  logic [BIT_WIDTH - 1:0] in [N_SAMPLES - 1:0],
-  output logic [BIT_WIDTH - 1:0] out[N_SAMPLES - 1:0]
+  input  logic [BIT_WIDTH - 1:0] in [N_SAMPLES],
+  output logic [BIT_WIDTH - 1:0] out[N_SAMPLES]
 );
-  // stores the reversed indexes
-  int reversed_indexes[N_SAMPLES];
   // number of bits in an index
-  int n = $clog2(N_SAMPLES);
-  initial begin
-    for (int m = 0; m < N_SAMPLES; m++) begin
-      reversed_indexes[m] = 0;
-      // loops through the bits in m and reverses them.
-      for (int i = 0; i < n; i++) begin
-        reversed_indexes[m] |= ((m >> i) & 1) << (n - i - 1);
-      end
-    end
-  end
+  localparam int n = $clog2(N_SAMPLES);
 
   generate
     for (genvar m = 0; m < N_SAMPLES; m++) begin
-      assign out[reversed_indexes[m]] = in[m];
+      logic [n-1:0] m_rev;
+      for (genvar i = 0; i < n; i++) begin
+        assign m_rev[n-i-1] = m[i];
+      end
+
+      assign out[m_rev] = in[m];
     end
   endgenerate
 

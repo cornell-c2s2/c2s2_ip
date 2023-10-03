@@ -37,9 +37,6 @@ module FFT #(
   assign send_val                  = val_in[$clog2(N_SAMPLES)];
   assign rdy_in[$clog2(N_SAMPLES)] = send_rdy;
 
-
-
-
   generate
     for (genvar i = 0; i < N_SAMPLES; i++) begin
       assign complex_msg[0][i] = 0;
