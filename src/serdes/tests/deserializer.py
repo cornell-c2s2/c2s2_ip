@@ -194,4 +194,11 @@ def test(test_params, cmdline_opts):
         interval_delay=test_params.sink_delay,
     )
 
-    run_sim(th, cmdline_opts, duts=["deserializer"])
+    run_sim(
+        th,
+        cmdline_opts={
+            **cmdline_opts,
+            "max_cycles": len(msgs) + 10,
+        },
+        duts=["deserializer"],
+    )
