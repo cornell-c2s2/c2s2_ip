@@ -6,8 +6,9 @@ import pytest
 import random
 from pymtl3 import *
 from pymtl3.stdlib import stream
-from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
+from pymtl3.stdlib.test_utils import run_sim
 from src.serdes.harnesses.deserializer import DeserializerTestHarnessVRTL
+from tools.pymtl_extensions import mk_test_case_table, mk_packed
 
 # -------------------------------------------------------------------------
 # TestHarness
@@ -77,11 +78,11 @@ def eight_point_two_transaction(BIT_WIDTH, N_SAMPLES):
 # for a deserializer with `BIT_WIDTH` bits and `N_SAMPLES` samples
 def create_transactions(BIT_WIDTH, N_SAMPLES, N_QUERIES):
     def pack_transaction(vals):
-        total = 0
-        for i in vals[::-1]:
-            total *= 2**BIT_WIDTH
-            total += i
-        return vals + [total]
+        packer = mk_packed(*([BIT_WIDTH] * N_SAMPLES))
+
+        bits = packer(*vals[::-1])
+        # Duplicate the transaction, one for input and output
+        return vals + [bits]
 
     return sum(
         [
@@ -106,18 +107,24 @@ def create_transaction_lmbda(N_QUERIES):
 def random_deserializers(n):
     for _ in range(n):
         n_samples = random.randint(2, 128)
-        # n_bits is capped here because pymtl3 does not support bit widths greater than 1024
-        n_bits = random.randint(1, 1024 // n_samples)
+        # n_bits is capped here because pymtl3 does not support bit widths greater than or equal to 1024
+        n_bits = random.randint(1, 1023 // n_samples)
         yield (n_samples, n_bits)
 
 
 test_case_table = mk_test_case_table(
     [
-        (
-            "msgs                                       src_delay sink_delay BIT_WIDTH N_SAMPLES"
-        ),
-        ["eight_point", eight_point, 0, 0, 32, 8],
-        ["eight_point_two_transaction", eight_point_two_transaction, 0, 0, 32, 8],
+        ("msgs src_delay sink_delay BIT_WIDTH N_SAMPLES slow"),
+        ["eight_point", eight_point, 0, 0, 32, 8, False],
+        [
+            "eight_point_two_transaction",
+            eight_point_two_transaction,
+            0,
+            0,
+            32,
+            8,
+            False,
+        ],
         *[
             [
                 "random_transaction",
@@ -126,6 +133,7 @@ test_case_table = mk_test_case_table(
                 0,
                 n_bits,
                 n_samples,
+                True,
             ]
             # Creates a test case for each combination of (n_samples, n_bits) and n_queries
             for (n_samples, n_bits) in [
@@ -137,9 +145,9 @@ test_case_table = mk_test_case_table(
                 (64, 8),
                 (128, 4),
                 (256, 2),
-                *random_deserializers(10),
+                *random_deserializers(100),
             ]
-            for n_queries in [1, 2, 10]
+            for n_queries in [1, 2, 100]
         ],
     ]
 )
