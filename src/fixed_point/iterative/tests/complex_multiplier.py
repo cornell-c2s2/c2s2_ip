@@ -7,6 +7,7 @@ from pymtl3.stdlib import stream
 from fixedpt import CFixed
 from src.fixed_point.iterative.harnesses.complex_multiplier import HarnessVRTL
 from random import randint
+from tools.pymtl_extensions import mk_packed
 
 
 # Complex multiplication with fixed precision
@@ -23,12 +24,12 @@ def cmul(n, d, a, b):
 
 # Merge a and b into a single bus
 def mk_msg(n, a, b):
-    return (a[0] << 3 * n) | (a[1] << 2 * n) | (b[0] << n) | b[1]
+    return mk_packed(n)(a[0], a[1], b[0], b[1])
 
 
 # Merge the real and imaginary parts of c into one bus
 def mk_ret(n, c):
-    return (c[0] << n) | c[1]
+    return mk_packed(n)(c[0], c[1])
 
 
 # Create test parametrization information

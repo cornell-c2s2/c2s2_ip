@@ -5,8 +5,9 @@
 import pytest
 from pymtl3 import *
 from pymtl3.stdlib import stream
-from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
+from pymtl3.stdlib.test_utils import run_sim
 from src.serdes.harnesses.connect import ConnectHarnessVRTL
+from tools.pymtl_extensions import mk_test_case_table
 
 # -------------------------------------------------------------------------
 # TestHarness

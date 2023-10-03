@@ -8,6 +8,7 @@ from fixedpt import CFixed
 from src.fixed_point.iterative.harnesses.butterfly import HarnessVRTL
 from src.fixed_point.iterative.tests.complex_multiplier import cmul
 from random import randint
+from tools.pymtl_extensions import mk_packed
 
 
 # Performs the butterfly operation on two complex numbers
@@ -19,19 +20,12 @@ def butterfly(n, d, a, b, w):
 
 # Merge inputs into a single bus
 def mk_msg(n, a, b, w):
-    return (
-        (a[0] << 5 * n)
-        | (a[1] << 4 * n)
-        | (b[0] << 3 * n)
-        | (b[1] << 2 * n)
-        | (w[0] << n)
-        | w[1]
-    )
+    return mk_packed(n)(*a, *b, *w)
 
 
 # Merge outputs into a single bus
 def mk_ret(n, c, d):
-    return (c[0] << 3 * n) | (c[1] << 2 * n) | (d[0] << n) | d[1]
+    return mk_packed(n)(*c, *d)
 
 
 # Create test parametrization information
