@@ -31,6 +31,7 @@ def mk_packed(*args):
 # Helper function that does the same thing as `mk_test_case_table` but allows for marking tests slow
 # Treats a column in `mk_test_case_table` named `slow` as a boolean flag to mark the test as slow
 def mk_test_case_table(test_cases):
+    print(test_cases)
     table = mk_test_case_table_native(test_cases)
 
     params = {
@@ -39,18 +40,19 @@ def mk_test_case_table(test_cases):
     }
 
     for i in range(len(table["ids"])):
-        if "slow" in table["argnames"]:
-            params["argvalues"].append(
-                pytest.param(
-                    table["argvalues"][i],
-                    id=table["ids"][i],
-                    # Adds the slow mark if the test case has the `slow` flag set to True
-                    marks=pytest.mark.slow if table["argvalues"][i].slow else [],
-                )
+        vals = table["argvalues"][i]
+        try:
+            slow = getattr(vals, "slow")
+        except AttributeError:
+            slow = False
+
+        params["argvalues"].append(
+            pytest.param(
+                vals,
+                id=table["ids"][i],
+                # Adds the slow mark if the test case has the `slow` flag set to True
+                marks=pytest.mark.slow if slow else [],
             )
-        else:
-            params["argvalues"].append(
-                pytest.param(table["argvalues"][i], id=table["ids"][i])
-            )
+        )
 
     return params
