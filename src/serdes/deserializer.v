@@ -66,16 +66,17 @@ module Control #(
   input logic reset,
   input logic clk
 );
-  localparam byte INIT = 2'b00;
-  localparam byte STATE1 = 2'b01;
-  localparam byte STATE2 = 2'b10;
+  logic INIT = 1'b0, DONE = 1'b1;
 
-  logic [$clog2(N_SAMPLES)-1:0] count;  //counter
-  // Extra bit needed here for count_next to avoid overflow
-  logic [$clog2(N_SAMPLES+1)-1:0] count_next;
+  localparam int C_WIDTH = $clog2(N_SAMPLES) - 1;
+  // Necessary because counter_next can go up to (including) N_SAMPLES
+  // so we need an extra bit to avoid overflow.
+  localparam int C_NXT_WIDTH = $clog2(N_SAMPLES + 1) - 1;
+  logic [C_WIDTH:0] count;  //counter
+  logic [C_NXT_WIDTH:0] count_next;
 
-  logic [1:0] next_state;
-  logic [1:0] state;
+  logic next_state;
+  logic state;
 
   Decoder #($clog2(
       N_SAMPLES
@@ -87,17 +88,17 @@ module Control #(
   always_comb begin
     case (state)
       INIT: begin
-        if (count_next == N_SAMPLES) begin
-          next_state = STATE1;
+        if (count_next == N_SAMPLES[C_NXT_WIDTH:0]) begin
+          next_state = DONE;
         end else begin
           next_state = INIT;
         end
       end
-      STATE1: begin
+      DONE: begin
         if (send_rdy == 1) begin
           next_state = INIT;
         end else begin
-          next_state = STATE1;
+          next_state = DONE;
         end
       end
       default: next_state = INIT;
@@ -108,16 +109,16 @@ module Control #(
     case (state)
       INIT: begin
         if (recv_val == 1) begin
-          count_next = count + 1;
+          count_next = {{(C_NXT_WIDTH - C_WIDTH) {1'b0}}, count} + 1;
         end else begin
-          count_next = count;
+          count_next = {{(C_NXT_WIDTH - C_WIDTH) {1'b0}}, count};
         end
 
         recv_rdy = 1'b1;
         send_val = 1'b0;
       end
 
-      STATE1: begin
+      DONE: begin
         count_next = 0;
         recv_rdy   = 1'b0;
         send_val   = 1'b1;
