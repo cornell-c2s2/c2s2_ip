@@ -55,26 +55,13 @@ endmodule
 module cmn_EnReg #(
   parameter p_nbits = 1
 ) (
-  input  logic               clk,    // Clock input
-  input  logic               reset,  // Sync reset input
-  output logic [p_nbits-1:0] q,      // Data output
-  input  logic [p_nbits-1:0] d,      // Data input
-  input  logic               en      // Enable input
+  input  logic               clk,  // Clock input
+  output logic [p_nbits-1:0] q,    // Data output
+  input  logic [p_nbits-1:0] d,    // Data input
+  input  logic               en    // Enable input
 );
 
   always_ff @(posedge clk) if (en) q <= d;
-
-  // Assertions
-
-`ifndef SYNTHESIS
-
-  /*
-  always_ff @( posedge clk )
-    if ( !reset )
-      `CMN_ASSERT_NOT_X( en );
-  */
-
-`endif  /* SYNTHESIS */
 
 endmodule
 
@@ -94,18 +81,6 @@ module cmn_EnResetReg #(
 );
 
   always_ff @(posedge clk) if (reset || en) q <= reset ? p_reset_value : d;
-
-  // Assertions
-
-`ifndef SYNTHESIS
-
-  /*
-  always_ff @( posedge clk )
-    if ( !reset )
-      `CMN_ASSERT_NOT_X( en );
-  */
-
-`endif  /* SYNTHESIS */
 
 endmodule
 

@@ -35,7 +35,7 @@ module FixedPointIterativeComplexMultiplier #(
   // cr = (ar * br) - (ac * bc)
   // cc = (ar * bc) + (br * ac) = (ar + ac)(br + bc) - (ac * bc) - (ar * br)
 
-  logic mul_recv_rdy, mul_send_val, in_wait;
+  logic mul_send_val, in_wait;
   logic [1:0] mul_stage;
 
   fpcmult_control #(n, d) control (
@@ -45,7 +45,6 @@ module FixedPointIterativeComplexMultiplier #(
     .recv_rdy(recv_rdy),
     .send_val(send_val),
     .send_rdy(send_rdy),
-    .mul_recv_rdy(mul_recv_rdy),
     .mul_send_val(mul_send_val),
     .in_wait(in_wait),
     .mul_stage(mul_stage)
@@ -60,7 +59,6 @@ module FixedPointIterativeComplexMultiplier #(
     .bc(bc),
     .cr(cr),
     .cc(cc),
-    .mul_recv_rdy(mul_recv_rdy),
     .mul_send_val(mul_send_val),
     .in_wait(in_wait),
     .mul_stage(mul_stage)
@@ -77,21 +75,19 @@ module fpcmult_control #(
   output logic recv_rdy,
   output logic send_val,
   input logic send_rdy,
-  input logic mul_recv_rdy,
   input logic mul_send_val,
   output logic [1:0] mul_stage,
   output logic in_wait
 );
 
-  localparam byte
-    IDLE = 3'd0,
-    DONE = 3'd1,
-    ARBR = 3'd2, // calculating a * c (in the multiplication (a + bi) * (c + di))
-  ACBC = 3'd3,  // calculating b * d
-  AABB = 3'd4,  // calculating (a + b)(c + d)
-  STALL = 3'd5;
+  logic [2:0]
+      IDLE = 3'd0,
+      DONE = 3'd1,
+      ARBR = 3'd2,  // calculating a * c (in the multiplication (a + bi) * (c + di))
+      ACBC = 3'd3,  // calculating b * d
+      AABB = 3'd4;  // calculating (a + b)(c + d)
 
-  logic [2:0] state, next_state, post_idle;
+  logic [2:0] state, next_state;
 
   // stateflow graph
   always_comb begin
@@ -100,13 +96,11 @@ module fpcmult_control #(
         if (recv_val) next_state = AABB;
         else begin
           next_state = IDLE;
-          post_idle  = AABB;
         end
       end
       ARBR: begin
         if (mul_send_val) begin
           next_state = ACBC;
-          post_idle  = ACBC;
         end else begin
           next_state = ARBR;
         end
@@ -118,16 +112,11 @@ module fpcmult_control #(
       AABB: begin
         if (mul_send_val) begin
           next_state = ARBR;
-          post_idle  = ARBR;
         end else next_state = AABB;
       end
       DONE: begin
         if (send_rdy) next_state = IDLE;
         else next_state = DONE;
-      end
-      STALL: begin
-        if (mul_recv_rdy) next_state = post_idle;
-        else next_state = STALL;
       end
       default: begin
         next_state = IDLE;
@@ -202,11 +191,10 @@ module fpcmult_datapath #(
   output logic [n-1:0] cc,
   input logic in_wait,
   input logic [1:0] mul_stage,
-  output logic mul_recv_rdy,
   output logic mul_send_val
 );
   logic [n-1:0] c_ar, c_ac, c_br, c_bc, c_arac;
-  logic [n-1:0] i_ar, i_ac, i_arac;
+  logic [n-1:0] i_ar, i_ac;
   logic [n-1:0] mul_a, mul_b, mul_c;
 
   // real part = ac - bd
@@ -266,7 +254,10 @@ module fpcmult_datapath #(
     .b(mul_b),
     .c(mul_c),
     .recv_val(mul_stage != 3),
-    .recv_rdy(mul_recv_rdy),
+    // no need to check `recv_rdy` here because valid held high until `send_val`
+    /* verilator lint_off PINCONNECTEMPTY */
+    .recv_rdy(),
+    /* verilator lint_on PINCONNECTEMPTY */
     .send_val(mul_send_val),
     .send_rdy(1'b1)
   );
