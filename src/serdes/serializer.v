@@ -19,7 +19,7 @@ module Serializer #(
   input logic clk
 );
 
-  logic [$clog2(N_SAMPLES+1) - 1:0] mux_sel;
+  logic [$clog2(N_SAMPLES) - 1:0] mux_sel;
   logic reg_en;
   logic [BIT_WIDTH - 1:0] reg_out[N_SAMPLES - 1:0];
 
@@ -36,6 +36,7 @@ module Serializer #(
   endgenerate
 
   assign send_msg = reg_out[mux_sel];
+
 
   SerializerControl #(
     .N_SAMPLES(N_SAMPLES)
@@ -61,21 +62,23 @@ module SerializerControl #(
   output logic send_val,
   input  logic send_rdy,
 
-  output logic [$clog2(N_SAMPLES+1) - 1:0] mux_sel,
+  output logic [$clog2(N_SAMPLES) - 1:0] mux_sel,
   output logic reg_en,
 
   input logic clk,
   input logic reset
 );
 
-  localparam byte INIT = 0;
-  localparam byte OUTPUT_START = 1;
-  localparam byte ADD = 2;
+  logic INIT = 1'b0, OUTPUT_START = 1'b1;
 
   logic next_state;
   logic state;
 
-  logic [$clog2(N_SAMPLES+1)-1:0] mux_sel_next;
+  // Number of bits to represent N_SAMPLES-1
+  localparam int NS_EXC_W = $clog2(N_SAMPLES);
+  // Number of bits to represent N_SAMPLES
+  localparam int NS_W = $clog2(N_SAMPLES + 1);
+  logic [NS_W-1:0] mux_sel_next;
 
   always_comb begin
     case (state)
@@ -85,7 +88,7 @@ module SerializerControl #(
         else next_state = INIT;
       end
       OUTPUT_START: begin
-        if (mux_sel_next != N_SAMPLES) next_state = OUTPUT_START;
+        if (mux_sel_next != N_SAMPLES[NS_W-1:0]) next_state = OUTPUT_START;
         else next_state = INIT;
       end
       default: next_state = INIT;
@@ -104,8 +107,8 @@ module SerializerControl #(
         reg_en   = 0;
         send_val = 1;
         recv_rdy = 0;
-        if (send_rdy == 1) mux_sel_next = mux_sel + 1;
-        else mux_sel_next = mux_sel;
+        if (send_rdy == 1) mux_sel_next = {{(NS_W - NS_EXC_W) {1'b0}}, mux_sel} + 1;
+        else mux_sel_next = {{(NS_W - NS_EXC_W) {1'b0}}, mux_sel};
       end
       default: begin
         reg_en = 1;
@@ -121,7 +124,7 @@ module SerializerControl #(
       state   <= INIT;
       mux_sel <= 0;
     end else begin
-      mux_sel <= mux_sel_next;
+      mux_sel <= mux_sel_next[NS_EXC_W-1:0];
       state   <= next_state;
     end
   end

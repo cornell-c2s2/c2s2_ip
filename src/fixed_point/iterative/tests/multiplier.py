@@ -8,11 +8,12 @@ from fixedpt import Fixed
 
 from src.fixed_point.iterative.harnesses.multiplier import FPIterativeMultiplier
 from random import randint
+from tools.pymtl_extensions import mk_packed
 
 
 # Merge a and b into a single bus
 def mk_msg(n, a, b):
-    return (a << n) | b
+    return mk_packed(n)(a, b)
 
 
 # Create test parametrization information
