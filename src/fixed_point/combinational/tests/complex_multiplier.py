@@ -14,12 +14,13 @@ import random
 # random.seed(0xdeadbeef)
 
 from pymtl3 import *
-from pymtl3.passes.PassGroups import DefaultPassGroup
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
-from src.fixed_point.combinational.harnesses.HarnessRTL import HarnessVRTL
+from src.fixed_point.combinational.harnesses.complex_multiplier import (
+    ComplexMultiplierTestHarness,
+)
 from random import randint
 
 
@@ -88,7 +89,7 @@ def rand_cfixed(n, d):
 
 # Initialize a simulatable model
 def create_model(n, d):
-    model = HarnessVRTL(n, d)
+    model = ComplexMultiplierTestHarness(n, d)
 
     return Harness(model, n)
 

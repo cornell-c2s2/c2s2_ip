@@ -8,7 +8,7 @@ from pymtl3.stdlib.test_utils import run_test_vector_sim
 from random import randint, seed
 import decimal
 
-from src.fixed_point.combinational.harnesses.FpCombMultVRTL import FpCombMultVRTL
+from src.fixed_point.combinational.harnesses.multiplier import MultiplierTestHarness
 from fixedpt import Fixed
 
 
@@ -33,18 +33,20 @@ def gen_random_test_case(n, d, num):
 
 
 def test_simple(cmdline_opts):
-    run_test_vector_sim(FpCombMultVRTL(32, 16, 1), simple_case(), cmdline_opts)
+    run_test_vector_sim(MultiplierTestHarness(32, 16, 1), simple_case(), cmdline_opts)
 
 
 def test_random(n, d):
     run_test_vector_sim(
-        FpCombMultVRTL(n, d, 1), gen_random_test_case(n, d, 100), cmdline_opts
+        MultiplierTestHarness(n, d, 1), gen_random_test_case(n, d, 100), cmdline_opts
     )
 
 
 def test_random_i32_16(cmdline_opts):
     run_test_vector_sim(
-        FpCombMultVRTL(32, 16, 1), gen_random_test_case(32, 16, 100), cmdline_opts
+        MultiplierTestHarness(32, 16, 1),
+        gen_random_test_case(32, 16, 100),
+        cmdline_opts,
     )
 
 
@@ -80,7 +82,7 @@ def test_edge(n, d, a, b):
     test_case = [("a b c* ")]
     test_case.append([a.get(), b.get(), c.get()])
 
-    run_test_vector_sim(FpCombMultVRTL(n, d, 1), test_case, cmdline_opts={})
+    run_test_vector_sim(MultiplierTestHarness(n, d, 1), test_case, cmdline_opts={})
 
 
 @pytest.mark.parametrize(
@@ -116,4 +118,4 @@ def test_random(
         c = (a * b).resize(None, n, d)
         test_cases.append([a.get(), b.get(), c.get()])
 
-    run_test_vector_sim(FpCombMultVRTL(n, d, 1), test_cases, cmdline_opts={})
+    run_test_vector_sim(MultiplierTestHarness(n, d, 1), test_cases, cmdline_opts={})

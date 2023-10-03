@@ -2,25 +2,25 @@
 `ifndef FIXED_POINT_COMB_COMPLEX_MULTIPLIER
 `define FIXED_POINT_COMB_COMPLEX_MULTIPLIER
 
-`include "src/fixed_point/combinational/FpCombMultVRTL.v"
+`include "src/fixed_point/combinational/multiplier.v"
 
-module FpCMultVRTL #(
-    parameter int n = 32,  // bit width
-    parameter int d = 16,  // number of decimal bits
-    parameter int num_mults = 1  // number of multipliers
+module FixedPointCombComplexMultiplier #(
+  parameter int n = 32,  // bit width
+  parameter int d = 16,  // number of decimal bits
+  parameter int num_mults = 1  // number of multipliers
 ) (
-    input logic clk,
-    input logic reset,
-    input logic recv_val,
-    output logic recv_rdy,
-    output logic send_val,
-    input logic send_rdy,
-    input logic [n-1:0] ar,
-    input logic [n-1:0] ac,
-    input logic [n-1:0] br,
-    input logic [n-1:0] bc,
-    output logic [n-1:0] cr,
-    output logic [n-1:0] cc
+  input logic clk,
+  input logic reset,
+  input logic recv_val,
+  output logic recv_rdy,
+  output logic send_val,
+  input logic send_rdy,
+  input logic [n-1:0] ar,
+  input logic [n-1:0] ac,
+  input logic [n-1:0] br,
+  input logic [n-1:0] bc,
+  output logic [n-1:0] cr,
+  output logic [n-1:0] cc
 );
   // performs c = a * b on complex a and b
 
@@ -47,34 +47,34 @@ module FpCMultVRTL #(
 
       logic [n-1:0] arXbr, acXbc, arcXbrc;
 
-      FpCombMultVRTL #(
-          .n(n),
-          .d(d),
-          .sign(1)
+      FixedPointCombMultiplier #(
+        .n(n),
+        .d(d),
+        .sign(1)
       ) arXbrMult (
-          .a(c_ar),
-          .b(c_br),
-          .c(arXbr)
+        .a(c_ar),
+        .b(c_br),
+        .c(arXbr)
       );
 
-      FpCombMultVRTL #(
-          .n(n),
-          .d(d),
-          .sign(1)
+      FixedPointCombMultiplier #(
+        .n(n),
+        .d(d),
+        .sign(1)
       ) acXbcMult (
-          .a(c_ac),
-          .b(c_bc),
-          .c(acXbc)
+        .a(c_ac),
+        .b(c_bc),
+        .c(acXbc)
       );
 
-      FpCombMultVRTL #(
-          .n(n),
-          .d(d),
-          .sign(1)
+      FixedPointCombMultiplier #(
+        .n(n),
+        .d(d),
+        .sign(1)
       ) arXbrcMult (
-          .a(c_ar + c_ac),
-          .b(c_br + c_bc),
-          .c(arcXbrc)
+        .a(c_ar + c_ac),
+        .b(c_br + c_bc),
+        .c(arcXbrc)
       );
 
       assign cr = arXbr - acXbc;
@@ -158,14 +158,14 @@ module FpCMultVRTL #(
         endcase
       end
 
-      FpCombMultVRTL #(
-          .n(n),
-          .d(d),
-          .sign(1)
+      FixedPointCombMultiplier #(
+        .n(n),
+        .d(d),
+        .sign(1)
       ) arXbrMult (
-          .a(mul_a),
-          .b(mul_b),
-          .c(mul_c)
+        .a(mul_a),
+        .b(mul_b),
+        .c(mul_c)
       );
 
       assign cr = arXbr - acXbc;
