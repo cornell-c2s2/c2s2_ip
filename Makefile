@@ -18,7 +18,16 @@ PURPLE =\033[0;35m
 CYAN   =\033[0;36m
 WHITE  =\033[0;37m
 
---parse-name:
+install:
+	@printf "${CYAN}Installing Dependencies...\n"
+	@git switch master
+	@git pull
+	@python3 -m venv .venv
+	@source .venv/bin/activate
+	@pip install -r requirements.txt
+	@printf "${GREEN}Dependencies installed!\n"
+
+--parse-name: install
 	@printf "${CYAN}"
 	@printf "Checking IP Name is set...\n"
 ifndef IP
@@ -29,18 +38,18 @@ ifndef IP
 	@exit 1
 else
 	@mkdir -p build
-	@python3 tools/parse-ip-name.py ${IP} | tee /dev/tty | tail -n 1 > build/ip_name.txt
+	@python tools/parse-ip-name.py ${IP} | tee /dev/tty | tail -n 1 > build/ip_name.txt
 endif
 
 clean:
-	@printf "${CYAN} Cleaning up build directory...${RESET}\n"
+	@printf "${CYAN} Cleaning up build directories...${RESET}\n"
 	@rm -rf build*/
 	@printf "${GREEN} - Done!${RESET}\n"
 
 IP_NAME_PARSED = $(shell cat build/ip_name.txt)
 
 # Recipe to check whether an IP already exists
-check-ip: --parse-name
+check-ip: --parse-name install
 	@printf "${CYAN}"
 	@printf "Checking for IP already named %s...\n" ${IP_NAME_PARSED}
 	@if [ -d "src/${IP_NAME_PARSED}" ]; then \
@@ -54,7 +63,7 @@ check-ip: --parse-name
 	@printf " - No similar-named IP exists!\n"
 
 # Recipe for making new IP
-new-ip: check-ip
+new-ip: check-ip install
 	@printf "${PURPLE}"
 	@printf "========================================\n"
 	@printf "C2S2 IP CREATOR\n"
@@ -83,7 +92,7 @@ else
 	@printf "${CYAN}"
 	@printf "Creating starter IP\n"
 
-	@python3 tools/new-ip.py ${IP_NAME_PARSED}
+	@python tools/new-ip.py ${IP_NAME_PARSED}
 
 # Make a new branch for the IP
 	@printf "${CYAN}"
@@ -107,11 +116,11 @@ else
 
 endif
 
-lint:
+lint: install
 	tools/lint.sh
 
 INCLUDE = "."
-test:
+test: install
 	@mkdir -p build
 ifndef IP
 	@pytest -k ${INCLUDE} --suppress-no-test-exit-code
