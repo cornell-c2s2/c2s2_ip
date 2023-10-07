@@ -12,11 +12,7 @@ module TwiddleGeneratorHarness #(
 );
 
   logic [BIT_WIDTH - 1:0] sine_wave_out[0:SIZE_FFT - 1];
-
-  logic [BIT_WIDTH - 1:0] twiddle_real[SIZE_FFT/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] twiddle_imaginary[SIZE_FFT/2 - 1:0];
-
-  logic [BIT_WIDTH - 1:0] twiddle_out[SIZE_FFT - 1:0];
+  logic [BIT_WIDTH - 1:0] twiddle_out  [SIZE_FFT - 1:0];
 
   generate
     for (genvar i = 0; i < SIZE_FFT; i = i + 1) begin

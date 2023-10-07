@@ -17,7 +17,9 @@ module SineWave #(
     real PI = $acos(-1);
     for (genvar i = 0; i < N; i++) begin
       real sinvalue = $sin(2 * PI * i / N);
+      /* verilator lint_off UNUSED */
       int  fixedptvalue = $rtoi(sinvalue * (1 << D));
+      /* verilator lint_on UNUSED */
 
       assign sine_wave_out[i] = fixedptvalue[W-1:0];
     end
