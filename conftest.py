@@ -6,6 +6,13 @@ import pytest
 import random
 from os import path
 import os
+import sys
+
+
+def pytest_load_initial_conftests(args):
+    if "xdist" in sys.modules:  # pytest-xdist plugin detected
+        # group tests by file
+        args[:] = ["--dist", "loadfile"] + args
 
 
 def pytest_addoption(parser):
@@ -33,8 +40,14 @@ def fix_randseed():
 
 @pytest.fixture(autouse=True)
 def change_test_dir(request, monkeypatch):
-    """Change the working directory to the src directory."""
-    wd = path.join(request.config.rootdir, request.config.getoption("--build-dir"))
+    buildfolder = request.config.getoption("--build-dir")
+    worker_id = os.environ.get("PYTEST_XDIST_WORKER")
+    if worker_id is not None:
+        # If we are running multiple threads, give each one a new buildfolder
+        buildfolder = f"{buildfolder}_{worker_id}"
+
+    """Change the working directory to the build directory."""
+    wd = path.join(request.config.rootdir, buildfolder)
     os.makedirs(wd, exist_ok=True)
 
     monkeypatch.chdir(wd)
