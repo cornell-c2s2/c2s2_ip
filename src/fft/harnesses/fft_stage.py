@@ -1,6 +1,7 @@
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.passes.backends.verilog import *
+from os import path
 
 
 class FFTStageTestHarness(VerilogPlaceholder, Component):
@@ -13,5 +14,6 @@ class FFTStageTestHarness(VerilogPlaceholder, Component):
 
         s.set_metadata(VerilogPlaceholderPass.top_module, "FFTStageHarness")
         s.set_metadata(
-            VerilogPlaceholderPass.src_file, "../src/fft/harnesses/fft_stage.v"
+            VerilogPlaceholderPass.src_file,
+            path.join(path.dirname(__file__), "fft_stage.py"),
         )
