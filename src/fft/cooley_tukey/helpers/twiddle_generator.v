@@ -1,5 +1,7 @@
 `ifndef TWIDDLE_GENERATOR
 `define TWIDDLE_GENERATOR
+
+/// Twiddle Generator module for a stage in a cooley tukey FFT
 module TwiddleGenerator #(
   parameter int BIT_WIDTH  = 4,
   parameter int DECIMAL_PT = 2,
