@@ -7,6 +7,7 @@ import random
 from os import path
 import os
 import sys
+import numpy as np
 
 
 def pytest_load_initial_conftests(args):
@@ -36,6 +37,7 @@ def pytest_addoption(parser):
 def fix_randseed():
     """Set the random seed prior to each test case."""
     random.seed(0xDEADBEEF)
+    np.random.seed(0xDEADBEEF)
 
 
 @pytest.fixture(autouse=True)

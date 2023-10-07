@@ -1,14 +1,14 @@
 import pytest
 from pymtl3.stdlib.test_utils import run_test_vector_sim
-from random import randint
+import random
 from src.fixed_point.combinational.harnesses.multiplier import MultiplierTestHarness
 from fixedpt import Fixed
-from src.fixed_point.tools.params import mk_params
+from src.fixed_point.tools.params import mk_params, rand_fxp_spec
 
 
 # Get a random fixed point number
 def rand_fixed(n, d):
-    return Fixed(randint(0, (1 << n) - 1), 1, n, d, raw=True)
+    return Fixed(random.randint(0, (1 << n) - 1), 1, n, d, raw=True)
 
 
 # Creates `num` random test cases
@@ -71,6 +71,8 @@ def test_edge(n, d, a, b):
     ),
 )
 def test_random(execution_number, sequence_length, n, d):
+    random.seed(random.random() + execution_number)
+    n, d = rand_fxp_spec(n, d)
     run_test_vector_sim(
         MultiplierTestHarness(n, d, 1),
         gen_random_test_case(n, d, sequence_length),

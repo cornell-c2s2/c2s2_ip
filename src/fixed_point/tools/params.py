@@ -18,16 +18,21 @@ def mk_params(execution_number, sequence_lengths, n, d, slow=False):
 
     for j in range(execution_number):
         for i in sequence_lengths:
-            rn = randint(n[0], n[1])
-            rd = randint(d[0], min(rn - 1, d[1]))
             res.append(
                 pytest.param(
                     j,  # execution_number index (unused)
                     i,  # number of inputs to stream
-                    rn,  # randomly generated `n`
-                    rd,  # randomly generated `d`
-                    id=f"{i} {rn}-bit, {rd}-decimal-bit numbers",
+                    n,  # bounds for `n`
+                    d,  # bounds for `d`
+                    id=f"{i} ({n[0]}-{n[1]})-bit, ({d[0]}-{d[1]})-decimal-bit numbers",
                     marks=pytest.mark.slow if slow else [],
                 )
             )
     return res
+
+
+# Random fixed point number specification
+def rand_fxp_spec(n, d):
+    rn = randint(n[0], n[1])
+    rd = randint(d[0], min(rn - 1, d[1]))
+    return (rn, rd)

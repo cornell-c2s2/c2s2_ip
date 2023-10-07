@@ -34,7 +34,7 @@ endif
 
 clean:
 	@printf "${CYAN} Cleaning up build directory...${RESET}\n"
-	@rm -rf build/* || true
+	@rm -rf build*/
 	@printf "${GREEN} - Done!${RESET}\n"
 
 IP_NAME_PARSED = $(shell cat build/ip_name.txt)

@@ -7,8 +7,8 @@ from fixedpt import CFixed
 from src.fixed_point.combinational.harnesses.complex_multiplier import (
     ComplexMultiplierTestHarness,
 )
-from random import randint
-from src.fixed_point.tools.params import mk_params
+import random
+from src.fixed_point.tools.params import mk_params, rand_fxp_spec
 
 
 # Complex multiplication with fixed precision
@@ -59,7 +59,12 @@ class Harness(Component):
 
 # return a random fxp value
 def rand_cfixed(n, d):
-    return CFixed((randint(0, (1 << n) - 1), randint(0, (1 << n) - 1)), n, d, raw=True)
+    return CFixed(
+        (random.randint(0, (1 << n) - 1), random.randint(0, (1 << n) - 1)),
+        n,
+        d,
+        raw=True,
+    )
 
 
 # Initialize a simulatable model
@@ -130,6 +135,8 @@ def test_edge(n, d, a, b, cmdline_opts):
     ),
 )
 def test_random(execution_number, sequence_length, n, d):
+    random.seed(random.random() + execution_number)
+    n, d = rand_fxp_spec(n, d)
     dat = [(rand_cfixed(n, d), rand_cfixed(n, d)) for i in range(sequence_length)]
     solns = [cmul(n, d, i[0], i[1]) for i in dat]
     print(
