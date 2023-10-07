@@ -3,7 +3,7 @@ import random
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
-from src.fft.harnesses.fft_stage import FFTStageTestHarness
+from src.fft.cooley_tukey.harnesses.fft_stage import FFTStageTestHarness
 from src.fft.tests.fft_sim import fixed_point_fft
 import math
 

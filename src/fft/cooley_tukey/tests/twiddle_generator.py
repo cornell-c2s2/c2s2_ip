@@ -1,6 +1,6 @@
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import run_test_vector_sim
-from src.fft.harnesses.twiddle_generator import TwiddleGenerator
+from src.fft.cooley_tukey.harnesses.twiddle_generator import TwiddleGenerator
 
 
 # 8 point FFT, stage 0

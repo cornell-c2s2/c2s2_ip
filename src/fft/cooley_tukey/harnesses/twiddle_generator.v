@@ -1,5 +1,5 @@
 `include "src/fft/helpers/sine_wave.v"
-`include "src/fft/helpers/twiddle_generator.v"
+`include "src/fft/helpers/cooley_tukey/twiddle_generator.v"
 
 module TwiddleGeneratorHarness #(
   parameter int BIT_WIDTH  = 4,
