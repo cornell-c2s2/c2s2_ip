@@ -6,14 +6,8 @@ import pytest
 import random
 from os import path
 import os
-import sys
+import importlib.util
 import numpy as np
-
-
-def pytest_load_initial_conftests(args):
-    if "xdist" in sys.modules:  # pytest-xdist plugin detected
-        # group tests by file
-        args[:] = ["--dist", "loadfile"] + args
 
 
 def pytest_addoption(parser):
