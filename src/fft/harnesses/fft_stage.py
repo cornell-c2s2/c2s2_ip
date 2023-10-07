@@ -15,5 +15,5 @@ class FFTStageTestHarness(VerilogPlaceholder, Component):
         s.set_metadata(VerilogPlaceholderPass.top_module, "FFTStageHarness")
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.join(path.dirname(__file__), "fft_stage.py"),
+            path.join(path.dirname(__file__), "fft_stage.v"),
         )

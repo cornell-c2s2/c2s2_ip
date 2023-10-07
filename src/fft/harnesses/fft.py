@@ -19,5 +19,5 @@ class FFTTestHarness(VerilogPlaceholder, Component):
         # Source file path
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.join(path.dirname(__file__), "fft.py"),
+            path.join(path.dirname(__file__), "fft.v"),
         )
