@@ -1,7 +1,6 @@
 import pytest
 
 from pymtl3 import *
-from pymtl3.passes.PassGroups import DefaultPassGroup
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream

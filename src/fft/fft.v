@@ -1,0 +1,95 @@
+
+`ifndef FIXED_POINT_FFT
+`define FIXED_POINT_FFT
+
+`include "src/fft/helpers/sine_wave.v"
+`include "src/fft/helpers/bit_reverse.v"
+`include "src/fft/helpers/fft_stage.v"
+module FFT #(
+  parameter int BIT_WIDTH  = 32,
+  parameter int DECIMAL_PT = 16,
+  parameter int N_SAMPLES  = 8
+) (
+  input  logic [BIT_WIDTH - 1:0] recv_msg[N_SAMPLES - 1:0],
+  input  logic                   recv_val,
+  output logic                   recv_rdy,
+
+  output logic [BIT_WIDTH - 1:0] send_msg[N_SAMPLES - 1:0],
+  output logic                   send_val,
+  input  logic                   send_rdy,
+
+  input logic reset,
+  input logic clk
+);
+
+  logic [BIT_WIDTH - 1:0] real_msg     [$clog2(N_SAMPLES):0] [N_SAMPLES - 1:0];
+  logic [BIT_WIDTH - 1:0] complex_msg  [$clog2(N_SAMPLES):0] [N_SAMPLES - 1:0];
+
+  logic                   val_in       [$clog2(N_SAMPLES):0];
+  logic                   rdy_in       [$clog2(N_SAMPLES):0];
+
+  logic [BIT_WIDTH - 1:0] sine_wave_out[    0:N_SAMPLES - 1];
+
+
+  assign val_in[0]                 = recv_val;
+  assign recv_rdy                  = rdy_in[0];
+
+  assign send_val                  = val_in[$clog2(N_SAMPLES)];
+  assign rdy_in[$clog2(N_SAMPLES)] = send_rdy;
+
+  generate
+    for (genvar i = 0; i < N_SAMPLES; i++) begin
+      assign complex_msg[0][i] = 0;
+    end
+  endgenerate
+
+  SineWave #(
+    .N(N_SAMPLES),
+    .W(BIT_WIDTH),
+    .D(DECIMAL_PT)
+  ) sine_wave (
+    .sine_wave_out(sine_wave_out)
+  );
+
+  BitReverse #(
+    .N_SAMPLES(N_SAMPLES),
+    .BIT_WIDTH(BIT_WIDTH)
+  ) bit_reverse (
+    .in (recv_msg),
+    .out(real_msg[0])
+  );
+
+  generate
+    for (genvar i = 0; i < $clog2(N_SAMPLES); i++) begin
+      FFTStage #(
+        .BIT_WIDTH (BIT_WIDTH),
+        .DECIMAL_PT(DECIMAL_PT),
+        .N_SAMPLES (N_SAMPLES),
+        .STAGE_FFT (i)
+      ) fft_stage (
+        .recv_msg_real(real_msg[i]),
+        .recv_msg_imag(complex_msg[i]),
+        .recv_val     (val_in[i]),
+        .recv_rdy     (rdy_in[i]),
+
+        .send_msg_real(real_msg[i+1]),
+        .send_msg_imag(complex_msg[i+1]),
+        .send_val     (val_in[i+1]),
+        .send_rdy     (rdy_in[i+1]),
+
+        .sine_wave_out(sine_wave_out),
+
+        .reset(reset),
+        .clk  (clk)
+      );
+    end
+  endgenerate
+
+  generate
+    for (genvar i = 0; i < N_SAMPLES; i++) begin
+      assign send_msg[i] = real_msg[$clog2(N_SAMPLES)][i];
+    end
+  endgenerate
+endmodule
+
+`endif
