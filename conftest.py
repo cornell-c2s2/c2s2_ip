@@ -4,6 +4,8 @@
 
 import pytest
 import random
+from os import path
+import os
 
 
 def pytest_addoption(parser):
@@ -13,6 +15,13 @@ def pytest_addoption(parser):
 
     parser.addoption(
         "--dump-bin", action="store_true", help="dump binary file for each test"
+    )
+
+    parser.addoption(
+        "--build-dir",
+        action="store",
+        default="build",
+        help="Build directory to generate files in.",
     )
 
 
@@ -25,7 +34,10 @@ def fix_randseed():
 @pytest.fixture(autouse=True)
 def change_test_dir(request, monkeypatch):
     """Change the working directory to the src directory."""
-    monkeypatch.chdir("build")
+    wd = path.join(request.config.rootdir, request.config.getoption("--build-dir"))
+    os.makedirs(wd, exist_ok=True)
+
+    monkeypatch.chdir(wd)
 
 
 @pytest.fixture()
