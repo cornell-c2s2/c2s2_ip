@@ -1,7 +1,3 @@
-# =========================================================================
-# Fixed Point Combinational Multiplier PyMTL3 Wrapper
-# =========================================================================
-
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from os import path
@@ -16,5 +12,5 @@ class MultiplierTestHarness(VerilogPlaceholder, Component):
         s.set_metadata(VerilogPlaceholderPass.top_module, "FixedPointCombMultiplier")
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.dirname(__file__) + "/../multiplier.v",
+            path.join(path.dirname(__file__), "../multiplier.v"),
         )

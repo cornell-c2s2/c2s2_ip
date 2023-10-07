@@ -1,18 +1,4 @@
-# -*- coding: utf-8 -*-
-# @Author: UnsignedByte
-# @Date:   2022-11-12 18:34:50
-# @Last Modified by:   UnsignedByte
-# @Last Modified time: 2022-11-24 13:33:01
-
-# =========================================================================
-# IntMulFixedLatRTL_test
-# =========================================================================
-
 import pytest
-import random
-
-# random.seed(0xdeadbeef)
-
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
@@ -22,6 +8,7 @@ from src.fixed_point.combinational.harnesses.complex_multiplier import (
     ComplexMultiplierTestHarness,
 )
 from random import randint
+from src.fixed_point.tools.params import mk_params
 
 
 # Complex multiplication with fixed precision
@@ -45,19 +32,7 @@ def mk_ret(n, c):
     return (c[0] << n) | c[1]
 
 
-# Create test parametrization information
-def mk_params(execution_number, sequence_lengths, n, d):
-    if isinstance(n, int):
-        n = (n, n)
-    if isinstance(d, int):
-        d = (d, d)
-
-    return [(j, i, n, d) for i in sequence_lengths for j in range(execution_number)]
-
-
 # Test harness for streaming data
-
-
 class Harness(Component):
     def construct(s, mult, n):
         s.mult = mult
@@ -104,7 +79,7 @@ def create_model(n, d):
         (6, 3, (3, 3), (3, 3)),  # overflow check
     ],
 )
-def test_edge(n, d, a, b):
+def test_edge(n, d, a, b, cmdline_opts):
     a = CFixed(a, n, d)
     b = CFixed(b, n, d)
 
@@ -126,26 +101,23 @@ def test_edge(n, d, a, b):
 
     run_sim(
         model,
-        cmdline_opts={"dump_textwave": False, "dump_vcd": "edge", "max_cycles": None},
+        cmdline_opts={"max_cycles": None, **cmdline_opts},
     )
-
-    # out = Fixed(int(eval_until_ready(model, a, b)), s, n, d, raw=True)
-
-    # c = (a * b).resize(s, n, d)
-    # print("%s * %s = %s, got %s" % (a.bin(dot=True), b.bin(dot=True), c.bin(dot=True), out.bin(dot=True)))
-    # assert c.bin() == out.bin()
 
 
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d",
     # Runs tests on smaller number sizes
-    mk_params(50, [1, 50], (2, 8), (0, 8)) +
+    mk_params(50, [1, 50], (2, 8), (0, 8), slow=True) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 10, 50, 100], (16, 64), (0, 64)) +
+    mk_params(20, [1, 10, 50, 100], (16, 64), (0, 64), slow=True) +
     # Extensively tests numbers with certain important bit sizes.
     sum(
         [
-            mk_params(1, [1, 100, 1000], n, d)
+            [
+                *mk_params(1, [20], n, d, slow=False),
+                *mk_params(1, [1000], n, d, slow=True),
+            ]
             for (n, d) in [
                 (8, 4),
                 (24, 8),
@@ -157,12 +129,7 @@ def test_edge(n, d, a, b):
         [],
     ),
 )
-def test_random(
-    execution_number, sequence_length, n, d
-):  # test individual and sequential multiplications to assure stream system works
-    n = randint(n[0], n[1])
-    d = randint(d[0], min(n - 1, d[1]))  # decimal bits
-
+def test_random(execution_number, sequence_length, n, d):
     dat = [(rand_cfixed(n, d), rand_cfixed(n, d)) for i in range(sequence_length)]
     solns = [cmul(n, d, i[0], i[1]) for i in dat]
     print(
@@ -188,7 +155,8 @@ def test_random(
         model,
         cmdline_opts={
             "dump_textwave": False,
-            "dump_vcd": f"rand_{execution_number}_{sequence_length}_{n}_{d}",
+            # "dump_vcd": f"rand_{execution_number}_{sequence_length}_{n}_{d}",
+            "dump_vcd": False,
             "max_cycles": (
                 30 + (3 * (n + 2) + 2) * len(dat)
             ),  # makes sure the time taken grows linearly with respect to 3n
