@@ -34,5 +34,5 @@ def mk_params(execution_number, sequence_lengths, n, d, slow=False):
 # Random fixed point number specification
 def rand_fxp_spec(n, d):
     rn = randint(n[0], n[1])
-    rd = randint(d[0], min(rn - 1, d[1]))
+    rd = randint(d[0], min(rn - 2, d[1]))
     return (rn, rd)

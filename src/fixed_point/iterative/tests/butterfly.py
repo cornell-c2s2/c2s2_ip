@@ -234,7 +234,7 @@ def test_optimizations(
 
     dat = [
         (rand_cfixed(n, d), rand_cfixed(n, d), rand_cfixed(n, d))
-        for i in range(sequence_length)
+        for _ in range(sequence_length)
     ]
     solns = [butterfly(n, d, i[0], i[1], opt_omega[m - 1]) for i in dat]
 
