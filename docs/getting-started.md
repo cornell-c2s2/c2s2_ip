@@ -29,3 +29,6 @@ Now that you're in your ssh machine, you'll want to get the github repository up
 3. Open `c2s2_ip` as a workspace in VSCode. You can do so in two ways:
    1. Run `code c2s2_ip` in the terminal. This should open a new VSCode window, where you have to log in again.
    2. Click `File > Open Folder` and select the `c2s2_ip` folder.
+4. Run `make install` in your terminal. This should install all the required dependencies for the workspace. This includes a few VSCode extensions as well as setting up a `python` virtual environment with all the necessary `pip` packages.
+5. Type `Ctrl+Shift+P` and select `Reload Window`. This should activate all the extensions you just installed.
+6. Read the [makefile tutorial](make.md) if you want to learn more about how to get started making new IP!
