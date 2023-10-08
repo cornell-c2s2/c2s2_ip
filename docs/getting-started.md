@@ -10,9 +10,9 @@ To get started, you'll want to make sure you have access to the following things
 
 If for some reason you don't have access to any of these, contact your subteam leads.
 
-## Using the IP
+## Installing VSCode and connecting to `c2s2-dev``
 
 Next, you'll want to get your working environment set up. If you don't already have experience with `git` and `github`, we recommend taking a look at the [Git/Github Primer](https://confluence.cornell.edu/pages/viewpage.action?pageId=476108648) on confluence.
 
-**TODO**
-
+1. First, you'll need to install VSCode (if you haven't already). VSCode can be downloaded [here](https://code.visualstudio.com/download).
+2. Install the [Visual Studio Code Remote - SSH](https://code.visualstudio.com/docs/remote/ssh) extension. If you need help installing extensions, VSCode has a useful tutorial [here](https://code.visualstudio.com/docs/editor/extension-marketplace).
