@@ -6,8 +6,9 @@ from pymtl3.stdlib import stream
 from fixedpt import CFixed
 from src.fixed_point.iterative.harnesses.butterfly import HarnessVRTL
 from src.fixed_point.iterative.tests.complex_multiplier import cmul
-from random import randint
+import random
 from tools.pymtl_extensions import mk_packed
+from src.fixed_point.tools.params import rand_fxp_spec
 
 
 # Performs the butterfly operation on two complex numbers
@@ -44,16 +45,14 @@ def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
     for k in m:
         for j in range(execution_number):
             for i in sequence_lengths:
-                rn = randint(n[0], n[1])
-                rd = randint(d[0], min(rn - 2, d[1]))
                 res.append(
                     pytest.param(
                         j,  # execution_number index (unused)
                         i,  # number of inputs to stream
-                        rn,  # randomly generated `n`
-                        rd,  # randomly generated `d`
+                        n,  # `n` bounds
+                        d,  # `d` bounds
                         k,  # optimization parameter
-                        id=f"{i} {rn}-bit, {rd}-decimal-bit numbers"
+                        id=f"{i} ({n[0]}-{n[1]})-bit, ({d[0]}-{d[1]})-decimal-bit numbers"
                         + (f", {k}-optimized " if k != 0 else ""),
                         marks=pytest.mark.slow if slow else [],
                     )
@@ -86,7 +85,12 @@ def create_model(n, d, mult=0):
 
 # return a random fixed point value
 def rand_cfixed(n, d):
-    return CFixed((randint(0, (1 << n) - 1), randint(0, (1 << n) - 1)), n, d, raw=True)
+    return CFixed(
+        (random.randint(0, (1 << n) - 1), random.randint(0, (1 << n) - 1)),
+        n,
+        d,
+        raw=True,
+    )
 
 
 @pytest.mark.parametrize(
@@ -161,6 +165,8 @@ def test_edge(n, d, a, b, w):
 def test_random(
     execution_number, sequence_length, n, d, m
 ):  # test individual and sequential multiplications to assure stream system works
+    random.seed(random.random() + execution_number)
+    n, d = rand_fxp_spec(n, d)
     assert m == 0
 
     dat = [
@@ -222,11 +228,13 @@ def test_random(
 def test_optimizations(
     execution_number, sequence_length, n, d, m
 ):  # test modules without multiplication
+    random.seed(random.random() + execution_number)
+    n, d = rand_fxp_spec(n, d)
     opt_omega = [CFixed(i, n, d) for i in [(1, 0), (-1, 0), (0, 1), (0, -1)]]
 
     dat = [
         (rand_cfixed(n, d), rand_cfixed(n, d), rand_cfixed(n, d))
-        for i in range(sequence_length)
+        for _ in range(sequence_length)
     ]
     solns = [butterfly(n, d, i[0], i[1], opt_omega[m - 1]) for i in dat]
 

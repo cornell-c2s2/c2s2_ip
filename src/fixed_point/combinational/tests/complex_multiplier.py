@@ -4,9 +4,10 @@ from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
-from src.fixed_point.iterative.harnesses.complex_multiplier import HarnessVRTL
+from src.fixed_point.combinational.harnesses.complex_multiplier import (
+    ComplexMultiplierTestHarness,
+)
 import random
-from tools.pymtl_extensions import mk_packed
 from src.fixed_point.tools.params import mk_params, rand_fxp_spec
 
 
@@ -22,14 +23,13 @@ def cmul(n, d, a, b):
     return CFixed.cast((ac - bc, c - ac - bc)).resize(n, d)
 
 
-# Merge a and b into a single bus
+# Merge a and b into a larger number
 def mk_msg(n, a, b):
-    return mk_packed(n)(a[0], a[1], b[0], b[1])
+    return (a[0] << 3 * n) | (a[1] << 2 * n) | (b[0] << n) | b[1]
 
 
-# Merge the real and imaginary parts of c into one bus
 def mk_ret(n, c):
-    return mk_packed(n)(c[0], c[1])
+    return (c[0] << n) | c[1]
 
 
 # Test harness for streaming data
@@ -41,22 +41,23 @@ class Harness(Component):
 
         s.sink = stream.SinkRTL(mk_bits(2 * n))
 
-        # Hook up source to receiver and sink to sender
         s.src.send //= s.mult.recv
         s.mult.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
 
+    def line_trace(s):
+        return (
+            s.src.line_trace()
+            + " > "
+            + s.mult.line_trace()
+            + " > "
+            + s.sink.line_trace()
+        )
 
-# Initialize a simulatable model
-def create_model(n, d):
-    model = HarnessVRTL(n, d)
 
-    return Harness(model, n)
-
-
-# return a random fixed point value
+# return a random fxp value
 def rand_cfixed(n, d):
     return CFixed(
         (random.randint(0, (1 << n) - 1), random.randint(0, (1 << n) - 1)),
@@ -66,7 +67,13 @@ def rand_cfixed(n, d):
     )
 
 
-# Tests some edge cases
+# Initialize a simulatable model
+def create_model(n, d):
+    model = ComplexMultiplierTestHarness(n, d)
+
+    return Harness(model, n)
+
+
 @pytest.mark.parametrize(
     "n, d, a, b",
     [
@@ -77,7 +84,7 @@ def rand_cfixed(n, d):
         (6, 3, (3, 3), (3, 3)),  # overflow check
     ],
 )
-def test_edge(n, d, a, b):
+def test_edge(n, d, a, b, cmdline_opts):
     a = CFixed(a, n, d)
     b = CFixed(b, n, d)
 
@@ -99,18 +106,10 @@ def test_edge(n, d, a, b):
 
     run_sim(
         model,
-        cmdline_opts={"dump_textwave": False, "dump_vcd": "edge", "max_cycles": None},
+        cmdline_opts={"max_cycles": None, **cmdline_opts},
     )
 
-    # out = Fixed(int(eval_until_ready(model, a, b)), s, n, d, raw=True)
 
-    # c = (a * b).resize(s, n, d)
-    # print("%s * %s = %s, got %s" % (a.bin(dot=True), b.bin(dot=True), c.bin(dot=True), out.bin(dot=True)))
-    # assert c.bin() == out.bin()
-
-
-# Test individual and sequential multiplications to assure stream system works
-# Generates random data to stream through the multiplier with random bit width information
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d",
     # Runs tests on smaller number sizes
