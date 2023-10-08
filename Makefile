@@ -18,14 +18,19 @@ PURPLE =\033[0;35m
 CYAN   =\033[0;36m
 WHITE  =\033[0;37m
 
+VENV:=. .venv/bin/activate
+
 install:
-	@printf "${CYAN}Installing Dependencies...\n"
-	@git switch master
+	@printf "${CYAN}Getting Latest Updates...${RESET}\n"
+	@git checkout master
 	@git pull
+	@printf "${CYAN}Installing VSCode Extensions...${RESET}\n"
+	@sed -n 's/^/--install-extension /p' .workspace-extensions | xargs code
+	@printf "${CYAN}Setting Up Virtual Environment...${RESET}\n"
 	@python3 -m venv .venv
-	@source .venv/bin/activate
+	@printf "${CYAN}Installing Python Dependencies...${RESET}\n"
 	@pip install -r requirements.txt
-	@printf "${GREEN}Dependencies installed!\n"
+	@printf "${GREEN}Dependencies installed!${RESET}\n"
 
 --parse-name: install
 	@printf "${CYAN}"
@@ -38,7 +43,7 @@ ifndef IP
 	@exit 1
 else
 	@mkdir -p build
-	@python tools/parse-ip-name.py ${IP} | tee /dev/tty | tail -n 1 > build/ip_name.txt
+	@$(VENV) && python tools/parse-ip-name.py ${IP} | tee /dev/tty | tail -n 1 > build/ip_name.txt
 endif
 
 clean:
@@ -60,7 +65,7 @@ check-ip: --parse-name install
 		exit 1; \
 	fi
 	@printf "${GREEN}"
-	@printf " - No similar-named IP exists!\n"
+	@printf " - No similar-named IP exists!${RESET}\n"
 
 # Recipe for making new IP
 new-ip: check-ip install
@@ -82,7 +87,7 @@ ifeq (${IP_USED},1)
 	@printf "[ERROR] A similar-named IP already exists!\n"
 	@printf "[ERROR] Please choose a different name\n"
 	@printf "[ERROR] (Use 'git branch -a' to see all of the existing\n"
-	@printf "[ERROR] branches, corresponding to existing IP)\n"
+	@printf "[ERROR] branches, corresponding to existing IP)${RESET}\n"
 else
 	@printf "${GREEN}"
 	@printf " - No similar-named IP exists!\n"
@@ -92,7 +97,7 @@ else
 	@printf "${CYAN}"
 	@printf "Creating starter IP\n"
 
-	@python tools/new-ip.py ${IP_NAME_PARSED}
+	@$(VENV) && python tools/new-ip.py ${IP_NAME_PARSED}
 
 # Make a new branch for the IP
 	@printf "${CYAN}"
@@ -112,7 +117,7 @@ else
 	@git push --set-upstream origin ${IP_NAME_PARSED}
 
 	@printf "${GREEN}"
-	@printf "[SUCCESS] New IP successfully created!\n"
+	@printf "[SUCCESS] New IP successfully created!${RESET}\n"
 
 endif
 
