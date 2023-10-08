@@ -22,7 +22,7 @@ VENV:=. .venv/bin/activate
 
 install:
 	@printf "${CYAN}Getting Latest Updates...${RESET}\n"
-	@git checkout master
+	@git checkout main
 	@git pull
 	@printf "${CYAN}Installing VSCode Extensions...${RESET}\n"
 	@sed -n 's/^/--install-extension /p' .workspace-extensions | xargs code
@@ -104,7 +104,7 @@ else
 	@printf "Creating new IP branch...\n"
 	
 	@printf "${RESET}"
-	@git checkout master
+	@git checkout main
 	@git pull
 	@git checkout -b ${IP_NAME_PARSED}
 
