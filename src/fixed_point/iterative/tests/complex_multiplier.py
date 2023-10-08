@@ -5,9 +5,9 @@ from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
 from src.fixed_point.iterative.harnesses.complex_multiplier import HarnessVRTL
-from random import randint
+import random
 from tools.pymtl_extensions import mk_packed
-from src.fixed_point.tools.params import mk_params
+from src.fixed_point.tools.params import mk_params, rand_fxp_spec
 
 
 # Complex multiplication with fixed precision
@@ -58,7 +58,12 @@ def create_model(n, d):
 
 # return a random fixed point value
 def rand_cfixed(n, d):
-    return CFixed((randint(0, (1 << n) - 1), randint(0, (1 << n) - 1)), n, d, raw=True)
+    return CFixed(
+        (random.randint(0, (1 << n) - 1), random.randint(0, (1 << n) - 1)),
+        n,
+        d,
+        raw=True,
+    )
 
 
 # Tests some edge cases
@@ -131,6 +136,8 @@ def test_edge(n, d, a, b):
     ),
 )
 def test_random(execution_number, sequence_length, n, d):
+    random.seed(random.random() + execution_number)
+    n, d = rand_fxp_spec(n, d)
     dat = [(rand_cfixed(n, d), rand_cfixed(n, d)) for i in range(sequence_length)]
     solns = [cmul(n, d, i[0], i[1]) for i in dat]
     print(

@@ -7,9 +7,9 @@ from pymtl3.stdlib import stream
 from fixedpt import Fixed
 
 from src.fixed_point.iterative.harnesses.multiplier import FPIterativeMultiplier
-from random import randint
+import random
 from tools.pymtl_extensions import mk_packed
-from src.fixed_point.tools.params import mk_params
+from src.fixed_point.tools.params import mk_params, rand_fxp_spec
 
 
 # Merge a and b into a single bus
@@ -37,7 +37,7 @@ class Harness(Component):
 
 # return a random fxp value
 def rand_fixed(n, d):
-    return Fixed(randint(0, (1 << n) - 1), 1, n, d, raw=True)
+    return Fixed(random.randint(0, (1 << n) - 1), 1, n, d, raw=True)
 
 
 # Initialize a simulatable model
@@ -113,6 +113,8 @@ def test_edge(n, d, a, b):
     ),
 )
 def test_random(execution_number, sequence_length, n, d):
+    random.seed(random.random() + execution_number)
+    n, d = rand_fxp_spec(n, d)
     dat = [
         {"a": rand_fixed(n, d), "b": rand_fixed(n, d)} for i in range(sequence_length)
     ]
