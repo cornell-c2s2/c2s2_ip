@@ -32,7 +32,7 @@ install:
 	@pip install -r requirements.txt
 	@printf "${GREEN}Dependencies installed!${RESET}\n"
 
---parse-name: install
+--parse-name:
 	@printf "${CYAN}"
 	@printf "Checking IP Name is set...\n"
 ifndef IP
@@ -54,7 +54,7 @@ clean:
 IP_NAME_PARSED = $(shell cat build/ip_name.txt)
 
 # Recipe to check whether an IP already exists
-check-ip: --parse-name install
+check-ip: --parse-name
 	@printf "${CYAN}"
 	@printf "Checking for IP already named %s...\n" ${IP_NAME_PARSED}
 	@if [ -d "src/${IP_NAME_PARSED}" ]; then \
@@ -68,7 +68,7 @@ check-ip: --parse-name install
 	@printf " - No similar-named IP exists!${RESET}\n"
 
 # Recipe for making new IP
-new-ip: check-ip install
+new-ip: check-ip
 	@printf "${PURPLE}"
 	@printf "========================================\n"
 	@printf "C2S2 IP CREATOR\n"
@@ -121,11 +121,11 @@ else
 
 endif
 
-lint: install
+lint:
 	tools/lint.sh
 
 INCLUDE = "."
-test: install
+test:
 	@mkdir -p build
 ifndef IP
 	@pytest -k ${INCLUDE} --suppress-no-test-exit-code
