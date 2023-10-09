@@ -13,9 +13,6 @@
   "python.analysis.ignore": [
     "template/"
   ],
-  "python.testing.pytestArgs": [
-    "."
-  ],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "[python]": {
@@ -24,5 +21,7 @@
   },
   "[systemverilog]": {
     "editor.formatOnSave": true
-  }
+  },
+  "python.terminal.activateEnvironment": true,
+  "python.terminal.activateEnvInCurrentTerminal": true
 }

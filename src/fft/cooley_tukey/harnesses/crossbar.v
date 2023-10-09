@@ -1,10 +1,10 @@
 `include "src/fft/cooley_tukey/helpers/crossbar.v"
 
 module CrossbarTestHarness #(
-  BIT_WIDTH = 1,
-  SIZE_FFT  = 2,
-  STAGE_FFT = 0,
-  FRONT     = 1
+  parameter int BIT_WIDTH = 1,
+  parameter int SIZE_FFT  = 2,
+  parameter int STAGE_FFT = 0,
+  parameter bit FRONT     = 1
 ) (
   input  logic [BIT_WIDTH * SIZE_FFT * 2 - 1:0] recv_msg,
   input  logic                                  recv_val,
@@ -24,6 +24,10 @@ module CrossbarTestHarness #(
   logic send_rdy_wide [SIZE_FFT - 1:0];
   logic send_val_wide [SIZE_FFT - 1:0];
 
+  // packed versions of the valrdy arrays so we can use bitwise or reduction
+  logic [SIZE_FFT - 1:0] recv_rdy_thin;
+  logic [SIZE_FFT - 1:0] send_val_thin;
+
   generate
     for (genvar i = 0; i < SIZE_FFT * 2; i = i + 1) begin
       assign crossbar_in[i][BIT_WIDTH-1:0]    = recv_msg[BIT_WIDTH*i+:BIT_WIDTH];
@@ -33,9 +37,11 @@ module CrossbarTestHarness #(
       assign recv_val_wide[i] = recv_val;
       assign send_rdy_wide[i] = send_rdy;
 
-      assign recv_rdy = recv_rdy || recv_rdy_wide[i];
-      assign send_val = send_val || send_val_wide[i];
+      assign recv_rdy_thin[i] = recv_rdy_wide[i];
+      assign send_val_thin[i] = send_val_wide[i];
     end
+    assign recv_rdy = |recv_rdy_thin;
+    assign send_val = |send_val_thin;
   endgenerate
 
   FFTCrossbar #(
