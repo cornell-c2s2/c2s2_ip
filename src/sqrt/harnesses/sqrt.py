@@ -5,7 +5,7 @@ from pymtl3.stdlib import stream
 from pymtl3.passes.backends.verilog import *
 
 
-class SqrtTestHarnessVRTL( VerilogPlaceholder, Component ):
+class SqrtTestHarness( VerilogPlaceholder, Component ):
 
   # Constructor
 

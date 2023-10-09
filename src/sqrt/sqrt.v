@@ -1,6 +1,9 @@
 `ifndef SQRT
 `define SQRT
 
+`include "src/cmn/muxes.v"
+`include "src/cmn/regs.v"
+
 // sqrt in Verilog
 
 module Sqrt
@@ -21,10 +24,10 @@ module Sqrt
     );
 
     // Control Signals
-    logic [1:0] a_mux_sel,
-    logic       x_mux_sel,
-    logic       t_mux_sel,
-    logic [1:0] q_mux_sel,
+    logic [1:0] a_mux_sel;
+    logic       x_mux_sel;
+    logic       t_mux_sel;
+    logic [1:0] q_mux_sel;
     logic       result_en;
 
     // Data Signals
@@ -46,14 +49,18 @@ endmodule
 // Control Module
 //========================================================================
 
-module control_module (
+module control_module 
+    #(
+        parameter BIT_WIDTH = 32
+    )
+    (
     input  logic       clk,
     input  logic       reset,
 
-    input  logic       req_val,
-    output logic       req_rdy,
-    output logic       resp_val,
-    input  logic       resp_rdy,
+    input  logic       recv_val,
+    output logic       recv_rdy,
+    output logic       send_val,
+    input  logic       send_rdy,
 
     input  logic       t_sign,
 
@@ -98,8 +105,8 @@ module control_module (
         input logic       table_result_en
     );
     begin
-        req_rdy        = table_req_rdy;
-        resp_val       = table_resp_val;
+        recv_rdy        = table_req_rdy;
+        send_val       = table_resp_val;
         a_mux_sel      = table_a_mux_sel;
         x_mux_sel      = table_x_mux_sel;
         t_mux_sel      = table_t_mux_sel;
@@ -138,20 +145,24 @@ endmodule
 // Datapath Module
 //========================================================================
 
-module datapath_module (
+module datapath_module 
+    #(
+        parameter BIT_WIDTH = 32
+    )
+    (
     input  logic                 clk,
     input  logic                 reset,
 
-    input  logic [BIT_WIDTH-1:0] req_msg,
+    input  logic [BIT_WIDTH-1:0] recv_msg,
 
     input  logic [1:0]          a_mux_sel,
     input  logic                x_mux_sel,
     input  logic                t_mux_sel,
     input  logic [1:0]          q_mux_sel,
-    input  logic                result_en
+    input  logic                result_en,
 
     output logic               t_sign,
-    output logic [BIT_WIDTH:0] resp_msg
+    output logic [BIT_WIDTH:0] send_msg
     );
 
     // Wires
@@ -160,7 +171,6 @@ module datapath_module (
     logic [31:0] out_minus;
     logic [31:0] out_shift_x;
     logic [31:0] out_x_mux;
-    logic [31:0] out_a_mux;
     logic [31:0] out_t_mux;
     logic [31:0] out_q_mux;
     logic [31:0] out_x_reg;
@@ -168,9 +178,10 @@ module datapath_module (
     logic [31:0] out_t_reg;
     logic [31:0] out_result_reg;
     logic [31:0] out_left_shift;
+    logic [31:0] out_q_lsb;
 
     // a mux
-    vc_Mux3 #(
+    cmn_Mux3 #(
         .p_nbits(BIT_WIDTH)
     ) a_mux (
         .in0(0),
@@ -181,7 +192,7 @@ module datapath_module (
     );
 
     // x mux
-    vc_Mux2 #(
+    cmn_Mux2 #(
         .p_nbits(BIT_WIDTH)
     ) x_mux (
         .in0(recv_msg),
@@ -191,7 +202,7 @@ module datapath_module (
     );
     
     // t mux
-    vc_Mux2 #(
+    cmn_Mux2 #(
         .p_nbits(BIT_WIDTH)
     ) t_mux (
         .in0(0),
@@ -201,7 +212,7 @@ module datapath_module (
     );
 
     // q mux
-    vc_Mux3 #(
+    cmn_Mux3 #(
         .p_nbits(BIT_WIDTH)
     ) q_mux (
         .in0(0),
@@ -212,7 +223,7 @@ module datapath_module (
     );
 
     // x reg
-    vc_Reg #(
+    cmn_Reg #(
         .p_nbits(BIT_WIDTH)
     ) x_reg (
         .clk(clk),
@@ -221,7 +232,7 @@ module datapath_module (
     );
 
     // a reg
-    vc_Reg #(
+    cmn_Reg #(
         .p_nbits(BIT_WIDTH)
     ) a_reg (
         .clk(clk),
@@ -230,7 +241,7 @@ module datapath_module (
     );
 
     // t reg
-    vc_Reg #(
+    cmn_Reg #(
         .p_nbits(BIT_WIDTH)
     ) t_reg (
         .clk(clk),
@@ -239,11 +250,10 @@ module datapath_module (
     );
 
     // result reg
-    vc_EnReg #(
+    cmn_EnReg #(
         .p_nbits(BIT_WIDTH)
     ) result_reg (
         .clk(clk),
-        .reset(reset),
         .q(out_result_reg),
         .d(out_q_mux),
         .en(result_en)
@@ -253,11 +263,11 @@ module datapath_module (
     assign out_left_shift = out_result_reg << 1;
 
     // set lsb of q to 1
-    assign out_q_lsb = {out_left_shift[BIT_WIDTH-1:1], 1};
+    assign out_q_lsb = {out_left_shift[BIT_WIDTH-1:1], 1'b1};
 
     // left shift x by two place into a
     logic [BIT_WIDTH+BIT_WIDTH-1:0] shifted_combined;
-    assign shifted_combined = {out_x_reg, out_a_reg} << 2;
+    assign shifted_combined = {out_a_reg, out_x_reg} << 2;
     assign out_shift_x = shifted_combined[BIT_WIDTH+BIT_WIDTH-1:BIT_WIDTH];
     assign out_shift_a = shifted_combined[BIT_WIDTH-1:0];
 
@@ -266,7 +276,7 @@ module datapath_module (
 
     // Output values
     assign t_sign = out_minus[BIT_WIDTH-1];
-    assign resp_msg = out_result_reg;
+    assign send_msg = out_result_reg;
 
 endmodule
 

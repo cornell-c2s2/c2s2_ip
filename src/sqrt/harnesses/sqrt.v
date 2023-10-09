@@ -1,4 +1,3 @@
-`default_nettype none
 `include "src/sqrt/sqrt.v"
 
 module SqrtHarness
@@ -18,7 +17,7 @@ module SqrtHarness
         input  logic                   send_rdy
     );
 
-    sqrt #(
+    Sqrt #(
         .BIT_WIDTH(BIT_WIDTH)
     ) sqrt_inst (
         .reset(reset),
@@ -29,6 +28,6 @@ module SqrtHarness
         .send_msg(send_msg),
         .send_val(send_val),
         .send_rdy(send_rdy)
-    );  
-    
+    );
+
 endmodule

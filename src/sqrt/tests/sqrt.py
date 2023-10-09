@@ -7,7 +7,7 @@ import random
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
-from src.sqrt.harnesses.sqrt import SqrtTestHarnessVRTL
+from src.sqrt.harnesses.sqrt import SqrtTestHarness
 
 # -------------------------------------------------------------------------
 # TestHarness
@@ -52,7 +52,7 @@ test_case_table = mk_test_case_table([
 @pytest.mark.parametrize(**test_case_table)
 def test(test_params, cmdline_opts):
     th = TestHarness(
-        SqrtTestHarnessVRTL(test_params.BIT_WIDTH),
+        SqrtTestHarness(test_params.BIT_WIDTH),
         test_params.BIT_WIDTH
     )
 
