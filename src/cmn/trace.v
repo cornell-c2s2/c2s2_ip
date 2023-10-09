@@ -11,10 +11,9 @@
 // inside this module in constant expressions (e.g., localparams).
 
 `define CMN_TRACE_NCHARS 512
-`define CMN_TRACE_NBITS  512*8
+`define CMN_TRACE_NBITS 512*8
 
-module cmn_Trace
-(
+module cmn_Trace (
   input logic clk,
   input logic reset
 );
@@ -31,24 +30,24 @@ module cmn_Trace
   // CMN_TRACE_NCHARS macro at the top of this file.
 
   localparam nchars = 512;
-  localparam nbits  = 512*8;
+  localparam nbits = 512 * 8;
 
   // This is the actual trace storage used when displaying a trace
 
-  logic [nbits-1:0] storage;
+  logic   [nbits-1:0] storage;
 
   // Meant to be accesible from outside module
 
-  integer cycles_next = 0;
-  integer cycles      = 0;
+  integer             cycles_next = 0;
+  integer             cycles = 0;
 
   // Get trace level from command line
 
-  logic [3:0] level;
+  logic   [      3:0] level;
 
 `ifndef VERILATOR
   initial begin
-    if ( !$value$plusargs( "trace=%d", level ) ) begin
+    if (!$value$plusargs("trace=%d", level)) begin
       level = 0;
     end
   end
@@ -56,12 +55,12 @@ module cmn_Trace
   initial begin
     level = 1;
   end
-`endif // !`ifndef VERILATOR
+`endif  // !`ifndef VERILATOR
 
   // Track cycle count
 
-  always_ff @( posedge clk ) begin
-    cycles <= ( reset ) ? 0 : cycles_next;
+  always_ff @(posedge clk) begin
+    cycles <= (reset) ? 0 : cycles_next;
   end
 
   //----------------------------------------------------------------------
@@ -69,29 +68,24 @@ module cmn_Trace
   //----------------------------------------------------------------------
   // Appends a string to the trace.
 
-  task append_str
-  (
-    inout logic [nbits-1:0] trace,
-    input logic [nbits-1:0] str
-  );
-  begin
-
-    len0 = 1;
-    while ( str[len0*8+:8] != 0 ) begin
-      len0 = len0 + 1;
-    end
-
-    idx0 = trace[31:0];
-
-    for ( idx1 = len0-1; idx1 >= 0; idx1 = idx1 - 1 )
+  task append_str(inout logic [nbits-1:0] trace, input logic [nbits-1:0] str);
     begin
-      trace[ idx0*8 +: 8 ] = str[ idx1*8 +: 8 ];
-      idx0 = idx0 - 1;
+
+      len0 = 1;
+      while (str[len0*8+:8] != 0) begin
+        len0 = len0 + 1;
+      end
+
+      idx0 = trace[31:0];
+
+      for (idx1 = len0 - 1; idx1 >= 0; idx1 = idx1 - 1) begin
+        trace[idx0*8+:8] = str[idx1*8+:8];
+        idx0 = idx0 - 1;
+      end
+
+      trace[31:0] = idx0;
+
     end
-
-    trace[31:0] = idx0;
-
-  end
   endtask
 
   //----------------------------------------------------------------------
@@ -99,25 +93,21 @@ module cmn_Trace
   //----------------------------------------------------------------------
   // Appends a left-justified string to the trace.
 
-  task append_str_ljust
-  (
-    inout logic [nbits-1:0] trace,
-    input logic [nbits-1:0] str
-  );
-  begin
+  task append_str_ljust(inout logic [nbits-1:0] trace, input logic [nbits-1:0] str);
+    begin
 
-    idx0 = trace[31:0];
-    idx1 = nchars;
+      idx0 = trace[31:0];
+      idx1 = nchars;
 
-    while ( str[ idx1*8-1 -: 8 ] != 0 ) begin
-      trace[ idx0*8 +: 8 ] = str[ idx1*8-1 -: 8 ];
-      idx0 = idx0 - 1;
-      idx1 = idx1 - 1;
+      while (str[idx1*8-1-:8] != 0) begin
+        trace[idx0*8+:8] = str[idx1*8-1-:8];
+        idx0 = idx0 - 1;
+        idx1 = idx1 - 1;
+      end
+
+      trace[31:0] = idx0;
+
     end
-
-    trace[31:0] = idx0;
-
-  end
   endtask
 
   //----------------------------------------------------------------------
@@ -125,27 +115,19 @@ module cmn_Trace
   //----------------------------------------------------------------------
   // Appends the given number of characters to the trace.
 
-  task append_chars
-  (
-    inout logic   [nbits-1:0] trace,
-    input logic         [7:0] char,
-    input integer             num
-  );
-  begin
-
-    idx0 = trace[31:0];
-
-    for ( idx1 = 0;
-          idx1 < num;
-          idx1 = idx1 + 1 )
+  task append_chars(inout logic [nbits-1:0] trace, input logic [7:0] char, input integer num);
     begin
-      trace[idx0*8+:8] = char;
-      idx0 = idx0 - 1;
+
+      idx0 = trace[31:0];
+
+      for (idx1 = 0; idx1 < num; idx1 = idx1 + 1) begin
+        trace[idx0*8+:8] = char;
+        idx0 = idx0 - 1;
+      end
+
+      trace[31:0] = idx0;
+
     end
-
-    trace[31:0] = idx0;
-
-  end
   endtask
 
   //----------------------------------------------------------------------
@@ -153,29 +135,22 @@ module cmn_Trace
   //----------------------------------------------------------------------
   // Append a string modified by val signal.
 
-  task append_val_str
-  (
-    inout logic [nbits-1:0] trace,
-    input logic             val,
-    input logic [nbits-1:0] str
-  );
-  begin
+  task append_val_str(inout logic [nbits-1:0] trace, input logic val, input logic [nbits-1:0] str);
+    begin
 
-    len1 = 0;
-    while ( str[len1*8+:8] != 0 ) begin
-      len1 = len1 + 1;
+      len1 = 0;
+      while (str[len1*8+:8] != 0) begin
+        len1 = len1 + 1;
+      end
+
+      if (val) append_str(trace, str);
+      else if (!val) append_chars(trace, " ", len1);
+      else begin
+        append_str(trace, "x");
+        append_chars(trace, " ", len1 - 1);
+      end
+
     end
-
-    if ( val )
-      append_str( trace, str );
-    else if ( !val )
-      append_chars( trace, " ", len1 );
-    else begin
-      append_str( trace, "x" );
-      append_chars( trace, " ", len1-1 );
-    end
-
-  end
   endtask
 
   //----------------------------------------------------------------------
@@ -183,40 +158,31 @@ module cmn_Trace
   //----------------------------------------------------------------------
   // Append a string modified by val/rdy signals.
 
-  task append_val_rdy_str
-  (
-    inout logic [nbits-1:0] trace,
-    input logic             val,
-    input logic             rdy,
-    input logic [nbits-1:0] str
-  );
-  begin
+  task append_val_rdy_str(inout logic [nbits-1:0] trace, input logic val, input logic rdy,
+                          input logic [nbits-1:0] str);
+    begin
 
-    len1 = 0;
-    while ( str[len1*8+:8] != 0 ) begin
-      len1 = len1 + 1;
-    end
+      len1 = 0;
+      while (str[len1*8+:8] != 0) begin
+        len1 = len1 + 1;
+      end
 
-    if ( rdy && val ) begin
-      append_str( trace, str );
-    end
-    else if ( rdy && !val ) begin
-      append_chars( trace, " ", len1 );
-    end
-    else if ( !rdy && val ) begin
-      append_str( trace, "#" );
-      append_chars( trace, " ", len1-1 );
-    end
-    else if ( !rdy && !val ) begin
-      append_str( trace, "." );
-      append_chars( trace, " ", len1-1 );
-    end
-    else begin
-      append_str( trace, "x" );
-      append_chars( trace, " ", len1-1 );
-    end
+      if (rdy && val) begin
+        append_str(trace, str);
+      end else if (rdy && !val) begin
+        append_chars(trace, " ", len1);
+      end else if (!rdy && val) begin
+        append_str(trace, "#");
+        append_chars(trace, " ", len1 - 1);
+      end else if (!rdy && !val) begin
+        append_str(trace, ".");
+        append_chars(trace, " ", len1 - 1);
+      end else begin
+        append_str(trace, "x");
+        append_chars(trace, " ", len1 - 1);
+      end
 
-  end
+    end
   endtask
 
 endmodule
@@ -226,7 +192,7 @@ endmodule
 //------------------------------------------------------------------------
 // Macro to determine number of characters for a net
 
-`define CMN_TRACE_NBITS_TO_NCHARS( nbits_ ) ((nbits_+3)/4)
+`define CMN_TRACE_NBITS_TO_NCHARS(nbits_) ((nbits_+3)/4)
 
 //------------------------------------------------------------------------
 // CMN_TRACE_BEGIN
@@ -282,5 +248,5 @@ endmodule
 `define CMN_TRACE_END \
   endtask
 
-`endif /* CMN_TRACE_V */
+`endif  /* CMN_TRACE_V */
 

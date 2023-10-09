@@ -1,0 +1,28 @@
+{
+  "editor.formatOnSave": true,
+  "verible.arguments": [
+    "--rules_config=./.verible-lint",
+    "--waiver_files=./.verible-waiver",
+    "--formal_parameters_indentation=indent",
+    "--named_parameter_indentation=indent",
+    "--named_port_indentation=indent",
+    "--port_declarations_indentation=indent",
+    "--ruleset=none"
+  ],
+  "editor.tabSize": 2,
+  "python.analysis.ignore": [
+    "template/"
+  ],
+  "python.testing.pytestArgs": [
+    "."
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.tabSize": 4
+  },
+  "[systemverilog]": {
+    "editor.formatOnSave": true
+  }
+}
