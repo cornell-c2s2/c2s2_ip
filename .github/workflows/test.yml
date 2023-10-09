@@ -28,5 +28,5 @@ jobs:
         run: sudo apt-get install -y verilator
       - name: Test with pytest
         run: |
-          pytest --tb=no -vx --suppress-no-test-exit-code -m "${{ matrix.pytest-markers }}"
+          pytest -n `nproc` --tb=long -v --suppress-no-test-exit-code -m "${{ matrix.pytest-markers }}"
     

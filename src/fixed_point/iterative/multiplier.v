@@ -53,7 +53,7 @@ module FixedPointIterativeMultiplier #(
     .in_wait(in_wait),
     .do_add(do_add),
     .do_carry((sign != 0) & do_carry),
-    .a({{d{(sign != 0) & a[n - 1]}}, a}),
+    .a({{d{(sign != 0) & a[n-1]}}, a}),
     .b(b),
     .c(c)
   );
@@ -74,7 +74,7 @@ module FXPIterMultControl #(
   output logic do_add,
   output logic do_carry
 );
-  localparam byte IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
+  logic [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
 
   logic [1:0] state, next_state;
   logic [$clog2(n)-1:0] counter;
@@ -229,18 +229,24 @@ module FXPIterMultDatapath #(
   );
 
   logic [n+d-1:0] add_tmp;
-  logic [n+d-1:0] carry;
 
   // stores the extra carry information, which allows us to skip the additional
   // `d` cycles we would usually need.
-  logic [2*n-1:0] carry_tmp, carry_tmp2;
+  logic [2*n-1:0] carry_tmp;
+
+  /* verilator lint_off UNUSED */
+  // top n-d bits here will be unused.
+  logic [2*n-1:0] carry_tmp2;
+  /* verilator lint_on UNUSED */
+
   // a sign-extended to the right length
   assign carry_tmp  = {{(n - d) {a_const_out[n+d-1]}}, a_const_out};
   // left shift by n, then subtract to get the carry
   // this is equivalent to multiplying `a` by `d+1` ones, which is equivalent to the last
   // `d+1` cycles in the multiplication, because `b` is either one-extended or zero-extended
   // from `n` bits to `n+d` bits. This allows us to do the multiplication in `n` cycles only.
-  assign carry_tmp2 = ((carry_tmp << (d+1)) - carry_tmp) << (n - 1);
+  assign carry_tmp2 = ((carry_tmp << (d + 1)) - carry_tmp) << (n - 1);
+
 
   // choose between the carry and the add
   cmn_Mux2 #(n + d) carry_sel (

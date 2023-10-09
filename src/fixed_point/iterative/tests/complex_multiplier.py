@@ -1,12 +1,13 @@
 import pytest
 from pymtl3 import *
-from pymtl3.passes.PassGroups import DefaultPassGroup
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
 from src.fixed_point.iterative.harnesses.complex_multiplier import HarnessVRTL
-from random import randint
+import random
+from tools.pymtl_extensions import mk_packed
+from src.fixed_point.tools.params import mk_params, rand_fxp_spec
 
 
 # Complex multiplication with fixed precision
@@ -23,42 +24,12 @@ def cmul(n, d, a, b):
 
 # Merge a and b into a single bus
 def mk_msg(n, a, b):
-    return (a[0] << 3 * n) | (a[1] << 2 * n) | (b[0] << n) | b[1]
+    return mk_packed(n)(a[0], a[1], b[0], b[1])
 
 
 # Merge the real and imaginary parts of c into one bus
 def mk_ret(n, c):
-    return (c[0] << n) | c[1]
-
-
-# Create test parametrization information
-# execution_number: number of times to run the test
-# sequence_lengths: numbers of inputs to stream through the block
-# n: bounds on number of bits in the fixed point number
-# d: bounds on number of decimal bits in the fixed point number
-def mk_params(execution_number, sequence_lengths, n, d, slow=False):
-    if isinstance(n, int):
-        n = (n, n)
-    if isinstance(d, int):
-        d = (d, d)
-
-    res = []
-
-    for j in range(execution_number):
-        for i in sequence_lengths:
-            rn = randint(n[0], n[1])
-            rd = randint(d[0], min(rn - 1, d[1]))
-            res.append(
-                pytest.param(
-                    j,  # execution_number index (unused)
-                    i,  # number of inputs to stream
-                    rn,  # randomly generated `n`
-                    rd,  # randomly generated `d`
-                    id=f"{i} {rn}-bit, {rd}-decimal-bit numbers",
-                    marks=pytest.mark.slow if slow else [],
-                )
-            )
-    return res
+    return mk_packed(n)(c[0], c[1])
 
 
 # Test harness for streaming data
@@ -87,7 +58,12 @@ def create_model(n, d):
 
 # return a random fixed point value
 def rand_cfixed(n, d):
-    return CFixed((randint(0, (1 << n) - 1), randint(0, (1 << n) - 1)), n, d, raw=True)
+    return CFixed(
+        (random.randint(0, (1 << n) - 1), random.randint(0, (1 << n) - 1)),
+        n,
+        d,
+        raw=True,
+    )
 
 
 # Tests some edge cases
@@ -160,6 +136,8 @@ def test_edge(n, d, a, b):
     ),
 )
 def test_random(execution_number, sequence_length, n, d):
+    random.seed(random.random() + execution_number)
+    n, d = rand_fxp_spec(n, d)
     dat = [(rand_cfixed(n, d), rand_cfixed(n, d)) for i in range(sequence_length)]
     solns = [cmul(n, d, i[0], i[1]) for i in dat]
     print(

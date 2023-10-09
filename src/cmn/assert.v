@@ -9,7 +9,7 @@
 // CMN_PROPAGATE_X
 //------------------------------------------------------------------------
 
-`define CMN_PROPAGATE_X( i_, o_ )                                        \
+`define CMN_PROPAGATE_X(i_, o_)                                        \
   if ((|(i_ ^ i_)) == 1'b0);                                            \
   else                                                                  \
     o_ = o_ + 1'bx
@@ -18,7 +18,7 @@
 // CMN_ASSERT
 //------------------------------------------------------------------------
 
-`define CMN_ASSERT( expr_ )                                              \
+`define CMN_ASSERT(expr_)                                              \
   if ( expr_ );                                                         \
   else begin                                                            \
     $display( "\n CMN_ASSERT FAILED\n  - assertion       :%s\n  - module instance : %m\n  - time            : %0d\n", \
@@ -31,7 +31,7 @@
 // CMN_ASSERT_FAIL
 //------------------------------------------------------------------------
 
-`define CMN_ASSERT_FAIL( msg_ )                                         \
+`define CMN_ASSERT_FAIL(msg_)                                         \
   $display( "\n CMN_ASSERT FAILED\n  - assertion       :%s\n  - module instance : %m\n  - time            : %0d\n", \
             msg_, $time );                                             \
   $finish;                                                             \
@@ -41,7 +41,7 @@
 // CMN_ASSERT_NOT_X
 //------------------------------------------------------------------------
 
-`define CMN_ASSERT_NOT_X( net_ )                                         \
+`define CMN_ASSERT_NOT_X(net_)                                         \
   if ((|(net_ ^ net_)) == 1'b0);                                        \
   else begin                                                            \
     $display( "\n CMN_ASSERT FAILED\n  - assertion that net not contain X's failed\n  - module instance : %m\n  - net             :%s\n  - time            : %0d\n", \
@@ -50,5 +50,5 @@
   end                                                                   \
   if (1)
 
-`endif /* CMN_ASSERT_V */
+`endif  /* CMN_ASSERT_V */
 

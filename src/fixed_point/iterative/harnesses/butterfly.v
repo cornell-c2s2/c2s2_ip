@@ -1,13 +1,11 @@
 `default_nettype none
 `include "src/fixed_point/iterative/butterfly.v"
 
-module HarnessFXPIB
-#(
+module HarnessFXPIB #(
   parameter int n = 32,
   parameter int d = 16,
   parameter byte mult = 1
-)
-(
+) (
   input logic clk,
   input logic reset,
 
@@ -20,8 +18,12 @@ module HarnessFXPIB
   output logic [4*n-1:0] send_msg
 );
 
-  FixedPointIterativeButterfly #(.n(n), .d(d), .mult(mult)) btfly (
-    .clk(clk),
+  FixedPointIterativeButterfly #(
+    .n(n),
+    .d(d),
+    .mult(mult)
+  ) btfly (
+    .clk  (clk),
     .reset(reset),
 
     .recv_val(recv_val),
