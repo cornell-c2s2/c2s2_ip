@@ -322,7 +322,6 @@ module cmn_QueueDpath #(
   parameter c_addr_nbits = $clog2(p_num_msgs)
 ) (
   input  logic                    clk,
-  input  logic                    reset,
   input  logic                    write_en,
   input  logic                    bypass_mux_sel,
   input  logic [c_addr_nbits-1:0] write_addr,
@@ -442,7 +441,6 @@ module cmn_Queue #(
 
       cmn_QueueDpath #(p_type, p_msg_nbits, p_num_msgs) dpath (
         .clk           (clk),
-        .reset         (reset),
         .write_en      (write_en),
         .bypass_mux_sel(bypass_mux_sel),
         .write_addr    (write_addr),
