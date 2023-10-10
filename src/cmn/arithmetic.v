@@ -9,10 +9,9 @@
 // Adders
 //------------------------------------------------------------------------
 
-module cmn_Adder
-#(
+module cmn_Adder #(
   parameter p_nbits = 1
-)(
+) (
   input  logic [p_nbits-1:0] in0,
   input  logic [p_nbits-1:0] in1,
   input  logic               cin,
@@ -23,14 +22,13 @@ module cmn_Adder
   // We need to convert cin into a 32-bit value to
   // avoid verilator warnings
 
-  assign {cout,out} = in0 + in1 + {{(p_nbits-1){1'b0}},cin};
+  assign {cout, out} = in0 + in1 + {{(p_nbits - 1) {1'b0}}, cin};
 
 endmodule
 
-module cmn_SimpleAdder
-#(
+module cmn_SimpleAdder #(
   parameter p_nbits = 1
-)(
+) (
   input  logic [p_nbits-1:0] in0,
   input  logic [p_nbits-1:0] in1,
   output logic [p_nbits-1:0] out
@@ -44,10 +42,9 @@ endmodule
 // Subtractor
 //------------------------------------------------------------------------
 
-module cmn_Subtractor
-#(
+module cmn_Subtractor #(
   parameter p_nbits = 1
-)(
+) (
   input  logic [p_nbits-1:0] in0,
   input  logic [p_nbits-1:0] in1,
   output logic [p_nbits-1:0] out
@@ -61,11 +58,10 @@ endmodule
 // Incrementer
 //------------------------------------------------------------------------
 
-module cmn_Incrementer
-#(
+module cmn_Incrementer #(
   parameter p_nbits     = 1,
   parameter p_inc_value = 1
-)(
+) (
   input  logic [p_nbits-1:0] in,
   output logic [p_nbits-1:0] out
 );
@@ -78,16 +74,15 @@ endmodule
 // ZeroExtender
 //------------------------------------------------------------------------
 
-module cmn_ZeroExtender
-#(
+module cmn_ZeroExtender #(
   parameter p_in_nbits  = 1,
   parameter p_out_nbits = 8
-)(
-  input  logic [p_in_nbits-1:0]  in,
+) (
+  input  logic [ p_in_nbits-1:0] in,
   output logic [p_out_nbits-1:0] out
 );
 
-  assign out = { {( p_out_nbits - p_in_nbits ){1'b0}}, in };
+  assign out = {{(p_out_nbits - p_in_nbits) {1'b0}}, in};
 
 endmodule
 
@@ -95,17 +90,15 @@ endmodule
 // SignExtender
 //------------------------------------------------------------------------
 
-module cmn_SignExtender
-#(
- parameter p_in_nbits = 1,
- parameter p_out_nbits = 8
-)
-(
-  input  logic [p_in_nbits-1:0]  in,
+module cmn_SignExtender #(
+  parameter p_in_nbits  = 1,
+  parameter p_out_nbits = 8
+) (
+  input  logic [ p_in_nbits-1:0] in,
   output logic [p_out_nbits-1:0] out
 );
 
-  assign out = { {(p_out_nbits-p_in_nbits){in[p_in_nbits-1]}}, in };
+  assign out = {{(p_out_nbits - p_in_nbits) {in[p_in_nbits-1]}}, in};
 
 endmodule
 
@@ -113,15 +106,14 @@ endmodule
 // ZeroComparator
 //------------------------------------------------------------------------
 
-module cmn_ZeroComparator
-#(
+module cmn_ZeroComparator #(
   parameter p_nbits = 1
-)(
+) (
   input  logic [p_nbits-1:0] in,
   output logic               out
 );
 
-  assign out = ( in == {p_nbits{1'b0}} );
+  assign out = (in == {p_nbits{1'b0}});
 
 endmodule
 
@@ -129,16 +121,15 @@ endmodule
 // EqComparator
 //------------------------------------------------------------------------
 
-module cmn_EqComparator
-#(
+module cmn_EqComparator #(
   parameter p_nbits = 1
-)(
+) (
   input  logic [p_nbits-1:0] in0,
   input  logic [p_nbits-1:0] in1,
   output logic               out
 );
 
-  assign out = ( in0 == in1 );
+  assign out = (in0 == in1);
 
 endmodule
 
@@ -146,16 +137,15 @@ endmodule
 // LtComparator
 //------------------------------------------------------------------------
 
-module cmn_LtComparator
-#(
+module cmn_LtComparator #(
   parameter p_nbits = 1
-)(
+) (
   input  logic [p_nbits-1:0] in0,
   input  logic [p_nbits-1:0] in1,
   output logic               out
 );
 
-  assign out = ( in0 < in1 );
+  assign out = (in0 < in1);
 
 endmodule
 
@@ -163,16 +153,15 @@ endmodule
 // GtComparator
 //------------------------------------------------------------------------
 
-module cmn_GtComparator
-#(
+module cmn_GtComparator #(
   parameter p_nbits = 1
-)(
+) (
   input  logic [p_nbits-1:0] in0,
   input  logic [p_nbits-1:0] in1,
   output logic               out
 );
 
-  assign out = ( in0 > in1 );
+  assign out = (in0 > in1);
 
 endmodule
 
@@ -180,17 +169,16 @@ endmodule
 // LeftLogicalShifter
 //------------------------------------------------------------------------
 
-module cmn_LeftLogicalShifter
-#(
+module cmn_LeftLogicalShifter #(
   parameter p_nbits       = 1,
-  parameter p_shamt_nbits = 1 )
-(
-  input  logic       [p_nbits-1:0] in,
+  parameter p_shamt_nbits = 1
+) (
+  input  logic [      p_nbits-1:0] in,
   input  logic [p_shamt_nbits-1:0] shamt,
-  output logic       [p_nbits-1:0] out
+  output logic [      p_nbits-1:0] out
 );
 
-  assign out = ( in << shamt );
+  assign out = (in << shamt);
 
 endmodule
 
@@ -198,19 +186,18 @@ endmodule
 // RightLogicalShifter
 //------------------------------------------------------------------------
 
-module cmn_RightLogicalShifter
-#(
+module cmn_RightLogicalShifter #(
   parameter p_nbits       = 1,
   parameter p_shamt_nbits = 1
-)(
-  input  logic       [p_nbits-1:0] in,
+) (
+  input  logic [      p_nbits-1:0] in,
   input  logic [p_shamt_nbits-1:0] shamt,
-  output logic       [p_nbits-1:0] out
+  output logic [      p_nbits-1:0] out
 );
 
-  assign out = ( in >> shamt );
+  assign out = (in >> shamt);
 
 endmodule
 
-`endif /* CMN_ARITHMETIC_V */
+`endif  /* CMN_ARITHMETIC_V */
 
