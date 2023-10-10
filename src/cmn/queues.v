@@ -5,11 +5,10 @@
 `ifndef CMN_QUEUES_V
 `define CMN_QUEUES_V
 
-`include "cmn/regs.v"
-`include "cmn/muxes.v"
-`include "cmn/regfiles.v"
-`include "cmn/trace.v"
-`include "cmn/assert.v"
+`include "src/cmn/regs.v"
+`include "src/cmn/muxes.v"
+`include "src/cmn/regfiles.v"
+`include "src/cmn/assert.v"
 
 //------------------------------------------------------------------------
 // Defines
@@ -130,7 +129,7 @@ module cmn_QueueDpath1 #(
 
   logic [p_msg_nbits-1:0] qstore;
 
-  cmn_EnReg #(p_msg_nbits) qstore_reg (
+  cmn_EnResetReg #(p_msg_nbits) qstore_reg (
     .clk  (clk),
     .reset(reset),
     .en   (write_en),
@@ -336,7 +335,7 @@ module cmn_QueueDpath #(
 
   logic [p_msg_nbits-1:0] read_data;
 
-  cmn_Regfile_1r1w #(p_msg_nbits, p_num_msgs) qstore (
+  cmn_ResetRegfile_1r1w #(p_msg_nbits, p_num_msgs) qstore (
     .clk       (clk),
     .reset     (reset),
     .read_addr (read_addr),
@@ -358,7 +357,12 @@ module cmn_QueueDpath #(
         .out(deq_msg)
       );
 
-    else assign deq_msg = read_data;
+    else begin
+      /* verilator lint_off UNUSED */
+      logic unused = 1'b0 & bypass_mux_sel;
+      /* verilator lint_on UNUSED */
+      assign deq_msg = read_data;
+    end
   endgenerate
 
 endmodule
@@ -388,7 +392,6 @@ module cmn_Queue #(
 
   output logic [c_addr_nbits:0] num_free_entries
 );
-
 
   generate
     if (p_num_msgs == 1) begin
