@@ -40,8 +40,8 @@ module CrossbarTestHarness #(
       assign recv_rdy_thin[i] = recv_rdy_wide[i];
       assign send_val_thin[i] = send_val_wide[i];
     end
-    assign recv_rdy = |recv_rdy_thin;
-    assign send_val = |send_val_thin;
+    assign recv_rdy = &recv_rdy_thin;
+    assign send_val = &send_val_thin;
   endgenerate
 
   FFTCrossbar #(
