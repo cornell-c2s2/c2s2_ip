@@ -1,6 +1,7 @@
-chipsalliance.verible
-gvekony.systemverilog-1800-2012
-ms-python.black-formatter
-ms-python.vscode-pylance
-ms-python.python
-dangmai.workspace-default-settings
+--install-extension chipsalliance.verible
+--install-extension gvekony.systemverilog-1800-2012
+--install-extension ms-python.black-formatter
+--install-extension ms-python.vscode-pylance
+--install-extension ms-python.python
+--install-extension dangmai.workspace-default-settings
+--uninstall-extension mshr-h.veriloghdl

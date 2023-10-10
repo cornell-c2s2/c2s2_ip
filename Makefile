@@ -25,7 +25,7 @@ install:
 	@git checkout main
 	@git pull
 	@printf "${CYAN}Installing VSCode Extensions...${RESET}\n"
-	@sed -n 's/^/--install-extension /p' .workspace-extensions | xargs code
+	@cat .workspace-extensions | xargs code
 	@printf "${CYAN}Setting Up Virtual Environment...${RESET}\n"
 	@python3 -m venv .venv
 	@printf "${CYAN}Installing Python Dependencies...${RESET}\n"
