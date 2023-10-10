@@ -28,9 +28,9 @@ module Router #(
   output logic             istream_rdy,
 
   // Out stream
-  output logic             ostream_val[0:noutputs-1],
-  output logic [nbits-1:0] ostream_msg[0:noutputs-1],
-  input  logic             ostream_rdy[0:noutputs-1]
+  output logic             ostream_val[noutputs],
+  output logic [nbits-1:0] ostream_msg[noutputs],
+  input  logic             ostream_rdy[noutputs]
 );
 
   logic [$clog2(noutputs)-1:0] select;

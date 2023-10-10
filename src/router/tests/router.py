@@ -1,8 +1,35 @@
-import pytest
-
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import run_test_vector_sim
 from src.router.harnesses.router import Router
+from pymtl3.stdlib import stream
+
+
+class TestHarness(Component):
+    def construct(s, nbits, noutputs):
+        # Instantiate models
+        s.noutputs = noutputs
+
+        s.src = stream.SourceRTL(mk_bits(nbits))
+        s.dut = Router(nbits, noutputs)
+        s.sinks = [stream.SinkRTL(mk_bits(nbits)) for _ in range(noutputs)]
+
+        # Connect
+
+        s.src.send //= s.dut.istream
+        for i in range(noutputs):
+            s.dut.ostream[i] //= s.sinks[i].recv
+
+    def done(s):
+        if not s.src.done():
+            return False
+        for i in range(s.noutputs):
+            if not s.sinks[i].done():
+                return False
+        return True
+
+    def line_trace(s):
+        sinks_str = "|".join([sink.line_trace() for sink in s.sinks])
+        return f"{s.sink.line_trace()} > ({s.dut.line_trace()}) > {sinks_str}"
 
 
 def test_one(cmdline_opts):
