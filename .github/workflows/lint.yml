@@ -4,13 +4,21 @@ on: [push]
 
 jobs:
   svlint:
-    name: Check Verilog Style Conventions using svlint
+    name: Verilog Compilation and Style
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Create Build Directory
       run: mkdir build
+    - name: Install verilator and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+            verilator \
+            moreutils
+    - name: Check verilator installed
+      run: verilator --version
     - name: Download svlint
       run: wget -O build/svlint.zip https://github.com/dalance/svlint/releases/download/v0.9.0/svlint-v0.9.0-x86_64-lnx.zip
     - name: Install svlint
@@ -21,10 +29,19 @@ jobs:
       run: svlint --version
     - name: Lint files
       run: make lint
+    - name: Lint with Verible
+      uses: chipsalliance/verible-linter-action@main
+      with:
+        config_file: '.verible-lint'
+        paths: |
+          ./src
+        extra_args: "--waiver_files=.verible-waiver"
+        verible_version: "v0.0-3410-g398a8505"
+        reviewdog_reporter: local
     - name: Cleanup
       run: rm -r build
   black:
-    name: Check Python Style Conventions using black
+    name: Python Style
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
