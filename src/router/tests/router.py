@@ -7,14 +7,11 @@ from pymtl3.stdlib import stream
 class TestHarness(Component):
     def construct(s, nbits, noutputs):
         # Instantiate models
-        s.noutputs = noutputs
-
         s.src = stream.SourceRTL(mk_bits(nbits))
         s.dut = Router(nbits, noutputs)
         s.sinks = [stream.SinkRTL(mk_bits(nbits)) for _ in range(noutputs)]
 
         # Connect
-
         s.src.send //= s.dut.istream
         for i in range(noutputs):
             s.dut.ostream[i] //= s.sinks[i].recv
@@ -22,8 +19,8 @@ class TestHarness(Component):
     def done(s):
         if not s.src.done():
             return False
-        for i in range(s.noutputs):
-            if not s.sinks[i].done():
+        for sink in s.sinks:
+            if not sink.done():
                 return False
         return True
 
