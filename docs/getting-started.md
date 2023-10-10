@@ -25,9 +25,9 @@ Next, you'll want to get your working environment set up. If you don't already h
 
 Now that you're in your ssh machine, you'll want to get the github repository up and running.
 1. First, you'll want to get github set up for your ssh machine. A useful tutorial exists [here](https://confluence.cornell.edu/pages/viewpage.action?spaceKey=c2s2&title=Configuring+GitHub+for+our+server) that describes how to set github up.
-2. Navigate to somewhere you'd like your code, and run `git clone git@github.com:cornell-c2s2/c2s2_ip.git`. This will create a folder named `c2s2_ip` with your code.
-3. Open `c2s2_ip` as a workspace in VSCode. You can do so in two ways:
-   1. Run `code c2s2_ip` in the terminal. This should open a new VSCode window, where you have to log in again.
+2. Navigate to somewhere you'd like your code, and run `git clone git@github.com:cornell-c2s2/c2s2_ip.git` in the terminal (the VSCode terminal can be opened using `` `Ctrl + ` ``). This will create a folder named `c2s2_ip` with your code.
+3. Open `c2s2_ip` as a workspace in VSCode. **This is necessary for your vscode extensions to work!** Otherwise, you'll lose features like autoformatting, syntax highlighting, etc. You can do so in two ways:
+   1. Run `code c2s2_ip` in the vscode terminal. This should open a new VSCode window, where you have to log in again.
    2. Click `File > Open Folder` and select the `c2s2_ip` folder.
 4. Run `make install` in your terminal. This should install all the required dependencies for the workspace. This includes a few VSCode extensions as well as setting up a `python` virtual environment with all the necessary `pip` packages.
 5. Type `Ctrl+Shift+P` and select `Python: Create Environment...`, and select `venv`. Next, select `Use Existing` and in the bottom right you should get that `c2s2_ip/.venv/bin/python` was selected as your default interpreter.
