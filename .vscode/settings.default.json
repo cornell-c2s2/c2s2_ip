@@ -24,5 +24,8 @@
   },
   "[systemverilog]": {
     "editor.formatOnSave": true
+  },
+  "files.associations": {
+    "*.v": "systemverilog"
   }
 }
