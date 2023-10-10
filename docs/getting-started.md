@@ -32,4 +32,4 @@ Now that you're in your ssh machine, you'll want to get the github repository up
 4. Run `make install` in your terminal. This should install all the required dependencies for the workspace. This includes a few VSCode extensions as well as setting up a `python` virtual environment with all the necessary `pip` packages.
 5. Type `Ctrl+Shift+P` and select `Python: Create Environment...`, and select `venv`. Next, select `Use Existing` and in the bottom right you should get that `c2s2_ip/.venv/bin/python` was selected as your default interpreter.
 6. Type `Ctrl+Shift+P` and select `Reload Window`. This should activate all the extensions you just installed.
-7. Read the [makefile tutorial](make.md) if you want to learn more about how to get started making new IP!
+7. Read the [makefile tutorial](make.md) and the [pytest tutorial](pytest.md) to learn more about how to get started making new IP!
