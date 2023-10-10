@@ -335,9 +335,8 @@ module cmn_QueueDpath #(
 
   logic [p_msg_nbits-1:0] read_data;
 
-  cmn_ResetRegfile_1r1w #(p_msg_nbits, p_num_msgs) qstore (
+  cmn_Regfile_1r1w #(p_msg_nbits, p_num_msgs) qstore (
     .clk       (clk),
-    .reset     (reset),
     .read_addr (read_addr),
     .read_data (read_data),
     .write_en  (write_en),
