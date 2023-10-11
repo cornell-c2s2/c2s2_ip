@@ -1,10 +1,13 @@
 // ==========================================================================
 // Arbitrator module
 // ==========================================================================
-// This module is used to pick which component gets to output to the val/rdy SPI wrapper if multiple components can send a valid message.
-// The arbitrator puts an address header on the outgoing packet so that downstream components can tell which component sent the response
+// This module is used to pick which component gets to output to the val/rdy
+// SPI wrapper if multiple components can send a valid message.
+// The arbitrator puts an address header on the outgoing packet so that
+// downstream components can tell which component sent the response
 // The nbits parameter is the length of the message.
-// The num_inputs parameter is the number of input components that the Arbitrator is selecting from. MUST be >= 2
+// The num_inputs parameter is the number of input components that the Arbitrator is selecting from.
+// NOTE: MUST be >= 2
 
 // Original   : Dilan Lakhani
 // Date       : Dec 19, 2021
