@@ -11,6 +11,8 @@
   * to determine which receiving port receives a high valid bit. All receiving ports receive the input but not a 
   * corresponding high valid bit. The block itself outputs a low ready bit if its internal queue is full;
   * otherwise the ready bit is high.
+  * 
+  * NOTE: Address bits are not truncated from the input message.
   *
   * Dependencies: muxes.v, demuxes.v, queues.v
 */
