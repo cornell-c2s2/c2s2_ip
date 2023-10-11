@@ -12,22 +12,23 @@
   * corresponding high valid bit. The block itself outputs a low ready bit if its internal queue is full;
   * otherwise the ready bit is high.
   * 
-  * NOTE: Address bits are not truncated from the input message.
+  * NOTE: Address bits are truncated from the input message.
   *
   * Dependencies: muxes.v, demuxes.v, queues.v
 */
 
 module Router #(
   parameter int nbits = 32,
-  parameter int noutputs = 8
+  parameter int noutputs = 8,
+  parameter int n_addr_bits = $clog2(noutputs)
 ) (
   input logic clk,
   input logic reset,
 
   // In stream
-  input  logic             istream_val,
-  input  logic [nbits-1:0] istream_msg,
-  output logic             istream_rdy,
+  input  logic                         istream_val,
+  input  logic [n_addr_bits+nbits-1:0] istream_msg,
+  output logic                         istream_rdy,
 
   // Out stream
   output logic             ostream_val[noutputs],
@@ -35,18 +36,18 @@ module Router #(
   input  logic             ostream_rdy[noutputs]
 );
 
-  logic [$clog2(noutputs)-1:0] select;
-  logic [           nbits-1:0] payload_msg;
-  logic                        payload_val;
-  logic                        payload_rdy;
+  logic [      n_addr_bits-1:0] select;
+  logic [n_addr_bits+nbits-1:0] payload_msg;
+  logic                         payload_val;
+  logic                         payload_rdy;
 
-  assign select = payload_msg[nbits-1 : nbits-$clog2(noutputs)];
+  assign select = payload_msg[n_addr_bits+nbits-1 : nbits];
 
   // not used, assigned to the unused net below
   logic [$clog2(3):0] num_free_entries;
 
   cmn_Queue #(
-    .p_msg_nbits(nbits),
+    .p_msg_nbits(nbits + n_addr_bits),
     .p_num_msgs (3)
   ) queue_inst (
     .clk             (clk),
@@ -82,7 +83,7 @@ module Router #(
 
   generate
     for (genvar i = 0; i < noutputs; i = i + 1) begin : output_gen
-      assign ostream_msg[i] = payload_msg;
+      assign ostream_msg[i] = payload_msg[nbits-1:0];
     end
   endgenerate
 

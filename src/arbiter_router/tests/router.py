@@ -1,16 +1,17 @@
 import pytest
+import random
 from pymtl3 import *
 from src.arbiter_router.harnesses.router import Router
 from pymtl3.stdlib import stream
-import random
 from pymtl3.stdlib.test_utils import run_sim
-from tools.pymtl_extensions import mk_test_matrix
+from tools.pymtl_extensions import mk_test_matrix, mk_packed
 
 
 class TestHarness(Component):
     def construct(s, nbits, noutputs):
+        n_addr_bits = (noutputs - 1).bit_length()
         # Instantiate models
-        s.src = stream.SourceRTL(mk_bits(nbits))
+        s.src = stream.SourceRTL(mk_bits(nbits + n_addr_bits))
         s.dut = Router(nbits, noutputs)
         s.sinks = [stream.SinkRTL(mk_bits(nbits)) for _ in range(noutputs)]
 
@@ -42,7 +43,7 @@ def router_spec(nbits, noutputs):
     # Generate a random number of bits between bounds
     nbits = random.randint(nbits[0], nbits[1])
     # Random number of outputs, guarantees that it fits within nbits
-    noutputs = random.randint(noutputs[0], min(noutputs[1], (1 << nbits) - 1))
+    noutputs = random.randint(noutputs[0], noutputs[1])
 
     return nbits, noutputs
 
@@ -51,15 +52,12 @@ def router_spec(nbits, noutputs):
 def router_msg(nbits, noutputs):
     # Number of bits needed to represent the output index
     n_addr_bits = (noutputs - 1).bit_length()
-    # Number of remaining bits to put random data in
-    n_data_bits = nbits - n_addr_bits
 
     # random address and data
     addr = random.randint(0, noutputs - 1)
-    data = random.randint(0, (1 << n_data_bits) - 1)
+    data = random.randint(0, (1 << nbits) - 1)
 
-    bits = mk_bits(nbits)
-    return (bits(addr << n_data_bits | data), addr)
+    return (data, addr)
 
 
 @pytest.mark.parametrize(
@@ -84,12 +82,14 @@ def test_router(execution_num, nbits, noutputs, nmsgs, cmdline_opts):
     nbits, noutputs = router_spec(nbits, noutputs)
     model = TestHarness(nbits, noutputs)
 
+    n_addr_bits = (noutputs - 1).bit_length()
+    input_packer = mk_packed(n_addr_bits, nbits)
+
     msgs = []
     expected_outputs = [[] for _ in range(noutputs)]
     for _ in range(nmsgs):
         msg, addr = router_msg(nbits, noutputs)
-        print(msg, addr)
-        msgs.append(msg)
+        msgs.append(input_packer(addr, msg))
         expected_outputs[addr].append(msg)
 
     model.set_param(
