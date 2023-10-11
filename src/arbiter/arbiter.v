@@ -1,26 +1,26 @@
 /*
- * ==========================================================================
- * Arbitrator module
- * ==========================================================================
- * This module is used to pick which component gets to output to the val/rdy
- * SPI wrapper if multiple components can send a valid message.
- * The arbitrator puts an address header on the outgoing packet so that
- * downstream components can tell which component sent the response
- * The nbits parameter is the length of the message.
- * 
- * The num_inputs parameter is the number of input components that the
- * Arbitrator is selecting from.
- * NOTE: MUST be >= 2
- *
- * Original Author  : Dilan Lakhani
- * Date             : Dec 19, 2021
+  ==========================================================================
+  Arbitrator module
+  ==========================================================================
+  This module is used to pick which component gets to output to the val/rdy
+  SPI wrapper if multiple components can send a valid message.
+  The arbitrator puts an address header on the outgoing packet so that
+  downstream components can tell which component sent the response
+  The nbits parameter is the length of the message.
+  
+  The num_inputs parameter is the number of input components that the
+  Arbitrator is selecting from.
+  NOTE: MUST be >= 2
+
+  Original Author  : Dilan Lakhani
+  Date             : Dec 19, 2021
  */
 
 
 module Arbiter #(
-  parameter nbits = 32,
-  parameter ninputs = 3,
-  parameter addr_nbits = $clog2(ninputs)
+  parameter int nbits = 32,
+  parameter int ninputs = 3,
+  parameter byte addr_nbits = $clog2(ninputs)
 ) (
   input logic clk,
   input logic reset,
@@ -59,26 +59,24 @@ module Arbiter #(
     end
   end
 
-  always_comb begin
-    for (integer j = 0; j < ninputs; j++) begin
+  generate
+    for (genvar i = 0; i < ninputs; i++) begin : input_assign
       // Only tell one input that the arbitrator is ready for it
-      if (grants_index == j[addr_nbits-1:0]) begin
-        istream_rdy[j] = ostream_rdy;
-      end else begin
-        istream_rdy[j] = 1'b0;
-      end
+      assign istream_rdy[i] = (grants_index == i[addr_nbits-1:0]) ? ostream_rdy : 1'b0;
     end
-  end
+  endgenerate
 
-  always_comb begin
+  generate
+    // hooks up a chain of muxes to create a
     // priority encoder that gives highest priority to the LSB and lowest to MSB
-    encoder_out = 0;
-    for (integer i = 0; i < ninputs; i++) begin
-      if (istream_val[ninputs-1-i]) begin
-        encoder_out = ninputs - 1 - i[addr_nbits-1:0];
-      end
+    logic [addr_nbits-1:0] encoder_outs[ninputs+1];
+    assign encoder_outs[ninputs] = 0;
+    for (genvar i = 0; i < ninputs; i++) begin
+      // if this input is valid, then it is the highest priority. Otherwise, use the result of the next index
+      assign encoder_outs[i] = istream_val[i] ? i : encoder_outs[i+1];
     end
-  end
+    assign encoder_out = encoder_outs[0];
+  endgenerate
 
   /*
     One issue arises with having multiple Disassemblers.
