@@ -14,13 +14,13 @@
 
   Original Author  : Dilan Lakhani
   Date             : Dec 19, 2021
- */
+*/
 
 
 module Arbiter #(
   parameter int nbits = 32,
   parameter int ninputs = 3,
-  parameter byte addr_nbits = $clog2(ninputs)
+  parameter int addr_nbits = $clog2(ninputs)
 ) (
   input logic clk,
   input logic reset,
@@ -69,7 +69,11 @@ module Arbiter #(
   generate
     // hooks up a chain of muxes to create a
     // priority encoder that gives highest priority to the LSB and lowest to MSB
+    // Disable unoptflat because there isn't actually circular logic as different
+    // indices are accessed each time
+    /* verilator lint_off UNOPTFLAT */
     logic [addr_nbits-1:0] encoder_outs[ninputs+1];
+    /* verilator lint_on UNOPTFLAT */
     assign encoder_outs[ninputs] = 0;
     for (genvar i = 0; i < ninputs; i++) begin
       // if this input is valid, then it is the highest priority. Otherwise, use the result of the next index
@@ -82,11 +86,12 @@ module Arbiter #(
     One issue arises with having multiple Disassemblers.
     Since the SPI width is normally less than the size of a response,
     a PacketDisassembler component needs multiple cycles to fully send a message to the arbitrator.
-    Thus, we do not want to change which Disassembler is allowed to send to the Arbitrator 
+    Thus, we do not want to change which Disassembler is allowed to send to the Arbitrator
     in the middle of a message. Fix this by holding a trailing value of the grants_index.
-    We need to be able to check the req_val of the old grants_index to make sure that it 
+    We need to be able to check the req_val of the old grants_index to make sure that it
     is not 1, then we can allow a different Disassembler to send a message.
-   */
+  */
+
   always_ff @(posedge clk) begin
     if (reset) begin
       old_grants_index <= 0;
