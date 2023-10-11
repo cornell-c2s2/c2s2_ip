@@ -50,7 +50,8 @@ module Arbiter #(
 
 
   always_comb begin
-    // change grants_index if the last cycle's grant index is 0 (that component has finished sending its message)
+    // change grants_index if the last cycle's grant index is 0
+    // (that component has finished sending its message)
     if (!istream_val[old_grants_index]) begin
       grants_index = encoder_out;
     end else begin
@@ -61,7 +62,7 @@ module Arbiter #(
   always_comb begin
     for (integer j = 0; j < ninputs; j++) begin
       // Only tell one input that the arbitrator is ready for it
-      if (grants_index == j) begin
+      if (grants_index == j[addr_nbits-1:0]) begin
         istream_rdy[j] = ostream_rdy;
       end else begin
         istream_rdy[j] = 1'b0;
@@ -74,17 +75,20 @@ module Arbiter #(
     encoder_out = 0;
     for (integer i = 0; i < ninputs; i++) begin
       if (istream_val[ninputs-1-i]) begin
-        encoder_out = ninputs - 1 - i;
+        encoder_out = ninputs - 1 - i[addr_nbits-1:0];
       end
     end
   end
 
-  // One issue arises with having multiple Disassemblers. Since the SPI width is normally less than the size of a response,
-  // a PacketDisassembler component needs multiple cycles to fully send a message to the arbitrator. Thus, we do not want to 
-  // change which Disassembler is allowed to send to the Arbitrator in the middle of a message.
-  // Fix this by holding a trailing value of the grants_index.
-  // We need to be able to check the req_val of the old grants_index to make sure that it is not 1, then we can allow a different
-  // Disassembler to send a message
+  /*
+    One issue arises with having multiple Disassemblers.
+    Since the SPI width is normally less than the size of a response,
+    a PacketDisassembler component needs multiple cycles to fully send a message to the arbitrator.
+    Thus, we do not want to change which Disassembler is allowed to send to the Arbitrator 
+    in the middle of a message. Fix this by holding a trailing value of the grants_index.
+    We need to be able to check the req_val of the old grants_index to make sure that it 
+    is not 1, then we can allow a different Disassembler to send a message.
+   */
   always_ff @(posedge clk) begin
     if (reset) begin
       old_grants_index <= 0;
