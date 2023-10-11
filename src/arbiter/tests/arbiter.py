@@ -14,12 +14,12 @@ class TestHarness(Component):
         # Instantiate models
         s.srcs = [stream.SourceRTL(mk_bits(nbits)) for _ in range(ninputs)]
         s.dut = Arbiter(nbits, ninputs)
-        s.sink = stream.SinkRTL(mk_bits(nbits))
+        s.sink = stream.SinkRTL(mk_bits(nbits + (ninputs - 1).bit_length()))
 
         # Connect
-        s.dut.istream //= s.sink.recv
+        s.dut.ostream //= s.sink.recv
         for i in range(ninputs):
-            s.srcs[i].send //= s.dut.ostreams[i]
+            s.srcs[i].send //= s.dut.istream[i]
 
     def done(s):
         if not s.sink.done():
@@ -72,7 +72,7 @@ def sim_arbiter(nbits, ninputs, nmsgs, delay):
         # Send inputs from LSB to MSB
         for i in range(ninputs):
             if enabled[i]:
-                expected_output.append(msgs[i][msg_indices[i]])
+                expected_output.append((i << nbits) + msgs[i][msg_indices[i]])
                 msg_indices[i] += 1
                 enabled[i] = False
                 break
@@ -81,14 +81,17 @@ def sim_arbiter(nbits, ninputs, nmsgs, delay):
         if all(msg_index >= nmsgs for msg_index in msg_indices):
             break
 
+        cycle += 1
+
     return (msgs, expected_output)
 
 
 # Simple arbiter tests where inputs are sent every `delay+1` cycles
 @pytest.mark.parametrize(
-    "execution_num, nbits, ninputs, nmsgs",
+    "execution_num, nbits, ninputs, nmsgs, delay",
     [
-        (0, 8, 4, 20),
+        (0, 8, 4, 20, 0),
+        (0, 8, 4, 20, 2),
         *mk_test_matrix(
             {
                 "execution_num": list(range(1, 101)),  # Do 100 tests
@@ -109,6 +112,9 @@ def test_arbiter(execution_num, nbits, ninputs, nmsgs, delay, cmdline_opts):
     model = TestHarness(nbits, ninputs)
 
     msgs, expected_output = sim_arbiter(nbits, ninputs, nmsgs, delay)
+
+    print([[hex(i) for i in msg] for msg in msgs])
+    print([hex(i) for i in expected_output])
 
     for i in range(ninputs):
         model.set_param(

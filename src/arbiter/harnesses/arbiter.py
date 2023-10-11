@@ -10,8 +10,8 @@ class Arbiter(VerilogPlaceholder, Component):
 
     def construct(s, nbits, ninputs):
         # Interface
-        s.recv = [stream.ifcs.RecvIfcRTL(mk_bits(nbits)) for _ in range(ninputs)]
-        s.send = stream.ifcs.SendIfcRTL(mk_bits(nbits + (ninputs - 1).bit_length()))
+        s.istream = [stream.ifcs.RecvIfcRTL(mk_bits(nbits)) for _ in range(ninputs)]
+        s.ostream = stream.ifcs.SendIfcRTL(mk_bits(nbits + (ninputs - 1).bit_length()))
 
         # Name of the top level module to be imported
         s.set_metadata(VerilogPlaceholderPass.top_module, "Arbiter")
