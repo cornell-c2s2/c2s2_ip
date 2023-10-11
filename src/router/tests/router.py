@@ -39,15 +39,22 @@ def router_spec(nbits, noutputs):
     if isinstance(noutputs, int):
         noutputs = (noutputs, noutputs)
 
+    # Generate a random number of bits between bounds
     nbits = random.randint(nbits[0], nbits[1])
+    # Random number of outputs, guarantees that it fits within nbits
     noutputs = random.randint(noutputs[0], min(noutputs[1], (1 << nbits) - 1))
+
     return nbits, noutputs
 
 
 # Creates an input message to the router as well as returning the expected output index
 def router_msg(nbits, noutputs):
+    # Number of bits needed to represent the output index
     n_addr_bits = (noutputs - 1).bit_length()
+    # Number of remaining bits to put random data in
     n_data_bits = nbits - n_addr_bits
+
+    # random address and data
     addr = random.randint(0, noutputs - 1)
     data = random.randint(0, (1 << n_data_bits) - 1)
 
