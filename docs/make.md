@@ -50,8 +50,10 @@ Clears all the files in your `build` directory. Useful especially after running 
 ```
 make lint
 ```
-Checks all verilog in the repository for whether they follow the linting (code style) guidelines.
+Checks all verilog files in the repository for whether they follow the linting (code style) guidelines.
 
-This requires `svlint` to be installed and in your `PATH`.
+You can select specific IP to check using `make lint IP=<name of ip folder>`.
+
+This requires `svlint` to be installed and in your `PATH` as well as requiring `sudo apt-get install moreutils` (which should be the case for your `ecelinux` machine).
 
 **Note**: Github actions has an automated script that already runs this on push, so installing `svlint` is entirely optional. However, there is a tutorial [here](./svlint.md) on how to do so, if you want to.
