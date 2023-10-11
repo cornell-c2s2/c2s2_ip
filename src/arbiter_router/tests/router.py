@@ -1,6 +1,6 @@
 import pytest
 from pymtl3 import *
-from src.router.harnesses.router import Router
+from src.arbiter_router.harnesses.router import Router
 from pymtl3.stdlib import stream
 import random
 from pymtl3.stdlib.test_utils import run_sim
