@@ -4,13 +4,13 @@
 We use Makefile recipies and Git to help automate a lot of the functionality.
 
 All IP has an associated name, corresponding to the main directory name. To check if an IP name is valid (a.k.a. it doesn't already exist), run
-```
+```sh
 make check-ip IP=<name>
 ```
 (replacing `name` with your desired name)
 
 Once you have verified that the IP name is a valid one, you can create the IP using
-```
+```sh
 make new-ip IP=<name>
 ```
 This will create a new Git branch for the desired IP, a new directory for it, as well as a starter file. 
@@ -47,11 +47,13 @@ We still recommend running `pytest` manually if you want to use the full range o
 Clears all the files in your `build` directory. Useful especially after running `make test`, which can generate tons of files.
 
 ## `make lint`
-```
-make lint
-```
-Checks all verilog in the repository for whether they follow the linting (code style) guidelines.
+Checks all verilog files in the repository for whether they follow the linting (code style) guidelines.
 
-This requires `svlint` to be installed and in your `PATH`.
+You can select specific IP to check using 
+```sh
+make lint IP=<name of ip folder>
+```
+
+This requires `svlint` to be installed and in your `PATH` as well as requiring `sudo apt-get install moreutils` (which should be the case for your `ecelinux` machine).
 
 **Note**: Github actions has an automated script that already runs this on push, so installing `svlint` is entirely optional. However, there is a tutorial [here](./svlint.md) on how to do so, if you want to.
