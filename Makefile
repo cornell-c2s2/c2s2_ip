@@ -29,8 +29,10 @@ install:
 	@printf "${CYAN}Setting Up Virtual Environment...${RESET}\n"
 	@python3 -m venv .venv
 	@printf "${CYAN}Installing Python Dependencies...${RESET}\n"
-	@pip install -r requirements.txt
+	@$(VENV) && pip install --upgrade pip
+	@$(VENV) && pip install -r requirements.txt
 	@printf "${GREEN}Dependencies installed!${RESET}\n"
+	@printf "${YELLOW}Run ${RED}source .venv/bin/activate${YELLOW} to activate your virtual environment.${RESET}\n"
 
 --parse-name:
 	@printf "${CYAN}"
