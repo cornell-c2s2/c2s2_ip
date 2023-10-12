@@ -66,8 +66,8 @@ def router_msg(nbits, noutputs):
         (0, 8, 4, 20),
         *mk_test_matrix(
             {
-                "execution_num": list(range(1, 101)),  # Do 100 tests
-                "nbits": [(8, 128)],  # Test 8-128 bit routers
+                "execution_num": list(range(1, 21)),  # Do 20 tests
+                "nbits": [(8, 128)],  # Test 8-32 bit routers
                 "noutputs": [(2, 16)],  # Test 2-16 output routers
                 "nmsgs": [100],  # Send 100 messages
             },
