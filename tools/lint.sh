@@ -14,7 +14,7 @@ has_errors=false
  
 while IFS= read -r -d '' line; do
     echo -e "${GREEN}Checking file ${line}${RESET}"
-    svlint "${line}" --github-actions
+    svlint "${line}" --github-actions --ignore-include
 
     # Check the exit code of svlint
     if [ $? -ne 0 ]; then
