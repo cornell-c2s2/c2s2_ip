@@ -98,7 +98,7 @@ def sim_arbiter(nbits, ninputs, nmsgs, delay):
                 "nbits": [(8, 32)],  # Test 8-32 bit routers
                 "ninputs": [(2, 16)],  # Test 2-16 input routers
                 "nmsgs": [50],  # Send 50 messages
-                "delay": [0, 1, 3, 16],  # Wait this many cycles between inputs
+                "delay": [0, 1, 8],  # Wait this many cycles between inputs
             },
             slow=True,
         ),

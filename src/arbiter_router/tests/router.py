@@ -9,9 +9,8 @@ from tools.pymtl_extensions import mk_test_matrix, mk_packed
 
 class TestHarness(Component):
     def construct(s, nbits, noutputs):
-        n_addr_bits = (noutputs - 1).bit_length()
         # Instantiate models
-        s.src = stream.SourceRTL(mk_bits(nbits + n_addr_bits))
+        s.src = stream.SourceRTL(mk_bits(nbits))
         s.dut = Router(nbits, noutputs)
         s.sinks = [stream.SinkRTL(mk_bits(nbits)) for _ in range(noutputs)]
 
@@ -43,7 +42,7 @@ def router_spec(nbits, noutputs):
     # Generate a random number of bits between bounds
     nbits = random.randint(nbits[0], nbits[1])
     # Random number of outputs, guarantees that it fits within nbits
-    noutputs = random.randint(noutputs[0], noutputs[1])
+    noutputs = random.randint(noutputs[0], min(noutputs[1], (1 << nbits) - 1))
 
     return nbits, noutputs
 
@@ -52,18 +51,19 @@ def router_spec(nbits, noutputs):
 def router_msg(nbits, noutputs):
     # Number of bits needed to represent the output index
     n_addr_bits = (noutputs - 1).bit_length()
+    n_data_bits = nbits - n_addr_bits
 
     # random address and data
     addr = random.randint(0, noutputs - 1)
-    data = random.randint(0, (1 << nbits) - 1)
+    data = random.randint(0, (1 << n_data_bits) - 1)
 
-    return (data, addr)
+    return ((addr << n_data_bits) | data, addr)
 
 
 @pytest.mark.parametrize(
     "execution_num, nbits, noutputs, nmsgs",
     [
-        (0, 8, 4, 20),
+        (0, 8, 16, 20),
         *mk_test_matrix(
             {
                 "execution_num": list(range(1, 21)),  # Do 20 tests
@@ -82,14 +82,11 @@ def test_router(execution_num, nbits, noutputs, nmsgs, cmdline_opts):
     nbits, noutputs = router_spec(nbits, noutputs)
     model = TestHarness(nbits, noutputs)
 
-    n_addr_bits = (noutputs - 1).bit_length()
-    input_packer = mk_packed(n_addr_bits, nbits)
-
     msgs = []
     expected_outputs = [[] for _ in range(noutputs)]
     for _ in range(nmsgs):
         msg, addr = router_msg(nbits, noutputs)
-        msgs.append(input_packer(addr, msg))
+        msgs.append(msg)
         expected_outputs[addr].append(msg)
 
     model.set_param(

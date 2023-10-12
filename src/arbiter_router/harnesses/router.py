@@ -7,7 +7,7 @@ from pymtl3.stdlib import stream
 class Router(VerilogPlaceholder, Component):
     # Constructor
     def construct(s, nbits, noutputs):
-        s.istream = stream.ifcs.RecvIfcRTL(mk_bits(nbits + (noutputs - 1).bit_length()))
+        s.istream = stream.ifcs.RecvIfcRTL(mk_bits(nbits))
         s.ostream = [stream.ifcs.SendIfcRTL(mk_bits(nbits)) for _ in range(noutputs)]
 
         # Name of the top level module to be imported
