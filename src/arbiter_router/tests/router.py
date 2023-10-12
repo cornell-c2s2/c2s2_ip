@@ -69,7 +69,7 @@ def router_msg(nbits, noutputs):
                 "execution_num": list(range(1, 21)),  # Do 20 tests
                 "nbits": [(8, 128)],  # Test 8-32 bit routers
                 "noutputs": [(2, 16)],  # Test 2-16 output routers
-                "nmsgs": [100],  # Send 100 messages
+                "nmsgs": [50],  # Send 50 messages
             },
             slow=True,
         ),

@@ -106,7 +106,7 @@ def test_edge(n, d, a, b, cmdline_opts):
 
     run_sim(
         model,
-        cmdline_opts={"max_cycles": None, **cmdline_opts},
+        cmdline_opts,
     )
 
 
