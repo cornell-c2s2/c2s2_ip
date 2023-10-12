@@ -124,7 +124,11 @@ else
 endif
 
 lint:
-	tools/lint.sh
+ifndef IP
+	@tools/lint.sh
+else
+	@tools/lint.sh "./src/${IP}"
+endif
 
 INCLUDE = "."
 test:

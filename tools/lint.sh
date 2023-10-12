@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Directory to search in
+DIR=${1:-"./src"}
+
 RESET='\033[0m'
 GREEN='\033[1;32m'
 RED='\033[1;31m'
@@ -11,7 +14,7 @@ has_errors=false
  
 while IFS= read -r -d '' line; do
     echo -e "${GREEN}Checking file ${line}${RESET}"
-    svlint "${line}" --github-actions
+    svlint "${line}" --github-actions --ignore-include
 
     # Check the exit code of svlint
     if [ $? -ne 0 ]; then
@@ -28,7 +31,7 @@ while IFS= read -r -d '' line; do
         echo -e "${RED}Verilog compilation error(s) found in $line${RESET}"
         has_errors=true
     fi
-done < <(find "./src" -name "*.v" -not -path "./src/cmn/*" -print0)
+done < <(find $DIR -name "*.v" -not -path "./src/cmn/*" -print0)
 
 
 # Check if there were any errors
