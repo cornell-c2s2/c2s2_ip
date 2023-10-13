@@ -6,7 +6,7 @@ from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from src.arbiter_router.harnesses.arbiter import Arbiter
 from src.arbiter_router.harnesses.router import Router
-from tools.pymtl_extensions import mk_test_matrix
+from tools.pymtl_extensions import mk_test_matrix, mk_packed
 
 """
 Tests that connect an arbiter to a router and makes sure messages end up in the right place
@@ -16,12 +16,14 @@ Tests that connect an arbiter to a router and makes sure messages end up in the 
 # Creates a test harness connecting the Arbiter to the Router
 class ArbiterRouterTestHarness(Component):
     def construct(s, nbits, nblocks):
+        n_addr_bits = (nblocks - 1).bit_length()
+
         s.arbiter = Arbiter(nbits, nblocks)
-        s.router = Router(nbits, nblocks)
+        s.router = Router(nbits + n_addr_bits, nblocks)
 
         # Instantiate models
         s.srcs = [stream.SourceRTL(mk_bits(nbits)) for _ in range(nblocks)]
-        s.sinks = [stream.SinkRTL(mk_bits(nbits)) for _ in range(nblocks)]
+        s.sinks = [stream.SinkRTL(mk_bits(nbits + n_addr_bits)) for _ in range(nblocks)]
 
         # Connect arbiter to router
         s.arbiter.ostream //= s.router.istream
@@ -49,14 +51,17 @@ class ArbiterRouterTestHarness(Component):
 # Test harness hooking up the router first to the arbiter
 class RouterArbiterTestHarness(Component):
     def construct(s, nbits, nblocks):
-        s.arbiter = Arbiter(nbits, nblocks)
-        s.router = Router(nbits, nblocks)
+        n_addr_bits = (nblocks - 1).bit_length()
+        # Arbiter is larger here because the router doesn't clip addresses
+        s.arbiter = Arbiter(nbits + n_addr_bits, nblocks)
+        s.router = Router(nbits + n_addr_bits, nblocks)
 
         n_addr_bits = (nblocks - 1).bit_length()
 
         # Instantiate models
         s.src = stream.SourceRTL(mk_bits(nbits + n_addr_bits))
-        s.sink = stream.SinkRTL(mk_bits(nbits + n_addr_bits))
+        # Sink will have doubled address bits
+        s.sink = stream.SinkRTL(mk_bits(nbits + 2 * n_addr_bits))
 
         # Connect arbiter to router
         for i in range(nblocks):
@@ -95,20 +100,38 @@ def arbiter_router_msgs(nbits, nblocks, nmsgs):
         for _ in range(nblocks)
     ]
 
-    # Output should be identical to input
-    return msgs
+    # Bit packer
+    n_addr_bits = (nblocks - 1).bit_length()
+    pack_addr_data = mk_packed(n_addr_bits, nbits)
+
+    # Add addresses to expected output
+    expected_output = [
+        [pack_addr_data(i, msg) for msg in msgs[i]] for i in range(nblocks)
+    ]
+
+    return (msgs, expected_output)
 
 
 def router_arbiter_msgs(nbits, nblocks, nmsgs):
-    # Create a bunch of messages
-    msgs = [
-        (random.randint(0, nblocks - 1) << nbits)  # Random address
-        | random.randint(0, (1 << nbits) - 1)  # Random data
+    # Bit packer
+    n_addr_bits = (nblocks - 1).bit_length()
+    pack_addr_data = mk_packed(n_addr_bits, nbits)
+    # Packs two versions of the address (as it is duplicated by the arbiter)
+    pack_addr_addr_data = mk_packed(n_addr_bits, n_addr_bits, nbits)
+
+    addr_data = [
+        (random.randint(0, nblocks - 1), random.randint(0, (1 << nbits) - 1))
         for _ in range(nmsgs)
     ]
 
-    # Output should be identical to input
-    return msgs
+    # Random addresses and random data
+    msgs = [pack_addr_data(addr, data) for (addr, data) in addr_data]
+    # Add the extra address to the expected output
+    expected_output = [
+        pack_addr_addr_data(addr, addr, data) for (addr, data) in addr_data
+    ]
+
+    return msgs, expected_output
 
 
 spec_matrix = [
@@ -120,7 +143,7 @@ spec_matrix = [
             "nbits": [(8, 32)],  # Test 8-32 bit routers
             "nblocks": [(2, 16)],  # Test 2-16 input routers
             "nmsgs": [50],  # Send 50 messages
-            "delay": [0, 1, 16],  # Wait this many cycles between inputs
+            "delay": [0, 1, 8],  # Wait this many cycles between inputs
         },
         slow=True,
     ),
@@ -135,7 +158,7 @@ def test_arbiter_router(execution_num, nbits, nblocks, nmsgs, delay, cmdline_opt
     nbits, nblocks = mk_spec(nbits, nblocks)
     model = ArbiterRouterTestHarness(nbits, nblocks)
 
-    msgs = arbiter_router_msgs(nbits, nblocks, nmsgs)
+    msgs, expected_output = arbiter_router_msgs(nbits, nblocks, nmsgs)
 
     for i in range(nblocks):
         model.set_param(
@@ -147,7 +170,7 @@ def test_arbiter_router(execution_num, nbits, nblocks, nmsgs, delay, cmdline_opt
 
         model.set_param(
             f"top.sinks[{i}].construct",
-            msgs=msgs[i],
+            msgs=expected_output[i],
             initial_delay=0,
             interval_delay=delay,
         )
@@ -169,7 +192,7 @@ def test_router_arbiter(execution_num, nbits, nblocks, nmsgs, delay, cmdline_opt
     nbits, nblocks = mk_spec(nbits, nblocks)
     model = RouterArbiterTestHarness(nbits, nblocks)
 
-    msgs = router_arbiter_msgs(nbits, nblocks, nmsgs * nblocks)
+    msgs, expected_output = router_arbiter_msgs(nbits, nblocks, nmsgs * nblocks)
 
     model.set_param(
         "top.src.construct",
@@ -180,7 +203,7 @@ def test_router_arbiter(execution_num, nbits, nblocks, nmsgs, delay, cmdline_opt
 
     model.set_param(
         "top.sink.construct",
-        msgs=msgs,
+        msgs=expected_output,
         initial_delay=0,
         interval_delay=delay,
     )
