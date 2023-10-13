@@ -19,7 +19,6 @@ module cmn_Regfile_1r1w #(
   parameter c_addr_nbits = $clog2(p_num_entries)
 ) (
   input logic clk,
-  input logic reset,
 
   // Read port (combinational read)
 
@@ -142,7 +141,6 @@ module cmn_Regfile_2r1w #(
   parameter c_addr_nbits = $clog2(p_num_entries)
 ) (
   input logic clk,
-  input logic reset,
 
   // Read port 0 (combinational read)
 
@@ -205,7 +203,6 @@ module cmn_Regfile_2r2w #(
   parameter c_addr_nbits = $clog2(p_num_entries)
 ) (
   input logic clk,
-  input logic reset,
 
   // Read port 0 (combinational read)
 
@@ -286,7 +283,6 @@ endmodule
 
 module cmn_Regfile_2r1w_zero (
   input logic clk,
-  input logic reset,
 
   input  logic [ 4:0] rd_addr0,
   output logic [31:0] rd_data0,
@@ -308,9 +304,8 @@ module cmn_Regfile_2r1w_zero (
   cmn_Regfile_2r1w #(
     .p_data_nbits (32),
     .p_num_entries(32)
-  ) rfile (
+  ) r_file (
     .clk       (clk),
-    .reset     (reset),
     .read_addr0(rd_addr0),
     .read_data0(rf_read_data0),
     .read_addr1(rd_addr1),

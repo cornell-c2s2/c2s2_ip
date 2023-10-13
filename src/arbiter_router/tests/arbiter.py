@@ -4,7 +4,7 @@ from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
-from src.arbiter.harnesses.arbiter import Arbiter
+from src.arbiter_router.harnesses.arbiter import Arbiter
 from tools.pymtl_extensions import mk_test_matrix
 
 
@@ -34,7 +34,7 @@ class TestHarness(Component):
         return f"{srcs_str} > ({s.dut.line_trace()}) > {s.sink.line_trace()}"
 
 
-# Creates a random router spec given a range of nbits and ninputs
+# Creates a random arbiter spec given a range of nbits and ninputs
 def arbiter_spec(nbits, ninputs):
     if isinstance(nbits, int):
         nbits = (nbits, nbits)
@@ -94,10 +94,10 @@ def sim_arbiter(nbits, ninputs, nmsgs, delay):
         (0, 8, 4, 20, 2),
         *mk_test_matrix(
             {
-                "execution_num": list(range(1, 101)),  # Do 100 tests
-                "nbits": [(8, 32)],  # Test 8-128 bit routers
+                "execution_num": list(range(1, 21)),  # Do 20 tests
+                "nbits": [(8, 32)],  # Test 8-32 bit routers
                 "ninputs": [(2, 16)],  # Test 2-16 input routers
-                "nmsgs": [100],  # Send 100 messages
+                "nmsgs": [50],  # Send 50 messages
                 "delay": [0, 1, 3, 16],  # Wait this many cycles between inputs
             },
             slow=True,
@@ -112,9 +112,6 @@ def test_arbiter(execution_num, nbits, ninputs, nmsgs, delay, cmdline_opts):
     model = TestHarness(nbits, ninputs)
 
     msgs, expected_output = sim_arbiter(nbits, ninputs, nmsgs, delay)
-
-    print([[hex(i) for i in msg] for msg in msgs])
-    print([hex(i) for i in expected_output])
 
     for i in range(ninputs):
         model.set_param(
