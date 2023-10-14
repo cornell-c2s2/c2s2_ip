@@ -8,7 +8,111 @@
 
 module Sqrt
     #(
-        parameter BIT_WIDTH = 32
+        parameter BIT_WIDTH = 8
+    )
+    (
+        input  logic                   reset   ,
+        input  logic                   clk     ,
+
+        input  logic [BIT_WIDTH - 1:0] recv_msg,
+        input  logic                   recv_val,
+        output logic                   recv_rdy,
+
+        output logic [BIT_WIDTH - 1:0] send_msg,
+        output logic                   send_val,
+        input  logic                   send_rdy
+    );
+
+    logic [BIT_WIDTH-1:0] x;
+    logic [BIT_WIDTH-1:0] x_next;    // radicand copy
+    logic [BIT_WIDTH-1:0] q;
+    logic [BIT_WIDTH-1:0] q_next;    // intermediate root (quotient)
+    logic [BIT_WIDTH+1:0] ac;
+    logic [BIT_WIDTH+1:0] ac_next;  // accumulator (2 bits wider)
+    logic [BIT_WIDTH+1:0] test_res;     // sign test result (2 bits wider)
+
+    always_comb begin
+        test_res = ac - {q, 2'b01};
+        if (test_res[BIT_WIDTH+1] == 0) begin  // test_res >=0? (check MSB)
+            {ac_next, x_next} = {test_res[BIT_WIDTH-1:0], x, 2'b0};
+            q_next = {q[BIT_WIDTH-2:0], 1'b1};
+        end else begin
+            {ac_next, x_next} = {ac[BIT_WIDTH-1:0], x, 2'b0};
+            q_next = q << 1;
+        end
+    end
+
+    localparam ITER = BIT_WIDTH >> 1;   // iterations are half radicand width
+    logic [$clog2(ITER)-1:0] i;     // iteration counter
+
+    logic [1:0] currentState;
+    logic [1:0] nextState;
+
+    parameter [1:0] IDLE = 2'd0,
+                    CALC = 2'd1,
+                    DONE = 2'd3;
+
+    // Next State Comb Logic
+    always_comb begin
+        case (currentState)
+        IDLE: if (recv_val && recv_rdy)     nextState = CALC; 
+              else                          nextState = IDLE;
+        CALC: if (i == ITER-1)              nextState = DONE;
+              else                          nextState = CALC; 
+        DONE: if (send_rdy && send_val)     nextState = IDLE; 
+              else                          nextState = DONE;
+        default: nextState = IDLE;
+        endcase
+    end
+
+    // Output Comb Logic
+    always_comb begin
+        case (currentState) 
+        IDLE:    begin recv_rdy = 1; send_val = 0; end
+        CALC:    begin recv_rdy = 0; send_val = 0; end
+        DONE:    begin recv_rdy = 0; send_val = 1; end
+        default: begin recv_rdy = 'x; send_val = 'x; end
+        endcase 
+    end
+
+    // State FFs
+    always_ff @(posedge clk) begin
+        if (reset) begin
+        currentState <= IDLE;
+        end
+        else begin
+        currentState <= nextState;
+        if (currentState == IDLE) begin
+            i <= 0;
+            q <= 0;
+            {ac, x} <= {{BIT_WIDTH{1'b0}}, recv_msg, 2'b0};
+        end
+        if (currentState == CALC) begin 
+            i <= i + 1;
+            q <= q_next;
+            x <= x_next;
+            ac <= ac_next;
+        end
+        // if (currentState == DONE) begin 
+        //     send_msg <= q;
+        // end
+        end
+    end
+
+    always_comb begin
+        if (currentState == DONE) begin 
+            send_msg = q;
+        end
+    end
+    
+endmodule
+
+
+/*
+
+module Sqrt
+    #(
+        parameter BIT_WIDTH = 8
     )
     (
         input  logic                   reset   ,
@@ -51,7 +155,7 @@ endmodule
 
 module control_module 
     #(
-        parameter BIT_WIDTH = 32
+        parameter BIT_WIDTH = 8
     )
     (
     input  logic       clk,
@@ -147,7 +251,7 @@ endmodule
 
 module datapath_module 
     #(
-        parameter BIT_WIDTH = 32
+        parameter BIT_WIDTH = 8
     )
     (
     input  logic                 clk,
@@ -279,5 +383,6 @@ module datapath_module
     assign send_msg = out_result_reg;
 
 endmodule
+*/
 
 `endif
