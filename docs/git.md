@@ -83,7 +83,7 @@ git branch -a
 ```
 lists all branches including remote branches (branches on the github repository). These will usually be prefixed by `origin/branch_name`.
 
-### Switching to branches
+### Switching between branches
 Running
 ```sh
 git checkout <branch_name>
@@ -95,6 +95,8 @@ You can create a branch using
 ```sh
 git branch <branch_name>
 ```
+and switch to it with `git switch`.
+
 *NOTE: Often times you will want to run `git checkout main` and `git pull` before creating a branch to make sure your work branches off from the main branch and is updated.*
 
 Then, the next time you run `git push` you will instead need to run
@@ -102,3 +104,41 @@ Then, the next time you run `git push` you will instead need to run
 git push -u origin <branch_name>
 ```
 in order to hook up a remote branch to track your local branch changes.
+### Merging Branches
+Merging branches is how you merge the changes from one branch into another locally. This will most often be used to merge the changes from the main branch into your current branch to add new changes into your branch.
+
+Running
+```sh
+git merge main
+```
+while in your branch will merge the changes from `main` into your branch (similarly, `git merge branch` will merge the changes from `branch` into your branch).
+
+Occasionally, if someone else has edited the same part of a file that you have before you try to merge changes, there will be a merge conflict. Github will tell you which files have conflicts and you will be able to choose how to resolve them to make sure both members' changes are not lost.
+
+## Pull Requests
+Pull Requests are a nice way to track changes to your local branch and are the only way members are allowed to merge code into the main branch. When you `git push` your changes from your local branch, we recommend always also creating a pull request from Github.To do so, navigate to the `Pull Requests` tab in the repository and click `New Pull Request`.
+![Pull Request Page](images/git-3.png)
+Next, you will see a page that looks as follows:
+![New PR](images/git-4.png)
+Click the `compare: main` dropdown and select the branch you want to compare.
+![Comparing Changes](images/git-5.png)
+Finally, click `Create Pull Request` and type in a title that describes what features/changes you are implementing, and a quick description with some details on the specifics.
+
+### Merging Pull Requests
+Before a pull request can be merged, we require that some automatic tests pass and that your code has been reviewed. Tests are run automatically on every push and check code formatting and also run `pytest`. Your code can be reviewed by another member, and just ensures that the code is readable and has been looked over before it is merged to main.
+
+### Reviewing Pull Requests
+In order to review a pull request, go to the `Files Changed` tab in the pull request. This will show added (green) and removed (red) lines in each file changed by the pull request.
+![Pull Request Files Changed](images/git-6.png)
+
+Leave comments on a pull request by clicking the `+` symbol at a line, and then typing in a comment and selecting `Start a review` or  `Add single comment`.
+![PR Comment](images/git-7.png)
+
+We recommend leaving comments whenever you are confused by some changes or have a critique. Here are some examples:
+* Code is confusingly documented or not documented.
+* You think there is a bug in an implementation.
+* You have questions about some code.
+* Anything that makes you feel a need to leave a comment!
+
+When you are done leaving comments, go to the top of the page and select `Review Changes` in the top right. Leave a comment with a summary of your review and select `Approve` or `Request Changes` depending on if you want the author to change something!
+![PR Approval](images/git-8.png)
