@@ -22,7 +22,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--build-dir",
         action="store",
-        default="build",
+        default=None,
         help="Build directory to generate files in.",
     )
 
@@ -37,6 +37,12 @@ def fix_randseed():
 @pytest.fixture(autouse=True)
 def change_test_dir(request, monkeypatch):
     buildfolder = request.config.getoption("--build-dir")
+    if buildfolder is None:
+        # If no buildfolder is specified, use `build`
+        buildfolder = "build"
+    else:
+        # If a buildfolder is specified, prefix it with `build_`
+        buildfolder = f"build_{buildfolder}"
     worker_id = os.environ.get("PYTEST_XDIST_WORKER")
     if worker_id is not None:
         # If we are running multiple threads, give each one a new buildfolder
