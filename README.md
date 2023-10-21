@@ -1,5 +1,5 @@
-# c2s2_ip
-C2S2_IP is a repository for keeping track of all of C2S2's IP
+# `c2s2_ip`
+C2S2_IP is a repository for keeping track of all of C2S2's IP.
 
 ## Getting Started
 
