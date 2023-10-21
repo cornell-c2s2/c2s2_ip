@@ -25,12 +25,14 @@ install:
 	@git checkout main
 	@git pull
 	@printf "${CYAN}Installing VSCode Extensions...${RESET}\n"
-	@sed -n 's/^/--install-extension /p' .workspace-extensions | xargs code
+	@cat .workspace-extensions | xargs code
 	@printf "${CYAN}Setting Up Virtual Environment...${RESET}\n"
 	@python3 -m venv .venv
 	@printf "${CYAN}Installing Python Dependencies...${RESET}\n"
-	@pip install -r requirements.txt
+	@$(VENV) && pip install --upgrade pip
+	@$(VENV) && pip install -r requirements.txt
 	@printf "${GREEN}Dependencies installed!${RESET}\n"
+	@printf "${YELLOW}Run ${RED}source .venv/bin/activate${YELLOW} to activate your virtual environment.${RESET}\n"
 
 --parse-name:
 	@printf "${CYAN}"
@@ -122,7 +124,11 @@ else
 endif
 
 lint:
-	tools/lint.sh
+ifndef IP
+	@tools/lint.sh
+else
+	@tools/lint.sh "./src/${IP}"
+endif
 
 INCLUDE = "."
 test:

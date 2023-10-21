@@ -56,3 +56,22 @@ def mk_test_case_table(test_cases):
         )
 
     return params
+
+
+# Creates a matrix of transactions
+def mk_test_matrix(values, slow=False):
+    keys = []
+    params = [[]]
+    for k, v in values.items():
+        keys.append(k)
+        params = [[*p, t] for t in v for p in params]
+
+    params = [
+        pytest.param(
+            *p,
+            id=",".join([f"{keys[i]}={p[i]}" for i in range(len(keys))]),
+            marks=pytest.mark.slow if slow else [],
+        )
+        for p in params
+    ]
+    return params
