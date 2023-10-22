@@ -50,9 +50,11 @@ def arbiter_spec(nbits, ninputs):
 
 
 def sim_arbiter(nbits, ninputs, nmsgs, delay):
+    mk_nbits = mk_bits(nbits)
+    mk_n_addr_bits = mk_bits((ninputs - 1).bit_length())
     # Create a bunch of messages
     msgs = [
-        [random.randint(0, (1 << nbits) - 1) for _ in range(nmsgs)]
+        [mk_nbits(random.randint(0, (1 << nbits) - 1)) for _ in range(nmsgs)]
         for _ in range(ninputs)
     ]
 
@@ -72,7 +74,9 @@ def sim_arbiter(nbits, ninputs, nmsgs, delay):
         # Send inputs from LSB to MSB
         for i in range(ninputs):
             if enabled[i]:
-                expected_output.append((i << nbits) + msgs[i][msg_indices[i]])
+                expected_output.append(
+                    concat(mk_n_addr_bits(i), msgs[i][msg_indices[i]])
+                )
                 msg_indices[i] += 1
                 enabled[i] = False
                 break
