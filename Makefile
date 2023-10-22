@@ -20,12 +20,17 @@ WHITE  =\033[0;37m
 
 VENV:=. .venv/bin/activate
 
-install:
+# Pulls main branch
+--pull:
 	@printf "${CYAN}Getting Latest Updates...${RESET}\n"
 	@git checkout main
 	@git pull
+
+vscode: 
 	@printf "${CYAN}Installing VSCode Extensions...${RESET}\n"
 	@cat .workspace-extensions | xargs code
+
+.venv:
 	@printf "${CYAN}Setting Up Virtual Environment...${RESET}\n"
 	@python3 -m venv .venv
 	@printf "${CYAN}Installing Python Dependencies...${RESET}\n"
@@ -33,6 +38,9 @@ install:
 	@$(VENV) && pip install -r requirements.txt
 	@printf "${GREEN}Dependencies installed!${RESET}\n"
 	@printf "${YELLOW}Run ${RED}source .venv/bin/activate${YELLOW} to activate your virtual environment.${RESET}\n"
+
+
+install: --pull code .venv
 
 --parse-name:
 	@printf "${CYAN}"
@@ -56,7 +64,7 @@ clean:
 IP_NAME_PARSED = $(shell cat build/ip_name.txt)
 
 # Recipe to check whether an IP already exists
-check-ip: --parse-name
+check-ip: --pull --parse-name
 	@printf "${CYAN}"
 	@printf "Checking for IP already named %s...\n" ${IP_NAME_PARSED}
 	@if [ -d "src/${IP_NAME_PARSED}" ]; then \
@@ -106,8 +114,6 @@ else
 	@printf "Creating new IP branch...\n"
 	
 	@printf "${RESET}"
-	@git checkout main
-	@git pull
 	@git checkout -b ${IP_NAME_PARSED}
 
 	@printf "${CYAN}"
