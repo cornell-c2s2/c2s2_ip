@@ -201,11 +201,11 @@ module control_module #(
   always_comb begin
     case (currentState)
       IDLE:    if (recv_val && recv_rdy) nextState = CALC;
- else nextState = IDLE;
+               else nextState = IDLE;
       CALC:    if (i == ITER[$clog2(ITER):0] - 1) nextState = DONE;
- else nextState = CALC;
+               else nextState = CALC;
       DONE:    if (send_rdy && send_val) nextState = IDLE;
- else nextState = DONE;
+               else nextState = DONE;
       default: nextState = IDLE;
     endcase
   end
@@ -272,15 +272,11 @@ module control_module #(
 
   // Counter logic
   always_ff @(posedge clk) begin
-    if (reset) begin
-      i <= 0;
-    end else if (currentState == IDLE) begin
-      i <= 0;
-    end else if (currentState == CALC) begin
-      i <= i + 1;
-    end else begin
-      i <= i;
-    end
+    case (currentState)
+      IDLE: i <= 0;
+      CALC: i <= i + 1;
+      default: i <= i;
+    endcase
   end
 
 endmodule

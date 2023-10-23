@@ -3,6 +3,7 @@
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.passes.backends.verilog import *
+from os import path
 
 
 class SqrtTestHarness(VerilogPlaceholder, Component):
@@ -15,9 +16,9 @@ class SqrtTestHarness(VerilogPlaceholder, Component):
         s.send = stream.ifcs.SendIfcRTL(mk_bits(BIT_WIDTH))
 
         # Name of the top level module to be imported
-        s.set_metadata(VerilogPlaceholderPass.top_module, "SqrtHarness")
+        s.set_metadata(VerilogPlaceholderPass.top_module, "Sqrt")
         # Source file path
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            "../src/sqrt/harnesses/sqrt.v",
+            path.join(path.dirname(__file__), "../sqrt.v"),
         )
