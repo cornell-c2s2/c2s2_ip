@@ -140,6 +140,9 @@ module FixedPointMultiButterfly #(
   // update output storage regs
   always_ff @(posedge clk) begin
     state <= next_state;
+    // $display("state: %d", state);
+    // $display("comp_state: %d", comp_state);
+    // $display("next_comp_state: %d\n", next_comp_state);
     comp_state <= next_comp_state;
     if(state == COMP) begin
       s_cr[comp_state] <= s_ar[comp_state] + m_cr;
@@ -152,7 +155,7 @@ module FixedPointMultiButterfly #(
   // state transition logic
   always_comb begin
     next_state = state;
-    next_comp_state = comp_state;
+    next_comp_state = 0;
 
     if(reset) begin
       next_state = IDLE;

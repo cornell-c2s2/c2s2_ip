@@ -183,15 +183,15 @@ def test(test_params, cmdline_opts):
     th.set_param(
         "top.src.construct",
         msgs=separate_transactions(msgs, test_params.N_SAMPLES, True),
-        initial_delay=test_params.src_delay,
-        interval_delay=test_params.src_delay,
+        initial_delay=0,
+        interval_delay=0,
     )
 
     th.set_param(
         "top.sink.construct",
         msgs=separate_transactions(msgs, test_params.N_SAMPLES, False),
-        initial_delay=test_params.sink_delay,
-        interval_delay=test_params.sink_delay,
+        initial_delay=0,
+        interval_delay=0,
     )
 
     run_sim(

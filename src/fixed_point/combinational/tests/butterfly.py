@@ -65,15 +65,18 @@ class Harness(Component):
     def construct(s, mult, n, b):
         s.mult = mult
 
-        s.src = stream.SourceRTL(mk_bits(6 * n * b))
+        s.src = stream.SourceRTL(mk_bits(6 * n))
 
-        s.sink = stream.SinkRTL(mk_bits(4 * n * b))
+        s.sink = stream.SinkRTL(mk_bits(4 * n))
 
         s.src.send //= s.mult.recv
         s.mult.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
+
+    def line_trace(s):
+        return s.src.line_trace() + " > " + s.mult.line_trace() + " > " + s.sink.line_trace()
 
 
 # Initialize a simulatable model
@@ -107,21 +110,71 @@ def test_edge(n, d, a, b, w):
     a = CFixed(a, n, d)
     b = CFixed(b, n, d)
     w = CFixed(w, n, d)
+    a2 = CFixed((0.5,0.5), n, d)
+    b2 = CFixed((3,3), n, d)
+    w2 = CFixed((1,0), n, d)
+    a3 = CFixed((0.1,0.7), n, d)
+    b3 = CFixed((2,3), n, d)
+    w3 = CFixed((1,1), n, d)
+    a4 = CFixed((0.7,0.5), n, d)
+    b4 = CFixed((3,2), n, d)
+    w4 = CFixed((2,1), n, d)
 
-    model = create_model(n, d, b=1)
+    a5 = CFixed((1,0.3), n, d)
+    b5 = CFixed((2,0.5), n, d)
+    w5 = CFixed((3,1), n, d)
+    a6 = CFixed((7,0.3), n, d)
+    b6 = CFixed((0.7,0.5), n, d)
+    w6 = CFixed((1,4), n, d)
+    a7 = CFixed((9,0.3), n, d)
+    b7 = CFixed((0.7,0.2), n, d)
+    w7 = CFixed((5,1), n, d)
+    a8 = CFixed((0.5,0.3), n, d)
+    b8 = CFixed((0.7,0.5), n, d)
+    w8 = CFixed((1,6), n, d)
+
+    model = create_model(n, d, b=2)
+
+    msg = []
+    msg.append(mk_msg(n, a.get(), b.get(), w.get()))
+    msg.append(mk_msg(n, a2.get(), b2.get(), w2.get()))
+    msg.append(mk_msg(n, a3.get(), b3.get(), w3.get()))
+    msg.append(mk_msg(n, a4.get(), b4.get(), w4.get()))
+    msg.append(mk_msg(n, a5.get(), b5.get(), w5.get()))
+    msg.append(mk_msg(n, a6.get(), b6.get(), w6.get()))
+    msg.append(mk_msg(n, a7.get(), b7.get(), w7.get()))
+    msg.append(mk_msg(n, a8.get(), b8.get(), w8.get()))
 
     model.set_param(
         "top.src.construct",
-        msgs=[mk_msg(n, a.get(), b.get(), w.get())],
+        msgs=msg,
         initial_delay=0,
         interval_delay=0,
     )
 
-    (c, d) = butterfly(n, d, a, b, w)
+    (c1, d1) = butterfly(n, d, a, b, w)
+    (c2, d2) = butterfly(n, d, a2, b2, w2)
+    (c3, d3) = butterfly(n, d, a3, b3, w3)
+    (c4, d4) = butterfly(n, d, a4, b4, w4)
+    (c5, d5) = butterfly(n, d, a5, b5, w5)
+    (c6, d6) = butterfly(n, d, a6, b6, w6)
+    (c7, d7) = butterfly(n, d, a7, b7, w7)
+    (c8, d8) = butterfly(n, d, a8, b8, w8)
+
+
+    ret = []
+    ret.append(mk_ret(n, c1.get(), d1.get()))
+    ret.append(mk_ret(n, c2.get(), d2.get()))
+    ret.append(mk_ret(n, c3.get(), d3.get()))
+    ret.append(mk_ret(n, c4.get(), d4.get()))
+    ret.append(mk_ret(n, c5.get(), d5.get()))
+    ret.append(mk_ret(n, c6.get(), d6.get()))
+    ret.append(mk_ret(n, c7.get(), d7.get()))
+    ret.append(mk_ret(n, c8.get(), d8.get()))
 
     model.set_param(
         "top.sink.construct",
-        msgs=[mk_ret(n, c.get(), d.get())],
+        msgs=ret,
         initial_delay=0,
         interval_delay=0,
     )
@@ -141,7 +194,7 @@ def test_edge(n, d, a, b, w):
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d, m",
     # Runs tests on smaller number sizes
-    mk_params(50, [1, 50], (2, 8), (0, 8), slow=True) +
+    mk_params(50, [8, 40], (2, 8), (0, 8), slow=True) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
     mk_params(20, [1, 100], (16, 64), (0, 64), slow=True) +
     # Extensively tests numbers with certain important bit sizes.
@@ -175,7 +228,7 @@ def test_random(
     ]
     solns = [butterfly(n, d, i[0], i[1], i[2]) for i in dat]
 
-    model = create_model(n, d)
+    model = create_model(n, d, b=1)
 
     dat = [mk_msg(n, i[0].get(), i[1].get(), i[2].get()) for i in dat]
 

@@ -8,8 +8,8 @@ class HarnessVRTL(VerilogPlaceholder, Component):
 
     def construct(s, n=32, d=16, mult=1, b=4):
         # Interface
-        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(6 * n * b))
-        s.send = stream.ifcs.SendIfcRTL(mk_bits(4 * n * b))
+        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(6 * n))
+        s.send = stream.ifcs.SendIfcRTL(mk_bits(4 * n))
 
         # Source file path
         # The ../ is necessary here because pytest is run from the build directory
