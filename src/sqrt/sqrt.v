@@ -7,7 +7,7 @@
 // sqrt in Verilog
 
 module Sqrt #(
-  parameter BIT_WIDTH = 8
+  parameter int BIT_WIDTH = 8
 ) (
   input logic reset,
   input logic clk,
@@ -41,7 +41,7 @@ endmodule
 // Datapath Module
 //========================================================================
 module datapath_module #(
-  parameter BIT_WIDTH = 8
+  parameter int BIT_WIDTH = 8
 ) (
   input logic clk,
 
@@ -170,7 +170,7 @@ endmodule
 // Control Module
 //========================================================================
 module control_module #(
-  parameter BIT_WIDTH = 8
+  parameter int BIT_WIDTH = 8
 ) (
   input logic clk,
   input logic reset,
@@ -189,23 +189,29 @@ module control_module #(
   output logic send_mux_sel
 );
 
-  localparam ITER = BIT_WIDTH >> 1;  // iterations are half radicand width
+  localparam int ITER = BIT_WIDTH >> 1;  // iterations are half radicand width
   logic [$clog2(ITER)-1:0] i;     // iteration counter
 
   logic [1:0] currentState;
   logic [1:0] nextState;
 
-  parameter [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd3;
+  logic [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd3;
 
   // Next State Comb Logic
   always_comb begin
     case (currentState)
-      IDLE:    if (recv_val && recv_rdy) nextState = CALC;
- else nextState = IDLE;
-      CALC:    if (i == ITER[$clog2(ITER)-1:0] - 1) nextState = DONE;
- else nextState = CALC;
-      DONE:    if (send_rdy && send_val) nextState = IDLE;
- else nextState = DONE;
+      IDLE: begin
+        if (recv_val && recv_rdy) nextState = CALC;
+        else nextState = IDLE;
+      end
+      CALC: begin
+        if (i == ITER[$clog2(ITER)-1:0] - 1) nextState = DONE;
+        else nextState = CALC;
+      end
+      DONE: begin
+        if (send_rdy && send_val) nextState = IDLE;
+        else nextState = DONE;
+      end
       default: nextState = IDLE;
     endcase
   end
@@ -267,8 +273,11 @@ module control_module #(
       currentState <= IDLE;
     end else begin
       currentState <= nextState;
-      if (currentState == IDLE) i <= 0;
-      if (currentState == CALC) i <= i + 1;
+      case (currentState)
+        IDLE: i <= 0;
+        CALC: i <= i + 1;
+        default: i <= i;
+      endcase
     end
   end
 
