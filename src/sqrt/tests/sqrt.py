@@ -10,13 +10,19 @@ from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
 from src.sqrt.harnesses.sqrt import SqrtTestHarness
 
+
 # ----------------------------------------------------------------------
 # Helper Functions
 # ----------------------------------------------------------------------
-def isPerfectSquare(n): return (n == round(math.sqrt(n)) ** 2)
+def isPerfectSquare(n):
+    return n == round(math.sqrt(n)) ** 2
+
+
 def lastPerfectSquare(n):
-    while(not isPerfectSquare(n)):n = n - 1
+    while not isPerfectSquare(n):
+        n = n - 1
     return round(math.sqrt(n))
+
 
 # -------------------------------------------------------------------------
 # TestHarness
@@ -39,38 +45,39 @@ class TestHarness(Component):
     def done(s):
         return s.src.done() and s.sink.done()
 
+
 # ----------------------------------------------------------------------
 # Test Case Table
 # ----------------------------------------------------------------------
 def perfect_squares():
     RANGE = 255
-    i, list  = 0, []
-    while(i <= RANGE):
-        if(isPerfectSquare(i)):
+    i, list = 0, []
+    while i <= RANGE:
+        if isPerfectSquare(i):
             list.append(i)
             list.append(int(math.sqrt(i)))
         i = i + 1
-    print(list)
     return list
+
 
 def non_perfect_squares():
     RANGE = 255
-    i, list  = 0, []
-    while(i <= RANGE):
-        if(not isPerfectSquare(i)):
+    i, list = 0, []
+    while i <= RANGE:
+        if not isPerfectSquare(i):
             list.append(i)
             list.append(lastPerfectSquare(i))
         i = i + 1
-    print(list)
     return list
-    
 
 
 test_case_table = mk_test_case_table(
     [
-        ("msgs                                          src_delay sink_delay BIT_WIDTH "),
-        ["perfect_squares", perfect_squares,                4,        4,         8      ],
-        ["non_perfect_squares", non_perfect_squares,        4,        4,         8      ],
+        (
+            "msgs                                          src_delay sink_delay BIT_WIDTH "
+        ),
+        ["perfect_squares", perfect_squares, 4, 4, 8],
+        ["non_perfect_squares", non_perfect_squares, 4, 4, 8],
     ]
 )
 

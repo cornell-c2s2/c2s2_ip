@@ -2,7 +2,7 @@
 
 module SqrtHarness
     #(
-        parameter BIT_WIDTH = 8
+        parameter int BIT_WIDTH = 8
     )
     (
         input  logic                   reset   ,
