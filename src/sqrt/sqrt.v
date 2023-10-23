@@ -44,7 +44,6 @@ module datapath_module #(
   parameter BIT_WIDTH = 8
 ) (
   input logic clk,
-  input logic reset,
 
   input logic [BIT_WIDTH-1:0] recv_msg,
 
@@ -203,7 +202,7 @@ module control_module #(
     case (currentState)
       IDLE:    if (recv_val && recv_rdy) nextState = CALC;
  else nextState = IDLE;
-      CALC:    if (i == ITER - 1) nextState = DONE;
+      CALC:    if (i == ITER[$clog2(ITER)-1:0] - 1) nextState = DONE;
  else nextState = CALC;
       DONE:    if (send_rdy && send_val) nextState = IDLE;
  else nextState = DONE;
