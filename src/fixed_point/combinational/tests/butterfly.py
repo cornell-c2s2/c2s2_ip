@@ -22,19 +22,17 @@ def butterfly(n, d, a, b, w):
 def mk_msg(n, a, b, w):
     return mk_packed(n)(*a, *b, *w)
 
-
 # Merge outputs into a single bus
 def mk_ret(n, c, d):
     return mk_packed(n)(*c, *d)
-
 
 # Create test parametrization information
 # execution_number: number of times to run the test
 # sequence_lengths: numbers of inputs to stream through the block
 # n: bounds on number of bits in the fixed point number
 # d: bounds on number of decimal bits in the fixed point number
-# m: optimization parameter
-def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
+# bin1: the butterfly parameter (b in 1 butterfly)
+def mk_params(execution_number, sequence_lengths, n, d, bin1, slow=False):
     if isinstance(n, int):
         n = (n, n)
     if isinstance(d, int):
@@ -42,7 +40,7 @@ def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
 
     res = []
 
-    for k in m:
+    for k in bin1:
         for j in range(execution_number):
             for i in sequence_lengths:
                 res.append(
@@ -51,9 +49,9 @@ def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
                         i,  # number of inputs to stream
                         n,  # `n` bounds
                         d,  # `d` bounds
-                        k,  # optimization parameter
+                        k,  # k in one butterfly
                         id=f"{i} ({n[0]}-{n[1]})-bit, ({d[0]}-{d[1]})-decimal-bit numbers"
-                        + (f", {k}-optimized " if k != 0 else ""),
+                        + (f", {k}in1 butterfly "),
                         marks=pytest.mark.slow if slow else [],
                     )
                 )
@@ -62,12 +60,12 @@ def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
 
 # Test harness for streaming data
 class Harness(Component):
-    def construct(s, mult, n, b):
+    def construct(s, mult, n, b = 1):
         s.mult = mult
 
-        s.src = stream.SourceRTL(mk_bits(6 * n))
+        s.src = stream.SourceRTL(mk_bits(6 * n * b))
 
-        s.sink = stream.SinkRTL(mk_bits(4 * n))
+        s.sink = stream.SinkRTL(mk_bits(4 * n * b))
 
         s.src.send //= s.mult.recv
         s.mult.send //= s.sink.recv
@@ -80,8 +78,8 @@ class Harness(Component):
 
 
 # Initialize a simulatable model
-def create_model(n, d, mult=0, b = 4):
-    model = HarnessVRTL(n, d, mult, b)
+def create_model(n, d, b):
+    model = HarnessVRTL(n, d,  b)
 
     return Harness(model, n, b)
 
@@ -94,7 +92,6 @@ def rand_cfixed(n, d):
         d,
         raw=True,
     )
-
 
 @pytest.mark.parametrize(
     "n, d, a, b, w,",
@@ -110,40 +107,11 @@ def test_edge(n, d, a, b, w):
     a = CFixed(a, n, d)
     b = CFixed(b, n, d)
     w = CFixed(w, n, d)
-    a2 = CFixed((0.5,0.5), n, d)
-    b2 = CFixed((3,3), n, d)
-    w2 = CFixed((1,0), n, d)
-    a3 = CFixed((0.1,0.7), n, d)
-    b3 = CFixed((2,3), n, d)
-    w3 = CFixed((1,1), n, d)
-    a4 = CFixed((0.7,0.5), n, d)
-    b4 = CFixed((3,2), n, d)
-    w4 = CFixed((2,1), n, d)
 
-    a5 = CFixed((1,0.3), n, d)
-    b5 = CFixed((2,0.5), n, d)
-    w5 = CFixed((3,1), n, d)
-    a6 = CFixed((7,0.3), n, d)
-    b6 = CFixed((0.7,0.5), n, d)
-    w6 = CFixed((1,4), n, d)
-    a7 = CFixed((9,0.3), n, d)
-    b7 = CFixed((0.7,0.2), n, d)
-    w7 = CFixed((5,1), n, d)
-    a8 = CFixed((0.5,0.3), n, d)
-    b8 = CFixed((0.7,0.5), n, d)
-    w8 = CFixed((1,6), n, d)
-
-    model = create_model(n, d, b=2)
+    model = create_model(n, d, b=1)
 
     msg = []
     msg.append(mk_msg(n, a.get(), b.get(), w.get()))
-    msg.append(mk_msg(n, a2.get(), b2.get(), w2.get()))
-    msg.append(mk_msg(n, a3.get(), b3.get(), w3.get()))
-    msg.append(mk_msg(n, a4.get(), b4.get(), w4.get()))
-    msg.append(mk_msg(n, a5.get(), b5.get(), w5.get()))
-    msg.append(mk_msg(n, a6.get(), b6.get(), w6.get()))
-    msg.append(mk_msg(n, a7.get(), b7.get(), w7.get()))
-    msg.append(mk_msg(n, a8.get(), b8.get(), w8.get()))
 
     model.set_param(
         "top.src.construct",
@@ -153,24 +121,9 @@ def test_edge(n, d, a, b, w):
     )
 
     (c1, d1) = butterfly(n, d, a, b, w)
-    (c2, d2) = butterfly(n, d, a2, b2, w2)
-    (c3, d3) = butterfly(n, d, a3, b3, w3)
-    (c4, d4) = butterfly(n, d, a4, b4, w4)
-    (c5, d5) = butterfly(n, d, a5, b5, w5)
-    (c6, d6) = butterfly(n, d, a6, b6, w6)
-    (c7, d7) = butterfly(n, d, a7, b7, w7)
-    (c8, d8) = butterfly(n, d, a8, b8, w8)
-
 
     ret = []
     ret.append(mk_ret(n, c1.get(), d1.get()))
-    ret.append(mk_ret(n, c2.get(), d2.get()))
-    ret.append(mk_ret(n, c3.get(), d3.get()))
-    ret.append(mk_ret(n, c4.get(), d4.get()))
-    ret.append(mk_ret(n, c5.get(), d5.get()))
-    ret.append(mk_ret(n, c6.get(), d6.get()))
-    ret.append(mk_ret(n, c7.get(), d7.get()))
-    ret.append(mk_ret(n, c8.get(), d8.get()))
 
     model.set_param(
         "top.sink.construct",
@@ -190,19 +143,24 @@ def test_edge(n, d, a, b, w):
     # print("%s * %s = %s, got %s" % (a.bin(dot=True), b.bin(dot=True), c.bin(dot=True), out.bin(dot=True)))
     # assert c.bin() == out.bin()
 
+def concat_Bits(list, n):
+    res = list[0]
+    for i in range(1, len(list)):
+        res = concat(res, list[i])
+    return res
 
 @pytest.mark.parametrize(
-    "execution_number, sequence_length, n, d, m",
+    "execution_number, sequence_length, n, d, bin1",
     # Runs tests on smaller number sizes
-    mk_params(50, [8, 40], (2, 8), (0, 8), slow=True) +
+    mk_params(50, [1, 50], (2, 8), (0,8), bin1=[1,2,4,8], slow=True) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 100], (16, 64), (0, 64), slow=True) +
+    mk_params(20, [1, 100], (16, 64), (0,64), bin1=[1,2,4,8], slow=True) +
     # Extensively tests numbers with certain important bit sizes.
     sum(
         [
             [
-                *mk_params(1, [20], n, d, slow=False),
-                *mk_params(1, [1000], n, d, slow=True),
+                *mk_params(1, [20], n, d, [1,2,4,8,16,32], slow=False),
+                *mk_params(1, [1000], n, d, [1,2,4,8,16,32], slow=True),
             ]
             for (n, d) in [
                 (8, 4),
@@ -216,27 +174,34 @@ def test_edge(n, d, a, b, w):
     ),
 )
 def test_random(
-    execution_number, sequence_length, n, d, m
+    execution_number, sequence_length, n, d, bin1
 ):  # test individual and sequential multiplications to assure stream system works
     random.seed(random.random() + execution_number)
     n, d = rand_fxp_spec(n, d)
-    assert m == 0
+    
+    dat = []
+    solns = []
+    for i in range(sequence_length):   
+        input = []
+        output = []
+        for j in range(bin1):
+            a = rand_cfixed(n, d)
+            b = rand_cfixed(n, d)
+            w = rand_cfixed(n, d)
+            input.append(mk_msg(n, a.get(), b.get(), w.get()))
+            c, dd = butterfly(n, d, a, b, w)
+            output.append(mk_ret(n, c.get(), dd.get()))
 
-    dat = [
-        (rand_cfixed(n, d), rand_cfixed(n, d), rand_cfixed(n, d))
-        for i in range(sequence_length)
-    ]
-    solns = [butterfly(n, d, i[0], i[1], i[2]) for i in dat]
+        dat.append(concat_Bits(input, n*6))
+        solns.append(concat_Bits(output, n*4))
 
-    model = create_model(n, d, b=1)
-
-    dat = [mk_msg(n, i[0].get(), i[1].get(), i[2].get()) for i in dat]
+    model = create_model(n, d, bin1)
 
     model.set_param("top.src.construct", msgs=dat, initial_delay=0, interval_delay=0)
 
     model.set_param(
         "top.sink.construct",
-        msgs=[mk_ret(n, c.get(), d.get()) for (c, d) in solns],
+        msgs=solns,
         initial_delay=0,
         interval_delay=0,
     )
@@ -245,73 +210,9 @@ def test_random(
         model,
         cmdline_opts={
             "dump_textwave": False,
-            "dump_vcd": f"rand_{execution_number}_{sequence_length}_{n}_{d}_m",
+            "dump_vcd": f"rand_{execution_number}_{sequence_length}_{n}_{d}_{bin1}",
             "max_cycles": (
                 30 + ((n + 2) * 3 + 4) * len(dat)
             ),  # makes sure the time taken grows linearly with respect to n
-        },
-    )
-
-
-@pytest.mark.parametrize(
-    "execution_number, sequence_length, n, d, m",
-    # Runs tests on smaller number sizes
-    mk_params(50, [1, 50], (2, 8), (0, 8), m=range(1, 5), slow=True) +
-    # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 100], (16, 64), (0, 64), m=range(1, 5), slow=True) +
-    # Extensively tests numbers with certain important bit sizes.
-    # Uses
-    sum(
-        [
-            [
-                *mk_params(1, [20], n, d, m=range(1, 5), slow=False),
-                *mk_params(1, [1000], n, d, m=range(1, 5), slow=True),
-            ]
-            for (n, d) in [
-                (8, 4),
-                (24, 8),
-                (32, 24),
-                (32, 16),
-                (64, 32),
-            ]
-        ],
-        [],
-    ),
-)
-def test_optimizations(
-    execution_number, sequence_length, n, d, m
-):  # test modules without multiplication
-    random.seed(random.random() + execution_number)
-    n, d = rand_fxp_spec(n, d)
-    opt_omega = [CFixed(i, n, d) for i in [(1, 0), (-1, 0), (0, 1), (0, -1)]]
-
-    dat = [
-        (rand_cfixed(n, d), rand_cfixed(n, d), rand_cfixed(n, d))
-        for _ in range(sequence_length)
-    ]
-    solns = [butterfly(n, d, i[0], i[1], opt_omega[m - 1]) for i in dat]
-
-    model = create_model(n, d, m)
-
-    dat = [mk_msg(n, i[0].get(), i[1].get(), i[2].get()) for i in dat]
-
-    model.set_param("top.src.construct", msgs=dat, initial_delay=5, interval_delay=5)
-
-    model.set_param(
-        "top.sink.construct",
-        msgs=[mk_ret(n, c.get(), d.get()) for (c, d) in solns],
-        initial_delay=5,
-        interval_delay=5,
-    )
-
-    run_sim(
-        model,
-        cmdline_opts={
-            "dump_textwave": False,
-            # "dump_vcd": f"opt_{execution_number}_{sequence_length}_{n}_{d}_{m}",
-            "dump_vcd": False,
-            "max_cycles": (
-                30 + 6 * len(dat)
-            ),  # makes sure the time taken grows constantly
         },
     )

@@ -6,10 +6,10 @@ from pymtl3.passes.backends.verilog import *
 class HarnessVRTL(VerilogPlaceholder, Component):
     # Constructor
 
-    def construct(s, n=32, d=16, mult=1, b=4):
+    def construct(s, n=32, d=16, b=4):
         # Interface
-        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(6 * n))
-        s.send = stream.ifcs.SendIfcRTL(mk_bits(4 * n))
+        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(6 * n * b))
+        s.send = stream.ifcs.SendIfcRTL(mk_bits(4 * n * b))
 
         # Source file path
         # The ../ is necessary here because pytest is run from the build directory

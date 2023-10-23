@@ -118,6 +118,8 @@ module FixedPointMultiButterfly #(
           s_ar[i] <= 0;
           s_bc[i] <= 0;
           s_br[i] <= 0;
+          s_cr[i] <= 0;
+          s_cc[i] <= 0;
           s_wr[i] <= 0;
           s_wc[i] <= 0;
         end if(recv_rdy && recv_val) begin
@@ -127,6 +129,8 @@ module FixedPointMultiButterfly #(
           s_bc[i] <= bc[i];
           s_wr[i] <= wr[i];
           s_wc[i] <= wc[i];
+          s_cc[i] <= 0;
+          s_cr[i] <= 0;
         end
       end
 
