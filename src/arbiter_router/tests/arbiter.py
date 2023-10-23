@@ -2,7 +2,7 @@ import pytest
 import random
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-from pymtl3.stdlib.test_utils import run_sim
+from pymtl3.stdlib.test_utils import run_sim, config_model_with_cmdline_opts
 from pymtl3.stdlib import stream
 from src.arbiter_router.harnesses.arbiter import Arbiter
 from tools.pymtl_extensions import mk_test_matrix
@@ -132,4 +132,5 @@ def test_arbiter(execution_num, nbits, ninputs, nmsgs, delay, cmdline_opts):
         interval_delay=0,
     )
 
+    config_model_with_cmdline_opts(model, cmdline_opts, ["dut"])
     run_sim(model, cmdline_opts)
