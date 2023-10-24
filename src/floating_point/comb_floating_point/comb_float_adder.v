@@ -49,10 +49,10 @@ module comb_float_adder #(
   logic [7:0] newExponent;
   always_comb begin
     if (exponentDiff > 0) begin
-      // Adjust for the right shift due to exponent difference
+      // Adjust for exponent difference
       newExponent = exponentB + exponentDiff;
     end else begin
-      // Adjust for the right shift due to exponent difference
+      // Adjust for exponent difference
       newExponent = exponentA + exponentDiff;
     end
   end
@@ -79,15 +79,6 @@ module comb_float_adder #(
       intermediateResult = alignedMantissaB - alignedMantissaA;
     else  // Operand B is negative
       intermediateResult = alignedMantissaA - alignedMantissaB;
-
-    // Binary addition
-    if (signA == signB)  // Both operands have the same sign
-      intermediateResult = alignedMantissaA + alignedMantissaB;
-    else if (signA == 1)  // Operand A is negative
-      intermediateResult = alignedMantissaB - alignedMantissaA;
-    else  // Operand B is negative
-      intermediateResult = alignedMantissaA - alignedMantissaB;
-
   end
 
   // Handle the case when intermediate result overflows
