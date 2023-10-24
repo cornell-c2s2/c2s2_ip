@@ -9,7 +9,7 @@
 `ifndef COMB_FLOAT_MULTIPLIER_V
 `define COMB_FLOAT_MULTIPLIER_V
 
-module comb_float_multiplier #(
+module CombFloatMultiplier #(
 ) (
   input  logic [31:0] in0,
   input  logic [31:0] in1,
