@@ -6,3 +6,4 @@ This contains links to some useful tutorials that are in the `docs/` directory. 
 3. [Pytest](pytest.md) - Documents how to use pytest in our repository, as well as containing some general pytest knowledge.
 4. [Svlint](svlint.md) - Instructions to install `svlint`. Completely optional.
 5. [Path](path.md) - Quick tutorial on how to add executables to your `PATH` environment variable.
+6. [Git/Github Quickstart](git.md) - Quick tutorial on some git/github basics.
