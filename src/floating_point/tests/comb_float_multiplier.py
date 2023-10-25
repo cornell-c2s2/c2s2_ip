@@ -1,9 +1,11 @@
 import pytest
 import random
+import struct
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib.test_utils import run_test_vector_sim
+from pymtl3.stdlib.test_utils import mk_test_case_table
 from pymtl3.stdlib import stream
 from src.floating_point.harnesses.comb_float_multiplier import CombFloatMultiplier
 
@@ -33,11 +35,20 @@ def create_model():
     # Create a harness wrapping our `CombFloatMultiplier` module.
     return Harness(model)
 
+def f32_as_int(x):
+    bytes = struct.pack(">f", x)
+    return int.from_bytes(bytes, byteorder="big")
 
-test_case_table = mk_test_case_table(
-    [("in0 in1 out"), ["basic", 1, 1, 1]]  # need to convert to floating pt
-)
 
+def int_as_f32(x):
+    bytes = x.to_bytes(length=4, byteorder="big")
+    return struct.unpack(">f", bytes)[0]
+
+test_case_table = mk_test_case_table([
+
+    (        "in0             in1             out"),
+    ["basic", int_as_f32(1),  int_as_f32(1),  int_as_f32(1) ]
+])
 
 # @pytest.mark.parametrize(
 #     "bitwidth, other_param",
@@ -46,6 +57,7 @@ test_case_table = mk_test_case_table(
 #         (32, 1),
 #     ],
 # )
+@pytest.mark.parametrize( **test_case_table )
 def test_simple(request):
     # The name of the test function run
     test_name = request.node.name
@@ -53,26 +65,10 @@ def test_simple(request):
     # Create our model.
     model = create_model()
 
-    # def t (in0, in1, out):
-
-    #     # Write input values to input ports
-    #     model.in0 @= in0
-    #     model.in1 @= in1
-
-    #     sim.sim_eval_combinational()
-
-    #     # If reference output is not'?', verify value read from output port
-    #     if out !='?':
-    #         assert model.out == out
-
-    #     sim.sim_cycle()
-
-    # t (0x2, 0x3, 0x6)
-
     model.set_param(
         "top.src0.construct",
         # Input values to stream through the block in order
-        msgs=[],
+        msgs=[test_case_table.in0],
         # Cycles to wait after reset before starting to send inputs
         initial_delay=0,
         # Cycles to wait before sending next input (before `send_val` set high)
@@ -82,7 +78,7 @@ def test_simple(request):
     model.set_param(
         "top.src1.construct",
         # Input values to stream through the block in order
-        msgs=[],
+        msgs=[test_case_table.in1],
         # Cycles to wait after reset before starting to send inputs
         initial_delay=0,
         # Cycles to wait before sending next input (before `send_val` set high)
@@ -92,7 +88,7 @@ def test_simple(request):
     model.set_param(
         "top.sink.construct",
         # Expected output values to read from the block in order
-        msgs=[],
+        msgs=[test_case_table.out],
         # Cycles to wait after reset before setting `recv_rdy` to high
         initial_delay=0,
         # Cycles to wait between outputs before setting `recv_rdy` to high
