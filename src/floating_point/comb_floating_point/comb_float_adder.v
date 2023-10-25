@@ -113,7 +113,7 @@ module comb_float_adder #(
     else normalizedResult = roundedResult;
   end
 
-  // Combine the sign, exponent, and mantissa to get the result
+  // Concatenate sign, exponent, and mantissa to get the result
   always_comb begin
     if (normalizedResult[24]) signResult = signA;
     else signResult = signB;
@@ -122,7 +122,6 @@ module comb_float_adder #(
     mantissaResult = normalizedResult[23:0] + stickyBit;
   end
 
-  // Combine the sign, exponent, and mantissa to form the result
   assign result = {signResult, exponentResult, mantissaResult};
 
 endmodule

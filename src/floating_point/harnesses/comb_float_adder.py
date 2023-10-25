@@ -3,7 +3,7 @@ from pymtl3.stdlib import stream
 from pymtl3.passes.backends.verilog import *
 
 
-# Pymtl3 harness for the `CombFloatMultiplier` module.
+# Pymtl3 harness for the `CombFloatAdder` module.
 class CombFloatAdder(VerilogPlaceholder, Component):
     # Constructor
 
@@ -14,8 +14,8 @@ class CombFloatAdder(VerilogPlaceholder, Component):
         s.b = InPort(32)
         s.result = OutPort(32)
         
-        # s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
-        # s.send = stream.ifcs.SendIfcRTL(mk_bits(BIT_WIDTH))
+        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
+        s.send = stream.ifcs.SendIfcRTL(mk_bits(BIT_WIDTH))
 
         # Name of the top level module to be imported
         s.set_metadata(VerilogPlaceholderPass.top_module, "CombFloatAdder")
