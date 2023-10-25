@@ -33,11 +33,11 @@ def create_model():
     # Create a harness wrapping our `CombFloatMultiplier` module.
     return Harness(model)
 
-test_case_table = mk_test_case_table([
 
-    (        "in0 in1 out"),
-    ["basic", 1,  1,  1   ] # need to convert to floating pt
-])
+test_case_table = mk_test_case_table(
+    [("in0 in1 out"), ["basic", 1, 1, 1]]  # need to convert to floating pt
+)
+
 
 # @pytest.mark.parametrize(
 #     "bitwidth, other_param",
@@ -66,7 +66,7 @@ def test_simple(request):
     #         assert model.out == out
 
     #     sim.sim_cycle()
-    
+
     # t (0x2, 0x3, 0x6)
 
     model.set_param(

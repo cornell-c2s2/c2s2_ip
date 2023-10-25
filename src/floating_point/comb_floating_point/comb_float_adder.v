@@ -6,14 +6,15 @@
 // Additional credits: Barry Lyu (fl327), Xilai Dai (xd44)
 //================================================
 
-`ifndef COMB_FLOAT_ADDER_V
-`define COMB_FLOAT_ADDER_V
+`ifndef COMB_FLOAT_ADDER
+`define COMB_FLOAT_ADDER
 
-module comb_float_adder #(
+module Comb_float_adder #(
+  parameter int BIT_WIDTH = 32
 ) (
-  input  logic [31:0] a,      // operand A
-  input  logic [31:0] b,      // operand B
-  output logic [31:0] result  // Result of the addition
+  input  logic [BIT_WIDTH - 1:0] a,      // operand A
+  input  logic [BIT_WIDTH - 1:0] b,      // operand B
+  output logic [BIT_WIDTH - 1:0] result  // Result of the addition
 );
 
   // Define bit fields
@@ -103,7 +104,7 @@ module comb_float_adder #(
     else roundedResult = intermediateResult[23:0];
   end
 
-  // Re-normalize the mantissa if necessary
+  // Normalize Mantissa
   logic [24:0] normalizedResult;
   always_comb begin
     if (roundedResult[24])  // Overflow
