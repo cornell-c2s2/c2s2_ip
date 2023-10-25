@@ -3,6 +3,7 @@
 // 
 // Combinational floating point multiplier
 // Author: Vicky Le (vml37)
+// Additional credits: Barry Lyu (fl327), Xilai Dai (xd44)
 //================================================
 
 `ifndef COMB_FLOAT_ADDER_V
@@ -57,14 +58,15 @@ module comb_float_adder #(
     end
   end
 
-  // Detect infinities or NaNs
+  // check if infinity or Not a number
   logic isInfinityA, isInfinityB, isNanA, isNanB;
   assign isInfinityA = (exponentA == 8'hFF) && (mantissaA == 23'h0);
   assign isInfinityB = (exponentB == 8'hFF) && (mantissaB == 23'h0);
+
   assign isNanA = (exponentA == 8'hFF) && (mantissaA != 23'h0);
   assign isNanB = (exponentB == 8'hFF) && (mantissaB != 23'h0);
 
-  // Add or subtract the aligned mantissas based on the signs
+  // Do fixed point addition accounting for NaN and Infinity
   logic [24:0] intermediateResult;
   always_comb begin
     if (isNanA || isNanB)  // Result is NaN
@@ -113,14 +115,10 @@ module comb_float_adder #(
 
   // Combine the sign, exponent, and mantissa to get the result
   always_comb begin
-    if (!isNanA && !isNanB && (isInfinityA || isInfinityB))
-      return;  // Infinities and NaNs handled earlier
-
     if (normalizedResult[24]) signResult = signA;
     else signResult = signB;
 
     exponentResult = newExponent;
-
     mantissaResult = normalizedResult[23:0] + stickyBit;
   end
 
