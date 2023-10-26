@@ -12,10 +12,23 @@
 module Comb_float_adder #(
   parameter int BIT_WIDTH = 32
 ) (
-  input  logic [BIT_WIDTH - 1:0] a,      // operand A
-  input  logic [BIT_WIDTH - 1:0] b,      // operand B
-  output logic [BIT_WIDTH - 1:0] result  // Result of the addition
+  input logic reset,
+  input logic clk,
+
+  input  logic [2 * BIT_WIDTH - 1:0] recv_msg,
+  input  logic                       recv_val,
+  output logic                       recv_rdy,
+
+  output logic [BIT_WIDTH - 1:0] send_msg,
+  output logic                   send_val,
+  input  logic                   send_rdy
 );
+  logic [BIT_WIDTH-1:0] a;  // operand A
+  logic [BIT_WIDTH-1:0] b;  // operand B
+
+  // Define operands a and b
+  assign a = recv_msg[2*BIT_WIDTH-1:BIT_WIDTH];
+  assign b = recv_msg[BIT_WIDTH-1:0];
 
   // Define bit fields
   logic signA, signB, signResult;
@@ -123,7 +136,43 @@ module Comb_float_adder #(
     mantissaResult = normalizedResult[23:0] + stickyBit;
   end
 
-  assign result = {signResult, exponentResult, mantissaResult};
+  assign send_msg = {signResult, exponentResult, mantissaResult};
+
+  // val-rdy logic
+  logic [1:0] currentState;
+  logic [1:0] nextState;
+  logic [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd3;
+
+  // Next State Comb Logic
+  always_comb begin
+    case (currentState)
+      IDLE:    if (recv_val && recv_rdy) nextState = CALC;
+               else nextState = IDLE;
+      CALC:    if (i == 1) nextState = DONE;
+               else nextState = CALC;
+      DONE:    if (send_rdy && send_val) nextState = IDLE;
+               else nextState = DONE;
+      default: nextState = IDLE;
+    endcase
+  end
+
+  // State FFs
+  always_ff @(posedge clk) begin
+    if (reset) begin
+      currentState <= IDLE;
+    end else begin
+      currentState <= nextState;
+    end
+  end
+
+  // Counter logic
+  always_ff @(posedge clk) begin
+    case (currentState)
+      IDLE: i <= 0;
+      CALC: i <= i + 1;
+      default: i <= i;
+    endcase
+  end
 
 endmodule
 

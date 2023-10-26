@@ -10,12 +10,7 @@ class CombFloatAdder(VerilogPlaceholder, Component):
     def construct(s, BIT_WIDTH=32):
         s.set_metadata(VerilogTranslationPass.explicit_module_name, "comb_float_adder")
         # Interface
-
-        s.a = InPort(32)
-        s.b = InPort(32)
-        s.result = OutPort(32)
-
-        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
+        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(2*BIT_WIDTH))
         s.send = stream.ifcs.SendIfcRTL(mk_bits(BIT_WIDTH))
 
         # Name of the top level module to be imported
@@ -24,5 +19,5 @@ class CombFloatAdder(VerilogPlaceholder, Component):
         # The ../ is necessary here because pytest is run from the build directory
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            "../src/floating_point/comb_floating_point/comb_float_adder.v",
+            "../src/floating_point/comb_floating_point/comb_float_adder.v", # add harness if use 2 input version
         )
