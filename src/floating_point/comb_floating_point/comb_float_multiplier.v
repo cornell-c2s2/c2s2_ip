@@ -9,6 +9,9 @@
 `ifndef COMB_FLOAT_MULTIPLIER_V
 `define COMB_FLOAT_MULTIPLIER_V
 
+`include "src/cmn/muxes.v"
+`include "src/fixed_point/combinational/multiplier.v"
+
 module CombFloatMultiplier #(
 ) (
   input  logic [31:0] in0,
@@ -42,8 +45,8 @@ module CombFloatMultiplier #(
     .d   (24),
     .sign(0)
   ) mantissa_mult (
-    .a({1, m0}),   // adding the hidden bit
-    .b({1, m1}),
+    .a({1'b1, m0}),   // adding the hidden bit
+    .b({1'b1, m1}),
     .c(mout_long)
   );
 
@@ -108,7 +111,7 @@ module CombFloatMultiplier #(
   // choose between normal output and special output
   cmn_Mux2 #(
     .p_nbits(32)
-  ) mantissa_mux (
+  ) output_mux (
     .in0(normal_out),
     .in1(special_out),
     .sel(use_special),
