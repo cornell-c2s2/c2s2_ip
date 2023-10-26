@@ -12,18 +12,16 @@ from src.floating_point.harnesses.comb_float_adder import CombFloatAdder
 # Creates a test harness class for the `CombFloatMultiplier` module.
 class TestHarness(Component):
     def construct(s, comb_float_adder, BIT_WIDTH=32):
-        s.src0 = stream.SourceRTL(mk_bits(BIT_WIDTH))
-        s.src1 = stream.SourceRTL(mk_bits(BIT_WIDTH))
+        s.src = stream.SourceRTL(mk_bits(2*BIT_WIDTH))
         s.sink = stream.SinkRTL(mk_bits(BIT_WIDTH))
         s.comb_float_adder = comb_float_adder
 
         # connect the harness to the python wrapper
-        s.src0.send //= s.comb_float_adder.a
-        s.src1.send //= s.comb_float_adder.b
-        s.comb_float_adder.out //= s.sink.result
+        s.src.send //= s.comb_float_adder.recv_msg
+        s.comb_float_adder.out //= s.sink.send_msg
 
     def done(s):
-        return s.src0.done() and s.src1.done() and s.sink.done()
+        return s.src.done() and s.sink.done()
 
 
 def basic():
@@ -32,12 +30,11 @@ def basic():
 
 test_case_table = mk_test_case_table(
     [
-        ("msgs a b"),
+        ("msgs "),
         [
             "basic",
             basic,
-            0b00111111100000000000000000000000,
-            0b00111111100000000000000000000000,
+            0b0011111110000000000000000000000000111111100000000000000000000000,
         ],
     ]
 )
