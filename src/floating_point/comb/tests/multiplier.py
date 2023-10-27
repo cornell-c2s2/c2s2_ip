@@ -61,6 +61,7 @@ def test_simple():
 # note: this test requires that the test cases have already been piped to the test_fifo
 # using the testfloat_gen() function
 # http://www.jhauser.us/arithmetic/TestFloat-3/doc/testfloat_gen.html
+@pytest.mark.slow
 def test_with_berkeley_library(testfloat_gen):
     # Create our model.
     model = create_model()
