@@ -4,7 +4,9 @@ from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
-from src.wishbone.harnesses.wishbone import Wishbone
+from src.wishbone.harnesses.wishbone import (
+    WishboneHarness,
+)
 
 
 # Creates a test harness class for the `Wishbone` module.
@@ -12,8 +14,8 @@ class Harness(Component):
     def construct(s, harness, n):
         s.harness = harness
 
-        s.src = stream.SourceRTL(mk_bits(n))
-        s.sink = stream.SinkRTL(mk_bits(n))
+        s.src = stream.SourceRTL(mk_bits(73+2*n))
+        s.sink = stream.SinkRTL(mk_bits(33+2*n))
 
         s.src.send //= s.harness.recv
         s.harness.send //= s.sink.recv
@@ -24,25 +26,24 @@ class Harness(Component):
 
 # Initialize a simulatable model
 def create_model(n):
-    model = Wishbone(n)
+    model = WishboneHarness(n)
 
     # Create a harness wrapping our `Wishbone` module.
     return Harness(model, n)
 
 
 @pytest.mark.parametrize(
-    "bitwidth, other_param",
+    "n_modules",
     [
-        (16, 1),
-        (32, 1),
+        (1),
     ],
 )
-def test_simple(request, bitwidth, other_param):
+def test_simple(request, n_modules):
     # The name of the test function run
     test_name = request.node.name
 
     # Create our model.
-    model = create_model(bitwidth)
+    model = create_model(n_modules)
 
     model.set_param(
         "top.src.construct",
@@ -68,8 +69,8 @@ def test_simple(request, bitwidth, other_param):
         model,
         cmdline_opts={
             "dump_textwave": False,
-            # Creates the vcd file test_simple_<bitwidth>.vcd for debugging.
-            "dump_vcd": f"{test_name}_{bitwidth}",
+            # Creates the vcd file test_simple_<n_modules>.vcd for debugging.
+            "dump_vcd": f"{test_name}_{n_modules}",
             # Optional, used to test accurate cycle counts.
             "max_cycles": None,
         },
