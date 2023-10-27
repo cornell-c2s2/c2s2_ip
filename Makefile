@@ -175,7 +175,7 @@ else
 		testfloat_gen ${FUNC} ${EXTRA_ARGS} > ${BUILD_DIR}/${OUTPUT_FILE}
 	@printf "${GREEN}"
 	@printf "[SUCCESS] Testfloat generation written to ${BUILD_DIR}/${OUTPUT_FILE}!${RESET}\n"
-endif 
+endif
 
 # ------------------------------------------------------------------------------
 # Redundant rules to help with user typos
