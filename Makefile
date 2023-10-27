@@ -1,11 +1,11 @@
 SHELL=/bin/bash -o pipefail
-#==========================================
+# ==============================================================================
 # c2s2_ip Makefile
-#==========================================
+# ==============================================================================
 
-#------------------------------------------
+# ------------------------------------------------------------------------------
 # ANSI Color Escape Defines
-#------------------------------------------
+# ------------------------------------------------------------------------------
 
 RESET  =\033[0m
 
@@ -20,12 +20,17 @@ WHITE  =\033[0;37m
 
 VENV:=. .venv/bin/activate
 
-install:
+# Pulls main branch
+--pull:
 	@printf "${CYAN}Getting Latest Updates...${RESET}\n"
 	@git checkout main
 	@git pull
+
+vscode: 
 	@printf "${CYAN}Installing VSCode Extensions...${RESET}\n"
 	@cat .workspace-extensions | xargs code
+
+.venv:
 	@printf "${CYAN}Setting Up Virtual Environment...${RESET}\n"
 	@python3 -m venv .venv
 	@printf "${CYAN}Installing Python Dependencies...${RESET}\n"
@@ -33,6 +38,9 @@ install:
 	@$(VENV) && pip install -r requirements.txt
 	@printf "${GREEN}Dependencies installed!${RESET}\n"
 	@printf "${YELLOW}Run ${RED}source .venv/bin/activate${YELLOW} to activate your virtual environment.${RESET}\n"
+
+
+install: --pull code .venv
 
 --parse-name:
 	@printf "${CYAN}"
@@ -55,8 +63,12 @@ clean:
 
 IP_NAME_PARSED = $(shell cat build/ip_name.txt)
 
+# ------------------------------------------------------------------------------
+# CREATING IP
+# ------------------------------------------------------------------------------
+
 # Recipe to check whether an IP already exists
-check-ip: --parse-name
+check-ip: --pull --parse-name
 	@printf "${CYAN}"
 	@printf "Checking for IP already named %s...\n" ${IP_NAME_PARSED}
 	@if [ -d "src/${IP_NAME_PARSED}" ]; then \
@@ -106,8 +118,6 @@ else
 	@printf "Creating new IP branch...\n"
 	
 	@printf "${RESET}"
-	@git checkout main
-	@git pull
 	@git checkout -b ${IP_NAME_PARSED}
 
 	@printf "${CYAN}"
@@ -139,6 +149,36 @@ else
 	@pytest src/${IP} -k ${INCLUDE} --suppress-no-test-exit-code
 endif
 
+# ------------------------------------------------------------------------------
+# Testfloat generation
+# Run
+# ```
+# make testfloat_gen FUNC=<func_name> EXTRA_ARGS=<extra_args>
+# ```
+# to generate testfloat data for a specific function.
+# Files will be written to `build/testfloat_gen`
+# ------------------------------------------------------------------------------
+TESTFLOAT_DOCKER_IMAGE = $(shell docker build -q - < .docker/testfloat.Dockerfile)
+EXTRA_ARGS=
+OUTPUT_FILE="testfloat_gen"
+BUILD_DIR="build"
+testfloat_gen:
+ifndef FUNC
+	@printf "${RED}"
+	@printf "[ERROR] No function specified! Please specify a function to generate testfloat data for using FUNC=<func_name>${RESET}\n"
+	@exit 1
+else
+	@printf "${CYAN}"
+	@printf "Generating testfloat data for ${FUNC}...${RESET}\n"
+	@mkdir -p ${BUILD_DIR}
+	@docker run --rm ${TESTFLOAT_DOCKER_IMAGE} \
+		testfloat_gen ${FUNC} ${EXTRA_ARGS} > ${BUILD_DIR}/${OUTPUT_FILE}
+	@printf "${GREEN}"
+	@printf "[SUCCESS] Testfloat generation written to ${BUILD_DIR}/${OUTPUT_FILE}!${RESET}\n"
+endif
+
+# ------------------------------------------------------------------------------
 # Redundant rules to help with user typos
+# ------------------------------------------------------------------------------
 new_ip: new-ip
 check_ip: check-ip

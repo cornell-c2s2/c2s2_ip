@@ -57,3 +57,13 @@ make lint IP=<name of ip folder>
 This requires `svlint` to be installed and in your `PATH` as well as requiring `sudo apt-get install moreutils` (which should be the case for your `ecelinux` machine).
 
 **Note**: Github actions has an automated script that already runs this on push, so installing `svlint` is entirely optional. However, there is a tutorial [here](./svlint.md) on how to do so, if you want to.
+
+# Advanced `make` Commands
+
+## `make testfloat_gen`
+Runs [testfloat_gen](http://www.jhauser.us/arithmetic/TestFloat-3/doc/testfloat_gen.html) and generates the output in a specified file.
+
+### Usage
+```sh
+make testfloat_gen FUNC=<func_name> EXTRA_ARGS=<extra_args> OUTPUT_FILE=<output_file> BUILD_DIR=<build_directory>
+```
