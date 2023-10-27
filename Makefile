@@ -150,6 +150,34 @@ else
 endif
 
 # ------------------------------------------------------------------------------
+# Testfloat generation
+# Run
+# ```
+# make testfloat_gen FUNC=<func_name> EXTRA_ARGS=<extra_args>
+# ```
+# to generate testfloat data for a specific function.
+# Files will be written to `build/testfloat_gen`
+# ------------------------------------------------------------------------------
+TESTFLOAT_DOCKER_IMAGE = $(shell docker build -q - < .docker/testfloat.Dockerfile)
+EXTRA_ARGS=
+OUTPUT_FILE="testfloat_gen"
+BUILD_DIR="build"
+testfloat_gen:
+ifndef FUNC
+	@printf "${RED}"
+	@printf "[ERROR] No function specified! Please specify a function to generate testfloat data for using FUNC=<func_name>${RESET}\n"
+	@exit 1
+else
+	@printf "${CYAN}"
+	@printf "Generating testfloat data for ${FUNC}...${RESET}\n"
+	@mkdir -p ${BUILD_DIR}
+	@docker run --rm ${TESTFLOAT_DOCKER_IMAGE} \
+		testfloat_gen ${FUNC} ${EXTRA_ARGS} > ${BUILD_DIR}/${OUTPUT_FILE}
+	@printf "${GREEN}"
+	@printf "[SUCCESS] Testfloat generation written to ${BUILD_DIR}/${OUTPUT_FILE}!${RESET}\n"
+endif 
+
+# ------------------------------------------------------------------------------
 # Redundant rules to help with user typos
 # ------------------------------------------------------------------------------
 new_ip: new-ip

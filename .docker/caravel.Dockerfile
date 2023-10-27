@@ -8,6 +8,9 @@ WORKDIR /home
 RUN git clone --depth 1 https://github.com/efabless/caravel_user_project.git caravel
 ENV CARAVEL_ROOT=/home/caravel
 
+# Install Softfloat
+WORKDIR /home
+
 WORKDIR /home
 ADD . c2s2_ip
 # Make install
