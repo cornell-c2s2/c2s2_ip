@@ -12,10 +12,10 @@
 `include "src/cmn/muxes.v"
 `include "src/fixed_point/combinational/multiplier.v"
 
-module CombFloatMultiplier #(
+module FloatCombMultiplier #(
   parameter int BIT_WIDTH = 32,
-  parameter int M_WIDTH = 23,
-  parameter int E_WIDTH = 8
+  parameter int M_WIDTH   = 23,
+  parameter int E_WIDTH   = 8
 
 ) (
   input  logic [BIT_WIDTH - 1:0] in0,
@@ -24,21 +24,21 @@ module CombFloatMultiplier #(
 );
 
   logic s0, s1, sout;  //sign
-  logic [E_WIDTH - 1:0]   e0, e1, eout;  // exponent
-  logic [M_WIDTH - 1:0]   m0, m1, mout;  // mantissa
+  logic [E_WIDTH - 1:0] e0, e1, eout;  // exponent
+  logic [M_WIDTH - 1:0] m0, m1, mout;  // mantissa
   logic [BIT_WIDTH - 1:0] normal_out, special_out;
   logic use_special;
 
   // bias is 2^(e_width - 1) - 1
   logic [E_WIDTH - 1:0] bias = '1 >> 1;
 
-  assign s0 = in0[BIT_WIDTH - 1];
-  assign e0 = in0[BIT_WIDTH - 2:M_WIDTH];
-  assign m0 = in0[M_WIDTH - 1:0];
+  assign s0 = in0[BIT_WIDTH-1];
+  assign e0 = in0[BIT_WIDTH-2:M_WIDTH];
+  assign m0 = in0[M_WIDTH-1:0];
 
-  assign s1 = in1[BIT_WIDTH - 1];
-  assign e1 = in1[BIT_WIDTH - 2:M_WIDTH];
-  assign m1 = in1[M_WIDTH - 1:0];
+  assign s1 = in1[BIT_WIDTH-1];
+  assign e1 = in1[BIT_WIDTH-2:M_WIDTH];
+  assign m1 = in1[M_WIDTH-1:0];
 
 
   // mantissa
@@ -50,7 +50,7 @@ module CombFloatMultiplier #(
     .d   (M_WIDTH - 1), // TODO: This might be wrong!
     .sign(0)
   ) mantissa_mult (
-    .a({1'b1, m0}),   // add the hidden bit
+    .a({1'b1, m0}),  // add the hidden bit
     .b({1'b1, m1}),
     .c(mout_long)
   );
@@ -62,9 +62,9 @@ module CombFloatMultiplier #(
   cmn_Mux2 #(
     .p_nbits(M_WIDTH)
   ) mantissa_mux (
-    .in0(mout_long[M_WIDTH - 1:0]), // no shift
-    .in1(mout_long[M_WIDTH:1]), // right shifted
-    .sel(mout_long[M_WIDTH + 1]), // MSB
+    .in0(mout_long[M_WIDTH-1:0]),  // no shift
+    .in1(mout_long[M_WIDTH:1]),    // right shifted
+    .sel(mout_long[M_WIDTH+1]),    // MSB
     .out(mout)
   );
 
@@ -72,7 +72,7 @@ module CombFloatMultiplier #(
   // add the MSB of mantissa product as part of normalization
   // if the MSB is 1 then we are right shifting the mantissa
   // so we need to increment the exponent as well.
-  assign eout = e0 + e1 - bias + mout_long[M_WIDTH + 1];
+  assign eout = e0 + e1 - bias + mout_long[M_WIDTH+1];
 
   // sign
   assign sout = s0 ^ s1;

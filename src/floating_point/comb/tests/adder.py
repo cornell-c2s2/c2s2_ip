@@ -7,7 +7,7 @@ from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib.test_utils import run_test_vector_sim
 from pymtl3.stdlib.test_utils import mk_test_case_table
 from pymtl3.stdlib import stream
-from src.floating_point.harnesses.comb_float_adder import CombFloatAdder
+from src.floating_point.comb.harnesses.adder import CombFloatAdder
 
 
 # Creates a test harness class for the `CombFloatMultiplier` module.
@@ -52,7 +52,6 @@ def test_simple():
 
     run_test_vector_sim(
         CombFloatAdder(),
-        [("a b out"),[int_as_f32(1),  int_as_f32(1),  int_as_f32(2)]],
+        [("a b out"), [int_as_f32(1), int_as_f32(1), int_as_f32(2)]],
         cmdline_opts={},
     )
-    
