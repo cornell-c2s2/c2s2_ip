@@ -13,39 +13,44 @@
 `include "src/fixed_point/combinational/multiplier.v"
 
 module CombFloatMultiplier #(
+  parameter int BIT_WIDTH = 32,
+  parameter int M_WIDTH = 23,
+  parameter int E_WIDTH = 8
+
 ) (
-  input  logic [31:0] in0,
-  input  logic [31:0] in1,
-  output logic [31:0] out
+  input  logic [BIT_WIDTH - 1:0] in0,
+  input  logic [BIT_WIDTH - 1:0] in1,
+  output logic [BIT_WIDTH - 1:0] out
 );
 
   logic s0, s1, sout;  //sign
-  logic [7:0] e0, e1, eout;  // exponent
-  logic [22:0] m0, m1, mout;  // mantissa
-  logic [31:0] normal_out, special_out;
+  logic [E_WIDTH - 1:0]   e0, e1, eout;  // exponent
+  logic [M_WIDTH - 1:0]   m0, m1, mout;  // mantissa
+  logic [BIT_WIDTH - 1:0] normal_out, special_out;
   logic use_special;
 
-  logic [7:0] bias = 8'd127;  // bias for 32 bit floating pt
+  // bias is 2^(e_width - 1) - 1
+  logic [E_WIDTH - 1:0] bias = '1 >> 1;
 
-  assign s0 = in0[31];
-  assign e0 = in0[30:23];
-  assign m0 = in0[22:0];
+  assign s0 = in0[BIT_WIDTH - 1];
+  assign e0 = in0[BIT_WIDTH - 2:M_WIDTH];
+  assign m0 = in0[M_WIDTH - 1:0];
 
-  assign s1 = in1[31];
-  assign e1 = in1[30:23];
-  assign m1 = in1[22:0];
+  assign s1 = in1[BIT_WIDTH - 1];
+  assign e1 = in1[BIT_WIDTH - 2:M_WIDTH];
+  assign m1 = in1[M_WIDTH - 1:0];
 
 
   // mantissa
-  // product of the mantissas must be 25 bits so that we can
-  // effectively normalize it afterwards. 
-  logic [24:0] mout_long;
+  // product of the mantissas must be 2 bits longer than
+  // mantissa so that we can effectively normalize it afterwards.
+  logic [M_WIDTH + 1:0] mout_long;
   FixedPointCombMultiplier #(
-    .n   (25),
-    .d   (24),
+    .n   (M_WIDTH + 2),
+    .d   (M_WIDTH - 1), // TODO: This might be wrong!
     .sign(0)
   ) mantissa_mult (
-    .a({1'b1, m0}),   // adding the hidden bit
+    .a({1'b1, m0}),   // add the hidden bit
     .b({1'b1, m1}),
     .c(mout_long)
   );
@@ -53,29 +58,29 @@ module CombFloatMultiplier #(
   // normalize the mantissa
   // this is equivalent to a right shift if the
   // MSB is 1. We can discard the MSB since it
-  // will become the hidden bit anyway. 
+  // will become the hidden bit anyway.
   cmn_Mux2 #(
-    .p_nbits(23)
+    .p_nbits(M_WIDTH)
   ) mantissa_mux (
-    .in0(mout_long[22:0]),
-    .in1(mout_long[23:1]),
-    .sel(mout_long[24]),
+    .in0(mout_long[M_WIDTH - 1:0]), // no shift
+    .in1(mout_long[M_WIDTH:1]), // right shifted
+    .sel(mout_long[M_WIDTH + 1]), // MSB
     .out(mout)
   );
 
-  // exponent 
+  // exponent
   // add the MSB of mantissa product as part of normalization
-  // if the MSB is 1 then we are right shifting the mantissa 
-  // so we need to increment the exponent as well. 
-  assign eout = e0 + e1 - bias + mout_long[24];
+  // if the MSB is 1 then we are right shifting the mantissa
+  // so we need to increment the exponent as well.
+  assign eout = e0 + e1 - bias + mout_long[M_WIDTH + 1];
 
-  // sign 
+  // sign
   assign sout = s0 ^ s1;
 
   assign normal_out = {sout, eout, mout};
 
-  // Special cases  
-  // this code is extracted from Barry and Xilai's code
+  // Special cases
+  // AUTHOR CREDITS: this code is from Barry and Xilai's multiplier
   always_comb begin
     // defaults
     use_special = 0;

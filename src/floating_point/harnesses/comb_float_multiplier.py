@@ -3,19 +3,14 @@ from pymtl3.stdlib import stream
 from pymtl3.passes.backends.verilog import *
 
 
-# Pymtl3 harness for the `CombFloatMultiplier` module.
-class CombFloatMultiplier(VerilogPlaceholder, Component):
+# Pymtl3 wrapper for the `CombFloatMultiplier` module.
+class CombFloatMultiplierWrapper(VerilogPlaceholder, Component):
     # Constructor
-
-    def construct(s):
+    def construct(s, BIT_WIDTH = 32, M_WIDTH = 23, E_WIDTH = 8):
         # Interface
-
         s.in0 = InPort(32)
         s.in1 = InPort(32)
         s.out = OutPort(32)
-        
-        # s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
-        # s.send = stream.ifcs.SendIfcRTL(mk_bits(BIT_WIDTH))
 
         # Name of the top level module to be imported
         s.set_metadata(VerilogPlaceholderPass.top_module, "CombFloatMultiplier")
