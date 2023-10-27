@@ -14,7 +14,7 @@ class CombFloatMultiplierWrapper(VerilogPlaceholder, Component):
         s.out = OutPort(32)
 
         # Name of the top level module to be imported
-        s.set_metadata(VerilogPlaceholderPass.top_module, "CombFloatMultiplier")
+        s.set_metadata(VerilogPlaceholderPass.top_module, "FloatCombMultiplier")
         # Source file path
         # The ../ is necessary here because pytest is run from the build directory
         s.set_metadata(

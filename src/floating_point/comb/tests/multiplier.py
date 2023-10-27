@@ -47,61 +47,6 @@ def int_as_f32(x):
     return struct.unpack(">f", bytes)[0]
 
 
-test_case_table = mk_test_case_table(
-    [
-        ("in0             in1             out"),
-        ["basic", int_as_f32(1), int_as_f32(1), int_as_f32(1)],
-    ]
-)
-
-
-# Pull test cases from berkeley testfloat generator (piped through fifo)
-# This function outputs an array of lines from the testfloat generator
-def read_testfloat_fifo_until_empty(fifo_path):
-    try:
-        fifo_fd = os.open(fifo_path, os.O_RDONLY)
-
-        lines = []
-
-        while True:
-            line = b""
-            while True:
-                try:
-                    byte = os.read(fifo_fd, 1)
-                    if not byte:
-                        break  # No more data in the FIFO
-                    line += byte
-
-                    if byte == b"\n":
-                        break  # Stop reading when a newline is encountered
-                except BlockingIOError:
-                    break  # No more data available to read
-
-            if not line:
-                break  # No more lines in the FIFO
-            lines.append(line)
-
-        os.close(fifo_fd)
-        return lines
-    except FileNotFoundError:
-        print(f"Named pipe '{fifo_path}' not found.")
-        return None
-
-
-# This function takes an array of lines and outputs a test_array
-def berkeley_testfloat_to_testarray(data_array):
-    test_array = [("in0 in1 out")]
-    for line in data_array:
-        line_split = line.split()
-
-        in0 = int(line_split[0], 16)
-        in1 = int(line_split[1], 16)
-        out = int(line_split[2], 16)
-
-        test_array.append([in0, in1, out])
-    return test_array
-
-
 def test_simple():
     # Create our model.
     model = create_model()
@@ -116,17 +61,17 @@ def test_simple():
 # note: this test requires that the test cases have already been piped to the test_fifo
 # using the testfloat_gen() function
 # http://www.jhauser.us/arithmetic/TestFloat-3/doc/testfloat_gen.html
-def test_with_berkeley_library():
-    FIFO = "testfloat_out"
-
+def test_with_berkeley_library(testfloat_gen):
     # Create our model.
     model = create_model()
 
-    # data_array = read_testfloat_fifo_until_empty(FIFO)
-    test_array = berkeley_testfloat_to_testarray(read_testfloat_fifo_until_empty(FIFO))
+    testfloat_data = testfloat_gen("f32_mul", level=1)
+
+    # Truncate the error flags here because we don't want them.
+    testfloat_data = [test_case[0:3] for test_case in testfloat_data]
 
     run_test_vector_sim(
         CombFloatMultiplierWrapper(32, 23, 8),  # dut
-        test_array,  # test cases
+        [("in0 in1 out"), *testfloat_data],  # test cases
         cmdline_opts={},
     )
