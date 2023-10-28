@@ -1,40 +1,9 @@
 import pytest
-import random
 import struct
-import os
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib.test_utils import run_test_vector_sim
-from pymtl3.stdlib.test_utils import mk_test_case_table
-from pymtl3.stdlib import stream
 from src.floating_point.comb.harnesses.adder import CombFloatAdderWrapper
-
-
-# Creates a test harness class for the `CombFloatAdder` module.
-class Harness(Component):
-    def construct(s, harness):
-        s.harness = harness
-
-        s.src0 = stream.SourceRTL(mk_bits(32))
-        s.src1 = stream.SourceRTL(mk_bits(32))
-        s.sink = stream.SinkRTL(mk_bits(32))
-
-        # connect the harness to the python wrapper
-        s.src0.send //= s.harness.in0
-        s.src1.send //= s.harness.in1
-        s.harness.out //= s.sink.out
-
-    def done(s):
-        return s.src0.done() and s.src1.done() and s.sink.done()
-
-
-# Initialize a simulatable model
-def create_model():
-    model = CombFloatAdderWrapper()
-
-    # Create a harness wrapping our `CombFloatAdder` module.
-    return Harness(model)
 
 
 def f32_as_int(x):
@@ -43,60 +12,55 @@ def f32_as_int(x):
 
 
 def int_as_f32(x):
-    bytes = x.to_bytes(length=4, byteorder="big")
+    bytes = x.to_bytes(length=4, byteorder="big", signed=True)
+    print(struct.unpack(">f", bytes)[0])
     return struct.unpack(">f", bytes)[0]
 
 
-def test_simple():
+def test_simple(cmdline_opts):
     # Create our model.
-    model = create_model()
-
     run_test_vector_sim(
         CombFloatAdderWrapper(32, 23, 8),  # dut
-        [("in0 in1 out"), [int_as_f32(1), int_as_f32(1), int_as_f32(2)]],
-        cmdline_opts={},
+        [("in0 in1 out*"), [f32_as_int(3), f32_as_int(2), f32_as_int(5)]],  # test cases
+        cmdline_opts,
     )
 
 
-def test_larger():
+def test_larger(cmdline_opts):
     # Create our model.
-    model = create_model()
     run_test_vector_sim(
         CombFloatAdderWrapper(32, 23, 8),  # dut
-        [("in0 in1 out"), [int_as_f32(5), int_as_f32(6), int_as_f32(11)]],
-        cmdline_opts={},
+        [("in0 in1 out*"), [f32_as_int(5), f32_as_int(6), f32_as_int(11)]],
+        cmdline_opts,
     )
 
 
 # can't cast float infinity to int
-# def test_infinity():
-#     # Create our model.
-#     model = create_model()
-#     run_test_vector_sim(
-#         CombFloatAdderWrapper(32, 23, 8),  # dut
-#         [
-#             ("in0 in1 out"),
-#             [int_as_f32(4286578688), int_as_f32(6), int_as_f32(4286578688)],
-#         ],
-#         cmdline_opts={},
-#     )
+def test_infinity(cmdline_opts):
+    run_test_vector_sim(
+        CombFloatAdderWrapper(32, 23, 8),  # dut
+        [
+            ("in0 in1 out*"),
+            [0xFF800000, f32_as_int(6), 0xFF800000],  # -Infinity + 6 = -Infinity
+            [0x7F800000, f32_as_int(-100), 0x7F800000],  # Infinity - 100 = Infinity
+        ],
+        cmdline_opts,
+    )
 
 
 # note: this test requires that the test cases have already been piped to the test_fifo
 # using the testfloat_gen() function
 # http://www.jhauser.us/arithmetic/TestFloat-3/doc/testfloat_gen.html
 @pytest.mark.slow
-def test_with_berkeley_library(testfloat_gen):
-    # Create our model.
-    model = create_model()
-
-    testfloat_data = testfloat_gen("f32_add", level=1)
+def test_with_testfloat(testfloat_gen, cmdline_opts):
+    # Generate 100,000 test cases from testfloat.
+    testfloat_data = testfloat_gen("f32_add", level=1, n=100_000)
 
     # Truncate the error flags here because we don't want them.
     testfloat_data = [test_case[0:3] for test_case in testfloat_data]
 
     run_test_vector_sim(
         CombFloatAdderWrapper(32, 23, 8),  # dut
-        [("in0 in1 out"), *testfloat_data],  # test cases
-        cmdline_opts={},
+        [("in0 in1 out*"), *testfloat_data],  # test cases
+        cmdline_opts,
     )
