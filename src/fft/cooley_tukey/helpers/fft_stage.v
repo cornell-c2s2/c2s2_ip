@@ -2,8 +2,8 @@
 `ifndef FFT_STAGE_VRTL
 `define FFT_STAGE_VRTL
 
-`include "src/fft/helpers/twiddle_generator.v"
-`include "src/fft/helpers/crossbar.v"
+`include "src/fft/cooley_tukey/helpers/twiddle_generator.v"
+`include "src/fft/cooley_tukey/helpers/crossbar.v"
 `include "src/fixed_point/iterative/butterfly.v"
 
 
