@@ -134,20 +134,34 @@ def router_arbiter_msgs(nbits, nblocks, nmsgs):
     return msgs, expected_output
 
 
-spec_matrix = [
-    (0, 8, 4, 20, 0),
-    (0, 8, 4, 20, 2),
-    *mk_test_matrix(
+spec_matrix = 
+    mk_test_matrices(
+        {
+            "execution_num": 0,
+            "nbits": 8,
+            "noutputs": 16,
+            "nmsgs": 20,
+            "src_delay": 0,
+            "sink_delay": 0,
+        },
+        {
+            "execution_num": 0,
+            "nbits": 8,
+            "noutputs": 16,
+            "nmsgs": 20,
+            "src_delay": 0,
+            "delay": 2,
+        },
         {
             "execution_num": list(range(1, 21)),  # Do 20 tests
             "nbits": [(8, 32)],  # Test 8-32 bit routers
-            "nblocks": [(2, 16)],  # Test 2-16 input routers
+            "noutputs": [(2, 16)],  # Test 2-16 output routers
             "nmsgs": [50],  # Send 50 messages
-            "delay": [0, 1, 8],  # Wait this many cycles between inputs
+            "src_delay": [0, 1, 8],  # Wait this many cycles between inputs
+            "sink_delay": [0, 1, 8],  # Wait this many cycles between outputs
+            "slow": True,
         },
-        slow=True,
-    ),
-]
+    )
 
 
 @pytest.mark.parametrize("execution_num, nbits, nblocks, nmsgs, delay", spec_matrix)
