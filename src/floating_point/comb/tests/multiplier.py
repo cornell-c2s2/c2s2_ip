@@ -22,7 +22,12 @@ def int_as_f32(x):
 def test_simple(cmdline_opts):
     run_test_vector_sim(
         CombFloatMultiplierWrapper(32, 23, 8),  # dut
-        [("in0 in1 out*"), [f32_as_int(3), f32_as_int(2), f32_as_int(6)]],  # test cases
+        [
+            ("in0 in1 out*"),
+            [f32_as_int(0), f32_as_int(0), f32_as_int(0)],
+            [f32_as_int(1), f32_as_int(1), f32_as_int(1)],
+            [f32_as_int(3), f32_as_int(2), f32_as_int(6)],
+        ],  # test cases
         cmdline_opts,
     )
 
