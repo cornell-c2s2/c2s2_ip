@@ -11,34 +11,36 @@
 
 `include "src/cmn/muxes.v"
 
-module CombFloatAdder #(
-  parameter int BIT_WIDTH = 32
+module FloatCombAdder #(
+  parameter int BIT_WIDTH = 32,
+  parameter int M_WIDTH   = 23,
+  parameter int E_WIDTH   = 8
 ) (
-  input  logic [31:0] a,
-  input  logic [31:0] b,
-  output logic [31:0] out
+  input  logic [BIT_WIDTH-1:0] in0,
+  input  logic [BIT_WIDTH-1:0] in1,
+  output logic [BIT_WIDTH-1:0] out
 );
   // Define bit fields
   logic signA, signB, signResult;
-  logic [7:0] exponentA, exponentB, exponentResult;
-  logic [22:0] mantissaA, mantissaB, mantissaResult;
+  logic [E_WIDTH-1:0] exponentA, exponentB, exponentResult;
+  logic [M_WIDTH-1:0] mantissaA, mantissaB, mantissaResult;
 
   // Extract sign, exponent, and mantissa from inputs A and B
-  assign signA = a[31];
-  assign signB = b[31];
+  assign signA = in0[BIT_WIDTH-1];
+  assign signB = in1[BIT_WIDTH-1];
 
-  assign exponentA = a[30:23];
-  assign exponentB = b[30:23];
+  assign exponentA = in0[BIT_WIDTH-2:M_WIDTH];
+  assign exponentB = in1[BIT_WIDTH-2:M_WIDTH];
 
-  assign mantissaA = a[22:0];
-  assign mantissaB = b[22:0];
+  assign mantissaA = in0[M_WIDTH-1:0];
+  assign mantissaB = in1[M_WIDTH-1:0];
 
   // Compute the difference in exponents
-  logic [7:0] exponentDiff;
+  logic [E_WIDTH-1:0] exponentDiff;
   assign exponentDiff = exponentA - exponentB;
 
   // Align mantissas based on the exponent difference
-  logic [23:0] alignedMantissaA, alignedMantissaB;
+  logic [M_WIDTH:0] alignedMantissaA, alignedMantissaB;
 
   // Align A if B exponent larger
   assign alignedMantissaA = (exponentDiff < 0) ? {1'b1, mantissaA} >> -exponentDiff
@@ -49,7 +51,7 @@ module CombFloatAdder #(
       : {1'b1, mantissaB};
 
   // Determine the new exponent for the result
-  logic [7:0] newExponent;
+  logic [E_WIDTH-1:0] newExponent;
   always_comb begin
     if (exponentDiff > 0) begin
       // Adjust for exponent difference
@@ -69,19 +71,19 @@ module CombFloatAdder #(
   assign isNanB = (exponentB == 8'hFF) && (mantissaB != 23'h0);
 
   // Do fixed point addition accounting for NaN and Infinity
-  logic [31:0] intermediateResult;
+  logic [BIT_WIDTH-1:0] intermediateResult;
+  logic [BIT_WIDTH-1:0] specialResult;
   logic use_special;
-  logic [31:0] specialResult;
 
   always_comb begin
     if (isNanA || isNanB) begin  // Result is NaN
-      specialResult = (isNanA) ? a : b;
+      specialResult = (isNanA) ? in0 : in1;
       use_special   = 1'b1;
     end else if (isInfinityA) begin  // A is Infinity
-      specialResult = (signA) ? a : b;
+      specialResult = (signA) ? in0 : in1;
       use_special   = 1'b1;
     end else if (isInfinityB) begin  // B is Infinity
-      specialResult = (signB) ? a : b;
+      specialResult = (signB) ? in0 : in1;
       use_special   = 1'b1;
     end else if (signA == signB) begin  // Both operands have the same sign
       intermediateResult = alignedMantissaA + alignedMantissaB;
@@ -94,48 +96,48 @@ module CombFloatAdder #(
   // Handle the case when intermediate result overflows
   logic [1:0] stickyBit;
   always_comb begin
-    if (intermediateResult[25:23] > 3'b100) begin  // Overflow
+    if (intermediateResult[M_WIDTH+2:M_WIDTH] > 3'b100) begin  // Overflow
       stickyBit = 2'b11;
-    end else if ((intermediateResult[25:23] == 3'b100) && intermediateResult[22]) begin
+    end else if ((intermediateResult[M_WIDTH+2:M_WIDTH] == 3'b100) && intermediateResult[22]) begin
       stickyBit = 2'b10;
-    end else stickyBit = intermediateResult[22:21];
+    end else stickyBit = intermediateResult[M_WIDTH-1:M_WIDTH-2];
   end
 
   // Round the result
-  logic [24:0] roundedResult;
+  logic [M_WIDTH+1:0] roundedResult;
   always_comb begin
-    if (intermediateResult[24:23] == 2'b11) begin  // Round up
-      roundedResult = intermediateResult[23:0] + 1;
-    end else if (intermediateResult[24:23] == 2'b10 && intermediateResult[22]) begin // Round to even
-      roundedResult = intermediateResult[23:0] + 1;
-    end else roundedResult = intermediateResult[23:0];
+    if (intermediateResult[M_WIDTH+1:M_WIDTH] == 2'b11) begin  // Round up
+      roundedResult = intermediateResult[M_WIDTH:0] + 1;
+    end else if (intermediateResult[M_WIDTH+1:M_WIDTH] == 2'b10 && intermediateResult[M_WIDTH-1]) begin // Round to even
+      roundedResult = intermediateResult[M_WIDTH:0] + 1;
+    end else roundedResult = intermediateResult[M_WIDTH:0];
   end
 
   // Normalize Mantissa
-  logic [24:0] normalizedResult;
+  logic [M_WIDTH+1:0] normalizedResult;
   always_comb begin
-    if (roundedResult[24]) begin  // Overflow
-      normalizedResult = {roundedResult[23], roundedResult[22:0]} >> 1;
-    end else if (roundedResult[23:0] == 24'b0) begin  // Underflow
-      normalizedResult = {1'b0, roundedResult[22:0]} << 1;
+    if (roundedResult[M_WIDTH+1]) begin  // Overflow
+      normalizedResult = {roundedResult[M_WIDTH], roundedResult[M_WIDTH-1:0]} >> 1;
+    end else if (roundedResult[M_WIDTH:0] == 24'b0) begin  // Underflow
+      normalizedResult = {1'b0, roundedResult[M_WIDTH-1:0]} << 1;
     end else normalizedResult = roundedResult;
   end
 
   // Concatenate sign, exponent, and mantissa to get the result
   always_comb begin
-    if (normalizedResult[24]) signResult = signA;
+    if (normalizedResult[M_WIDTH+1]) signResult = signA;
     else signResult = signB;
 
     exponentResult = newExponent;
-    mantissaResult = normalizedResult[23:0] + stickyBit;
+    mantissaResult = normalizedResult[M_WIDTH:0] + stickyBit;
   end
 
-  logic [31:0] normalResult;
+  logic [BIT_WIDTH-1:0] normalResult;
   assign normalResult = {signResult, exponentResult, mantissaResult};
 
   // choose between normal output and special output
   cmn_Mux2 #(
-    .p_nbits(32)
+    .p_nbits(BIT_WIDTH)
   ) output_mux (
     .in0(normalResult),
     .in1(specialResult),

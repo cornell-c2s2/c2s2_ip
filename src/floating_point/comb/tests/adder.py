@@ -8,10 +8,10 @@ from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib.test_utils import run_test_vector_sim
 from pymtl3.stdlib.test_utils import mk_test_case_table
 from pymtl3.stdlib import stream
-from src.floating_point.comb.harnesses.adder import CombFloatAdder
+from src.floating_point.comb.harnesses.adder import CombFloatAdderWrapper
 
 
-# Creates a test harness class for the `CombFloatMultiplier` module.
+# Creates a test harness class for the `CombFloatAdder` module.
 class Harness(Component):
     def construct(s, harness):
         s.harness = harness
@@ -21,8 +21,8 @@ class Harness(Component):
         s.sink = stream.SinkRTL(mk_bits(32))
 
         # connect the harness to the python wrapper
-        s.src0.send //= s.harness.a
-        s.src1.send //= s.harness.b
+        s.src0.send //= s.harness.in0
+        s.src1.send //= s.harness.in1
         s.harness.out //= s.sink.out
 
     def done(s):
@@ -31,7 +31,7 @@ class Harness(Component):
 
 # Initialize a simulatable model
 def create_model():
-    model = CombFloatAdder()
+    model = CombFloatAdderWrapper()
 
     # Create a harness wrapping our `CombFloatAdder` module.
     return Harness(model)
@@ -52,8 +52,31 @@ def test_simple():
     model = create_model()
 
     run_test_vector_sim(
-        CombFloatAdder(),
-        [("a b out"), [int_as_f32(1), int_as_f32(1), int_as_f32(2)]],
+        CombFloatAdderWrapper(32, 23, 8),  # dut
+        [("in0 in1 out"), [int_as_f32(1), int_as_f32(1), int_as_f32(2)]],
+        cmdline_opts={},
+    )
+
+
+def test_larger():
+    # Create our model.
+    model = create_model()
+    run_test_vector_sim(
+        CombFloatAdderWrapper(32, 23, 8),  # dut
+        [("in0 in1 out"), [int_as_f32(5), int_as_f32(6), int_as_f32(11)]],
+        cmdline_opts={},
+    )
+
+
+def test_infinity():
+    # Create our model.
+    model = create_model()
+    run_test_vector_sim(
+        CombFloatAdderWrapper(32, 23, 8),  # dut
+        [
+            ("in0 in1 out"),
+            [int_as_f32(4286578688), int_as_f32(6), int_as_f32(4286578688)],
+        ],
         cmdline_opts={},
     )
 
@@ -72,7 +95,7 @@ def test_with_berkeley_library(testfloat_gen):
     testfloat_data = [test_case[0:3] for test_case in testfloat_data]
 
     run_test_vector_sim(
-        CombFloatAdder(32),  # dut
-        [("a b out"), *testfloat_data],  # test cases
+        CombFloatAdderWrapper(32, 23, 8),  # dut
+        [("in0 in1 out"), *testfloat_data],  # test cases
         cmdline_opts={},
     )
