@@ -31,7 +31,7 @@ module Wishbone  #(
 );
 
   localparam   [31:0]  BASE_ADDRESS    = 32'h3000_0000;        // base address
-  localparam   [31:0]  FFT_ADDRESS     = BASE_ADDRES+4;
+  localparam   [31:0]  FFT_ADDRESS     = BASE_ADDRESS+4;
   assign wbs_dat_o = 32'b0;
 endmodule
 
