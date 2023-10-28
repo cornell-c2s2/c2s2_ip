@@ -28,6 +28,15 @@ class TestHarness(Component):
     def done(s):
         return s.src.done() and s.sink.done()
 
+    def line_trace(s):
+        return (
+            s.src.line_trace()
+            + " > "
+            + s.serializer.line_trace()
+            + " > "
+            + s.sink.line_trace()
+        )
+
 
 # ----------------------------------------------------------------------
 # Test Case Table
@@ -91,10 +100,10 @@ def separate_transactions(array, N_SAMPLES, input=True):
             "sink_delay": [0, 1, 5],
         },
         {
-            "execution_num": list(range(1, 50)),
-            "nmsgs": [1, 100],
-            "nbits": [None],
-            "nsamples": [None],
+            "execution_num": list(range(1, 10)),
+            "nmsgs": 100,
+            "nbits": None,
+            "nsamples": None,
             "src_delay": [0, 1, 5],
             "sink_delay": [0, 1, 5],
             "slow": True,

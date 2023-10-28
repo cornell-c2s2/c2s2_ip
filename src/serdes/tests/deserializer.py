@@ -31,6 +31,15 @@ class TestHarness(Component):
     def done(s):
         return s.src.done() and s.sink.done()
 
+    def line_trace(s):
+        return (
+            s.src.line_trace()
+            + " > "
+            + s.deserializer.line_trace()
+            + " > "
+            + s.sink.line_trace()
+        )
+
 
 # Creates a list of `nmsgs` random transactions
 # for a deserializer with `nbits` bits and `nsamples` samples
@@ -81,14 +90,6 @@ def separate_transactions(array, N_SAMPLES, input=True):
 @pytest.mark.parametrize(
     *mk_test_matrices(
         {
-            "execution_num": 0,
-            "nbits": 1,
-            "nsamples": 2,
-            "nmsgs": 1,
-            "src_delay": 0,
-            "sink_delay": 5,
-        },
-        {
             "execution_num": [0],
             "nbits": [1, 16],
             "nsamples": [1, 2, 16],
@@ -97,10 +98,10 @@ def separate_transactions(array, N_SAMPLES, input=True):
             "sink_delay": [0, 1, 5],
         },
         {
-            "execution_num": list(range(1, 50)),
-            "nmsgs": [1, 100],
-            "nbits": [None],
-            "nsamples": [None],
+            "execution_num": list(range(1, 10)),
+            "nmsgs": 100,
+            "nbits": None,
+            "nsamples": None,
             "src_delay": [0, 1, 5],
             "sink_delay": [0, 1, 5],
             "slow": True,

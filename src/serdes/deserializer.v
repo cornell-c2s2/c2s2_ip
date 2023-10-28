@@ -50,7 +50,7 @@ module Deserializer #(
         cmn_EnResetReg #(BIT_WIDTH) register (
           .clk(clk),
           .reset(reset),
-          .en(en_sel[i]),
+          .en(recv_rdy & en_sel[i]),
           .d(recv_msg),
           .q(send_msg[i])
         );
