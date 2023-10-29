@@ -1167,10 +1167,6 @@ def test(request, test_params, cmdline_opts):
 
     run_sim(
         th,
-        cmdline_opts={
-            "dump_textwave": False,
-            "dump_vcd": f"FFTStage_{request.node.name}",
-            "max_cycles": 10000,
-        },
+        cmdline_opts,
         duts=["fft"],
     )

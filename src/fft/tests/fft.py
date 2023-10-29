@@ -573,7 +573,7 @@ def make_signed(i, n):
 
 
 @pytest.mark.parametrize(**test_case_table)
-def test(request, test_params, cmdline_opts):
+def test(test_params, cmdline_opts):
     th = TestHarness(
         FFTTestHarness(
             test_params.BIT_WIDTH, test_params.DECIMAL_PT, test_params.N_SAMPLES
@@ -609,7 +609,5 @@ def test(request, test_params, cmdline_opts):
         initial_delay=test_params.sink_delay + 3,
         interval_delay=test_params.sink_delay,
     )
-
-    cmdline_opts["dump_vcd"] = f"FFT_{request.node.name}"
 
     run_sim(th, cmdline_opts, duts=["fft"])

@@ -37,7 +37,7 @@ def mk_msg(n, a, b):
         [32, 16, 1, 1],
     ],
 )
-def test_edge(n, d, a, b):
+def test_edge(cmdline_opts, n, d, a, b):
     a = Fixed(a, 1, n, d)
     b = Fixed(b, 1, n, d)
     c = (a * b).resize(None, n, d)
@@ -45,7 +45,7 @@ def test_edge(n, d, a, b):
     test_case = [("a b c* ")]
     test_case.append([a.get(), b.get(), c.get()])
 
-    run_test_vector_sim(MultiplierTestHarness(n, d, 1), test_case, cmdline_opts={})
+    run_test_vector_sim(MultiplierTestHarness(n, d, 1), test_case, cmdline_opts)
 
 
 @pytest.mark.parametrize(
@@ -70,11 +70,11 @@ def test_edge(n, d, a, b):
         [],
     ),
 )
-def test_random(execution_number, sequence_length, n, d):
+def test_random(cmdline_opts, execution_number, sequence_length, n, d):
     random.seed(random.random() + execution_number)
     n, d = rand_fxp_spec(n, d)
     run_test_vector_sim(
         MultiplierTestHarness(n, d, 1),
         gen_random_test_case(n, d, sequence_length),
-        cmdline_opts={},
+        cmdline_opts,
     )

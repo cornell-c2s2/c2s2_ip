@@ -134,7 +134,7 @@ def test_edge(n, d, a, b, cmdline_opts):
         [],
     ),
 )
-def test_random(execution_number, sequence_length, n, d):
+def test_random(cmdline_opts, execution_number, sequence_length, n, d):
     random.seed(random.random() + execution_number)
     n, d = rand_fxp_spec(n, d)
     dat = [(rand_cfixed(n, d), rand_cfixed(n, d)) for i in range(sequence_length)]
@@ -149,21 +149,19 @@ def test_random(execution_number, sequence_length, n, d):
 
     dat = [mk_msg(n, i[0].get(), i[1].get()) for i in dat]
 
-    model.set_param("top.src.construct", msgs=dat, initial_delay=5, interval_delay=5)
+    model.set_param("top.src.construct", msgs=dat, initial_delay=0, interval_delay=0)
 
     model.set_param(
         "top.sink.construct",
         msgs=[mk_ret(n, c.get()) for c in solns],
-        initial_delay=5,
-        interval_delay=5,
+        initial_delay=0,
+        interval_delay=0,
     )
 
     run_sim(
         model,
         cmdline_opts={
-            "dump_textwave": False,
-            # "dump_vcd": f"rand_{execution_number}_{sequence_length}_{n}_{d}",
-            "dump_vcd": False,
+            **cmdline_opts,
             "max_cycles": (
                 30 + (3 * (n + 2) + 2) * len(dat)
             ),  # makes sure the time taken grows linearly with respect to 3n
