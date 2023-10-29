@@ -40,7 +40,7 @@ vscode:
 	@printf "${YELLOW}Run ${RED}source .venv/bin/activate${YELLOW} to activate your virtual environment.${RESET}\n"
 
 
-install: --pull code .venv
+install: --pull vscode .venv
 
 --parse-name:
 	@printf "${CYAN}"
