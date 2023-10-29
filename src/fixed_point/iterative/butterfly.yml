@@ -1,0 +1,21 @@
+FILE: butterfly.v
+TOP_MODULE: Butterfly
+CONFIG:
+# First macro (n=32, d=16, with multiplier)
+# DESIGN_NAME can be skipped here as it is taken from TOP_MODULE
+# Documentation on parameters here: https://openlane.readthedocs.io/en/latest/reference/configuration.html
+  - SYNTH_PARAMETERS: 
+      n: 32
+      d: 16
+      mult: 0
+    CLOCK_PERIOD: 10
+    CLOCK_PORT: clk
+    PL_TARGET_DENSITY: 0.8
+# Second macro (n=32, d=16, omega=1)
+  - SYNTH_PARAMETERS: 
+      n: 32
+      d: 16
+      mult: 1
+    CLOCK_PERIOD: 10
+    CLOCK_PORT: clk
+    PL_TARGET_DENSITY: 0.8

@@ -77,7 +77,7 @@ def rand_cfixed(n, d):
         (6, 3, (3, 3), (3, 3)),  # overflow check
     ],
 )
-def test_edge(n, d, a, b):
+def test_edge(cmdline_opts, n, d, a, b):
     a = CFixed(a, n, d)
     b = CFixed(b, n, d)
 
@@ -99,7 +99,7 @@ def test_edge(n, d, a, b):
 
     run_sim(
         model,
-        cmdline_opts={"dump_textwave": False, "dump_vcd": "edge", "max_cycles": None},
+        cmdline_opts,
     )
 
     # out = Fixed(int(eval_until_ready(model, a, b)), s, n, d, raw=True)
@@ -135,7 +135,7 @@ def test_edge(n, d, a, b):
         [],
     ),
 )
-def test_random(execution_number, sequence_length, n, d):
+def test_random(cmdline_opts, execution_number, sequence_length, n, d):
     random.seed(random.random() + execution_number)
     n, d = rand_fxp_spec(n, d)
     dat = [(rand_cfixed(n, d), rand_cfixed(n, d)) for i in range(sequence_length)]
@@ -162,9 +162,7 @@ def test_random(execution_number, sequence_length, n, d):
     run_sim(
         model,
         cmdline_opts={
-            "dump_textwave": False,
-            # "dump_vcd": f"rand_{execution_number}_{sequence_length}_{n}_{d}",
-            "dump_vcd": False,
+            **cmdline_opts,
             "max_cycles": (
                 30 + (3 * (n + 2) + 2) * len(dat)
             ),  # makes sure the time taken grows linearly with respect to 3n
