@@ -146,4 +146,5 @@ def test_deserializer(p, cmdline_opts):
             "max_cycles": nmsgs * (nsamples + 1) * (1 + max(p.src_delay, p.sink_delay))
             + 10,
         },
+        duts=["deserializer"],
     )
