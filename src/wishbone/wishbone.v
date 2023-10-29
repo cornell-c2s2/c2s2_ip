@@ -8,10 +8,8 @@
 module Wishbone #(
   parameter n_modules = 1
 ) (
-  // Wishbone Slave ports (WB MI A)
-  input  logic [n_modules-1:0] i_stream_rdy,
-  output logic [n_modules-1:0] i_stream_val,
 
+  // Wishbone Slave ports (WB MI A)
   input logic clk,
   input logic reset,
   input logic wbs_stb_i,
@@ -20,15 +18,16 @@ module Wishbone #(
   input logic [3:0] wbs_sel_i,
   input logic [31:0] wbs_dat_i,
   input logic [31:0] wbs_adr_i,
-
-  output logic [n_modules-1:0] o_stream_rdy,
-  input  logic [n_modules-1:0] o_stream_val,
-
-  input  logic [31:0] o_stream_data,
-  output logic [31:0] i_stream_data,
-
   output logic wbs_ack_o,
-  output logic [31:0] wbs_dat_o
+  output logic [31:0] wbs_dat_o,
+
+  // Ports to connect to modules
+  input logic [n_modules-1:0] i_stream_rdy,
+  output logic [n_modules-1:0] i_stream_val,
+  output logic [n_modules-1:0] o_stream_rdy,
+  input logic [n_modules-1:0] o_stream_val,
+  input logic [31:0] o_stream_data,
+  output logic [31:0] i_stream_data
 
 );
 
