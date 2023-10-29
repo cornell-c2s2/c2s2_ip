@@ -4,7 +4,11 @@ from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
-from src.fixed_point.iterative.harnesses.butterfly import HarnessVRTL
+from src.fixed_point.iterative.harnesses.butterfly import (
+    Butterfly,
+    mk_butterfly_input,
+    mk_butterfly_output,
+)
 from src.fixed_point.iterative.tests.complex_multiplier import cmul
 import random
 from tools.pymtl_extensions import mk_packed
@@ -61,26 +65,19 @@ def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
 
 
 # Test harness for streaming data
-class Harness(Component):
-    def construct(s, mult, n):
-        s.mult = mult
+class TestHarness(Component):
+    def construct(s, nbits, ndecimalbits):
+        s.mult = Butterfly(nbits, ndecimalbits)
 
-        s.src = stream.SourceRTL(mk_bits(6 * n))
+        s.src = stream.SourceRTL(mk_butterfly_input(nbits))
 
-        s.sink = stream.SinkRTL(mk_bits(4 * n))
+        s.sink = stream.SinkRTL(mk_butterfly_output(nbits))
 
         s.src.send //= s.mult.recv
         s.mult.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
-
-
-# Initialize a simulatable model
-def create_model(n, d, mult=0):
-    model = HarnessVRTL(n, d, mult)
-
-    return Harness(model, n)
 
 
 # return a random fixed point value
@@ -103,12 +100,12 @@ def rand_cfixed(n, d):
         (6, 3, (3, 3), (3, 3), (1, 0)),  # overflow check
     ],
 )
-def test_edge(n, d, a, b, w):
+def test_edge(cmdline_opts, n, d, a, b, w):
     a = CFixed(a, n, d)
     b = CFixed(b, n, d)
     w = CFixed(w, n, d)
 
-    model = create_model(n, d)
+    model = TestHarness(n, d)
 
     model.set_param(
         "top.src.construct",
@@ -128,14 +125,9 @@ def test_edge(n, d, a, b, w):
 
     run_sim(
         model,
-        cmdline_opts={"dump_textwave": False, "dump_vcd": "edge", "max_cycles": None},
+        cmdline_opts,
+        duts=["mult"],
     )
-
-    # out = Fixed(int(eval_until_ready(model, a, b)), s, n, d, raw=True)
-
-    # c = (a * b).resize(s, n, d)
-    # print("%s * %s = %s, got %s" % (a.bin(dot=True), b.bin(dot=True), c.bin(dot=True), out.bin(dot=True)))
-    # assert c.bin() == out.bin()
 
 
 @pytest.mark.parametrize(
@@ -163,7 +155,7 @@ def test_edge(n, d, a, b, w):
     ),
 )
 def test_random(
-    execution_number, sequence_length, n, d, m
+    cmdline_opts, execution_number, sequence_length, n, d, m
 ):  # test individual and sequential multiplications to assure stream system works
     random.seed(random.random() + execution_number)
     n, d = rand_fxp_spec(n, d)
@@ -191,12 +183,12 @@ def test_random(
     run_sim(
         model,
         cmdline_opts={
-            "dump_textwave": False,
-            "dump_vcd": f"rand_{execution_number}_{sequence_length}_{n}_{d}_m",
+            **cmdline_opts,
             "max_cycles": (
                 30 + ((n + 2) * 3 + 4) * len(dat)
             ),  # makes sure the time taken grows linearly with respect to n
         },
+        duts=["mult"],
     )
 
 
@@ -226,7 +218,7 @@ def test_random(
     ),
 )
 def test_optimizations(
-    execution_number, sequence_length, n, d, m
+    cmdline_opts, execution_number, sequence_length, n, d, m
 ):  # test modules without multiplication
     random.seed(random.random() + execution_number)
     n, d = rand_fxp_spec(n, d)
@@ -254,11 +246,10 @@ def test_optimizations(
     run_sim(
         model,
         cmdline_opts={
-            "dump_textwave": False,
-            # "dump_vcd": f"opt_{execution_number}_{sequence_length}_{n}_{d}_{m}",
-            "dump_vcd": False,
+            **cmdline_opts,
             "max_cycles": (
                 30 + 6 * len(dat)
             ),  # makes sure the time taken grows constantly
         },
+        duts=["mult"],
     )

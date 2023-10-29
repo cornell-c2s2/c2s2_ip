@@ -107,4 +107,4 @@ def test_router(execution_num, nbits, noutputs, nmsgs, cmdline_opts):
             interval_delay=0,
         )
 
-    run_sim(model, cmdline_opts)
+    run_sim(model, cmdline_opts, duts=["dut"])

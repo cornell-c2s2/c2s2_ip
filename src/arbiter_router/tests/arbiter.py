@@ -132,5 +132,4 @@ def test_arbiter(execution_num, nbits, ninputs, nmsgs, delay, cmdline_opts):
         interval_delay=0,
     )
 
-    config_model_with_cmdline_opts(model, cmdline_opts, ["dut"])
-    run_sim(model, cmdline_opts)
+    run_sim(model, cmdline_opts, duts=["dut"])

@@ -181,6 +181,7 @@ def test_arbiter_router(execution_num, nbits, nblocks, nmsgs, delay, cmdline_opt
             **cmdline_opts,
             "max_cycles": nmsgs * nblocks * (delay + 1) + 10,
         },
+        duts=["arbiter", "router"],
     )
 
 
@@ -214,4 +215,5 @@ def test_router_arbiter(execution_num, nbits, nblocks, nmsgs, delay, cmdline_opt
             **cmdline_opts,
             "max_cycles": nmsgs * nblocks * (delay + 1) + 10,
         },
+        duts=["arbiter", "router"],
     )
