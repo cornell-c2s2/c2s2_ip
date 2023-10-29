@@ -182,10 +182,20 @@ endif
 # ------------------------------------------------------------------------------
 CARAVEL_DOCKER_IMAGE = $(shell docker build -q - < .docker/caravel.Dockerfile)
 caravel:
+ifndef PDK_ROOT
+	@printf "${RED} [ERROR] PDK_ROOT environment variable not set!\n - Make sure you have sourced ${YELLOW}setup-c2s2.sh${RED}.${RESET}\n"
+	@exit 1
+endif
+ifndef OPENLANE_ROOT
+	@printf "${RED} [ERROR] OPENLANE_ROOT environment variable not set!\n - Make sure you have sourced ${YELLOW}setup-c2s2.sh${RED}.${RESET}\n"
+	@exit 1
+endif
 	@docker run --rm -it \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v ${PWD}:/home/c2s2_ip \
-		-w /home/c2s2_ip \
+		-v ${PDK_ROOT}:/pdk:ro \
+		-v ${OPENLANE_ROOT}:/openlane:ro \
+		-v ${PWD}:/c2s2_ip:ro \
+		-w /caravel \
 		${CARAVEL_DOCKER_IMAGE}
 
 # ------------------------------------------------------------------------------
@@ -193,3 +203,4 @@ caravel:
 # ------------------------------------------------------------------------------
 new_ip: new-ip
 check_ip: check-ip
+testfloat-gen: testfloat_gen
