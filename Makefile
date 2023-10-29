@@ -178,6 +178,17 @@ else
 endif
 
 # ------------------------------------------------------------------------------
+# Run Caravel in an interactive docker shell
+# ------------------------------------------------------------------------------
+CARAVEL_DOCKER_IMAGE = $(shell docker build -q - < .docker/caravel.Dockerfile)
+caravel:
+	@docker run --rm -it \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v ${PWD}:/home/c2s2_ip \
+		-w /home/c2s2_ip \
+		${CARAVEL_DOCKER_IMAGE}
+
+# ------------------------------------------------------------------------------
 # Redundant rules to help with user typos
 # ------------------------------------------------------------------------------
 new_ip: new-ip
