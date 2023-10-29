@@ -11,7 +11,7 @@ from src.fixed_point.iterative.harnesses.butterfly import (
 )
 from src.fixed_point.iterative.tests.complex_multiplier import cmul
 import random
-from tools.pymtl_extensions import mk_packed
+from tools.utils import mk_packed
 from src.fixed_point.tools.params import rand_fxp_spec
 
 
@@ -66,8 +66,8 @@ def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
 
 # Test harness for streaming data
 class TestHarness(Component):
-    def construct(s, nbits, ndecimalbits):
-        s.mult = Butterfly(nbits, ndecimalbits)
+    def construct(s, nbits, ndecimalbits, m=0):
+        s.mult = Butterfly(nbits, ndecimalbits, m)
 
         s.src = stream.SourceRTL(mk_butterfly_input(nbits))
 
@@ -167,7 +167,7 @@ def test_random(
     ]
     solns = [butterfly(n, d, i[0], i[1], i[2]) for i in dat]
 
-    model = create_model(n, d)
+    model = TestHarness(n, d)
 
     dat = [mk_msg(n, i[0].get(), i[1].get(), i[2].get()) for i in dat]
 
@@ -230,7 +230,7 @@ def test_optimizations(
     ]
     solns = [butterfly(n, d, i[0], i[1], opt_omega[m - 1]) for i in dat]
 
-    model = create_model(n, d, m)
+    model = TestHarness(n, d, m)
 
     dat = [mk_msg(n, i[0].get(), i[1].get(), i[2].get()) for i in dat]
 
@@ -239,8 +239,8 @@ def test_optimizations(
     model.set_param(
         "top.sink.construct",
         msgs=[mk_ret(n, c.get(), d.get()) for (c, d) in solns],
-        initial_delay=5,
-        interval_delay=5,
+        initial_delay=0,
+        interval_delay=0,
     )
 
     run_sim(
