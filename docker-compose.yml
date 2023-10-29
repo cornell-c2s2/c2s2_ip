@@ -1,0 +1,9 @@
+services:
+  caravel:
+    build:
+      context: .
+      dockerfile: .docker/caravel.Dockerfile
+  testfloat:
+    build:
+      context: .
+      dockerfile: .docker/testfloat.Dockerfile
