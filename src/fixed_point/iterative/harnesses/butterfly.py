@@ -66,22 +66,22 @@ class Butterfly(VerilogPlaceholder, Component):
 
 class ButterflyHarness(Component):
     def construct(s, n, d, mult):
-        s.btfly = Butterfly(n, d, mult)
+        s.dut = Butterfly(n, d, mult)
         s.recv = stream.ifcs.RecvIfcRTL(mk_butterfly_input(n))
-        s.recv.msg.ar //= s.btfly.ar
-        s.recv.msg.ac //= s.btfly.ac
-        s.recv.msg.br //= s.btfly.br
-        s.recv.msg.bc //= s.btfly.bc
-        s.recv.msg.wr //= s.btfly.wr
-        s.recv.msg.wc //= s.btfly.wc
+        s.recv.msg.ar //= s.dut.ar
+        s.recv.msg.ac //= s.dut.ac
+        s.recv.msg.br //= s.dut.br
+        s.recv.msg.bc //= s.dut.bc
+        s.recv.msg.wr //= s.dut.wr
+        s.recv.msg.wc //= s.dut.wc
 
-        s.recv.val //= s.btfly.recv_val
-        s.btfly.recv_rdy //= s.recv.rdy
+        s.recv.val //= s.dut.recv_val
+        s.dut.recv_rdy //= s.recv.rdy
         s.send = stream.ifcs.SendIfcRTL(mk_butterfly_output(n))
-        s.btfly.cr //= s.send.msg.cr
-        s.btfly.cc //= s.send.msg.cc
-        s.btfly.dr //= s.send.msg.dr
-        s.btfly.dc //= s.send.msg.dc
+        s.dut.cr //= s.send.msg.cr
+        s.dut.cc //= s.send.msg.cc
+        s.dut.dr //= s.send.msg.dr
+        s.dut.dc //= s.send.msg.dc
 
-        s.btfly.send_val //= s.send.val
-        s.send.rdy //= s.btfly.send_rdy
+        s.dut.send_val //= s.send.val
+        s.send.rdy //= s.dut.send_rdy

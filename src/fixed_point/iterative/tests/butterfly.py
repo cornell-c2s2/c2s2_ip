@@ -67,13 +67,13 @@ def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
 # Test harness for streaming data
 class TestHarness(Component):
     def construct(s, nbits, ndecimalbits, m=0):
-        s.mult = ButterflyHarness(nbits, ndecimalbits, m)
+        s.dut = ButterflyHarness(nbits, ndecimalbits, m)
 
         s.src = stream.SourceRTL(mk_butterfly_input(nbits))
         s.sink = stream.SinkRTL(mk_butterfly_output(nbits))
 
-        s.src.send //= s.mult.recv
-        s.mult.send //= s.sink.recv
+        s.src.send //= s.dut.recv
+        s.dut.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
@@ -125,7 +125,7 @@ def test_edge(cmdline_opts, n, d, a, b, w):
     run_sim(
         model,
         cmdline_opts,
-        duts=["mult"],
+        duts=["dut"],
     )
 
 
@@ -250,5 +250,5 @@ def test_optimizations(
                 30 + 6 * len(dat)
             ),  # makes sure the time taken grows constantly
         },
-        duts=["mult"],
+        duts=["dut"],
     )

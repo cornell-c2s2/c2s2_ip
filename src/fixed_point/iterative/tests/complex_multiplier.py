@@ -4,7 +4,11 @@ from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
-from src.fixed_point.iterative.harnesses.complex_multiplier import HarnessVRTL
+from src.fixed_point.iterative.harnesses.complex_multiplier import (
+    ComplexMultiplierHarness,
+    mk_complex_multiplier_input,
+    mk_complex_multiplier_output,
+)
 import random
 from tools.utils import mk_packed
 from src.fixed_point.tools.params import mk_params, rand_fxp_spec
@@ -24,36 +28,28 @@ def cmul(n, d, a, b):
 
 # Merge a and b into a single bus
 def mk_msg(n, a, b):
-    return mk_packed(n)(a[0], a[1], b[0], b[1])
+    return mk_complex_multiplier_input(n)(*a, *b)
 
 
 # Merge the real and imaginary parts of c into one bus
 def mk_ret(n, c):
-    return mk_packed(n)(c[0], c[1])
+    return mk_complex_multiplier_output(n)(*c)
 
 
 # Test harness for streaming data
-class Harness(Component):
-    def construct(s, mult, n):
-        s.mult = mult
+class TestHarness(Component):
+    def construct(s, n, d):
+        s.dut = ComplexMultiplierHarness(n, d)
 
-        s.src = stream.SourceRTL(mk_bits(4 * n))
-
-        s.sink = stream.SinkRTL(mk_bits(2 * n))
+        s.src = stream.SourceRTL(mk_complex_multiplier_input(n))
+        s.sink = stream.SinkRTL(mk_complex_multiplier_output(n))
 
         # Hook up source to receiver and sink to sender
-        s.src.send //= s.mult.recv
-        s.mult.send //= s.sink.recv
+        s.src.send //= s.dut.recv
+        s.dut.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
-
-
-# Initialize a simulatable model
-def create_model(n, d):
-    model = HarnessVRTL(n, d)
-
-    return Harness(model, n)
 
 
 # return a random fixed point value
@@ -81,7 +77,7 @@ def test_edge(cmdline_opts, n, d, a, b):
     a = CFixed(a, n, d)
     b = CFixed(b, n, d)
 
-    model = create_model(n, d)
+    model = TestHarness(n, d)
 
     model.set_param(
         "top.src.construct",
@@ -97,13 +93,7 @@ def test_edge(cmdline_opts, n, d, a, b):
         interval_delay=0,
     )
 
-    run_sim(model, cmdline_opts, duts=["mult"])
-
-    # out = Fixed(int(eval_until_ready(model, a, b)), s, n, d, raw=True)
-
-    # c = (a * b).resize(s, n, d)
-    # print("%s * %s = %s, got %s" % (a.bin(dot=True), b.bin(dot=True), c.bin(dot=True), out.bin(dot=True)))
-    # assert c.bin() == out.bin()
+    run_sim(model, cmdline_opts, duts=["dut"])
 
 
 # Test individual and sequential multiplications to assure stream system works
@@ -143,7 +133,7 @@ def test_random(cmdline_opts, execution_number, sequence_length, n, d):
         [i.bin(dot=True) for i in solns],
     )
 
-    model = create_model(n, d)
+    model = TestHarness(n, d)
 
     dat = [mk_msg(n, i[0].get(), i[1].get()) for i in dat]
 
@@ -164,5 +154,5 @@ def test_random(cmdline_opts, execution_number, sequence_length, n, d):
                 30 + (3 * (n + 2) + 2) * len(dat)
             ),  # makes sure the time taken grows linearly with respect to 3n
         },
-        duts=["mult"],
+        duts=["dut"],
     )

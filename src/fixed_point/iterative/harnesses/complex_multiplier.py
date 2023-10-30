@@ -1,23 +1,74 @@
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.passes.backends.verilog import *
+from os import path
 
 
-class HarnessVRTL(VerilogPlaceholder, Component):
+def mk_complex_multiplier_input(nbits):
+    @bitstruct
+    class ComplexMultiplierInput:
+        ar: mk_bits(nbits)
+        ac: mk_bits(nbits)
+        br: mk_bits(nbits)
+        bc: mk_bits(nbits)
+
+    return ComplexMultiplierInput
+
+
+def mk_complex_multiplier_output(nbits):
+    @bitstruct
+    class ComplexMultiplierOutput:
+        cr: mk_bits(nbits)
+        cc: mk_bits(nbits)
+
+    return ComplexMultiplierOutput
+
+
+class ComplexMultiplier(VerilogPlaceholder, Component):
     # Constructor
 
-    def construct(s, n=32, d=16):
+    def construct(s, n, d):
         # Interface
+        s.ar = InPort(mk_bits(n))
+        s.ac = InPort(mk_bits(n))
+        s.br = InPort(mk_bits(n))
+        s.bc = InPort(mk_bits(n))
 
-        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(4 * n))
-        s.send = stream.ifcs.SendIfcRTL(mk_bits(2 * n))
+        s.cr = OutPort(mk_bits(n))
+        s.cc = OutPort(mk_bits(n))
+
+        s.recv_val = InPort()
+        s.recv_rdy = OutPort()
+        s.send_val = OutPort()
+        s.send_rdy = InPort()
 
         # Source file path
         # The ../ is necessary here because pytest is run from the build directory
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            "../src/fixed_point/iterative/harnesses/complex_multiplier.v",
+            path.join(path.dirname(__file__), "../complex_multiplier.v"),
         )
 
         # Name of the top level module to be imported
-        s.set_metadata(VerilogPlaceholderPass.top_module, "HarnessFXPICM")
+        s.set_metadata(
+            VerilogPlaceholderPass.top_module, "FixedPointIterativeComplexMultiplier"
+        )
+
+
+class ComplexMultiplierHarness(Component):
+    def construct(s, n, d):
+        s.dut = ComplexMultiplier(n, d)
+        s.recv = stream.ifcs.RecvIfcRTL(mk_complex_multiplier_input(n))
+        s.recv.msg.ar //= s.dut.ar
+        s.recv.msg.ac //= s.dut.ac
+        s.recv.msg.br //= s.dut.br
+        s.recv.msg.bc //= s.dut.bc
+
+        s.recv.val //= s.dut.recv_val
+        s.dut.recv_rdy //= s.recv.rdy
+        s.send = stream.ifcs.SendIfcRTL(mk_complex_multiplier_output(n))
+        s.dut.cr //= s.send.msg.cr
+        s.dut.cc //= s.send.msg.cc
+
+        s.dut.send_val //= s.send.val
+        s.send.rdy //= s.dut.send_rdy
