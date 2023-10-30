@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.11"]
-        pytest-flags: ["", "-m \"not slow\"", "--test-yosys-verilog=rand"]
+        pytest-flags: ["", "-m \"not slow\"", "--test-verilog=rand"]
     name: pytest ${{ matrix.pytest-flags }}
     steps:
       - name: Checkout
