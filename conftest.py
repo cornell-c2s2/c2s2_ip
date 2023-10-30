@@ -9,7 +9,7 @@ from os import path
 import os
 import numpy as np
 import subprocess
-from tempfile import NamedTemporaryFile
+from tempfile import TemporaryDirectory
 
 
 def pytest_addoption(parser):
@@ -67,34 +67,48 @@ def dump_asm(request):
 # Returns a list of lists, where each inner list is a row of numbers referring to the arguments of the test case.
 @pytest.fixture()
 def testfloat_gen(request):
+    root_dir = request.config.rootdir
+
     def testfloat_gen(func, level=1, seed=0xDEADBEEF, n=None, extra_args=""):
-        tfile = NamedTemporaryFile()
-        dir, file = path.split(tfile.name())
+        nonlocal root_dir
 
-        args_n = "" if n is None else f"-n {n}"
-        args = f"-seed {seed} -level {level} {args_n}{extra_args}"
+        with TemporaryDirectory() as dir:
+            output_file = "testfloat_gen"
+            args_n = "" if n is None else f"-n {n}"
+            args = f"-seed {seed} -level {level} {args_n}{extra_args}"
 
-        # Run the testfloat generator
-        testfloat_gen_cmd = f"make testfloat_gen FUNC={func} BUILD_DIR={dir} OUTPUT_FILE={file} EXTRA_ARGS='{args}'"
-        testfloat_gen_proc = subprocess.Popen(testfloat_gen_cmd, start_new_session=True)
-
-        # Wait for the testfloat generator to finish
-        testfloat_gen_timeout = 120
-        try:
-            testfloat_gen_proc.wait(timeout=testfloat_gen_timeout)
-        except subprocess.TimeoutExpired:
-            print(
-                f"Testfloat generator timed out after {testfloat_gen_timeout} seconds."
+            # Run the testfloat generator
+            testfloat_gen_cmd = [
+                "make",
+                "testfloat_gen",
+                f"FUNC={func}",
+                f"BUILD_DIR={dir}",
+                f"OUTPUT_FILE={output_file}",
+                f"EXTRA_ARGS={args}",
+            ]
+            testfloat_gen_proc = subprocess.Popen(
+                testfloat_gen_cmd,
+                start_new_session=True,
+                cwd=root_dir,
+                stdout=subprocess.DEVNULL,
             )
-            os.killpg(os.getpgid(testfloat_gen_proc.pid), signal.SIGTERM)
-            return None
 
-        # Read the testfloat generator output
-        testfloat_gen = []
-        with open(tfile.name(), "r") as f:
-            for line in f:
-                testfloat_gen.append([int(x, 16) for x in line.split()])
+            # Wait for the testfloat generator to finish
+            testfloat_gen_timeout = 120
+            try:
+                testfloat_gen_proc.wait(timeout=testfloat_gen_timeout)
+            except subprocess.TimeoutExpired:
+                print(
+                    f"Testfloat generator timed out after {testfloat_gen_timeout} seconds."
+                )
+                os.killpg(os.getpgid(testfloat_gen_proc.pid), signal.SIGTERM)
+                return None
 
-        tfile.close()
+            # Read the testfloat generator output
+            data = []
+            with open(path.join(dir, output_file), "r") as f:
+                for line in f:
+                    data.append([int(x, 16) for x in line.split()])
+        return data
 
     return testfloat_gen
