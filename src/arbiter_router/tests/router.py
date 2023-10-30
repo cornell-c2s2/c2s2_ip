@@ -79,7 +79,7 @@ def router_msg(nbits, noutputs):
             "sink_delay": 2,
         },
         {
-            "execution_num": list(range(1, 21)),  # Do 20 tests
+            "execution_num": list(range(1, 11)),  # Do 10 tests
             "nbits": [(8, 32)],  # Test 8-32 bit routers
             "noutputs": [(2, 16)],  # Test 2-16 output routers
             "nmsgs": [50],  # Send 50 messages

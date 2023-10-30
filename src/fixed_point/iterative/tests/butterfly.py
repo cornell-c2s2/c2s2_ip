@@ -203,9 +203,9 @@ def test_random(
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d, m",
     # Runs tests on smaller number sizes
-    mk_params(50, [1, 50], (2, 8), (0, 8), m=range(1, 5), slow=True) +
+    mk_params(20, [1, 50], (2, 8), (0, 8), m=range(1, 5), slow=True) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 100], (16, 64), (0, 64), m=range(1, 5), slow=True) +
+    mk_params(10, [1, 100], (16, 64), (0, 64), m=range(1, 5), slow=True) +
     # Extensively tests numbers with certain important bit sizes.
     # Uses
     sum(

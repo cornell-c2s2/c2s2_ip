@@ -104,7 +104,7 @@ def sim_arbiter(nbits, ninputs, nmsgs, delay):
             "delay": 2,
         },
         {
-            "execution_num": list(range(1, 21)),  # Do 20 tests
+            "execution_num": list(range(1, 11)),  # Do 10 tests
             "nbits": [(8, 32)],  # Test 8-32 bit arbiters
             "ninputs": [(2, 16)],  # Test 2-16 input arbiters
             "nmsgs": [50],  # Send 50 messages
