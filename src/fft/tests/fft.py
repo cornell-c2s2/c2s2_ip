@@ -18,12 +18,13 @@ import math
 
 
 class TestHarness(Component):
-    def construct(s, fft, BIT_WIDTH, DECIMAL_PT, N_SAMPLES):
+    def construct(s, BIT_WIDTH, DECIMAL_PT, N_SAMPLES):
         # Instantiate models
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.sink = stream.SinkRTL(
             mk_bits(BIT_WIDTH),
+            # Compare by approximation
             cmp_fn=lambda a, b: abs(a.int() - b.int()) <= (1 << (DECIMAL_PT // 2)),
         )
         s.dut = FFTWrapper(BIT_WIDTH, DECIMAL_PT, N_SAMPLES)

@@ -4,7 +4,7 @@
 
 `include "fft/helpers/sine_wave.v"
 `include "fft/helpers/bit_reverse.v"
-`include "fft/helpers/fft_stage.v"
+`include "fft/stage.v"
 module fft_FFT #(
   parameter int BIT_WIDTH  = 32,
   parameter int DECIMAL_PT = 16,
