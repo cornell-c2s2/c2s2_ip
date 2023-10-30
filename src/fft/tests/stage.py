@@ -3,8 +3,8 @@ import random
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
-from src.fft.harnesses.fft_stage import FFTStageTestHarness
-from src.fft.tests.fft_sim import fixed_point_fft
+from src.fft.stage import StageWrapper
+from src.fft.tests.sim import fixed_point_fft
 import math
 
 # -------------------------------------------------------------------------
@@ -13,17 +13,22 @@ import math
 
 
 class TestHarness(Component):
-    def construct(s, fft, BIT_WIDTH=32, DECIMAL_PT=16, N_SAMPLES=8, STAGE_FFT=0):
+    def construct(s, BIT_WIDTH=32, DECIMAL_PT=16, N_SAMPLES=8, STAGE_FFT=0):
         # Instantiate models
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.sink = stream.SinkRTL(mk_bits(BIT_WIDTH))
-        s.fft = fft
+        s.dut = StageWrapper(
+            BIT_WIDTH,
+            DECIMAL_PT,
+            N_SAMPLES,
+            STAGE_FFT,
+        )
 
         # Connect
 
-        s.src.send //= s.fft.recv
-        s.fft.send //= s.sink.recv
+        s.src.send //= s.dut.recv
+        s.dut.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
@@ -32,7 +37,7 @@ class TestHarness(Component):
         return (
             s.src.line_trace()
             + " > "
-            + s.fft.line_trace()
+            + s.dut.line_trace()
             + " > "
             + s.sink.line_trace()
         )
@@ -1120,12 +1125,6 @@ def chunk(l, i, n, sep):
 @pytest.mark.parametrize(**test_case_table)
 def test(request, test_params, cmdline_opts):
     th = TestHarness(
-        FFTStageTestHarness(
-            test_params.BIT_WIDTH,
-            test_params.DECIMAL_PT,
-            test_params.N_SAMPLES,
-            test_params.STAGE_FFT,
-        ),
         test_params.BIT_WIDTH,
         test_params.DECIMAL_PT,
         test_params.N_SAMPLES,
@@ -1168,5 +1167,6 @@ def test(request, test_params, cmdline_opts):
     run_sim(
         th,
         cmdline_opts,
-        duts=["fft"],
+        duts=["dut"],
+        print_line_trace=False,  # Turned off because line traces for large modules are very large
     )

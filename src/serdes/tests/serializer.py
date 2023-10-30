@@ -6,7 +6,7 @@ import pytest
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
-from src.serdes.harnesses.serializer import SerializerTestHarnessVRTL
+from src.serdes.serializer import SerializerTestHarnessVRTL
 from tools.utils import mk_test_case_table
 
 # -------------------------------------------------------------------------

@@ -7,7 +7,7 @@ from os import path
 
 class Deserializer(VerilogPlaceholder, Component):
     # Constructor
-    def construct(s, BIT_WIDTH=32, N_SAMPLES=8):
+    def construct(s, BIT_WIDTH, N_SAMPLES):
         # Interface
         s.recv_val = InPort()
         s.recv_rdy = OutPort()

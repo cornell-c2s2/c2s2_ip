@@ -1,6 +1,6 @@
 
-`ifndef FFT_STAGE_VRTL
-`define FFT_STAGE_VRTL
+`ifndef fft_STAGE
+`define fft_STAGE
 
 `include "fft/helpers/twiddle_generator.v"
 `include "fft/helpers/crossbar.v"
@@ -12,7 +12,7 @@
 /// @param DECIMAL_PT The number of decimal bits in each fixed point number
 /// @param N_SAMPLES  The number of samples in the FFT
 /// @param STAGE_FFT  The stage of the FFT to calculate
-module FFTStage #(
+module fft_Stage #(
   parameter int BIT_WIDTH  = 32,
   parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES  = 8,
@@ -66,7 +66,7 @@ module FFTStage #(
   logic                   val_interior_mini      [N_SAMPLES/2 - 1:0];
   logic                   rdy_interior_mini      [N_SAMPLES/2 - 1:0];
 
-  FFTCrossbar #(
+  fft_helpers_Crossbar #(
     .BIT_WIDTH(BIT_WIDTH),
     .SIZE_FFT(N_SAMPLES),
     .STAGE_FFT(STAGE_FFT),
@@ -93,7 +93,7 @@ module FFTStage #(
         (IX == 3 * (N_SAMPLES >> 2))? 3 : 0
       );
 
-      FixedPointIterativeButterfly #(
+      fixed_point_iterative_Butterfly #(
         .n(BIT_WIDTH),
         .d(DECIMAL_PT),
         .mult(MMC)
@@ -126,7 +126,7 @@ module FFTStage #(
 
 
 
-  FFTCrossbar #(
+  fft_helpers_Crossbar #(
     .BIT_WIDTH(BIT_WIDTH),
     .SIZE_FFT(N_SAMPLES),
     .STAGE_FFT(STAGE_FFT),
@@ -142,7 +142,7 @@ module FFTStage #(
     .send_rdy(rdy_out)
   );
 
-  TwiddleGenerator #(
+  fft_helpers_TwiddleGenerator #(
     .BIT_WIDTH (BIT_WIDTH),
     .DECIMAL_PT(DECIMAL_PT),
     .SIZE_FFT  (N_SAMPLES),
