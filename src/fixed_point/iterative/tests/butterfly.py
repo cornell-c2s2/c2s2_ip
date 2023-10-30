@@ -5,7 +5,7 @@ from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
 from src.fixed_point.iterative.harnesses.butterfly import (
-    Butterfly,
+    ButterflyHarness,
     mk_butterfly_input,
     mk_butterfly_output,
 )
@@ -24,12 +24,12 @@ def butterfly(n, d, a, b, w):
 
 # Merge inputs into a single bus
 def mk_msg(n, a, b, w):
-    return mk_packed(n)(*a, *b, *w)
+    return mk_butterfly_input(n)(*a, *b, *w)
 
 
 # Merge outputs into a single bus
 def mk_ret(n, c, d):
-    return mk_packed(n)(*c, *d)
+    return mk_butterfly_output(n)(*c, *d)
 
 
 # Create test parametrization information
@@ -67,10 +67,9 @@ def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
 # Test harness for streaming data
 class TestHarness(Component):
     def construct(s, nbits, ndecimalbits, m=0):
-        s.mult = Butterfly(nbits, ndecimalbits, m)
+        s.mult = ButterflyHarness(nbits, ndecimalbits, m)
 
         s.src = stream.SourceRTL(mk_butterfly_input(nbits))
-
         s.sink = stream.SinkRTL(mk_butterfly_output(nbits))
 
         s.src.send //= s.mult.recv
