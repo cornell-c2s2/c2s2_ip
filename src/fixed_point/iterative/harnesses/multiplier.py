@@ -50,7 +50,7 @@ class Multiplier(VerilogPlaceholder, Component):
         )
 
 
-class MultiplierHarness(Component):
+class MultiplierWrapper(Component):
     def construct(s, n, d):
         s.dut = Multiplier(n, d)
         s.recv = stream.ifcs.RecvIfcRTL(mk_multiplier_input(n))

@@ -1,9 +1,9 @@
 `default_nettype none
-`ifndef SERIALIZER
-`define SERIALIZER
-`include "src/cmn/regs.v"
+`ifndef serdes_SERIALIZER
+`define serdes_SERIALIZER
+`include "cmn/regs.v"
 
-module Serializer #(
+module serdes_Serializer #(
   parameter int BIT_WIDTH = 32,
   parameter int N_SAMPLES = 8
 ) (

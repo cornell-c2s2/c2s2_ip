@@ -2,7 +2,7 @@
 `ifndef FIXED_POINT_COMB_COMPLEX_MULTIPLIER
 `define FIXED_POINT_COMB_COMPLEX_MULTIPLIER
 
-`include "src/fixed_point/combinational/multiplier.v"
+`include "fixed_point/combinational/multiplier.v"
 
 module FixedPointCombComplexMultiplier #(
   parameter int n = 32,  // bit width

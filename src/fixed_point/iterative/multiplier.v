@@ -10,8 +10,8 @@
 `ifndef FIXED_POINT_ITERATIVE_MULTIPLIER
 `define FIXED_POINT_ITERATIVE_MULTIPLIER
 
-`include "src/cmn/muxes.v"
-`include "src/cmn/regs.v"
+`include "cmn/muxes.v"
+`include "cmn/regs.v"
 
 module FixedPointIterativeMultiplier #(
   parameter int n = 32,  // bit width

@@ -7,7 +7,7 @@ from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
 from src.serdes.harnesses.connect import ConnectHarnessVRTL
-from tools.pymtl_extensions import mk_test_case_table
+from tools.utils import mk_test_case_table
 
 # -------------------------------------------------------------------------
 # TestHarness
@@ -105,7 +105,6 @@ test_case_table = mk_test_case_table(
         ),
         ["two_point", two_point, 0, 0, 32, 2],
         ["eight_point", eight_point, 0, 0, 32, 8],
-        # [ "sixteen_point",                   sixteen_point,                             0,        0,         32,       16        ],
     ]
 )
 

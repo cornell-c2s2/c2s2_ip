@@ -1,5 +1,5 @@
 `default_nettype none
-`include "src/serdes/serializer.v"
+`include "serdes/serializer.v"
 
 module SerializerHarness #(
   parameter int BIT_WIDTH = 32,

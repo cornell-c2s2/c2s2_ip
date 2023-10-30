@@ -55,7 +55,7 @@ class ComplexMultiplier(VerilogPlaceholder, Component):
         )
 
 
-class ComplexMultiplierHarness(Component):
+class ComplexMultiplierWrapper(Component):
     def construct(s, n, d):
         s.dut = ComplexMultiplier(n, d)
         s.recv = stream.ifcs.RecvIfcRTL(mk_complex_multiplier_input(n))

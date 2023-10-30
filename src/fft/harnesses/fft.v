@@ -1,7 +1,7 @@
 
-`include "src/fft/fft.v"
-`include "src/serdes/deserializer.v"
-`include "src/serdes/serializer.v"
+`include "fft/fft.v"
+`include "serdes/deserializer.v"
+`include "serdes/serializer.v"
 
 module FFTHarness #(
   parameter int BIT_WIDTH  = 32,

@@ -7,7 +7,7 @@ from pymtl3.stdlib import stream
 from fixedpt import Fixed
 
 from src.fixed_point.iterative.harnesses.multiplier import (
-    MultiplierHarness,
+    MultiplierWrapper,
     mk_multiplier_input,
     mk_multiplier_output,
 )
@@ -19,7 +19,7 @@ from src.fixed_point.tools.params import mk_params, rand_fxp_spec
 # Test harness for streaming data
 class TestHarness(Component):
     def construct(s, n, d):
-        s.dut = MultiplierHarness(n, d)
+        s.dut = MultiplierWrapper(n, d)
 
         s.src = stream.SourceRTL(mk_multiplier_input(n))
         s.sink = stream.SinkRTL(mk_multiplier_output(n))

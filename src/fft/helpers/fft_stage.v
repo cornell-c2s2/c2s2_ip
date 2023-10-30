@@ -2,9 +2,9 @@
 `ifndef FFT_STAGE_VRTL
 `define FFT_STAGE_VRTL
 
-`include "src/fft/helpers/twiddle_generator.v"
-`include "src/fft/helpers/crossbar.v"
-`include "src/fixed_point/iterative/butterfly.v"
+`include "fft/helpers/twiddle_generator.v"
+`include "fft/helpers/crossbar.v"
+`include "fixed_point/iterative/butterfly.v"
 
 
 /// Performs one stage of the FFT

@@ -1,7 +1,7 @@
-`include "src/fft/helpers/sine_wave.v"
-`include "src/serdes/deserializer.v"
-`include "src/serdes/serializer.v"
-`include "src/fft/helpers/fft_stage.v"
+`include "fft/helpers/sine_wave.v"
+`include "serdes/deserializer.v"
+`include "serdes/serializer.v"
+`include "fft/helpers/fft_stage.v"
 
 module FFTStageHarness #(
   parameter int BIT_WIDTH  = 32,

@@ -3,7 +3,7 @@ A useful library of PYMTL3 test helper functions
 """
 
 import pytest
-from pymtl3 import mk_bits, concat
+from pymtl3 import mk_bits, concat, bitstruct
 from pymtl3.stdlib.test_utils import mk_test_case_table as mk_test_case_table_native
 
 
@@ -26,6 +26,15 @@ def mk_packed(*args):
         return concat(*[mk_bits(args[i])(vals[i]) for i in range(len(args))])
 
     return packer
+
+
+# Creates a bitstruct with one field representing its list.
+def mk_list_bitstruct(nbits, nsamples):
+    @bitstruct
+    class ListStruct:
+        list: [mk_bits(nbits) for _ in range(nsamples)]
+
+    return ListStruct
 
 
 # Helper function that does the same thing as `mk_test_case_table` but allows for marking tests slow

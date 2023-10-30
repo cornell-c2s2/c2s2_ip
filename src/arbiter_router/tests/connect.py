@@ -6,7 +6,7 @@ from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from src.arbiter_router.harnesses.arbiter import Arbiter
 from src.arbiter_router.harnesses.router import Router
-from tools.pymtl_extensions import mk_test_matrix, mk_packed
+from tools.utils import mk_test_matrix, mk_packed
 
 """
 Tests that connect an arbiter to a router and makes sure messages end up in the right place

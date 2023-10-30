@@ -5,7 +5,7 @@ from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
 from src.fixed_point.iterative.harnesses.complex_multiplier import (
-    ComplexMultiplierHarness,
+    ComplexMultiplierWrapper,
     mk_complex_multiplier_input,
     mk_complex_multiplier_output,
 )
@@ -39,7 +39,7 @@ def mk_ret(n, c):
 # Test harness for streaming data
 class TestHarness(Component):
     def construct(s, n, d):
-        s.dut = ComplexMultiplierHarness(n, d)
+        s.dut = ComplexMultiplierWrapper(n, d)
 
         s.src = stream.SourceRTL(mk_complex_multiplier_input(n))
         s.sink = stream.SinkRTL(mk_complex_multiplier_output(n))

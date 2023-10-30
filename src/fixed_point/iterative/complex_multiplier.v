@@ -9,9 +9,9 @@
 `default_nettype none
 `ifndef FIXED_POINT_ITERATIVE_COMPLEX_MULTIPLIER
 `define FIXED_POINT_ITERATIVE_COMPLEX_MULTIPLIER
-`include "src/fixed_point/iterative/multiplier.v"
-`include "src/cmn/regs.v"
-`include "src/cmn/muxes.v"
+`include "fixed_point/iterative/multiplier.v"
+`include "cmn/regs.v"
+`include "cmn/muxes.v"
 
 module FixedPointIterativeComplexMultiplier #(
   parameter int n = 32,  // bit width

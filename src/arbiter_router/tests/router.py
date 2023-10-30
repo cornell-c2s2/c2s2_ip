@@ -1,10 +1,10 @@
 import pytest
 import random
 from pymtl3 import *
-from src.arbiter_router.harnesses.router import Router
+from src.arbiter_router.router import Router
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
-from tools.pymtl_extensions import mk_test_matrix, mk_packed
+from tools.utils import mk_test_matrix, mk_packed
 
 
 class TestHarness(Component):

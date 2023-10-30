@@ -64,7 +64,7 @@ class Butterfly(VerilogPlaceholder, Component):
         )
 
 
-class ButterflyHarness(Component):
+class ButterflyWrapper(Component):
     def construct(s, n, d, mult):
         s.dut = Butterfly(n, d, mult)
         s.recv = stream.ifcs.RecvIfcRTL(mk_butterfly_input(n))

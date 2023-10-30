@@ -1,5 +1,5 @@
 `default_nettype none
-`include "src/fixed_point/combinational/complex_multiplier.v"
+`include "fixed_point/combinational/complex_multiplier.v"
 
 module ComplexMultiplierHarness #(
   parameter int n = 32,

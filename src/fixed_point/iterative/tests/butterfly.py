@@ -5,7 +5,7 @@ from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
 from src.fixed_point.iterative.harnesses.butterfly import (
-    ButterflyHarness,
+    ButterflyWrapper,
     mk_butterfly_input,
     mk_butterfly_output,
 )
@@ -67,7 +67,7 @@ def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
 # Test harness for streaming data
 class TestHarness(Component):
     def construct(s, nbits, ndecimalbits, m=0):
-        s.dut = ButterflyHarness(nbits, ndecimalbits, m)
+        s.dut = ButterflyWrapper(nbits, ndecimalbits, m)
 
         s.src = stream.SourceRTL(mk_butterfly_input(nbits))
         s.sink = stream.SinkRTL(mk_butterfly_output(nbits))

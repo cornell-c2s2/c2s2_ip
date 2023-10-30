@@ -16,8 +16,8 @@
 `default_nettype none
 `ifndef FIXED_POINT_ITERATIVE_BUTTERFLY
 `define PROJECT_BUTTERFLY_V
-`include "src/fixed_point/iterative/complex_multiplier.v"
-`include "src/cmn/regs.v"
+`include "fixed_point/iterative/complex_multiplier.v"
+`include "cmn/regs.v"
 
 module FixedPointIterativeButterfly #(
   parameter int n = 32,
