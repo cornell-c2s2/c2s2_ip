@@ -6,7 +6,7 @@ import pytest
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
-from src.serdes.serializer import SerializerTestHarnessVRTL
+from src.serdes.serializer import SerializerWrapper
 from tools.utils import mk_test_case_table
 
 # -------------------------------------------------------------------------
@@ -15,12 +15,12 @@ from tools.utils import mk_test_case_table
 
 
 class TestHarness(Component):
-    def construct(s, serializer, BIT_WIDTH=32, N_SAMPLES=8):
+    def construct(s, BIT_WIDTH, N_SAMPLES):
         # Instantiate models
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH * N_SAMPLES))
         s.sink = stream.SinkRTL(mk_bits(BIT_WIDTH))
-        s.serializer = serializer
+        s.serializer = SerializerWrapper(BIT_WIDTH, N_SAMPLES)
 
         # Connect
 
@@ -676,7 +676,6 @@ def separate_transactions(array, N_SAMPLES, input=True):
 @pytest.mark.parametrize(**test_case_table)
 def test(test_params, cmdline_opts):
     th = TestHarness(
-        SerializerTestHarnessVRTL(test_params.BIT_WIDTH, test_params.N_SAMPLES),
         test_params.BIT_WIDTH,
         test_params.N_SAMPLES,
     )
