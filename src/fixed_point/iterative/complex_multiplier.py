@@ -46,13 +46,11 @@ class ComplexMultiplier(VerilogPlaceholder, Component):
         # The ../ is necessary here because pytest is run from the build directory
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.join(path.dirname(__file__), "../complex_multiplier.v"),
+            path.join(path.dirname(__file__), "complex_multiplier.v"),
         )
 
         # Name of the top level module to be imported
-        s.set_metadata(
-            VerilogPlaceholderPass.top_module, "FixedPointIterativeComplexMultiplier"
-        )
+        s.set_metadata(VerilogPlaceholderPass.top_module, "ComplexMultiplier")
 
 
 class ComplexMultiplierWrapper(Component):

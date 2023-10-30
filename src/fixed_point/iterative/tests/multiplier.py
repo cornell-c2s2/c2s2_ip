@@ -6,7 +6,7 @@ from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import Fixed
 
-from src.fixed_point.iterative.harnesses.multiplier import (
+from src.fixed_point.iterative.multiplier import (
     MultiplierWrapper,
     mk_multiplier_input,
     mk_multiplier_output,

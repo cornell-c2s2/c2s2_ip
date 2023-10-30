@@ -4,7 +4,7 @@ from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
-from src.fixed_point.iterative.harnesses.butterfly import (
+from src.fixed_point.iterative.butterfly import (
     ButterflyWrapper,
     mk_butterfly_input,
     mk_butterfly_output,

@@ -55,13 +55,11 @@ class Butterfly(VerilogPlaceholder, Component):
         # Source file path
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.join(path.dirname(__file__), "../butterfly.v"),
+            path.join(path.dirname(__file__), "butterfly.v"),
         )
 
         # Name of the top level module to be imported
-        s.set_metadata(
-            VerilogPlaceholderPass.top_module, "FixedPointIterativeButterfly"
-        )
+        s.set_metadata(VerilogPlaceholderPass.top_module, "Butterfly")
 
 
 class ButterflyWrapper(Component):

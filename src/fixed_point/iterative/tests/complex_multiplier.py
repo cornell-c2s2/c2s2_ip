@@ -4,7 +4,7 @@ from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
-from src.fixed_point.iterative.harnesses.complex_multiplier import (
+from src.fixed_point.iterative.complex_multiplier import (
     ComplexMultiplierWrapper,
     mk_complex_multiplier_input,
     mk_complex_multiplier_output,

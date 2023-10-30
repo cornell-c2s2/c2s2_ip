@@ -7,13 +7,13 @@
 // One multiplication takes 3*n cycles.
 //================================================
 `default_nettype none
-`ifndef FIXED_POINT_ITERATIVE_COMPLEX_MULTIPLIER
-`define FIXED_POINT_ITERATIVE_COMPLEX_MULTIPLIER
+`ifndef fixed_point_iterative_COMPLEX_MULTIPLIER
+`define fixed_point_iterative_COMPLEX_MULTIPLIER
 `include "fixed_point/iterative/multiplier.v"
 `include "cmn/regs.v"
 `include "cmn/muxes.v"
 
-module FixedPointIterativeComplexMultiplier #(
+module fixed_point_iterative_ComplexMultiplier #(
   parameter int n = 32,  // bit width
   parameter int d = 16   // number of decimal bits
 ) (
@@ -247,7 +247,7 @@ module fpcmult_datapath #(
     .q(c_arac)
   );
 
-  FixedPointIterativeMultiplier #(n, d, 1) multiplier (
+  fixed_point_iterative_Multiplier #(n, d, 1) multiplier (
     .clk(clk),
     .reset(reset),
     .a(mul_a),
