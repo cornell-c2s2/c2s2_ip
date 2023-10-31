@@ -20,6 +20,9 @@ WHITE  =\033[0;37m
 
 VENV:=. .venv/bin/activate
 
+# Extra arguments to pass
+EXTRA_ARGS=
+
 # Pulls main branch
 --pull:
 	@printf "${CYAN}Getting Latest Updates...${RESET}\n"
@@ -142,14 +145,8 @@ else
 	@tools/lint.sh "./src/${IP}"
 endif
 
-INCLUDE = "."
 test:
-	@mkdir -p build
-ifndef IP
-	@pytest -k ${INCLUDE} --suppress-no-test-exit-code
-else
-	@pytest src/${IP} -k ${INCLUDE} --suppress-no-test-exit-code
-endif
+	@tools/test.sh ${EXTRA_ARGS}
 
 # ------------------------------------------------------------------------------
 # Testfloat generation
@@ -161,7 +158,6 @@ endif
 # Files will be written to `build/testfloat_gen`
 # ------------------------------------------------------------------------------
 TESTFLOAT_DOCKER_IMAGE = $(shell docker build -q - < .docker/testfloat.Dockerfile)
-EXTRA_ARGS=
 OUTPUT_FILE="testfloat_gen"
 BUILD_DIR="build"
 testfloat_gen:

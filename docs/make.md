@@ -32,15 +32,16 @@ We recommend typing in `IP` either
 and to avoid starting words with numbers or using non-alphaneumeric characters.
 
 ## `make test`
-Runs all the tests in the entire test suite.
 
-* An optional `IP="exact_name"` can be used to run the tests in the IP `src/exact_name`.
-  * `IP` can also be replaced with `exact_name/tests/test.py` to run a specific file in the `exact_name` ip.
+**NOTE:** We recommend running `pytest` manually to do your own testing.
 
-    *Note here that `IP` must be the exact name, and will not go through the parsing described above.*
-* A further argument `INCLUDE="expression or expression2"` matches the `-k` argument [in pytest](https://docs.pytest.org/en/6.2.x/usage.html).
+Runs all the tests in the entire test suite. This runs a new pytest instance for every IP, to prevent memory leaks from building while running the whole test suite, primarily to stop github actions from crashing.
 
-We still recommend running `pytest` manually if you want to use the full range of pytest's arguments.
+```sh
+make test EXTRA_ARGS="-n auto"
+```
+
+Allows for an optional flag `EXTRA_ARGS` to pass in pytest flags.
 
 ## `make clean`
 
