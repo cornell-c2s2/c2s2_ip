@@ -20,33 +20,41 @@ module Deserializer #(
   input logic reset
 );
 
-  logic [N_SAMPLES - 1:0] en_sel;
-
-  //body of code
-  Control #(
-    .N_SAMPLES(N_SAMPLES)
-  ) c (
-    .recv_val(recv_val),
-    .send_rdy(send_rdy),
-
-    .send_val(send_val),
-    .recv_rdy(recv_rdy),
-
-    .reset(reset),
-    .clk  (clk),
-
-    .en_sel(en_sel)
-  );
-
   generate
-    for (genvar i = 0; i < N_SAMPLES; i++) begin : l_regs
-      cmn_EnResetReg #(BIT_WIDTH) register (
-        .clk(clk),
+    if (N_SAMPLES == 1) begin
+      assign recv_rdy = send_rdy;
+      assign send_val = recv_val;
+      assign send_msg[0] = recv_msg;
+
+      logic unused = {1'b0, clk, reset, 1'b0};
+    end else begin
+      logic [N_SAMPLES - 1:0] en_sel;
+
+      //body of code
+      Control #(
+        .N_SAMPLES(N_SAMPLES)
+      ) c (
+        .recv_val(recv_val),
+        .send_rdy(send_rdy),
+
+        .send_val(send_val),
+        .recv_rdy(recv_rdy),
+
         .reset(reset),
-        .en(en_sel[i]),
-        .d(recv_msg),
-        .q(send_msg[i])
+        .clk  (clk),
+
+        .en_sel(en_sel)
       );
+
+      for (genvar i = 0; i < N_SAMPLES; i++) begin : l_regs
+        cmn_EnResetReg #(BIT_WIDTH) register (
+          .clk(clk),
+          .reset(reset),
+          .en(recv_rdy & en_sel[i]),
+          .d(recv_msg),
+          .q(send_msg[i])
+        );
+      end
     end
   endgenerate
 

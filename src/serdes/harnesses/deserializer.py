@@ -1,9 +1,10 @@
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.passes.backends.verilog import *
+from os import path
 
 
-class DeserializerTestHarnessVRTL(VerilogPlaceholder, Component):
+class DeserializerHarness(VerilogPlaceholder, Component):
     # Constructor
     def construct(s, BIT_WIDTH=32, N_SAMPLES=8):
         # Interface
@@ -15,5 +16,5 @@ class DeserializerTestHarnessVRTL(VerilogPlaceholder, Component):
         # Source file path
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            "../src/serdes/harnesses/deserializer.v",
+            path.join(path.dirname(__file__), "deserializer.v"),
         )

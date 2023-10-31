@@ -10,6 +10,7 @@ import os
 import numpy as np
 import subprocess
 from tempfile import NamedTemporaryFile
+from glob import glob
 
 
 def pytest_addoption(parser):
@@ -28,12 +29,33 @@ def pytest_addoption(parser):
         help="Build directory to generate files in.",
     )
 
+    parser.addoption(
+        "--cleanup-post-test",
+        action="store_true",
+        help="Cleanup the build directory after each test case. Used in github actions.",
+    )
+
 
 @pytest.fixture(autouse=True)
 def fix_randseed():
     """Set the random seed prior to each test case."""
     random.seed(0xDEADBEEF)
     np.random.seed(0xDEADBEEF)
+
+
+@pytest.fixture(autouse=True)
+def optional_cleanup(request):
+    """Cleanup the build directory after each test case."""
+    yield
+
+    if request.config.getoption("--cleanup-post-test"):
+        cwd = os.getcwd()
+        # Extra check to make double sure we are in the build directory and don't remove random files
+        if path.split(cwd)[1].startswith("build"):
+            subprocess.run(["rm", "-rf", *glob("*")], cwd=cwd)
+            print(f"removed files in {os.getcwd()}")
+        else:
+            print(f"skipped cleanup in {os.getcwd()}")
 
 
 @pytest.fixture(autouse=True)
