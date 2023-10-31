@@ -179,6 +179,8 @@ def log_memory(start_tb, request):
         logging.info(
             f"Memory usage: {psutil.Process().memory_info().rss / 1024 / 1024} MB",
         )
+    else:
+        yield
 
 
 @pytest.fixture()
