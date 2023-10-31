@@ -18,24 +18,41 @@ module Serializer #(
   input logic reset,
   input logic clk
 );
+  generate
+    if (N_SAMPLES == 1) begin
+      assign recv_rdy = send_rdy;
+      assign send_val = recv_val;
+      assign send_msg = recv_msg[0];
 
-  generate if (N_SAMPLES == 1) begin : g_single
-    assign send_msg = recv_msg[0];
-    assign send_val = recv_val;
-    assign recv_rdy = send_rdy;
-  end else begin
+      logic unused = {1'b0, clk, reset, 1'b0};
+    end else begin
+      logic [$clog2(N_SAMPLES) - 1:0] mux_sel;
+      logic reg_en;
+      logic [BIT_WIDTH - 1:0] reg_out[N_SAMPLES - 1:0];
 
-    logic [$clog2(N_SAMPLES) - 1:0] mux_sel;
-    logic reg_en;
-    logic [BIT_WIDTH - 1:0] reg_out[N_SAMPLES - 1:0];
+      for (genvar i = 0; i < N_SAMPLES; i++) begin : l_regs
+        cmn_EnResetReg #(BIT_WIDTH) register (
+          .clk(clk),
+          .reset(reset),
+          .en(reg_en),
+          .d(recv_msg[i]),
+          .q(reg_out[i])
+        );
+      end
 
-    for (genvar i = 0; i < N_SAMPLES; i++) begin : l_regs
-      cmn_EnResetReg #(BIT_WIDTH) register (
+      assign send_msg = reg_out[mux_sel];
+
+      SerializerControl #(
+        .N_SAMPLES(N_SAMPLES)
+      ) ctrl (
         .clk(clk),
         .reset(reset),
-        .en(reg_en),
-        .d(recv_msg[i]),
-        .q(reg_out[i])
+        .recv_val(recv_val),
+        .recv_rdy(recv_rdy),
+        .send_val(send_val),
+        .send_rdy(send_rdy),
+        .mux_sel(mux_sel),
+        .reg_en(reg_en)
       );
     end
 

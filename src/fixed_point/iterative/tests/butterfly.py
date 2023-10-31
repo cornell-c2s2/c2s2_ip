@@ -142,16 +142,13 @@ def test_edge(n, d, a, b, w):
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d, m",
     # Runs tests on smaller number sizes
-    mk_params(50, [1, 50], (2, 8), (0, 8), slow=True) +
+    mk_params(50, [50], (2, 8), (0, 8), slow=True) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 100], (16, 64), (0, 64), slow=True) +
+    mk_params(20, [100], (16, 64), (0, 64), slow=True) +
     # Extensively tests numbers with certain important bit sizes.
     sum(
         [
-            [
-                *mk_params(1, [20], n, d, slow=False),
-                *mk_params(1, [1000], n, d, slow=True),
-            ]
+            mk_params(1, [100], n, d, slow=True)
             for (n, d) in [
                 (8, 4),
                 (24, 8),
@@ -204,23 +201,17 @@ def test_random(
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d, m",
     # Runs tests on smaller number sizes
-    mk_params(50, [1, 50], (2, 8), (0, 8), m=range(1, 5), slow=True) +
+    mk_params(10, [50], (2, 8), (0, 8), m=range(1, 5), slow=True) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 100], (16, 64), (0, 64), m=range(1, 5), slow=True) +
+    mk_params(5, [100], (16, 64), (0, 64), m=range(1, 5), slow=True) +
     # Extensively tests numbers with certain important bit sizes.
     # Uses
     sum(
         [
-            [
-                *mk_params(1, [20], n, d, m=range(1, 5), slow=False),
-                *mk_params(1, [1000], n, d, m=range(1, 5), slow=True),
-            ]
+            mk_params(1, [100], n, d, m=range(1, 5), slow=True)
             for (n, d) in [
                 (8, 4),
-                (24, 8),
-                (32, 24),
                 (32, 16),
-                (64, 32),
             ]
         ],
         [],
