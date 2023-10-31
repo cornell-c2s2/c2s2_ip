@@ -65,10 +65,10 @@ def create_transactions(nbits, nsamples, nmsgs):
 
 
 # Return a random deserializer spec
-def rand_serializer():
-    n_samples = random.randint(1, 1023)
+def rand_serializer(max_bus=1024):
+    n_samples = random.randint(1, max_bus - 1)
     # n_bits is capped here because pymtl3 does not support bit widths greater than or equal to 1024
-    n_bits = random.randint(1, 1023 // n_samples)
+    n_bits = random.randint(1, (max_bus - 1) // n_samples)
     return (n_samples, n_bits)
 
 
@@ -118,7 +118,7 @@ def test_serializer(p, cmdline_opts):
     nmsgs = p.nmsgs
 
     if nbits is None or nsamples is None:
-        nsamples, nbits = rand_serializer()
+        nsamples, nbits = rand_serializer(256)
 
     th = TestHarness(
         nbits,
