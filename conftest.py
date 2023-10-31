@@ -1,15 +1,20 @@
 # =========================================================================
 # conftest
 # =========================================================================
-
+import linecache
 import signal
 import pytest
 import random
 from os import path
-import os
+import os, psutil
 import numpy as np
 import subprocess
 from tempfile import NamedTemporaryFile
+from glob import glob
+import sys
+import logging
+import gc
+import tracemalloc
 
 
 def pytest_addoption(parser):
@@ -28,12 +33,58 @@ def pytest_addoption(parser):
         help="Build directory to generate files in.",
     )
 
+    parser.addoption(
+        "--cleanup-build",
+        action="store_true",
+        help="Cleanup the build directory after each test case. Used in github actions.",
+    )
 
-@pytest.fixture(autouse=True)
-def fix_randseed():
-    """Set the random seed prior to each test case."""
-    random.seed(0xDEADBEEF)
-    np.random.seed(0xDEADBEEF)
+    parser.addoption(
+        "--log-memory",
+        action="store_true",
+        help="Log the memory usage of the process after each test case.",
+    )
+
+
+def pytest_configure():
+    """
+    Configures pytest logging to output each worker's log messages
+    to its own worker log file and to the console.
+    """
+    # Determine worker id
+    # Also see: https://pytest-xdist.readthedocs.io/en/latest/how-to.html#creating-one-log-file-for-each-worker
+    worker_id = os.environ.get("PYTEST_XDIST_WORKER", default="gw0")
+
+    # Create logs folder
+    logs_folder = os.environ.get("LOG_FOLDER", default=None)
+    if logs_folder is None:
+        logs_folder = "log"
+    else:
+        logs_folder = f"log_{logs_folder}"
+    os.makedirs(logs_folder, exist_ok=True)
+
+    # Create file handler to output logs into corresponding worker file
+    file_handler = logging.FileHandler(
+        f"{logs_folder}/worker_{worker_id}.log", mode="w"
+    )
+    file_handler.setFormatter(
+        logging.Formatter(
+            fmt="{asctime} {levelname}:{name}:{lineno}:{message}",
+            style="{",
+        )
+    )
+
+    # Configure logging
+    logging.basicConfig(handlers=[file_handler])
+
+
+@pytest.fixture(scope="function", autouse=True)
+def log_test_name_at_start(request):
+    """
+    Before starting a test, log its name.
+    This makes it easier to retrieve the logs for a specific test.
+    """
+    logging.info("=" * 20 + request.node.nodeid + "=" * 20)
 
 
 @pytest.fixture(autouse=True)
@@ -55,6 +106,79 @@ def change_test_dir(request, monkeypatch):
     os.makedirs(wd, exist_ok=True)
 
     monkeypatch.chdir(wd)
+
+
+@pytest.fixture(autouse=True)
+def fix_randseed():
+    """Set the random seed prior to each test case."""
+    random.seed(0xDEADBEEF)
+    np.random.seed(0xDEADBEEF)
+
+
+@pytest.fixture(autouse=True)
+def build_cleanup(request):
+    """Cleanup the build directory after each test case."""
+    yield
+
+    if request.config.getoption("--cleanup-build"):
+        cwd = os.getcwd()
+        # Extra check to make double sure we are in the build directory and don't remove random files
+        if path.split(cwd)[1].startswith("build"):
+            subprocess.run(["rm", "-rf", *glob("*")], cwd=cwd)
+            logging.info(f"removed files in {os.getcwd()}", file=sys.stderr)
+        else:
+            logging.info(f"skipped cleanup in {os.getcwd()}", file=sys.stderr)
+
+
+# Display the top memory-allocating lines
+def display_top(snapshot, key_type="traceback", limit=3):
+    snapshot = snapshot.filter_traces(
+        (
+            tracemalloc.Filter(
+                False, "<frozen importlib._bootstrap>", all_frames=False
+            ),
+            tracemalloc.Filter(False, "<unknown>", all_frames=False),
+            tracemalloc.Filter(False, tracemalloc.__file__, all_frames=True),
+        )
+    )
+
+    top_stats = snapshot.statistics("traceback")
+
+    log = f"\nTop {limit} lines\n"
+    for index, stat in enumerate(top_stats[:limit], 1):
+        log += f"\t#{index}: {stat.size / 1024:.2f} KiB\n"
+        for frame in stat.traceback.format():
+            log += f"\t\t{frame}\n"
+    other = top_stats[limit:]
+    if other:
+        size = sum(stat.size for stat in other)
+        log += f"\t{len(other)} other: {size / 1024:.2f} KiB\n"
+    total = sum(stat.size for stat in top_stats)
+    log += f"Total allocated size: {total / 1024:.2f} KiB\n"
+    logging.debug(log)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def start_tb(request):
+    """Start the testbench."""
+    if request.config.getoption("--log-memory"):
+        tracemalloc.start(25)
+
+
+@pytest.fixture(autouse=True)
+def log_memory(start_tb, request):
+    """Log the memory usage of the process after each test case."""
+    if request.config.getoption("--log-memory"):
+        # tracemalloc.clear_traces()
+
+        yield
+
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot, limit=10)
+
+        logging.info(
+            f"Memory usage: {psutil.Process().memory_info().rss / 1024 / 1024} MB",
+        )
 
 
 @pytest.fixture()
