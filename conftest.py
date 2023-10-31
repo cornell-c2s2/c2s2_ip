@@ -161,8 +161,8 @@ def display_top(snapshot, key_type="traceback", limit=3):
         size = sum(stat.size for stat in other)
         log += f"\t{len(other)} other: {size / 1024:.2f} KiB\n"
     total = sum(stat.size for stat in top_stats)
-    log += f"Total allocated size: {total / 1024:.2f} KiB\n"
     logging.debug(log)
+    logging.info(f"Total allocated size: {total / 1024:.2f} KiB\n")
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -183,9 +183,15 @@ def log_memory(start_tb, request):
         snapshot = tracemalloc.take_snapshot()
         display_top(snapshot, limit=10)
 
-        logging.info(
-            f"Memory usage: {psutil.Process().memory_info().rss / 1024 / 1024} MB",
-        )
+        gc.collect()
+
+        log = "Garbage Collection Stats:\n"
+        for generation, stats in enumerate(gc.get_stats()):
+            log += f"\tGeneration {generation}:\n"
+            log += f"\t\tstats: {stats}\n"
+        log += f"\ttracking {len(gc.get_objects())} objects.\n"
+        logging.info(log)
+        gc.unfreeze()
     else:
         yield
 
