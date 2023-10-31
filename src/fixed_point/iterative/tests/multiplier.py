@@ -68,7 +68,7 @@ def test_edge(cmdline_opts, n, d, a, b):
     run_sim(
         model,
         cmdline_opts,
-        duts=["dut"],
+        duts=["dut.dut"],
     )
 
 
@@ -125,5 +125,5 @@ def test_random(cmdline_opts, execution_number, sequence_length, n, d):
                 30 + (n + 2) * len(dat)
             ),  # makes sure the time taken grows linearly with respect to n
         },
-        duts=["dut"],
+        duts=["dut.dut"],
     )

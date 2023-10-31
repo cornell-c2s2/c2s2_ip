@@ -93,7 +93,7 @@ def test_edge(cmdline_opts, n, d, a, b):
         interval_delay=0,
     )
 
-    run_sim(model, cmdline_opts, duts=["dut"])
+    run_sim(model, cmdline_opts, duts=["dut.dut"])
 
 
 # Test individual and sequential multiplications to assure stream system works
@@ -154,5 +154,5 @@ def test_random(cmdline_opts, execution_number, sequence_length, n, d):
                 30 + (3 * (n + 2) + 2) * len(dat)
             ),  # makes sure the time taken grows linearly with respect to 3n
         },
-        duts=["dut"],
+        duts=["dut.dut"],
     )

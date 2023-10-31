@@ -125,7 +125,7 @@ def test_edge(cmdline_opts, n, d, a, b, w):
     run_sim(
         model,
         cmdline_opts,
-        duts=["dut"],
+        duts=["dut.dut"],
     )
 
 
@@ -250,5 +250,5 @@ def test_optimizations(
                 30 + 6 * len(dat)
             ),  # makes sure the time taken grows constantly
         },
-        duts=["dut"],
+        duts=["dut.dut"],
     )

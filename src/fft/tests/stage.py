@@ -1167,6 +1167,6 @@ def test(request, test_params, cmdline_opts):
     run_sim(
         th,
         cmdline_opts,
-        duts=["dut"],
+        duts=["dut.dut"],
         print_line_trace=False,  # Turned off because line traces for large modules are very large
     )

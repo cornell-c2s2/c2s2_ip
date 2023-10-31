@@ -608,4 +608,4 @@ def test(test_params, cmdline_opts):
         interval_delay=test_params.sink_delay,
     )
 
-    run_sim(th, cmdline_opts, duts=["dut"])
+    run_sim(th, cmdline_opts, duts=["dut.dut"])
