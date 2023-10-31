@@ -2,6 +2,7 @@
 A useful library of PYMTL3 test helper functions
 """
 
+from collections import namedtuple
 import pytest
 from pymtl3 import mk_bits, concat, bitstruct
 from pymtl3.stdlib.test_utils import mk_test_case_table as mk_test_case_table_native
@@ -68,19 +69,57 @@ def mk_test_case_table(test_cases):
 
 
 # Creates a matrix of transactions
+# Takes a dictionary of transaction fields and their value ranges
+# and returns a set of tests with all possible combinations of values
+# USAGE:
+# @pytest.mark.parametrize(*mk_test_matrix({
+#  "field1": [1, 2, 3],
+# "field2": [4, 5, 6],
+# }, slow=False))
+# def test_something(p):
+#   print(p.field1) # ranges from 1 to 3
+#   print(p.field2) # ranges from 4 to 6
+#
 def mk_test_matrix(values, slow=False):
     keys = []
     params = [[]]
     for k, v in values.items():
+        if not isinstance(v, list):
+            v = [v]
         keys.append(k)
-        params = [[*p, t] for t in v for p in params]
+        params = [[*p, (k, t)] for t in v for p in params]
+
+    tp = namedtuple("_".join(keys), keys)
 
     params = [
         pytest.param(
-            *p,
-            id=",".join([f"{keys[i]}={p[i]}" for i in range(len(keys))]),
+            tp(**dict(p)),
+            id=",".join([f"{p[i][0]}={p[i][1]}" for i in range(len(keys))]),
             marks=pytest.mark.slow if slow else [],
         )
         for p in params
     ]
-    return params
+    return ["p", params]
+
+
+# Can make multiple test matrices.
+# Takes any number of dictionaries of transaction fields and their value ranges
+# USAGE:
+# @pytest.mark.parametrize(*mk_test_matrices({
+#   "field1": [1, 2, 3],
+#   "field2": [4, 5, 6],
+#   "slow": True
+# }, {
+#   "field1": [1, 2, 3],
+#   "field2": [4, 5, 6],
+#   "slow": False
+# }))
+# def test_something(p):
+#   print(p.field1) # ranges from 1 to 3
+#   print(p.field2) # ranges from 4 to 6
+#
+def mk_test_matrices(*args):
+    return [
+        "p",
+        sum([(mk_test_matrix(arg, arg.get("slow", False))[1]) for arg in args], []),
+    ]

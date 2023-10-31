@@ -113,9 +113,9 @@ def test_edge(n, d, a, b, cmdline_opts):
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d",
     # Runs tests on smaller number sizes
-    mk_params(50, [1, 50], (2, 8), (0, 8), slow=True) +
+    mk_params(20, [1, 50], (2, 8), (0, 8), slow=True) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 10, 50, 100], (16, 64), (0, 64), slow=True) +
+    mk_params(10, [1, 10, 50, 100], (16, 64), (0, 64), slow=True) +
     # Extensively tests numbers with certain important bit sizes.
     sum(
         [

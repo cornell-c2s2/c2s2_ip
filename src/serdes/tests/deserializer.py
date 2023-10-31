@@ -8,7 +8,7 @@ from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
 from src.serdes.deserializer import DeserializerWrapper
-from tools.utils import mk_test_case_table, mk_list_bitstruct
+from tools.utils import mk_test_matrices, mk_list_bitstruct
 
 # -------------------------------------------------------------------------
 # TestHarness
@@ -30,137 +30,110 @@ class TestHarness(Component):
     def done(s):
         return s.src.done() and s.sink.done()
 
+    def line_trace(s):
+        return (
+            s.src.line_trace()
+            + " > "
+            + s.deserializer.line_trace()
+            + " > "
+            + s.sink.line_trace()
+        )
 
-# ----------------------------------------------------------------------
-# Test Case Table
-# ----------------------------------------------------------------------
 
+# Creates a list of `nmsgs` random transactions
+# for a deserializer with `nbits` bits and `nsamples` samples
+def create_transactions(nbits, nsamples, nmsgs):
+    def pack_transaction(vals):
+        packer = mk_packed(*([nbits] * nsamples))
 
-def eight_point_two_transaction(BIT_WIDTH, N_SAMPLES):
-    return [
+        bits = packer(*vals[::-1])
+        # Duplicate the transaction, one for input and output
+        return vals + [bits]
+
+    return sum(
         [
-            0x00000008,
-            0x00000007,
-            0x00000006,
-            0x00000005,
-            0x00000004,
-            0x00000003,
-            0x00000002,
-            0x00000001,
+            pack_transaction(
+                [random.randint(0, (1 << nbits) - 1) for __ in range(nsamples)]
+            )
+            for _ in range(nmsgs)
         ],
-        [
-            0x00000001,
-            0x00000002,
-            0x00000003,
-            0x00000004,
-            0x00000005,
-            0x00000006,
-            0x00000007,
-            0x00000008,
-        ],
-    ]
-
-
-# Creates a list of `N_QUERIES` random transactions
-# for a deserializer with `BIT_WIDTH` bits and `N_SAMPLES` samples
-def create_transactions(BIT_WIDTH, N_SAMPLES, N_QUERIES):
-    return [
-        [random.randint(0, (1 << BIT_WIDTH) - 1) for __ in range(N_SAMPLES)]
-        for _ in range(N_QUERIES)
-    ]
-
-
-# Returns a function that takes the number of bits and number of samples
-# and creates a list of `N_QUERIES` random transactions
-def create_transaction_lmbda(N_QUERIES):
-    return lambda BIT_WIDTH, N_SAMPLES: create_transactions(
-        BIT_WIDTH, N_SAMPLES, N_QUERIES
+        [],
     )
 
 
-# Return `N_SAMPLES and `BIT_WIDTH` for `n` random deserializers
-def random_deserializers(n):
-    for _ in range(n):
-        n_samples = random.randint(2, 128)
-        # n_bits is capped here because pymtl3 does not support bit widths greater than or equal to 1024
-        n_bits = random.randint(1, 1023 // n_samples)
-        yield (n_samples, n_bits)
+# Return a random deserializer spec
+def rand_deserializer(max_bus=1024):
+    n_samples = random.randint(1, max_bus - 1)
+    # n_bits is capped here because pymtl3 does not support bit widths greater than or equal to 1024
+    n_bits = random.randint(1, (max_bus - 1) // n_samples)
+    return (n_samples, n_bits)
 
-
-test_case_table = mk_test_case_table(
-    [
-        ("msgs src_delay sink_delay BIT_WIDTH N_SAMPLES slow"),
-        [
-            "eight_point_two_transaction",
-            eight_point_two_transaction,
-            0,
-            0,
-            32,
-            8,
-            False,
-        ],
-        *[
-            [
-                "random_transaction",
-                create_transaction_lmbda(n_queries),
-                0,
-                0,
-                n_bits,
-                n_samples,
-                True,
-            ]
-            # Creates a test case for each combination of (n_samples, n_bits) and n_queries
-            for (n_samples, n_bits) in [
-                (2, 128),
-                (2, 64),
-                (8, 32),
-                (16, 32),
-                (32, 16),
-                (64, 8),
-                (128, 4),
-                (256, 2),
-                *random_deserializers(100),
-            ]
-            for n_queries in [1, 2, 100]
-        ],
-    ]
-)
 
 # -------------------------------------------------------------------------
 # TestHarness
 # -------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(**test_case_table)
-def test(test_params, cmdline_opts):
+@pytest.mark.parametrize(
+    *mk_test_matrices(
+        {
+            "execution_num": [0],
+            "nbits": [1, 16],
+            "nsamples": [1, 2, 16],
+            "nmsgs": [1, 100],
+            "src_delay": [0, 1, 5],
+            "sink_delay": [0, 1, 5],
+        },
+        {
+            "execution_num": list(range(1, 10)),
+            "nmsgs": 100,
+            "nbits": None,
+            "nsamples": None,
+            "src_delay": [0, 1, 5],
+            "sink_delay": [0, 1, 5],
+            "slow": True,
+        },
+    )
+)
+def test_deserializer(p, cmdline_opts):
+    random.seed(random.random() + p.execution_num)
+
+    nbits = p.nbits
+    nsamples = p.nsamples
+    nmsgs = p.nmsgs
+
+    if nbits is None or nsamples is None:
+        nsamples, nbits = rand_deserializer(256)
+
     th = TestHarness(
-        test_params.BIT_WIDTH,
-        test_params.N_SAMPLES,
+        nbits,
+        nsamples,
     )
 
-    msgs = test_params.msgs(test_params.BIT_WIDTH, test_params.N_SAMPLES)
+    msgs = create_transactions(nbits, nsamples, p.nmsgs)
 
-    mk_ret = mk_list_bitstruct(test_params.BIT_WIDTH, test_params.N_SAMPLES)
+    mk_ret = mk_list_bitstruct(nbits, nsamples)
 
     th.set_param(
         "top.src.construct",
         msgs=sum(msgs, []),
-        initial_delay=test_params.src_delay,
-        interval_delay=test_params.src_delay,
+        initial_delay=p.src_delay,
+        interval_delay=p.src_delay,
     )
 
     th.set_param(
         "top.sink.construct",
         msgs=[mk_ret(msg) for msg in msgs],
-        initial_delay=test_params.sink_delay,
-        interval_delay=test_params.sink_delay,
+        initial_delay=p.sink_delay,
+        interval_delay=p.sink_delay,
     )
 
     run_sim(
         th,
         cmdline_opts={
             **cmdline_opts,
-            "max_cycles": len(msgs) + 10,
+            "max_cycles": nmsgs * (nsamples + 1) * (1 + max(p.src_delay, p.sink_delay))
+            + 10,
         },
         duts=["dut"],
     )

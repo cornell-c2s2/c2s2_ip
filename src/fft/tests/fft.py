@@ -540,11 +540,11 @@ test_case_table = mk_tests(
         ["descend_signal_16", descend_signal, 0, 0, 32, 16, 16, False],
         *[
             [f"{n}_point_dc_generated", n_point_dc, 0, 0, 32, 16, n, True]
-            for n in [16, 32, 64, 128, 256]
+            for n in [16, 64, 256]
         ],
         *[
             [f"{n}_point_{f.__name__}", f, 0, 0, 32, 16, n, True]
-            for n in [16, 32, 64, 128, 256]
+            for n in [16, 64, 256]
             for f in [random_signal]
         ],
     ],

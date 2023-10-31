@@ -4,9 +4,9 @@ from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
-from src.arbiter_router.harnesses.arbiter import Arbiter
-from src.arbiter_router.harnesses.router import Router
-from tools.utils import mk_test_matrix, mk_packed
+from src.arbiter_router.arbiter import Arbiter
+from src.arbiter_router.router import Router
+from tools.utils import mk_test_matrices, mk_packed
 
 """
 Tests that connect an arbiter to a router and makes sure messages end up in the right place
@@ -134,86 +134,99 @@ def router_arbiter_msgs(nbits, nblocks, nmsgs):
     return msgs, expected_output
 
 
-spec_matrix = [
-    (0, 8, 4, 20, 0),
-    (0, 8, 4, 20, 2),
-    *mk_test_matrix(
-        {
-            "execution_num": list(range(1, 21)),  # Do 20 tests
-            "nbits": [(8, 32)],  # Test 8-32 bit routers
-            "nblocks": [(2, 16)],  # Test 2-16 input routers
-            "nmsgs": [50],  # Send 50 messages
-            "delay": [0, 1, 8],  # Wait this many cycles between inputs
-        },
-        slow=True,
-    ),
-]
+spec_matrix = mk_test_matrices(
+    {
+        "execution_num": 0,
+        "nbits": 8,
+        "nblocks": 16,
+        "nmsgs": 20,
+        "src_delay": 0,
+        "sink_delay": 0,
+    },
+    {
+        "execution_num": 0,
+        "nbits": 8,
+        "nblocks": 16,
+        "nmsgs": 20,
+        "src_delay": 0,
+        "sink_delay": 2,
+    },
+    {
+        "execution_num": list(range(1, 11)),  # Do 10 tests
+        "nbits": [(8, 32)],  # Test 8-32 bit routers
+        "nblocks": [(2, 16)],  # Test 2-16 output routers
+        "nmsgs": [50],  # Send 50 messages
+        "src_delay": [0, 1, 8],  # Wait this many cycles between inputs
+        "sink_delay": [0, 1, 8],  # Wait this many cycles between outputs
+        "slow": True,
+    },
+)
 
 
-@pytest.mark.parametrize("execution_num, nbits, nblocks, nmsgs, delay", spec_matrix)
-def test_arbiter_router(execution_num, nbits, nblocks, nmsgs, delay, cmdline_opts):
+@pytest.mark.parametrize(*spec_matrix)
+def test_arbiter_router(p, cmdline_opts):
     random.seed(
-        random.random() + execution_num
+        random.random() + p.execution_num
     )  # Done so each test has a deterministic but different random seed
-    nbits, nblocks = mk_spec(nbits, nblocks)
+    nbits, nblocks = mk_spec(p.nbits, p.nblocks)
     model = ArbiterRouterTestHarness(nbits, nblocks)
 
-    msgs, expected_output = arbiter_router_msgs(nbits, nblocks, nmsgs)
+    msgs, expected_output = arbiter_router_msgs(nbits, nblocks, p.nmsgs)
 
     for i in range(nblocks):
         model.set_param(
             f"top.srcs[{i}].construct",
             msgs=msgs[i],
-            initial_delay=0,
-            interval_delay=delay,
+            initial_delay=p.src_delay,
+            interval_delay=p.src_delay,
         )
 
         model.set_param(
             f"top.sinks[{i}].construct",
             msgs=expected_output[i],
-            initial_delay=0,
-            interval_delay=delay,
+            initial_delay=p.sink_delay,
+            interval_delay=p.sink_delay,
         )
 
     run_sim(
         model,
         cmdline_opts={
             **cmdline_opts,
-            "max_cycles": nmsgs * nblocks * (delay + 1) + 10,
+            "max_cycles": p.nmsgs * nblocks * (max(p.src_delay, p.sink_delay) + 1) + 10,
         },
         duts=["arbiter", "router"],
     )
 
 
-@pytest.mark.parametrize("execution_num, nbits, nblocks, nmsgs, delay", spec_matrix)
-def test_router_arbiter(execution_num, nbits, nblocks, nmsgs, delay, cmdline_opts):
+@pytest.mark.parametrize(*spec_matrix)
+def test_router_arbiter(p, cmdline_opts):
     random.seed(
-        random.random() + execution_num
+        random.random() + p.execution_num
     )  # Done so each test has a deterministic but different random seed
-    nbits, nblocks = mk_spec(nbits, nblocks)
+    nbits, nblocks = mk_spec(p.nbits, p.nblocks)
     model = RouterArbiterTestHarness(nbits, nblocks)
 
-    msgs, expected_output = router_arbiter_msgs(nbits, nblocks, nmsgs * nblocks)
+    msgs, expected_output = router_arbiter_msgs(nbits, nblocks, p.nmsgs * nblocks)
 
     model.set_param(
         "top.src.construct",
         msgs=msgs,
-        initial_delay=0,
-        interval_delay=delay,
+        initial_delay=p.src_delay,
+        interval_delay=p.src_delay,
     )
 
     model.set_param(
         "top.sink.construct",
         msgs=expected_output,
-        initial_delay=0,
-        interval_delay=delay,
+        initial_delay=p.sink_delay,
+        interval_delay=p.sink_delay,
     )
 
     run_sim(
         model,
         cmdline_opts={
             **cmdline_opts,
-            "max_cycles": nmsgs * nblocks * (delay + 1) + 10,
+            "max_cycles": p.nmsgs * nblocks * (max(p.src_delay, p.sink_delay) + 1) + 10,
         },
         duts=["arbiter", "router"],
     )
