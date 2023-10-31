@@ -13,6 +13,7 @@ from tempfile import NamedTemporaryFile
 from glob import glob
 import sys
 import logging
+import logging.handlers
 import gc
 import tracemalloc
 
@@ -64,10 +65,15 @@ def pytest_configure():
     os.makedirs(logs_folder, exist_ok=True)
 
     # Create file handler to output logs into corresponding worker file
-    file_handler = logging.FileHandler(
-        f"{logs_folder}/worker_{worker_id}.log", mode="w"
+    log_handler = logging.handlers.RotatingFileHandler(
+        f"{logs_folder}/worker_{worker_id}.log",
+        mode="a",
+        maxBytes=5 * 1024 * 1024,
+        backupCount=2,
+        encoding=None,
+        delay=0,
     )
-    file_handler.setFormatter(
+    log_handler.setFormatter(
         logging.Formatter(
             fmt="{asctime} {levelname}:{name}:{lineno}:{message}",
             style="{",
@@ -75,7 +81,8 @@ def pytest_configure():
     )
 
     # Configure logging
-    logging.basicConfig(handlers=[file_handler])
+    logger = logging.getLogger()
+    logger.addHandler(log_handler)
 
 
 @pytest.fixture(scope="function", autouse=True)
