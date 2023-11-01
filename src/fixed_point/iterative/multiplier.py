@@ -1,24 +1,8 @@
-from pymtl3 import *
+from pymtl3 import mk_bits, InPort, OutPort, Component
 from pymtl3.stdlib import stream
 from pymtl3.passes.backends.verilog import *
 from os import path
-
-
-def mk_multiplier_input(nbits):
-    @bitstruct
-    class MultiplierInput:
-        a: mk_bits(nbits)
-        b: mk_bits(nbits)
-
-    return MultiplierInput
-
-
-def mk_multiplier_output(nbits):
-    @bitstruct
-    class MultiplierOutput:
-        c: mk_bits(nbits)
-
-    return MultiplierOutput
+from src.fixed_point.utils import mk_multiplier_input, mk_multiplier_output
 
 
 # Pymtl3 harness for the `FixedPointIterativeMultiplier` module.

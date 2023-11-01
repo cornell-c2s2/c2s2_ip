@@ -4,15 +4,15 @@ from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
-from src.fixed_point.iterative.butterfly import (
-    ButterflyWrapper,
+from src.fixed_point.iterative.butterfly import ButterflyWrapper
+from src.fixed_point.utils import (
     mk_butterfly_input,
     mk_butterfly_output,
 )
 from src.fixed_point.iterative.tests.complex_multiplier import cmul
 import random
 from tools.utils import mk_packed
-from src.fixed_point.tools.params import rand_fxp_spec
+from src.fixed_point.utils import rand_fxp_spec
 
 
 # Performs the butterfly operation on two complex numbers

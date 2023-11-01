@@ -4,14 +4,14 @@ from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
-from src.fixed_point.iterative.complex_multiplier import (
-    ComplexMultiplierWrapper,
+from src.fixed_point.iterative.complex_multiplier import ComplexMultiplierWrapper
+from src.fixed_point.utils import (
     mk_complex_multiplier_input,
     mk_complex_multiplier_output,
 )
 import random
 from tools.utils import mk_packed
-from src.fixed_point.tools.params import mk_params, rand_fxp_spec
+from src.fixed_point.utils import mk_params, rand_fxp_spec
 
 
 # Complex multiplication with fixed precision

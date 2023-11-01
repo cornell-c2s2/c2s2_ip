@@ -2,31 +2,7 @@ from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.passes.backends.verilog import *
 from os import path
-
-
-def mk_butterfly_input(nbits):
-    @bitstruct
-    class ButterflyInput:
-        ar: mk_bits(nbits)
-        ac: mk_bits(nbits)
-        br: mk_bits(nbits)
-        bc: mk_bits(nbits)
-        # Omega value
-        wr: mk_bits(nbits)
-        wc: mk_bits(nbits)
-
-    return ButterflyInput
-
-
-def mk_butterfly_output(nbits):
-    @bitstruct
-    class ButterflyOutput:
-        cr: mk_bits(nbits)
-        cc: mk_bits(nbits)
-        dr: mk_bits(nbits)
-        dc: mk_bits(nbits)
-
-    return ButterflyOutput
+from src.fixed_point.utils import mk_butterfly_input, mk_butterfly_output
 
 
 class Butterfly(VerilogPlaceholder, Component):

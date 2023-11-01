@@ -26,15 +26,11 @@ class ComplexMultiplier(VerilogPlaceholder, Component):
         s.send_val = OutPort()
         s.send_rdy = InPort()
 
-        # Source file path
-        # The ../ is necessary here because pytest is run from the build directory
+        s.set_metadata(VerilogPlaceholderPass.top_module, "ComplexMultiplier")
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
             path.join(path.dirname(__file__), "complex_multiplier.v"),
         )
-
-        # Name of the top level module to be imported
-        s.set_metadata(VerilogPlaceholderPass.top_module, "ComplexMultiplier")
 
 
 class ComplexMultiplierWrapper(Component):
@@ -54,3 +50,6 @@ class ComplexMultiplierWrapper(Component):
 
         s.dut.send_val //= s.send.val
         s.send.rdy //= s.dut.send_rdy
+
+    def line_trace(s):
+        return s.dut.line_trace()

@@ -6,14 +6,14 @@ from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import Fixed
 
-from src.fixed_point.iterative.multiplier import (
-    MultiplierWrapper,
+from src.fixed_point.iterative.multiplier import MultiplierWrapper
+from src.fixed_point.utils import (
     mk_multiplier_input,
     mk_multiplier_output,
 )
 import random
 from tools.utils import mk_packed
-from src.fixed_point.tools.params import mk_params, rand_fxp_spec
+from src.fixed_point.utils import mk_params, rand_fxp_spec
 
 
 # Test harness for streaming data
