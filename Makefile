@@ -195,7 +195,7 @@ endif
 		-v ${PDK_ROOT}:/pdk:ro \
 		-v ${OPENLANE_ROOT}:/openlane:ro \
 		-v ${PWD}:/c2s2_ip:ro \
-		-w /caravel \
+		-w /caravel_user_project \
 		${CARAVEL_DOCKER_IMAGE}
 
 # ------------------------------------------------------------------------------

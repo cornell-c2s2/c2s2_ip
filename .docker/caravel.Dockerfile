@@ -26,5 +26,4 @@ ENV PDK_ROOT=/pdk
 
 # Install Caravel
 WORKDIR /
-RUN git clone --depth 1 https://github.com/efabless/caravel_user_project.git caravel
-ENV CARAVEL_ROOT=/caravel
+RUN git clone --depth 1 https://github.com/efabless/caravel_user_project.git caravel_user_project
