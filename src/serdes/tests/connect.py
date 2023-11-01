@@ -2,12 +2,15 @@
 # IntMulFixedLatRTL_test
 # =========================================================================
 
+import random
 import pytest
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
-from src.serdes.harnesses.connect import ConnectHarnessVRTL
-from tools.utils import mk_test_case_table
+from src.serdes.deserializer import DeserializerWrapper
+from src.serdes.serializer import SerializerWrapper
+from src.serdes.tests.utils import create_transactions, rand_spec
+from tools.utils import mk_test_case_table, mk_test_matrices
 
 # -------------------------------------------------------------------------
 # TestHarness
@@ -15,140 +18,82 @@ from tools.utils import mk_test_case_table
 
 
 class TestHarness(Component):
-    def construct(s, connect, BIT_WIDTH=32, N_SAMPLES=8):
+    def construct(s, BIT_WIDTH, N_SAMPLES):
         # Instantiate models
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.sink = stream.SinkRTL(mk_bits(BIT_WIDTH))
-        s.con = connect
+        s.deserializer = DeserializerWrapper(BIT_WIDTH, N_SAMPLES)
+        s.serializer = SerializerWrapper(BIT_WIDTH, N_SAMPLES)
+
+        s.deserializer.send //= s.serializer.recv
 
         # Connect
-
-        s.src.send //= s.con.recv
-        s.con.send //= s.sink.recv
+        s.src.send //= s.deserializer.recv
+        s.serializer.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
 
 
-# ----------------------------------------------------------------------
-# Test Case Table
-# ----------------------------------------------------------------------
-
-
-def two_point():
-    return [0x00000008, 0x00000007, 0x00000008, 0x00000007]
-
-
-def eight_point():
-    return [
-        0x00000008,
-        0x00000007,
-        0x00000006,
-        0x00000005,
-        0x00000004,
-        0x00000003,
-        0x00000002,
-        0x00000001,  # input to deserializer
-        0x00000008,
-        0x00000007,
-        0x00000006,
-        0x00000005,
-        0x00000004,
-        0x00000003,
-        0x00000002,
-        0x00000001,
-    ]  # output to serializer
-
-
-def sixteen_point():  # test 16 point
-    return [
-        0x00000008,
-        0x00000007,
-        0x00000006,
-        0x00000005,
-        0x00000004,
-        0x00000003,
-        0x00000002,
-        0x00000001,  # input to deserializer
-        0x00000008,
-        0x00000007,
-        0x00000006,
-        0x00000005,
-        0x00000004,
-        0x00000003,
-        0x00000002,
-        0x00000001,
-        0x00000008,
-        0x00000007,
-        0x00000006,
-        0x00000005,
-        0x00000004,
-        0x00000003,
-        0x00000002,
-        0x00000001,  # output to serializer
-        0x00000008,
-        0x00000007,
-        0x00000006,
-        0x00000005,
-        0x00000004,
-        0x00000003,
-        0x00000002,
-        0x00000001,
-    ]
-
-
-test_case_table = mk_test_case_table(
-    [
-        (
-            "msgs                                       src_delay sink_delay BIT_WIDTH N_SAMPLES"
-        ),
-        ["two_point", two_point, 0, 0, 32, 2],
-        ["eight_point", eight_point, 0, 0, 32, 8],
-    ]
+@pytest.mark.parametrize(
+    *mk_test_matrices(
+        {
+            "execution_num": [0],
+            "nbits": [1, 16],
+            "nsamples": [1, 2, 16],
+            "nmsgs": [1, 100],
+            "src_delay": [0, 1, 5],
+            "sink_delay": [0, 1, 5],
+        },
+        {
+            "execution_num": list(range(1, 10)),
+            "nmsgs": 100,
+            "nbits": None,
+            "nsamples": None,
+            "src_delay": [0, 1, 5],
+            "sink_delay": [0, 1, 5],
+            "slow": True,
+        },
+    )
 )
+def test_connect(p, cmdline_opts):
+    random.seed(random.random() + p.execution_num)
 
+    nbits = p.nbits
+    nsamples = p.nsamples
+    nmsgs = p.nmsgs
 
-def separate_transactions(array, N_SAMPLES, input=True):
-    if not input:
-        return array[N_SAMPLES :: N_SAMPLES + 1]
+    if nbits is None or nsamples is None:
+        nsamples, nbits = rand_spec(256)
 
-    newarray = []
-    if input:
-        for i in range(0, len(array)):
-            if i % (N_SAMPLES + 1) != N_SAMPLES:
-                newarray.append(array[i])
-        print(newarray)
-        return newarray
-
-
-# -------------------------------------------------------------------------
-# TestHarness
-# -------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(**test_case_table)
-def test(test_params, cmdline_opts):
     th = TestHarness(
-        ConnectHarnessVRTL(test_params.BIT_WIDTH, test_params.N_SAMPLES),
-        test_params.BIT_WIDTH,
-        test_params.N_SAMPLES,
+        nbits,
+        nsamples,
     )
 
-    msgs = test_params.msgs()
+    msgs = create_transactions(nbits, nsamples, p.nmsgs)
 
     th.set_param(
         "top.src.construct",
-        msgs=separate_transactions(msgs, test_params.N_SAMPLES, True),
-        initial_delay=test_params.src_delay + 3,
-        interval_delay=test_params.src_delay,
+        msgs=sum(msgs, []),
+        initial_delay=p.src_delay,
+        interval_delay=p.src_delay,
     )
 
     th.set_param(
         "top.sink.construct",
-        msgs=separate_transactions(msgs, test_params.N_SAMPLES, False),
-        initial_delay=test_params.sink_delay + 3,
-        interval_delay=test_params.sink_delay,
+        msgs=sum(msgs, []),
+        initial_delay=p.sink_delay,
+        interval_delay=p.sink_delay,
     )
 
-    run_sim(th, cmdline_opts, duts=["connect"])
+    run_sim(
+        th,
+        cmdline_opts={
+            **cmdline_opts,
+            "max_cycles": nmsgs * (nsamples + 1) * (1 + max(p.src_delay, p.sink_delay))
+            + 10,
+        },
+        duts=["deserializer.dut", "serializer.dut"],
+    )

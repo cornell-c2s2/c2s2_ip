@@ -8,6 +8,7 @@ from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
 from src.serdes.deserializer import DeserializerWrapper
+from src.serdes.tests.utils import create_transactions, rand_spec
 from tools.utils import mk_test_matrices, mk_list_bitstruct
 
 # -------------------------------------------------------------------------
@@ -38,35 +39,6 @@ class TestHarness(Component):
             + " > "
             + s.sink.line_trace()
         )
-
-
-# Creates a list of `nmsgs` random transactions
-# for a deserializer with `nbits` bits and `nsamples` samples
-def create_transactions(nbits, nsamples, nmsgs):
-    def pack_transaction(vals):
-        packer = mk_packed(*([nbits] * nsamples))
-
-        bits = packer(*vals[::-1])
-        # Duplicate the transaction, one for input and output
-        return vals + [bits]
-
-    return sum(
-        [
-            pack_transaction(
-                [random.randint(0, (1 << nbits) - 1) for __ in range(nsamples)]
-            )
-            for _ in range(nmsgs)
-        ],
-        [],
-    )
-
-
-# Return a random deserializer spec
-def rand_deserializer(max_bus=1024):
-    n_samples = random.randint(1, max_bus - 1)
-    # n_bits is capped here because pymtl3 does not support bit widths greater than or equal to 1024
-    n_bits = random.randint(1, (max_bus - 1) // n_samples)
-    return (n_samples, n_bits)
 
 
 # -------------------------------------------------------------------------
@@ -103,7 +75,7 @@ def test_deserializer(p, cmdline_opts):
     nmsgs = p.nmsgs
 
     if nbits is None or nsamples is None:
-        nsamples, nbits = rand_deserializer(256)
+        nsamples, nbits = rand_spec(256)
 
     th = TestHarness(
         nbits,
@@ -135,5 +107,5 @@ def test_deserializer(p, cmdline_opts):
             "max_cycles": nmsgs * (nsamples + 1) * (1 + max(p.src_delay, p.sink_delay))
             + 10,
         },
-        duts=["dut"],
+        duts=["dut.dut"],
     )
