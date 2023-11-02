@@ -1,4 +1,5 @@
 import random
+from pymtl3 import mk_bits
 
 
 # Return a random serdes spec
@@ -12,7 +13,8 @@ def rand_spec(max_bus=1024):
 # Creates a list of `nmsgs` random transactions
 # for a serdes with `nbits` bits and `nsamples` samples
 def create_transactions(nbits, nsamples, nmsgs):
+    bits = mk_bits(nbits)
     return [
-        [random.randint(0, (1 << nbits) - 1) for __ in range(nsamples)]
+        [bits(random.randint(0, (1 << nbits) - 1)) for __ in range(nsamples)]
         for _ in range(nmsgs)
     ]

@@ -41,3 +41,6 @@ class DeserializerWrapper(Component):
             s.dut.send_msg[i] //= s.send.msg.list[i]
         s.dut.send_val //= s.send.val
         s.send.rdy //= s.dut.send_rdy
+
+    def line_trace(s):
+        return s.dut.line_trace()

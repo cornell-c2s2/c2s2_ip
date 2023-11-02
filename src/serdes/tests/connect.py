@@ -92,7 +92,10 @@ def test_connect(p, cmdline_opts):
         th,
         cmdline_opts={
             **cmdline_opts,
-            "max_cycles": nmsgs * (nsamples + 1) * (1 + max(p.src_delay, p.sink_delay))
+            "max_cycles": 2
+            * nmsgs
+            * (nsamples + 1)
+            * (1 + max(p.src_delay, p.sink_delay))
             + 10,
         },
         duts=["deserializer.dut", "serializer.dut"],

@@ -41,3 +41,6 @@ class SerializerWrapper(Component):
         s.dut.send_msg //= s.send.msg
         s.dut.send_val //= s.send.val
         s.send.rdy //= s.dut.send_rdy
+
+    def line_trace(s):
+        return s.dut.line_trace()

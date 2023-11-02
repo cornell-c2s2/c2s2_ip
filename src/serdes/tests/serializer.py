@@ -17,7 +17,7 @@ class TestHarness(Component):
     def construct(s, BIT_WIDTH, N_SAMPLES):
         # Instantiate models
 
-        s.src = stream.SourceRTL(mk_bits(BIT_WIDTH * N_SAMPLES))
+        s.src = stream.SourceRTL(mk_list_bitstruct(BIT_WIDTH, N_SAMPLES))
         s.sink = stream.SinkRTL(mk_bits(BIT_WIDTH))
         s.dut = SerializerWrapper(BIT_WIDTH, N_SAMPLES)
 
@@ -37,26 +37,6 @@ class TestHarness(Component):
             + " > "
             + s.sink.line_trace()
         )
-
-
-# ----------------------------------------------------------------------
-# Test Case Table
-# ----------------------------------------------------------------------
-def separate_transactions(array, N_SAMPLES, input=True):
-    if input:
-        return array[N_SAMPLES :: N_SAMPLES + 1]
-
-    newarray = []
-    if not input:
-        for i in range(0, len(array)):
-            if i % (N_SAMPLES + 1) != N_SAMPLES:
-                newarray.append(array[i])
-        return newarray
-
-
-# -------------------------------------------------------------------------
-# TestHarness
-# -------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -101,7 +81,7 @@ def test_serializer(p, cmdline_opts):
 
     th.set_param(
         "top.src.construct",
-        msgs=[mk_msg(msg) for msg in msgs],
+        msgs=[mk_msg(msg[::-1]) for msg in msgs],
         initial_delay=p.src_delay,
         interval_delay=p.src_delay,
     )
