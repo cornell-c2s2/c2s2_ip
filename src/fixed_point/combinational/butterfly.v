@@ -166,17 +166,18 @@ module FixedPointMultiButterfly #(
     end else if (state == IDLE && recv_rdy) begin
       if (recv_val) begin
         next_state = COMP;
-      end
+      end else begin end
     end else if (state == DONE && send_val) begin
       if (send_rdy) begin
         next_state = IDLE;
-      end
+      end else begin end
     end else if (state == COMP) begin
       if (comp_state == b-1) begin
         next_state = DONE;
         next_comp_state = 0;
-      end else
+      end else begin
         next_comp_state = comp_state + 1;
+      end
     end else begin
     end
 
