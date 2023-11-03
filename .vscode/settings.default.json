@@ -22,6 +22,18 @@
   "[systemverilog]": {
     "editor.formatOnSave": true
   },
-  "python.terminal.activateEnvironment": true,
-  "python.terminal.activateEnvInCurrentTerminal": true
+  "files.associations": {
+    "*.v": "systemverilog"
+  },
+  "terminal.integrated.profiles.linux": {
+    "c2s2_ip": {
+      "path": "bash",
+      "icon": "terminal-bash",
+      "args": [
+        "--init-file",
+        "${workspaceFolder}/tools/source.sh"
+      ]
+    }
+  },
+  "terminal.integrated.defaultProfile.linux": "c2s2_ip"
 }
