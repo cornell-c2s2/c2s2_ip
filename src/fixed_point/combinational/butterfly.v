@@ -121,7 +121,7 @@ module FixedPointMultiButterfly #(
           s_cc[i] <= 0;
           s_wr[i] <= 0;
           s_wc[i] <= 0;
-        end if (recv_rdy && recv_val) begin
+        end else if (recv_rdy && recv_val) begin
           s_ar[i] <= ar[i];
           s_ac[i] <= ac[i];
           s_br[i] <= br[i];
@@ -130,7 +130,7 @@ module FixedPointMultiButterfly #(
           s_wc[i] <= wc[i];
           s_cc[i] <= 0;
           s_cr[i] <= 0;
-        end
+        end else begin end
       end
 
       assign cr[i] = s_cr[i];
@@ -152,7 +152,7 @@ module FixedPointMultiButterfly #(
       s_cc[comp_state] <= s_ac[comp_state] + m_cc;
       s_dr[comp_state] <= s_ar[comp_state] - m_cr;
       s_dc[comp_state] <= s_ac[comp_state] - m_cc;
-    end
+    end else begin end
   end
 
   // state transition logic
