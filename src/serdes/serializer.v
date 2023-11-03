@@ -19,7 +19,7 @@ module Serializer #(
   input logic clk
 );
 
-  generate if(N_SAMPLES == 1) begin : g_single
+  generate if (N_SAMPLES == 1) begin : g_single
     assign send_msg = recv_msg[0];
     assign send_val = recv_val;
     assign recv_rdy = send_rdy;

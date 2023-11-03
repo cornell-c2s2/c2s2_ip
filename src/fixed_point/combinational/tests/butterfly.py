@@ -22,9 +22,11 @@ def butterfly(n, d, a, b, w):
 def mk_msg(n, a, b, w):
     return mk_packed(n)(*a, *b, *w)
 
+
 # Merge outputs into a single bus
 def mk_ret(n, c, d):
     return mk_packed(n)(*c, *d)
+
 
 # Create test parametrization information
 # execution_number: number of times to run the test
@@ -60,7 +62,7 @@ def mk_params(execution_number, sequence_lengths, n, d, bin1, slow=False):
 
 # Test harness for streaming data
 class Harness(Component):
-    def construct(s, mult, n, b = 1):
+    def construct(s, mult, n, b=1):
         s.mult = mult
 
         s.src = stream.SourceRTL(mk_bits(6 * n * b))
@@ -74,12 +76,18 @@ class Harness(Component):
         return s.src.done() and s.sink.done()
 
     def line_trace(s):
-        return s.src.line_trace() + " > " + s.mult.line_trace() + " > " + s.sink.line_trace()
+        return (
+            s.src.line_trace()
+            + " > "
+            + s.mult.line_trace()
+            + " > "
+            + s.sink.line_trace()
+        )
 
 
 # Initialize a simulatable model
 def create_model(n, d, b):
-    model = HarnessVRTL(n, d,  b)
+    model = HarnessVRTL(n, d, b)
 
     return Harness(model, n, b)
 
@@ -92,6 +100,7 @@ def rand_cfixed(n, d):
         d,
         raw=True,
     )
+
 
 @pytest.mark.parametrize(
     "n, d, a, b, w,",
@@ -143,31 +152,28 @@ def test_edge(n, d, a, b, w):
     # print("%s * %s = %s, got %s" % (a.bin(dot=True), b.bin(dot=True), c.bin(dot=True), out.bin(dot=True)))
     # assert c.bin() == out.bin()
 
+
 def concat_Bits(list, n):
     res = list[0]
     for i in range(1, len(list)):
         res = concat(res, list[i])
     return res
 
+
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d, bin1",
     # Runs tests on smaller number sizes
-    mk_params(50, [1, 50], (2, 8), (0,8), bin1=[1,2,4], slow=True) +
+    mk_params(50, [1, 50], (2, 8), (0, 8), bin1=[1, 2, 4], slow=True) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(20, [1, 100], (16, 32), (0,32), bin1=[1,2,4], slow=True) +
+    mk_params(20, [1, 100], (16, 32), (0, 32), bin1=[1, 2, 4], slow=True) +
     # Extensively tests numbers with certain important bit sizes.
     sum(
         [
             [
-                *mk_params(1, [20], n, d, [1,2,4], slow=False),
-                *mk_params(1, [1000], n, d, [1,2,4], slow=True),
+                *mk_params(1, [20], n, d, [1, 2, 4], slow=False),
+                *mk_params(1, [1000], n, d, [1, 2, 4], slow=True),
             ]
-            for (n, d) in [
-                (8, 4),
-                (24, 8),
-                (32, 24),
-                (32, 16)
-            ]
+            for (n, d) in [(8, 4), (24, 8), (32, 24), (32, 16)]
         ],
         [],
     ),
@@ -177,10 +183,10 @@ def test_random(
 ):  # test individual and sequential multiplications to assure stream system works
     random.seed(random.random() + execution_number)
     n, d = rand_fxp_spec(n, d)
-    
+
     dat = []
     solns = []
-    for i in range(sequence_length):   
+    for i in range(sequence_length):
         input = []
         output = []
         for j in range(bin1):
@@ -191,8 +197,8 @@ def test_random(
             c, dd = butterfly(n, d, a, b, w)
             output.append(mk_ret(n, c.get(), dd.get()))
 
-        dat.append(concat_Bits(input, n*6))
-        solns.append(concat_Bits(output, n*4))
+        dat.append(concat_Bits(input, n * 6))
+        solns.append(concat_Bits(output, n * 4))
 
     model = create_model(n, d, bin1)
 

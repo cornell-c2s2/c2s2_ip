@@ -109,11 +109,10 @@ module FixedPointMultiButterfly #(
   assign send_val = (state == DONE);
 
   // registers for storing the inputs / outputs
-  genvar i;
   generate
-    for(i = 0; i < b; i++) begin: g_loop
+    for (genvar i = 0; i < b; i++) begin: g_loop
       always_ff @(posedge clk) begin
-        if(reset) begin
+        if (reset) begin
           s_ac[i] <= 0;
           s_ar[i] <= 0;
           s_bc[i] <= 0;
@@ -122,7 +121,7 @@ module FixedPointMultiButterfly #(
           s_cc[i] <= 0;
           s_wr[i] <= 0;
           s_wc[i] <= 0;
-        end if(recv_rdy && recv_val) begin
+        end if (recv_rdy && recv_val) begin
           s_ar[i] <= ar[i];
           s_ac[i] <= ac[i];
           s_br[i] <= br[i];
@@ -148,7 +147,7 @@ module FixedPointMultiButterfly #(
     // $display("comp_state: %d", comp_state);
     // $display("next_comp_state: %d\n", next_comp_state);
     comp_state <= next_comp_state;
-    if(state == COMP) begin
+    if (state == COMP) begin
       s_cr[comp_state] <= s_ar[comp_state] + m_cr;
       s_cc[comp_state] <= s_ac[comp_state] + m_cc;
       s_dr[comp_state] <= s_ar[comp_state] - m_cr;
@@ -161,21 +160,24 @@ module FixedPointMultiButterfly #(
     next_state = state;
     next_comp_state = 0;
 
-    if(reset) begin
+    if (reset) begin
       next_state = IDLE;
       next_comp_state = 0;
     end else if (state == IDLE && recv_rdy) begin
-      if(recv_val)
+      if (recv_val) begin
         next_state = COMP;
+      end
     end else if (state == DONE && send_val) begin
-      if(send_rdy)
+      if (send_rdy) begin
         next_state = IDLE;
+      end
     end else if (state == COMP) begin
-      if(comp_state == b-1) begin
+      if (comp_state == b-1) begin
         next_state = DONE;
         next_comp_state = 0;
       end else
         next_comp_state = comp_state + 1;
+    end else begin
     end
 
     m_ac = s_bc[comp_state];

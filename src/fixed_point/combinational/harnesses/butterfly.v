@@ -33,8 +33,7 @@ module HarnessFXPMB #(
   logic [n-1:0] dr[b-1:0];
   logic [n-1:0] dc[b-1:0];
 
-  genvar i;
-  generate for(i = 0; i < b; i++) begin : g_loop
+  generate for (genvar i = 0; i < b; i++) begin : g_loop
     assign recv_msg_unpacked[i] = recv_msg[6*n*(i+1)-1:6*n*i];
     assign ar[i] = recv_msg_unpacked[i][6*n-1:5*n];
     assign ac[i] = recv_msg_unpacked[i][5*n-1:4*n];

@@ -1,6 +1,6 @@
 `default_nettype none
 `ifndef DESERIALIZER
-`define DESERIALIZER 
+`define DESERIALIZER
 `include "src/cmn/regs.v"
 
 module Deserializer #(
@@ -20,7 +20,7 @@ module Deserializer #(
   input logic reset
 );
 
-  generate if(N_SAMPLES == 1) begin : g_single
+  generate if (N_SAMPLES == 1) begin : g_single
     assign recv_rdy = send_rdy;
     assign send_val = recv_val;
     assign send_msg[0] = recv_msg;
