@@ -12,7 +12,7 @@ If for some reason you don't have access to any of these, contact your subteam l
 
 ## Installing VSCode and connecting to `c2s2-dev`
 
-Next, you'll want to get your working environment set up. If you don't already have experience with `git` and `github`, we recommend taking a look at the [Git/Github Primer](https://confluence.cornell.edu/pages/viewpage.action?pageId=476108648) on confluence.
+Next, you'll want to get your working environment set up.
 
 1. First, you'll need to install VSCode (if you haven't already). VSCode can be downloaded [here](https://code.visualstudio.com/download).
 2. Install the `Remote - SSH` extension. If you need help installing extensions, VSCode has a useful tutorial [here](https://code.visualstudio.com/docs/editor/extension-marketplace).
@@ -23,13 +23,14 @@ Next, you'll want to get your working environment set up. If you don't already h
 
 ## Cloning and Setting Up `c2s2_ip`
 
-Now that you're in your ssh machine, you'll want to get the github repository up and running.
-1. First, you'll want to get github set up for your ssh machine. A useful tutorial exists [here](https://confluence.cornell.edu/pages/viewpage.action?spaceKey=c2s2&title=Configuring+GitHub+for+our+server) that describes how to set github up.
-2. Navigate to somewhere you'd like your code, and run `git clone git@github.com:cornell-c2s2/c2s2_ip.git`. This will create a folder named `c2s2_ip` with your code.
-3. Open `c2s2_ip` as a workspace in VSCode. You can do so in two ways:
-   1. Run `code c2s2_ip` in the terminal. This should open a new VSCode window, where you have to log in again.
+Now that you're in your ssh machine, you'll want to get the github repository up and running. If you don't already have experience with `git` and `github`, we recommend taking a look at the [Git/Github Quickstart](git.md).
+
+1. First, you'll want to get github set up for your ssh machine. Follow [this tutorial](https://confluence.cornell.edu/pages/viewpage.action?spaceKey=c2s2&title=Configuring+GitHub+for+our+server) to get github set up.
+2. Navigate to somewhere you'd like your code, and run `git clone git@github.com:cornell-c2s2/c2s2_ip.git` in the terminal (the VSCode terminal can be opened using `` Ctrl + ` ``). This will create a folder named `c2s2_ip` with your code.
+3. Open `c2s2_ip` as a workspace in VSCode. **This is necessary for your vscode extensions to work!** Otherwise, you'll lose features like autoformatting, syntax highlighting, etc. You can do so in two ways:
+   1. Run `code c2s2_ip` in the vscode terminal. This should open a new VSCode window, where you have to log in again.
    2. Click `File > Open Folder` and select the `c2s2_ip` folder.
 4. Run `make install` in your terminal. This should install all the required dependencies for the workspace. This includes a few VSCode extensions as well as setting up a `python` virtual environment with all the necessary `pip` packages.
 5. Type `Ctrl+Shift+P` and select `Python: Create Environment...`, and select `venv`. Next, select `Use Existing` and in the bottom right you should get that `c2s2_ip/.venv/bin/python` was selected as your default interpreter.
 6. Type `Ctrl+Shift+P` and select `Reload Window`. This should activate all the extensions you just installed.
-7. Read the [makefile tutorial](make.md) if you want to learn more about how to get started making new IP!
+7. Read the [makefile tutorial](make.md) and the [pytest tutorial](pytest.md) to learn more about how to get started making new IP! A full list of tutorials on the github repository exists [here](index.md).
