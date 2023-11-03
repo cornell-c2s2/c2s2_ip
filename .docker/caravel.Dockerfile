@@ -21,9 +21,9 @@ RUN mkdir -p /etc/apt/keyrings && \
 RUN apt-get update -y && \
   apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-ENV OPENLANE_ROOT=/openlane
-ENV PDK_ROOT=/pdk
+ENV OPENLANE_ROOT=/home/openlane
+ENV PDK_ROOT=/home/pdk
 
 # Install Caravel
-WORKDIR /
+WORKDIR /home
 RUN git clone --depth 1 https://github.com/efabless/caravel_user_project.git caravel_user_project
