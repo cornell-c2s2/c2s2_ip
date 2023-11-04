@@ -20,10 +20,7 @@ RUN mkdir -p /etc/apt/keyrings && \
 
 RUN apt-get update -y && \
   apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-ENV OPENLANE_ROOT=/home/openlane
-ENV PDK_ROOT=/home/pdk
-
+  
 # Install Caravel
 WORKDIR /home
 # Cloning my branch here due to a bug in the Makefile.
