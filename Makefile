@@ -192,8 +192,6 @@ ifndef OPENLANE_ROOT
 endif
 	@docker run --rm -it \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v ${PDK_ROOT}:/home/pdk:ro \
-		-v ${OPENLANE_ROOT}:/home/openlane \
 		-v ${PWD}:/home/c2s2_ip:ro \
 		-w /home/caravel_user_project \
 		${CARAVEL_DOCKER_IMAGE}

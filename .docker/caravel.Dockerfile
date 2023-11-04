@@ -26,4 +26,5 @@ ENV PDK_ROOT=/home/pdk
 
 # Install Caravel
 WORKDIR /home
-RUN git clone --depth 1 https://github.com/efabless/caravel_user_project.git caravel_user_project
+# Cloning my branch here due to a bug in the Makefile.
+RUN git clone --depth 1 https://github.com/UnsignedByte/caravel_user_project.git caravel_user_project
