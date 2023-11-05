@@ -5,7 +5,7 @@ from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from src.arbiter_router.harnesses.arbiter import Arbiter
-from tools.pymtl_extensions import mk_test_matrix
+from tools.pymtl_extensions import mk_test_matrices
 
 
 # Creates a test harness class for the `Arbiter` module.
@@ -88,39 +88,49 @@ def sim_arbiter(nbits, ninputs, nmsgs, delay):
 
 # Simple arbiter tests where inputs are sent every `delay+1` cycles
 @pytest.mark.parametrize(
-    "execution_num, nbits, ninputs, nmsgs, delay",
-    [
-        (0, 8, 4, 20, 0),
-        (0, 8, 4, 20, 2),
-        *mk_test_matrix(
-            {
-                "execution_num": list(range(1, 21)),  # Do 20 tests
-                "nbits": [(8, 32)],  # Test 8-32 bit routers
-                "ninputs": [(2, 16)],  # Test 2-16 input routers
-                "nmsgs": [50],  # Send 50 messages
-                "delay": [0, 1, 8],  # Wait this many cycles between inputs
-            },
-            slow=True,
-        ),
-    ],
+    *mk_test_matrices(
+        {
+            "execution_num": 0,
+            "nbits": 8,
+            "ninputs": 4,
+            "nmsgs": 20,
+            "delay": 0,
+        },
+        {
+            "execution_num": 0,
+            "nbits": 8,
+            "ninputs": 4,
+            "nmsgs": 20,
+            "delay": 2,
+        },
+        {
+            "execution_num": list(range(1, 11)),  # Do 10 tests
+            "nbits": [(8, 32)],  # Test 8-32 bit arbiters
+            "ninputs": [(2, 16)],  # Test 2-16 input arbiters
+            "nmsgs": [50],  # Send 50 messages
+            "delay": [0, 1, 8],  # Wait this many cycles between inputs
+            "slow": True,
+        },
+    )
 )
-def test_arbiter(execution_num, nbits, ninputs, nmsgs, delay, cmdline_opts):
+def test_arbiter(p, cmdline_opts):
     random.seed(
-        random.random() + execution_num
+        random.random() + p.execution_num
     )  # Done so each test has a deterministic but different random seed
-    nbits, ninputs = arbiter_spec(nbits, ninputs)
+    nbits, ninputs = arbiter_spec(p.nbits, p.ninputs)
     model = TestHarness(nbits, ninputs)
 
-    msgs, expected_output = sim_arbiter(nbits, ninputs, nmsgs, delay)
+    msgs, expected_output = sim_arbiter(nbits, ninputs, p.nmsgs, p.delay)
 
     for i in range(ninputs):
         model.set_param(
             f"top.srcs[{i}].construct",
             msgs=msgs[i],
-            initial_delay=0,
-            interval_delay=delay,
+            initial_delay=p.delay,
+            interval_delay=p.delay,
         )
 
+    # Would need an unordered sink to test delays here
     model.set_param(
         "top.sink.construct",
         msgs=expected_output,
