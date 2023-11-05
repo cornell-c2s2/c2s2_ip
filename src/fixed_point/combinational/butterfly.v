@@ -83,6 +83,8 @@ module FixedPointMultiButterfly #(
   logic [n-1:0] m_cr;
   logic [n-1:0] m_cc;
 
+  logic mult_recv_rdy, mult_send_val;
+
   // complex multiplier instantiation as combinatorial
   FixedPointCombComplexMultiplier #(
     .n(n),
@@ -90,8 +92,8 @@ module FixedPointMultiButterfly #(
     .num_mults(3) // with 3 mults, can output in same cycle
   ) mult (
     .recv_val(1'b1),
-    .recv_rdy(),
-    .send_val(),
+    .recv_rdy(mult_recv_rdy),
+    .send_val(mult_send_val),
     .send_rdy(1'b1),
     .clk(clk),
     .reset(reset),
