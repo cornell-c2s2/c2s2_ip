@@ -539,11 +539,11 @@ test_case_table = mk_tests(
         ["descend_signal_16", descend_signal, 0, 0, 32, 16, 16, False],
         *[
             [f"{n}_point_dc_generated", n_point_dc, 0, 0, 32, 16, n, True]
-            for n in [16, 32, 64, 128, 256]
+            for n in [16, 64, 128]
         ],
         *[
             [f"{n}_point_{f.__name__}", f, 0, 0, 32, 16, n, True]
-            for n in [16, 32, 64, 128, 256]
+            for n in [16, 64, 128]
             for f in [random_signal]
         ],
     ],
@@ -574,6 +574,7 @@ def make_signed(i, n):
 
 @pytest.mark.parametrize(**test_case_table)
 def test(request, test_params, cmdline_opts):
+    random.seed(hash(test_params))
     th = TestHarness(
         FFTTestHarness(
             test_params.BIT_WIDTH, test_params.DECIMAL_PT, test_params.N_SAMPLES

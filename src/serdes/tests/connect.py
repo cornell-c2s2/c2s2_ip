@@ -105,7 +105,6 @@ test_case_table = mk_test_case_table(
         ),
         ["two_point", two_point, 0, 0, 32, 2],
         ["eight_point", eight_point, 0, 0, 32, 8],
-        # [ "sixteen_point",                   sixteen_point,                             0,        0,         32,       16        ],
     ]
 )
 
