@@ -72,8 +72,8 @@ module FixedPointMultiButterfly #(
   logic [2:0] state;
   logic [2:0] next_state;
 
-  logic [((b == 1) ? 0 : $clog2(b)):0] comp_state;
-  logic [((b == 1) ? 0 : $clog2(b)):0] next_comp_state;
+  logic [((b == 1) ? 0 : $clog2(b)-1):0] comp_state;
+  logic [((b == 1) ? 0 : $clog2(b)-1):0] next_comp_state;
 
   // wiring for the complex multipliers
   logic [n-1:0] m_ar;
