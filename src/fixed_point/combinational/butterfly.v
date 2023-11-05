@@ -17,7 +17,6 @@
 `ifndef FIXED_POINT_MULTI_BUTTERFLY
 `define FIXED_POINT_MULTI_BUTTERFLY
 `include "src/fixed_point/combinational/complex_multiplier.v"
-`include "src/cmn/regs.v"
 
 module FixedPointMultiButterfly #(
   parameter int n = 32,
@@ -49,6 +48,8 @@ module FixedPointMultiButterfly #(
   output logic [n-1:0] dr[b],
   output logic [n-1:0] dc[b]
 );
+
+  localparam int bb = b-1;
 
   /* performs the butterfly operation, equivalent to doing
     | 1  w |   | a |   | c |
@@ -173,7 +174,7 @@ module FixedPointMultiButterfly #(
         next_state = IDLE;
       end else begin end
     end else if (state == COMP) begin
-      if (comp_state == b-1) begin
+      if (comp_state == bb[((b == 1) ? 0 : $clog2(b)-1):0]) begin
         next_state = DONE;
         next_comp_state = 0;
       end else begin
