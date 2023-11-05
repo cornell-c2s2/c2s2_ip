@@ -31,7 +31,7 @@ module FixedPointCombComplexMultiplier #(
 
   logic [n-1:0] arXbr, acXbc, arcXbrc;
 
-  localparam [2:0] IDLE = 3'd0, MUL1 = 3'd1, MUL2 = 3'd2, MUL3 = 3'd3, DONE = 3'd4;
+  localparam logic [2:0] IDLE = 3'd0, MUL1 = 3'd1, MUL2 = 3'd2, MUL3 = 3'd3, DONE = 3'd4;
 
   generate
     // 3 multiplier implementation, completes computations in a single cycle, no sequential logic required.
