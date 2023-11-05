@@ -68,9 +68,7 @@ module FixedPointMultiButterfly #(
   logic [n-1:0] s_wc[b];
 
   // state machine registers
-  localparam int IDLE = 3'd0;
-  localparam int COMP = 3'd1;
-  localparam int DONE = 3'd2;
+  logic [2:0] IDLE = 3'd0, COMP = 3'd1, DONE = 3'd2;
   logic [2:0] state;
   logic [2:0] next_state;
 
