@@ -149,6 +149,10 @@ else
 	@pytest src/${IP} -k ${INCLUDE} --suppress-no-test-exit-code
 endif
 
+TOOL_DOCKER_IMAGE = $(shell docker build -q - < .docker/tools.Dockerfile)
+BUILD_DIR="build"
+OUTPUT_FILE = "output"
+
 # ------------------------------------------------------------------------------
 # Testfloat generation
 # Run
@@ -158,10 +162,7 @@ endif
 # to generate testfloat data for a specific function.
 # Files will be written to `build/testfloat_gen`
 # ------------------------------------------------------------------------------
-TESTFLOAT_DOCKER_IMAGE = $(shell docker build -q - < .docker/testfloat.Dockerfile)
 EXTRA_ARGS=
-OUTPUT_FILE="testfloat_gen"
-BUILD_DIR="build"
 testfloat_gen:
 ifndef FUNC
 	@printf "${RED}"
@@ -171,10 +172,32 @@ else
 	@printf "${CYAN}"
 	@printf "Generating testfloat data for ${FUNC}...${RESET}\n"
 	@mkdir -p ${BUILD_DIR}
-	@docker run --rm ${TESTFLOAT_DOCKER_IMAGE} \
+	@docker run --rm ${TOOL_DOCKER_IMAGE} \
 		testfloat_gen ${FUNC} ${EXTRA_ARGS} > ${BUILD_DIR}/${OUTPUT_FILE}
 	@printf "${GREEN}"
 	@printf "[SUCCESS] Testfloat generation written to ${BUILD_DIR}/${OUTPUT_FILE}!${RESET}\n"
+endif
+
+# ------------------------------------------------------------------------------
+# Flopoco generation
+# Run
+# ```
+# make flopoco ARGS=<args>
+# ```
+# to generate flopoco data in verilog for a specific function.
+# Files will be written to `build/flopoco.v`
+# ------------------------------------------------------------------------------
+flopoco:
+ifndef ARGS
+	@docker run --rm ${TOOL_DOCKER_IMAGE} flopoco
+else
+	@printf "${CYAN}"
+	@printf "Generating flopoco data for ${FUNC}...${RESET}\n"
+	@mkdir -p ${BUILD_DIR}
+	@docker run --rm ${TOOL_DOCKER_IMAGE} \
+		flopoco ${ARGS} outputFile=/dev/stdout > ${BUILD_DIR}/${OUTPUT_FILE}
+	@printf "${GREEN}"
+	@printf "[SUCCESS] Flopoco generation written to ${BUILD_DIR}/${OUTPUT_FILE}!${RESET}\n"
 endif
 
 # ------------------------------------------------------------------------------
