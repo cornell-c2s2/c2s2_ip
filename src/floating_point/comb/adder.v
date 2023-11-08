@@ -42,7 +42,7 @@ module FloatCombAdder #(
   // Align mantissas based on the exponent difference
   logic [M_WIDTH:0] alignedMantissaA, alignedMantissaB;
 
-  // Align A if B exponent larger
+  // Align A if B exponent larger, append hidden bit (1)
   assign alignedMantissaA = (exponentDiff < 0) ? {1'b1, mantissaA} >> -exponentDiff
       : {1'b1, mantissaA};
 
