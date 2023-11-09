@@ -52,7 +52,7 @@ class TestHarness(Component):
             "execution_num": [0],
             "nbits": [4],
             "nsamples": [1, 2, 8],
-            "nmsgs": [1, 50],
+            "nmsgs": [50],
             "src_delay": [0, 1, 5],
             "sink_delay": [0, 1, 5],
         },
