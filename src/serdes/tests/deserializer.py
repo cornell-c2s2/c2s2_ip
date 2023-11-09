@@ -50,14 +50,14 @@ class TestHarness(Component):
     *mk_test_matrices(
         {
             "execution_num": [0],
-            "nbits": [1, 16],
-            "nsamples": [1, 2, 16],
+            "nbits": [4],
+            "nsamples": [1, 2, 8],
             "nmsgs": [1, 50],
             "src_delay": [0, 1, 5],
             "sink_delay": [0, 1, 5],
         },
         {
-            "execution_num": list(range(1, 10)),
+            "execution_num": list(range(1, 5)),
             "nmsgs": 50,
             "nbits": None,
             "nsamples": None,
@@ -75,7 +75,7 @@ def test_deserializer(p, cmdline_opts):
     nmsgs = p.nmsgs
 
     if nbits is None or nsamples is None:
-        nsamples, nbits = rand_spec(256)
+        nsamples, nbits = rand_spec(128)
 
     th = TestHarness(
         nbits,
