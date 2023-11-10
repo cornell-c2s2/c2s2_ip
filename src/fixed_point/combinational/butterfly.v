@@ -70,8 +70,6 @@ module FixedPointMultiButterfly #(
 
   // state machine registers
   logic [2:0] IDLE = 3'd0, COMP = 3'd1, DONE = 3'd2;
-
-  logic unused = &({IDLE,COMP,DONE});
   logic [2:0] state;
   logic [2:0] next_state;
 
@@ -87,6 +85,8 @@ module FixedPointMultiButterfly #(
   logic [n-1:0] m_cc;
 
   logic mult_recv_rdy, mult_send_val;
+
+  logic unused = &({IDLE,COMP,DONE,mult_recv_rdy,mult_send_val});
 
   // complex multiplier instantiation as combinatorial
   FixedPointCombComplexMultiplier #(
