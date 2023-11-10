@@ -70,6 +70,8 @@ module FixedPointMultiButterfly #(
 
   // state machine registers
   logic [2:0] IDLE = 3'd0, COMP = 3'd1, DONE = 3'd2;
+
+  logic unused = &({IDLE,COMP,DONE});
   logic [2:0] state;
   logic [2:0] next_state;
 
