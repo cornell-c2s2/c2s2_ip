@@ -12,7 +12,7 @@
 `ifndef CMN_REGS_V
 `define CMN_REGS_V
 
-`include "src/cmn/assert.v"
+`include "cmn/assert.v"
 
 //------------------------------------------------------------------------
 // Postive-edge triggered flip-flop

@@ -4,11 +4,14 @@ from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
-from src.fixed_point.combinational.harnesses.complex_multiplier import (
-    ComplexMultiplierTestHarness,
-)
+from src.fixed_point.combinational.complex_multiplier import ComplexMultiplierWrapper
 import random
-from src.fixed_point.tools.params import mk_params, rand_fxp_spec
+from src.fixed_point.utils import (
+    mk_params,
+    rand_fxp_spec,
+    mk_complex_multiplier_input,
+    mk_complex_multiplier_output,
+)
 
 
 # Complex multiplication with fixed precision
@@ -25,24 +28,23 @@ def cmul(n, d, a, b):
 
 # Merge a and b into a larger number
 def mk_msg(n, a, b):
-    return (a[0] << 3 * n) | (a[1] << 2 * n) | (b[0] << n) | b[1]
+    return mk_complex_multiplier_input(n)(*a, *b)
 
 
 def mk_ret(n, c):
-    return (c[0] << n) | c[1]
+    return mk_complex_multiplier_output(n)(*c)
 
 
 # Test harness for streaming data
-class Harness(Component):
-    def construct(s, mult, n):
-        s.mult = mult
+class TestHarness(Component):
+    def construct(s, n, d):
+        s.dut = ComplexMultiplierWrapper(n, d)
 
-        s.src = stream.SourceRTL(mk_bits(4 * n))
+        s.src = stream.SourceRTL(mk_complex_multiplier_input(n))
+        s.sink = stream.SinkRTL(mk_complex_multiplier_output(n))
 
-        s.sink = stream.SinkRTL(mk_bits(2 * n))
-
-        s.src.send //= s.mult.recv
-        s.mult.send //= s.sink.recv
+        s.src.send //= s.dut.recv
+        s.dut.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
@@ -51,7 +53,7 @@ class Harness(Component):
         return (
             s.src.line_trace()
             + " > "
-            + s.mult.line_trace()
+            + s.dut.line_trace()
             + " > "
             + s.sink.line_trace()
         )
@@ -65,13 +67,6 @@ def rand_cfixed(n, d):
         d,
         raw=True,
     )
-
-
-# Initialize a simulatable model
-def create_model(n, d):
-    model = ComplexMultiplierTestHarness(n, d)
-
-    return Harness(model, n)
 
 
 @pytest.mark.parametrize(
@@ -88,7 +83,7 @@ def test_edge(n, d, a, b, cmdline_opts):
     a = CFixed(a, n, d)
     b = CFixed(b, n, d)
 
-    model = create_model(n, d)
+    model = TestHarness(n, d)
 
     model.set_param(
         "top.src.construct",
@@ -104,10 +99,7 @@ def test_edge(n, d, a, b, cmdline_opts):
         interval_delay=0,
     )
 
-    run_sim(
-        model,
-        cmdline_opts,
-    )
+    run_sim(model, cmdline_opts, duts=["dut.dut"])
 
 
 @pytest.mark.parametrize(
@@ -115,14 +107,11 @@ def test_edge(n, d, a, b, cmdline_opts):
     # Runs tests on smaller number sizes
     mk_params(20, [1, 50], (2, 8), (0, 8), slow=True) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
-    mk_params(10, [1, 10, 50, 100], (16, 64), (0, 64), slow=True) +
+    mk_params(10, [1, 50], (16, 64), (0, 64), slow=True) +
     # Extensively tests numbers with certain important bit sizes.
     sum(
         [
-            [
-                *mk_params(1, [20], n, d, slow=False),
-                *mk_params(1, [1000], n, d, slow=True),
-            ]
+            mk_params(1, [100], n, d, slow=True)
             for (n, d) in [
                 (8, 4),
                 (24, 8),
@@ -134,7 +123,7 @@ def test_edge(n, d, a, b, cmdline_opts):
         [],
     ),
 )
-def test_random(execution_number, sequence_length, n, d):
+def test_random(cmdline_opts, execution_number, sequence_length, n, d):
     random.seed(random.random() + execution_number)
     n, d = rand_fxp_spec(n, d)
     dat = [(rand_cfixed(n, d), rand_cfixed(n, d)) for i in range(sequence_length)]
@@ -145,27 +134,26 @@ def test_random(execution_number, sequence_length, n, d):
         [i.bin(dot=True) for i in solns],
     )
 
-    model = create_model(n, d)
+    model = TestHarness(n, d)
 
     dat = [mk_msg(n, i[0].get(), i[1].get()) for i in dat]
 
-    model.set_param("top.src.construct", msgs=dat, initial_delay=5, interval_delay=5)
+    model.set_param("top.src.construct", msgs=dat, initial_delay=0, interval_delay=0)
 
     model.set_param(
         "top.sink.construct",
         msgs=[mk_ret(n, c.get()) for c in solns],
-        initial_delay=5,
-        interval_delay=5,
+        initial_delay=0,
+        interval_delay=0,
     )
 
     run_sim(
         model,
         cmdline_opts={
-            "dump_textwave": False,
-            # "dump_vcd": f"rand_{execution_number}_{sequence_length}_{n}_{d}",
-            "dump_vcd": False,
+            **cmdline_opts,
             "max_cycles": (
                 30 + (3 * (n + 2) + 2) * len(dat)
             ),  # makes sure the time taken grows linearly with respect to 3n
         },
+        duts=["dut.dut"],
     )

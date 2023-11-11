@@ -4,9 +4,9 @@ from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
-from src.arbiter_router.harnesses.arbiter import Arbiter
-from src.arbiter_router.harnesses.router import Router
-from tools.pymtl_extensions import mk_test_matrices, mk_packed
+from src.arbiter_router.arbiter import Arbiter
+from src.arbiter_router.router import Router
+from tools.utils import mk_test_matrices, mk_packed
 
 """
 Tests that connect an arbiter to a router and makes sure messages end up in the right place
@@ -194,6 +194,7 @@ def test_arbiter_router(p, cmdline_opts):
             **cmdline_opts,
             "max_cycles": p.nmsgs * nblocks * (max(p.src_delay, p.sink_delay) + 1) + 10,
         },
+        duts=["arbiter", "router"],
     )
 
 
@@ -227,4 +228,5 @@ def test_router_arbiter(p, cmdline_opts):
             **cmdline_opts,
             "max_cycles": p.nmsgs * nblocks * (max(p.src_delay, p.sink_delay) + 1) + 10,
         },
+        duts=["arbiter", "router"],
     )
