@@ -5,10 +5,10 @@
 `ifndef CMN_QUEUES_V
 `define CMN_QUEUES_V
 
-`include "src/cmn/regs.v"
-`include "src/cmn/muxes.v"
-`include "src/cmn/regfiles.v"
-`include "src/cmn/assert.v"
+`include "cmn/regs.v"
+`include "cmn/muxes.v"
+`include "cmn/regfiles.v"
+`include "cmn/assert.v"
 
 //------------------------------------------------------------------------
 // Defines

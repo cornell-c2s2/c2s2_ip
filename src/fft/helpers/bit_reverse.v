@@ -1,11 +1,11 @@
-`ifndef FFT_BIT_REVERSAL
-`define FFT_BIT_REVERSAL
+`ifndef fft_helpers_BIT_REVERSE
+`define fft_helpers_BIT_REVERSE
 `default_nettype none
 
 /// FFT Bit Reversal
 /// @param BIT_WIDTH  : Data bit width
 /// @param N_SAMPLES   : Number of points in the FFT
-module BitReverse #(
+module fft_helpers_BitReverse #(
   parameter int BIT_WIDTH = 32,
   parameter int N_SAMPLES = 8
 ) (

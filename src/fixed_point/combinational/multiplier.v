@@ -2,7 +2,7 @@
 `ifndef FIXED_POINT_COMB_MULTIPLIER
 `define FIXED_POINT_COMB_MULTIPLIER
 
-module FixedPointCombMultiplier #(
+module fixed_point_combinational_Multiplier #(
   parameter int n = 32,  // bit width
   parameter int d = 16,  // number of decimal bits
   parameter bit sign = 1  // 1 if signed, 0 otherwise.

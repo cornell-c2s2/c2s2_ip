@@ -1,10 +1,10 @@
 import pytest
 import random
 from pymtl3 import *
-from src.arbiter_router.harnesses.router import Router
+from src.arbiter_router.router import Router
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
-from tools.pymtl_extensions import mk_test_matrices
+from tools.utils import mk_test_matrices, mk_packed
 
 
 class TestHarness(Component):
@@ -53,11 +53,14 @@ def router_msg(nbits, noutputs):
     n_addr_bits = (noutputs - 1).bit_length()
     n_data_bits = nbits - n_addr_bits
 
-    # random address and data
-    addr = random.randint(0, noutputs - 1)
-    data = random.randint(0, (1 << n_data_bits) - 1)
+    addr_bits = mk_bits(n_addr_bits)
+    data_bits = mk_bits(n_data_bits)
 
-    return ((addr << n_data_bits) | data, addr)
+    # random address and data
+    addr = addr_bits(random.randint(0, noutputs - 1))
+    data = data_bits(random.randint(0, (1 << n_data_bits) - 1))
+
+    return (concat(addr, data), addr)
 
 
 @pytest.mark.parametrize(
@@ -118,4 +121,4 @@ def test_router(p, cmdline_opts):
             interval_delay=p.sink_delay,
         )
 
-    run_sim(model, cmdline_opts)
+    run_sim(model, cmdline_opts, duts=["dut"])

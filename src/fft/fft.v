@@ -2,10 +2,10 @@
 `ifndef FIXED_POINT_FFT
 `define FIXED_POINT_FFT
 
-`include "src/fft/helpers/sine_wave.v"
-`include "src/fft/helpers/bit_reverse.v"
-`include "src/fft/helpers/fft_stage.v"
-module FFT #(
+`include "fft/helpers/sine_wave.v"
+`include "fft/helpers/bit_reverse.v"
+`include "fft/stage.v"
+module fft_FFT #(
   parameter int BIT_WIDTH  = 32,
   parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES  = 8
@@ -43,7 +43,7 @@ module FFT #(
     end
   endgenerate
 
-  SineWave #(
+  fft_helpers_SineWave #(
     .N(N_SAMPLES),
     .W(BIT_WIDTH),
     .D(DECIMAL_PT)
@@ -51,7 +51,7 @@ module FFT #(
     .sine_wave_out(sine_wave_out)
   );
 
-  BitReverse #(
+  fft_helpers_BitReverse #(
     .N_SAMPLES(N_SAMPLES),
     .BIT_WIDTH(BIT_WIDTH)
   ) bit_reverse (
@@ -61,7 +61,7 @@ module FFT #(
 
   generate
     for (genvar i = 0; i < $clog2(N_SAMPLES); i++) begin
-      FFTStage #(
+      fft_Stage #(
         .BIT_WIDTH (BIT_WIDTH),
         .DECIMAL_PT(DECIMAL_PT),
         .N_SAMPLES (N_SAMPLES),
