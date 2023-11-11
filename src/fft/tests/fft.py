@@ -8,7 +8,7 @@ from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
 from src.fft.tests.fft_sim import fixed_point_fft
-from src.fft.cooley_tukey.harnesses.fft import FFTTestHarness
+from src.fft.pease.harnesses.fft import FFTTestHarness
 import math
 
 
