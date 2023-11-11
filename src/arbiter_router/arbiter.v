@@ -1,3 +1,5 @@
+`ifndef arbiter_router_ARBITER
+`define arbiter_router_ARBITER
 /*
   ==========================================================================
   Arbitrator module
@@ -16,8 +18,7 @@
   Date             : Dec 19, 2021
 */
 
-
-module Arbiter #(
+module arbiter_router_Arbiter #(
   parameter int nbits = 32,
   parameter int ninputs = 3,
   parameter int addr_nbits = $clog2(ninputs)
@@ -101,3 +102,4 @@ module Arbiter #(
   end
 
 endmodule
+`endif

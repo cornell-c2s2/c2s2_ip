@@ -142,7 +142,7 @@ lint:
 ifndef IP
 	@tools/lint.sh
 else
-	@tools/lint.sh "./src/${IP}"
+	@tools/lint.sh ${IP}
 endif
 
 test:

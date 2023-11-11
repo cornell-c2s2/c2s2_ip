@@ -4,11 +4,15 @@ from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from fixedpt import CFixed
-from src.fixed_point.iterative.harnesses.butterfly import HarnessVRTL
+from src.fixed_point.iterative.butterfly import ButterflyWrapper
+from src.fixed_point.utils import (
+    mk_butterfly_input,
+    mk_butterfly_output,
+)
 from src.fixed_point.iterative.tests.complex_multiplier import cmul
 import random
-from tools.pymtl_extensions import mk_packed
-from src.fixed_point.tools.params import rand_fxp_spec
+from tools.utils import mk_packed
+from src.fixed_point.utils import rand_fxp_spec
 
 
 # Performs the butterfly operation on two complex numbers
@@ -20,12 +24,12 @@ def butterfly(n, d, a, b, w):
 
 # Merge inputs into a single bus
 def mk_msg(n, a, b, w):
-    return mk_packed(n)(*a, *b, *w)
+    return mk_butterfly_input(n)(*a, *b, *w)
 
 
 # Merge outputs into a single bus
 def mk_ret(n, c, d):
-    return mk_packed(n)(*c, *d)
+    return mk_butterfly_output(n)(*c, *d)
 
 
 # Create test parametrization information
@@ -61,26 +65,18 @@ def mk_params(execution_number, sequence_lengths, n, d, m=[0], slow=False):
 
 
 # Test harness for streaming data
-class Harness(Component):
-    def construct(s, mult, n):
-        s.mult = mult
+class TestHarness(Component):
+    def construct(s, nbits, ndecimalbits, m=0):
+        s.dut = ButterflyWrapper(nbits, ndecimalbits, m)
 
-        s.src = stream.SourceRTL(mk_bits(6 * n))
+        s.src = stream.SourceRTL(mk_butterfly_input(nbits))
+        s.sink = stream.SinkRTL(mk_butterfly_output(nbits))
 
-        s.sink = stream.SinkRTL(mk_bits(4 * n))
-
-        s.src.send //= s.mult.recv
-        s.mult.send //= s.sink.recv
+        s.src.send //= s.dut.recv
+        s.dut.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
-
-
-# Initialize a simulatable model
-def create_model(n, d, mult=0):
-    model = HarnessVRTL(n, d, mult)
-
-    return Harness(model, n)
 
 
 # return a random fixed point value
@@ -108,7 +104,7 @@ def test_edge(cmdline_opts, n, d, a, b, w):
     b = CFixed(b, n, d)
     w = CFixed(w, n, d)
 
-    model = create_model(n, d)
+    model = TestHarness(n, d)
 
     model.set_param(
         "top.src.construct",
@@ -129,13 +125,8 @@ def test_edge(cmdline_opts, n, d, a, b, w):
     run_sim(
         model,
         cmdline_opts,
+        duts=["dut.dut"],
     )
-
-    # out = Fixed(int(eval_until_ready(model, a, b)), s, n, d, raw=True)
-
-    # c = (a * b).resize(s, n, d)
-    # print("%s * %s = %s, got %s" % (a.bin(dot=True), b.bin(dot=True), c.bin(dot=True), out.bin(dot=True)))
-    # assert c.bin() == out.bin()
 
 
 @pytest.mark.parametrize(
@@ -172,7 +163,7 @@ def test_random(
     ]
     solns = [butterfly(n, d, i[0], i[1], i[2]) for i in dat]
 
-    model = create_model(n, d)
+    model = TestHarness(n, d)
 
     dat = [mk_msg(n, i[0].get(), i[1].get(), i[2].get()) for i in dat]
 
@@ -193,6 +184,7 @@ def test_random(
                 30 + ((n + 2) * 3 + 4) * len(dat)
             ),  # makes sure the time taken grows linearly with respect to n
         },
+        duts=["dut"],
     )
 
 
@@ -228,7 +220,7 @@ def test_optimizations(
     ]
     solns = [butterfly(n, d, i[0], i[1], opt_omega[m - 1]) for i in dat]
 
-    model = create_model(n, d, m)
+    model = TestHarness(n, d, m)
 
     dat = [mk_msg(n, i[0].get(), i[1].get(), i[2].get()) for i in dat]
 
@@ -237,8 +229,8 @@ def test_optimizations(
     model.set_param(
         "top.sink.construct",
         msgs=[mk_ret(n, c.get(), d.get()) for (c, d) in solns],
-        initial_delay=5,
-        interval_delay=5,
+        initial_delay=0,
+        interval_delay=0,
     )
 
     run_sim(
@@ -249,4 +241,5 @@ def test_optimizations(
                 30 + 6 * len(dat)
             ),  # makes sure the time taken grows constantly
         },
+        duts=["dut.dut"],
     )
