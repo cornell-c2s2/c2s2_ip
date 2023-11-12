@@ -18,7 +18,7 @@ PURPLE =\033[0;35m
 CYAN   =\033[0;36m
 WHITE  =\033[0;37m
 
-VENV:=. .venv/bin/activate
+VENV:=source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ./venv ; conda activate ./venv
 
 # Extra arguments to pass
 EXTRA_ARGS=
@@ -34,13 +34,10 @@ vscode:
 	@cat .workspace-extensions | xargs code
 
 venv:
-	@printf "${CYAN}Setting Up Virtual Environment...${RESET}\n"
-	@python3 -m venv .venv
-	@printf "${CYAN}Installing Python Dependencies...${RESET}\n"
-	@$(VENV) && pip install --upgrade pip
-	@$(VENV) && pip install -r requirements.txt
+	@printf "${CYAN}Setting Up Conda Environment...${RESET}\n"
+	@conda env create -f environment.yml -p venv
 	@printf "${GREEN}Dependencies installed!${RESET}\n"
-	@printf "${YELLOW}Run ${RED}source .venv/bin/activate${YELLOW} to activate your virtual environment.${RESET}\n"
+	@printf "${YELLOW}Run ${RED}conda activate ./venv${YELLOW} to activate your virtual environment.${RESET}\n"
 
 
 install: --pull vscode venv
