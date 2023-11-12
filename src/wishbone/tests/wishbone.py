@@ -129,12 +129,15 @@ def test_fft_delay_out():
         ]
 
 @pytest.mark.parametrize(
-    "n_modules",
+    "n_modules, f_in, f_out",
     [
-        (1),
+        (1, test_loop_in, test_loop_out),
+        (1, test_loop_delay_in, test_loop_delay_out),
+        (1, test_fft_in, test_fft_out),
+        (1, test_fft_delay_in, test_fft_delay_out),
     ],
 )
-def test_loop(request, n_modules):
+def test_wb(request, n_modules, f_in, f_out):
     # The name of the test function run
     test_name = request.node.name
     # Create our model.
@@ -142,7 +145,7 @@ def test_loop(request, n_modules):
     model.set_param(
         "top.src.construct",
         # Input values to stream through the block in order
-        msgs=test_loop_in(),
+        msgs=f_in(),
         # Cycles to wait after reset before starting to send inputs
         initial_delay=1,
         # Cycles to wait before sending next input (before `send_val` set high)
@@ -151,7 +154,7 @@ def test_loop(request, n_modules):
     model.set_param(
         "top.sink.construct",
         # Expected output values to read from the block in order
-        msgs=test_loop_out(),
+        msgs=f_out(),
         # Cycles to wait after reset before setting `recv_rdy` to high
         initial_delay=1,
         # Cycles to wait between outputs before setting `recv_rdy` to high
@@ -164,76 +167,6 @@ def test_loop(request, n_modules):
             # Creates the vcd file test_simple_<n_modules>.vcd for debugging.
             "dump_vcd": f"{test_name}_{n_modules}",
             # Optional, used to test accurate cycle counts.
-            "max_cycles": None,
-        },
-    )
-    
-def test_loop_delay(request):
-    test_name = request.node.name
-    model = create_model(1)
-    model.set_param(
-        "top.src.construct",
-        msgs=test_loop_delay_in(),
-        initial_delay=1,
-        interval_delay=1,
-    )
-    model.set_param(
-        "top.sink.construct",
-        msgs=test_loop_delay_out(),
-        initial_delay=1,
-        interval_delay=1,
-    )
-    run_sim(
-        model,
-        cmdline_opts={
-            "dump_textwave": False,
-            "dump_vcd": f"{test_name}_{1}",
-            "max_cycles": None,
-        },
-    )
-def test_fft(request):
-    test_name = request.node.name
-    model = create_model(1)
-    model.set_param(
-        "top.src.construct",
-        msgs=test_fft_in(),
-        initial_delay=1,
-        interval_delay=1,
-    )
-    model.set_param(
-        "top.sink.construct",
-        msgs=test_fft_out(),
-        initial_delay=1,
-        interval_delay=1,
-    )
-    run_sim(
-        model,
-        cmdline_opts={
-            "dump_textwave": False,
-            "dump_vcd": f"{test_name}_{1}",
-            "max_cycles": None,
-        },
-    )
-def test_fft_delay(request):
-    test_name = request.node.name
-    model = create_model(1)
-    model.set_param(
-        "top.src.construct",
-        msgs=test_fft_delay_in(),
-        initial_delay=1,
-        interval_delay=1,
-    )
-    model.set_param(
-        "top.sink.construct",
-        msgs=test_fft_delay_out(),
-        initial_delay=1,
-        interval_delay=1,
-    )
-    run_sim(
-        model,
-        cmdline_opts={
-            "dump_textwave": False,
-            "dump_vcd": f"{test_name}_{1}",
             "max_cycles": None,
         },
     )
