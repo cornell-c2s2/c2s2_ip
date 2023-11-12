@@ -8,6 +8,7 @@ import logging as log
 Helper file to run remote commands on the ecelinux servers
 """
 
+
 def connect():
     user = get_user()
     log.info("Connecting to c2s2-dev.ece.cornell.edu as %s", user)

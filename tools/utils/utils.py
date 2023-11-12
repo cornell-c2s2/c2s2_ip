@@ -2,6 +2,7 @@
 import logging as log
 import sys
 
+
 def setup_logging(args):
     # Add color to logs
     log.addLevelName(log.INFO, "\033[1;34m%s\033[1;0m" % log.getLevelName(log.INFO))
@@ -18,7 +19,5 @@ def setup_logging(args):
         level = log.INFO
     elif args.verbose >= 2:
         level = log.DEBUG
-    
-    log.basicConfig(
-        format="%(levelname)s: %(message)s", stream=sys.stderr, level=level
-    )
+
+    log.basicConfig(format="%(levelname)s: %(message)s", stream=sys.stderr, level=level)

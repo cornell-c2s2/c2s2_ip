@@ -5,21 +5,25 @@ from utils.utils import setup_logging
 from os import path
 import logging as log
 import argparse
-import sys
 from fabric import Connection
+
 
 def caravel_dir():
     return path.join("/scratch", "caravel", get_user())
+
 
 def connect():
     connection = connect_native()
 
     # Install if necessary
-    exists = connection.run(f'if [ ! -d "{caravel_dir()}" ]; then false; fi;', warn=True)
+    exists = connection.run(
+        f'if [ ! -d "{caravel_dir()}" ]; then false; fi;', warn=True
+    )
     if exists.exited != 0:
         install(connection)
-    
+
     return connection
+
 
 def install(connection: Connection):
     """Install caravel in a custom location."""
@@ -27,10 +31,11 @@ def install(connection: Connection):
 
     connection.run(f"rm -rf {caravel_dir()}")
     connection.run(f"mkdir -p {caravel_dir()}")
-    connection.run(f"cd {caravel_dir()} && git clone --depth 1 https://github.com/efabless/caravel_user_project.git .")
+    connection.run(
+        f"cd {caravel_dir()} && git clone --depth 1 https://github.com/efabless/caravel_user_project.git ."
+    )
 
     return connection
-
 
 
 if __name__ == "__main__":

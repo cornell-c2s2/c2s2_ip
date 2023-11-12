@@ -91,7 +91,7 @@ def test_edge(cmdline_opts, n, d, a, b):
         initial_delay=0,
         interval_delay=0,
     )
-    
+
     run_sim(model, cmdline_opts, duts=["dut.dut"])
 
 
