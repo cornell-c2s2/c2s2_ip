@@ -10,7 +10,6 @@ from src.fixed_point.utils import (
     mk_complex_multiplier_output,
 )
 import random
-from tools.utils import mk_packed
 from src.fixed_point.utils import mk_params, rand_fxp_spec
 
 
