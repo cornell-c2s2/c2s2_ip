@@ -42,7 +42,7 @@ venv:
 
 install: --pull vscode venv
 
---parse-name:
+--parse-name:  venv
 	@printf "${CYAN}"
 	@printf "Checking IP Name is set...\n"
 ifndef IP
@@ -84,7 +84,7 @@ check-ip: --pull --parse-name
 	@printf " - No similar-named IP exists!${RESET}\n"
 
 # Recipe for making new IP
-new-ip: check-ip
+new-ip: check-ip venv
 	@printf "${PURPLE}"
 	@printf "========================================\n"
 	@printf "C2S2 IP CREATOR\n"
@@ -142,7 +142,7 @@ else
 	@tools/lint.sh ${IP}
 endif
 
-test:
+test: venv
 	@$(VENV) && tools/test.sh ${EXTRA_ARGS}
 
 # ------------------------------------------------------------------------------
