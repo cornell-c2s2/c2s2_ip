@@ -143,7 +143,7 @@ else
 endif
 
 test:
-	@tools/test.sh ${EXTRA_ARGS}
+	@$(VENV) && tools/test.sh ${EXTRA_ARGS}
 
 # ------------------------------------------------------------------------------
 # Testfloat generation
