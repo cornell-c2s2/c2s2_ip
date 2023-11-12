@@ -1,8 +1,8 @@
-`ifndef router
-`define router
-`include "src/cmn/muxes.v"
-`include "src/cmn/demuxes.v"
-`include "src/cmn/queues.v"
+`ifndef arbiter_router_ROUTER
+`define arbiter_router_ROUTER
+`include "cmn/muxes.v"
+`include "cmn/demuxes.v"
+`include "cmn/queues.v"
 
 /*
   * Module: Router
@@ -18,7 +18,7 @@
   * @param nbits: number of total bits in the message (includes address bits)
   * @param noutputs: number of output ports
 */
-module Router #(
+module arbiter_router_Router #(
   parameter int nbits = 32,
   parameter int noutputs = 8
 ) (

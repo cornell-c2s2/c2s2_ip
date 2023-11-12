@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Directory to search in
-DIR=${1:-"./src"}
+DIR=${1:-""}
 
 RESET='\033[0m'
 GREEN='\033[1;32m'
@@ -11,6 +11,8 @@ mkdir build -p
 
 # Flag to track if there are any errors
 has_errors=false
+
+cd src
  
 while IFS= read -r -d '' line; do
     echo -e "${GREEN}Checking file ${line}${RESET}"
@@ -31,8 +33,9 @@ while IFS= read -r -d '' line; do
         echo -e "${RED}Verilog compilation error(s) found in $line${RESET}"
         has_errors=true
     fi
-done < <(find $DIR -name "*.v" -not -path "./src/cmn/*" -print0)
+done < <(find $DIR -name "*.v" -not -path "./cmn/*" -print0)
 
+cd ..
 
 # Check if there were any errors
 if [ "$has_errors" = true ]; then
