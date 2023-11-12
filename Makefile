@@ -176,42 +176,6 @@ else
 endif
 
 # ------------------------------------------------------------------------------
-# Caravel and flow stuff
-# ------------------------------------------------------------------------------
-# Create a docker container unique to a user and set it up
-CARAVEL_DOCKER_IMAGE = $(shell docker build -q - < .docker/caravel.Dockerfile)
-CARAVEL_DOCKER_CONTAINER = caravel-$(shell id -u)
-
-force-install-caravel: caravel-remove-container install-caravel
-caravel-remove-container:
-	@docker rm -f ${CARAVEL_DOCKER_CONTAINER}
-install-caravel:
-	@if [ ! "$(shell docker ps -a -q -f name=${CARAVEL_DOCKER_CONTAINER})" ]; then \
-		docker ps -a -q -f name=${CARAVEL_DOCKER_CONTAINER}; \
-		printf "${CYAN}Setting up Caravel Docker container...${RESET}\n"; \
-		docker run \
-			--name ${CARAVEL_DOCKER_CONTAINER} \
-			-v /var/run/docker.sock:/var/run/docker.sock \
-			-v ${PWD}:/home/c2s2_ip:ro \
-			-w /home/caravel_user_project \
-			${CARAVEL_DOCKER_IMAGE} \
-			make setup PWD=/home/caravel_user_project; \
-	fi
-
-# Run Caravel in an interactive docker shell
-caravel:
-ifndef PDK_ROOT
-	@printf "${RED} [ERROR] PDK_ROOT environment variable not set!\n - Make sure you have sourced ${YELLOW}setup-c2s2.sh${RED}.${RESET}\n"
-	@exit 1
-endif
-ifndef OPENLANE_ROOT
-	@printf "${RED} [ERROR] OPENLANE_ROOT environment variable not set!\n - Make sure you have sourced ${YELLOW}setup-c2s2.sh${RED}.${RESET}\n"
-	@exit 1
-endif
-	@docker exec -it \
-		${CARAVEL_DOCKER_CONTAINER} bash
-
-# ------------------------------------------------------------------------------
 # Redundant rules to help with user typos
 # ------------------------------------------------------------------------------
 new_ip: new-ip
