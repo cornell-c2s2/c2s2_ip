@@ -33,7 +33,7 @@ vscode:
 	@printf "${CYAN}Installing VSCode Extensions...${RESET}\n"
 	@cat .workspace-extensions | xargs code
 
-.venv:
+venv:
 	@printf "${CYAN}Setting Up Virtual Environment...${RESET}\n"
 	@python3 -m venv .venv
 	@printf "${CYAN}Installing Python Dependencies...${RESET}\n"
@@ -43,7 +43,7 @@ vscode:
 	@printf "${YELLOW}Run ${RED}source .venv/bin/activate${YELLOW} to activate your virtual environment.${RESET}\n"
 
 
-install: --pull vscode .venv force-install-caravel
+install: --pull vscode venv
 
 --parse-name:
 	@printf "${CYAN}"
