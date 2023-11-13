@@ -5,20 +5,20 @@ from os import path
 
 
 # Pymtl3 harness for the `Wishbone` module.
-class AdderHarness(VerilogPlaceholder, Component):
+class WishboneAdderHarness(VerilogPlaceholder, Component):
     # Constructor
 
     def construct(s):
         # Interface
 
-        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(32))
-        s.send = stream.ifcs.SendIfcRTL(mk_bits(32))
+        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(70))
+        s.send = stream.ifcs.SendIfcRTL(mk_bits(33))
 
         # Name of the top level module to be imported
-        s.set_metadata(VerilogPlaceholderPass.top_module, "AdderHarness")
+        s.set_metadata(VerilogPlaceholderPass.top_module, "WishboneAdderHarness")
         # Source file path
         # The ../ is necessary here because pytest is run from the build directory
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            (path.dirname(__file__) +  "/adder.v"),
+            (path.dirname(__file__) +  "/wishbone_adder.v"),
         )

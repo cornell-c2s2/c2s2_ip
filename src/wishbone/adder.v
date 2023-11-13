@@ -60,6 +60,10 @@ module Adder
                 i_stream_rdy = 1'b0;
                 o_stream_val = 1'b1;
             end
+            default: begin
+                i_stream_rdy = 1'bx;
+                o_stream_val = 1'bx;
+            end
         endcase
     end
 
