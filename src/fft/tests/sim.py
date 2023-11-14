@@ -64,7 +64,6 @@ def fixed_point_fft(BIT_WIDTH, DECIMAL_PT, SIZE_FFT, x):
             BIT_WIDTH, DECIMAL_PT, SIZE_FFT, stage, sine_table, X_r, X_i
         )
 
-    print(X_r)
     return X_r
     # return X
 

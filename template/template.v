@@ -5,7 +5,7 @@
 `ifndef TEMPLATE_V
 `define TEMPLATE_V
 
-module Template #(
+module template_Template #(
   parameter int Width = 32
 ) (
   input logic clk,

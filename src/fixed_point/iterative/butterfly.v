@@ -14,12 +14,12 @@
 // multiplier in certain cases.
 //================================================
 `default_nettype none
-`ifndef FIXED_POINT_ITERATIVE_BUTTERFLY
-`define PROJECT_BUTTERFLY_V
-`include "src/fixed_point/iterative/complex_multiplier.v"
-`include "src/cmn/regs.v"
+`ifndef fixed_point_iterative_BUTTERFLY
+`define fixed_point_iterative_BUTTERFLY
+`include "fixed_point/iterative/complex_multiplier.v"
+`include "cmn/regs.v"
 
-module FixedPointIterativeButterfly #(
+module fixed_point_iterative_Butterfly #(
   parameter int n = 32,
   parameter int d = 16,
   parameter byte mult = 0
@@ -194,7 +194,7 @@ module FixedPointIterativeButterfly #(
         logic [n-1:0] ar_imm, ac_imm;
         logic [n-1:0] tr, tc;
 
-        FixedPointIterativeComplexMultiplier #(
+        fixed_point_iterative_ComplexMultiplier #(
           .n(n),
           .d(d)
         ) mul (  // ar * br

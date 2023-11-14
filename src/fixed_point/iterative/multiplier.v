@@ -7,13 +7,13 @@
 // to complete a multiplication.
 //================================================
 `default_nettype none
-`ifndef FIXED_POINT_ITERATIVE_MULTIPLIER
-`define FIXED_POINT_ITERATIVE_MULTIPLIER
+`ifndef fixed_point_iterative_MULTIPLIER
+`define fixed_point_iterative_MULTIPLIER
 
-`include "src/cmn/muxes.v"
-`include "src/cmn/regs.v"
+`include "cmn/muxes.v"
+`include "cmn/regs.v"
 
-module FixedPointIterativeMultiplier #(
+module fixed_point_iterative_Multiplier #(
   parameter int n = 32,  // bit width
   parameter int d = 16,  // number of decimal bits
   parameter bit sign = 1  // 1 if signed, 0 otherwise.

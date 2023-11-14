@@ -2,9 +2,9 @@
 `ifndef FIXED_POINT_COMB_COMPLEX_MULTIPLIER
 `define FIXED_POINT_COMB_COMPLEX_MULTIPLIER
 
-`include "src/fixed_point/combinational/multiplier.v"
+`include "fixed_point/combinational/multiplier.v"
 
-module FixedPointCombComplexMultiplier #(
+module fixed_point_combinational_ComplexMultiplier #(
   parameter int n = 32,  // bit width
   parameter int d = 16,  // number of decimal bits
   parameter int num_mults = 1  // number of multipliers
@@ -41,7 +41,7 @@ module FixedPointCombComplexMultiplier #(
       assign c_br = br;
       assign c_bc = bc;
 
-      FixedPointCombMultiplier #(
+      fixed_point_combinational_Multiplier #(
         .n(n),
         .d(d),
         .sign(1)
@@ -51,7 +51,7 @@ module FixedPointCombComplexMultiplier #(
         .c(arXbr)
       );
 
-      FixedPointCombMultiplier #(
+      fixed_point_combinational_Multiplier #(
         .n(n),
         .d(d),
         .sign(1)
@@ -61,7 +61,7 @@ module FixedPointCombComplexMultiplier #(
         .c(acXbc)
       );
 
-      FixedPointCombMultiplier #(
+      fixed_point_combinational_Multiplier #(
         .n(n),
         .d(d),
         .sign(1)
@@ -152,7 +152,7 @@ module FixedPointCombComplexMultiplier #(
         endcase
       end
 
-      FixedPointCombMultiplier #(
+      fixed_point_combinational_Multiplier #(
         .n(n),
         .d(d),
         .sign(1)
