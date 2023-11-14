@@ -11,15 +11,17 @@ def twiddle_gen (bit_width=4, decimal_pt=2, size_fft=8, stage_fft=0):
 
     twiddles = [] * (size_fft//2)
 
-    for k in range(size_fft):
-        angle = -2 * np.pi * k / size_fft
-        real_part = CFixed(np.cos(angle), bit_width, decimal_pt)
-        imag_part = CFixed(np.sin(angle), bit_width, decimal_pt)
+    for m in range(0, 2 ** stage_fft):
+        for i in range(0, size_fft, 2 ** (stage_fft + 1)):
+            idx = m * size_fft / (1 << (stage_fft + 1))
+            
+            real = CFixed(np.sin((idx+size_fft/4)%size_fft), bit_width, decimal_pt)
+            imag = CFixed(-np.sin(idx%size_fft), bit_width, decimal_pt)
 
-        twiddle = CFixed(0, bit_width, decimal_pt)
-        twiddle.value = CFixed(real_part, bit_width, decimal_pt).value + 1j * CFixed(imag_part, bit_width, decimal_pt).value
+            twiddle = CFixed(0, bit_width, decimal_pt)
+            twiddle.value = CFixed(real, bit_width, decimal_pt).value + 1j * CFixed(imag, bit_width, decimal_pt).value
 
-        twiddles.append(twiddle)
+            twiddles[i/2+m] = twiddle
 
     return twiddles
 
