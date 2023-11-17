@@ -13,6 +13,9 @@
   "python.analysis.ignore": [
     "template/"
   ],
+  "python.analysis.exclude": [
+    "venv"
+  ],
   "python.testing.pytestArgs": [
     "."
   ],

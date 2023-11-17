@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from utils.config import get_user
-from utils.remote import connect as connect_native
-from utils.utils import setup_logging
+from tools.utils.config import get_user
+from tools.utils.remote import connect as connect_native
+from tools.utils.utils import setup_logging
 from os import path
 import logging as log
 import argparse
@@ -32,10 +32,12 @@ def install(connection: Connection):
     connection.run(f"rm -rf {caravel_dir()}")
     connection.run(f"mkdir -p {caravel_dir()}")
     connection.run(
-        f"cd {caravel_dir()} && git clone --depth 1 https://github.com/efabless/caravel_user_project.git ."
+        f"""
+cd {caravel_dir()} && \
+    git clone --depth 1 --branch mpw-9g https://github.com/efabless/caravel_user_project.git . && \
+    make install check-env install_mcw setup-timing-scripts
+"""
     )
-
-    return connection
 
 
 if __name__ == "__main__":
