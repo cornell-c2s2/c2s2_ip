@@ -1,6 +1,5 @@
 from os import path
 import json
-import logging as log
 
 CONFIG_FILE = path.join(path.dirname(__file__), "config.json")
 

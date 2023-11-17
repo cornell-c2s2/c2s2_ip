@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from fabric import Connection
-from tools.utils.config import get_user
+from .config import get_user
 import logging as log
 
 """

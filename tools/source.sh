@@ -14,8 +14,8 @@ export PYTHONPATH=$PYTHONPATH:$DIR/..
 mkdir -p $DIR/bin
 export PATH=$PATH:$DIR/bin
 
-# link tools/flow.py to tools/bin/caravel
-ln -sf $DIR/flow.py $DIR/bin/caravel
+# link tools/flow/main.py to tools/bin/caravel
+ln -sf $DIR/flow/main.py $DIR/bin/caravel
 
 
 echo -e "\033[0;32mC2S2 Workspace Initialized.\033[0m"
