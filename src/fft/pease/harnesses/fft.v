@@ -27,7 +27,7 @@ module FFTHarness #(
   logic send_rdy_t;
   logic [BIT_WIDTH - 1:0] send_msg_t[N_SAMPLES - 1:0];
 
-  Deserializer #(
+  serdes_Deserializer #(
     .N_SAMPLES(N_SAMPLES),
     .BIT_WIDTH(BIT_WIDTH)
   ) deser (
@@ -43,7 +43,7 @@ module FFTHarness #(
     .clk  (clk)
   );
 
-  Serializer #(
+  serdes_Serializer #(
     .N_SAMPLES(N_SAMPLES),
     .BIT_WIDTH(BIT_WIDTH)
   ) ser (

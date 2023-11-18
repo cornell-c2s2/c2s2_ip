@@ -1,7 +1,7 @@
 `default_nettype none
 `ifndef serdes_SERIALIZER
 `define serdes_SERIALIZER
-`include "cmn/regs.v"
+`include "src/cmn/regs.v"
 
 module serdes_Serializer #(
   parameter int BIT_WIDTH = 32,

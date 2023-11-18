@@ -1,7 +1,7 @@
 `default_nettype none
 `ifndef serdes_DESERIALIZER
 `define serdes_DESERIALIZER 
-`include "cmn/regs.v"
+`include "src/cmn/regs.v"
 
 module serdes_Deserializer #(
   parameter int N_SAMPLES = 8,
