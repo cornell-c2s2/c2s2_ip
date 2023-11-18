@@ -1,9 +1,9 @@
 `default_nettype none
-`ifndef SERIALIZER
-`define SERIALIZER
-`include "src/cmn/regs.v"
+`ifndef serdes_SERIALIZER
+`define serdes_SERIALIZER
+`include "cmn/regs.v"
 
-module Serializer #(
+module serdes_Serializer #(
   parameter int BIT_WIDTH = 32,
   parameter int N_SAMPLES = 8
 ) (
@@ -55,22 +55,6 @@ module Serializer #(
         .reg_en(reg_en)
       );
     end
-
-    assign send_msg = reg_out[mux_sel];
-
-    SerializerControl #(
-      .N_SAMPLES(N_SAMPLES)
-    ) ctrl (
-      .clk(clk),
-      .reset(reset),
-      .recv_val(recv_val),
-      .recv_rdy(recv_rdy),
-      .send_val(send_val),
-      .send_rdy(send_rdy),
-      .mux_sel(mux_sel),
-      .reg_en(reg_en)
-    );
-  end
   endgenerate
 endmodule
 

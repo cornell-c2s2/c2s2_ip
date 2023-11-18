@@ -1,9 +1,9 @@
 `default_nettype none
-`ifndef DESERIALIZER
-`define DESERIALIZER
-`include "src/cmn/regs.v"
+`ifndef serdes_DESERIALIZER
+`define serdes_DESERIALIZER 
+`include "cmn/regs.v"
 
-module Deserializer #(
+module serdes_Deserializer #(
   parameter int N_SAMPLES = 8,
   parameter int BIT_WIDTH = 32
 ) (
@@ -31,7 +31,7 @@ module Deserializer #(
       logic [N_SAMPLES - 1:0] en_sel;
 
       //body of code
-      Control #(
+      DeserializerControl #(
         .N_SAMPLES(N_SAMPLES)
       ) c (
         .recv_val(recv_val),
@@ -56,12 +56,11 @@ module Deserializer #(
         );
       end
     end
-  end
   endgenerate
 
 endmodule
 
-module Control #(
+module DeserializerControl #(
   parameter int N_SAMPLES = 8
 ) (
   input logic recv_val,
