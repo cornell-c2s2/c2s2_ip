@@ -73,14 +73,14 @@ def test_loop_delay_in():
 def test_loop_delay_out():
     return [
         #                                     istream ostream
-        #       n_modules,  dat, istream_dat, ack, val, rdy
+        #  n_modules,  dat, istream_dat, ack, val, rdy
        # testing loopback delay
         gen_out(1,    0,           0,   0,   0,   0),
         gen_out(1,   0x0,       0xffff,   1,   0,   0),
-        gen_out(1,    0,           0,   0,   0,   0),
-        gen_out(1,    0,           0,   0,   0,   0),
-        gen_out(1,    0,           0,   0,   0,   0),
-        gen_out(1,   0xffff,     0x0,   1,   0,   0),     
+        gen_out(1, 0xffff,           0,   0,   0,   0),
+        gen_out(1, 0xffff,           0,   0,   0,   0),
+        gen_out(1, 0xffff,           0,   0,   0,   0),
+        gen_out(1, 0xffff,         0x0,   1,   0,   0),     
         
         ]
     
@@ -99,7 +99,7 @@ def test_fft_out():
         #n_modules,  dat, istream_dat, ack, val, rdy
         gen_out(1,    0,           0,   0,   0,   0),
         gen_out(1,   0x0,        0x4,   0,   1,   0),
-        gen_out(1,   0x4,        0x0,   1,   0,   0),
+        gen_out(1,   0x0,        0x0,   1,   0,   0),
         gen_out(1,   0x4,        0x0,   1,   0,   1)
         ]
 
@@ -124,7 +124,7 @@ def test_fft_delay_out():
         gen_out(1,   0x0,           0,   0,   0,   0),
         gen_out(1,   0x0,           0,   0,   0,   0),
         gen_out(1,   0x0,           0,   0,   0,   0),
-        gen_out(1,   0xffff,        0,   1,   0,   0),
+        gen_out(1,   0x0,           0,   1,   0,   0),
         gen_out(1,   0xffff,        0,   1,   0,   1)
         ]
 

@@ -22,3 +22,5 @@ class WishboneAdderHarness(VerilogPlaceholder, Component):
             VerilogPlaceholderPass.src_file,
             (path.dirname(__file__) +  "/wishbone_adder.v"),
         )
+        # def line_trace( s ):
+        #     return f"{s.in_} ({s.reg_out}) {s.out}"

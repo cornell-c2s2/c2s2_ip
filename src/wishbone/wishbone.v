@@ -5,6 +5,8 @@
 `ifndef WISHBONE_V
 `define WISHBONE_V
 
+`include "src/cmn/trace.v"
+
 module Wishbone #(
   parameter n_modules = 1
 ) (
@@ -49,7 +51,8 @@ module Wishbone #(
 
   assign i_stream_data = wbs_dat_i;
   logic wbs_dat_o_sel;
-  assign wbs_dat_o = (wbs_dat_o_sel) ? loopback_reg : o_stream_data;
+  assign wbs_dat_o = (wbs_dat_o_sel) ? o_stream_data : loopback_reg;
+  // assign wbs_dat_o = {o_stream_val, 2'b0, state, 2'b0, next_state};
 
   logic [$clog2(n_modules):0] index;
   assign index = 0;  // hardcoding this for now
@@ -82,8 +85,14 @@ module Wishbone #(
   always_ff @(posedge clk) begin
     if (reset) begin
       state <= IDLE;
-    end else begin
-      state <= next_state;
+    end else if (next_state == IDLE) begin
+      state <= IDLE;
+    end else if (next_state == BUSY) begin
+      state <= BUSY;
+    end else if (next_state == DONE) begin
+      state <= DONE;
+    end else if (next_state == LOOP) begin
+      state <= LOOP;
     end
   end
 
@@ -126,19 +135,31 @@ module Wishbone #(
         else cs(0, 0, 0, 0, 0);
       end
       BUSY: begin
-        if (o_stream_val) cs(0, 0, 1, 0, 0);
+        if (next_state == DONE) cs(0, 0, 1, 0, 0);
         else cs(0, 0, 0, 0, 0);
       end
       DONE: begin
-        if (is_read_module) cs(0, 1, 1, 0, 0);
+        if (is_read_module) cs(0, 1, 1, 0, 1);
         else cs(0, 0, 0, 0, 0);
       end
       LOOP: begin
-        if (is_read_loop) cs(0, 0, 1, 0, 1);
+        if (is_read_loop) cs(0, 0, 1, 0, 0);
         else cs(0, 0, 0, 0, 0);
       end
     endcase
   end
+
+  `ifndef SYNTHESIS
+
+  logic [`CMN_TRACE_NBITS-1:0] str;
+  `CMN_TRACE_BEGIN
+  begin
+    $sformat( str, "%x", i_stream_data);
+    cmn_trace.append_str( trace_str, str );
+  end
+  `CMN_TRACE_END
+
+  `endif /* SYNTHESIS */
 
 endmodule
 
