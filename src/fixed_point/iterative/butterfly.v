@@ -54,6 +54,10 @@ module FixedPointIterativeButterfly #(
     | 1 -w | * | b | = | d |
   */
 
+  // always_ff @(posedge clk) begin
+  //   $display("[%x %x %x %x %x %x %x %x %x %x] [%x,%x] %x",ar,ac,br,bc,wr,wc,cr,cc,dr,dc,recv_val && recv_rdy,send_rdy && send_val, mult);
+  // end
+
   generate
     case (mult)
       // w = 1

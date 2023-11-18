@@ -39,7 +39,7 @@ module FFT #(
   logic [BstageBits-1:0] bstage;
   logic [BstageBits-1:0] next_bstage;
 
-  logic [2 * BIT_WIDTH - 1:0] in_stride         [N_SAMPLES - 1:0];
+  logic [2 * BIT_WIDTH - 1:0] out_stride         [N_SAMPLES - 1:0];
   logic [2 * BIT_WIDTH - 1:0] in_butterfly      [N_SAMPLES - 1:0];
   logic [2 * BIT_WIDTH - 1:0] out_butterfly     [N_SAMPLES - 1:0];
 
@@ -56,11 +56,13 @@ module FFT #(
     .N_SAMPLES(N_SAMPLES),
     .BIT_WIDTH(BIT_WIDTH*2)
   ) stride_permutation (
-    .recv (in_stride),
-    .send (in_butterfly)
+    .recv (out_butterfly),
+    .send (out_stride)
   );
 
   logic [BIT_WIDTH - 1:0] sine_wave_out     [0:N_SAMPLES - 1];
+  logic [BIT_WIDTH - 1:0] wr_pre            [$clog2(N_SAMPLES)-1:0][N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] wc_pre            [$clog2(N_SAMPLES)-1:0][N_SAMPLES/2 - 1:0];
   logic [BIT_WIDTH - 1:0] wr                [$clog2(N_SAMPLES)-1:0][N_SAMPLES/2 - 1:0];
   logic [BIT_WIDTH - 1:0] wc                [$clog2(N_SAMPLES)-1:0][N_SAMPLES/2 - 1:0];
 
@@ -73,9 +75,29 @@ module FFT #(
         .STAGE_FFT (i)
       ) twiddle_generator (
         .sine_wave_in(sine_wave_out),
-        .twiddle_real(wr[i]),
-        .twiddle_imaginary(wc[i])
+        .twiddle_real(wr_pre[i]),
+        .twiddle_imaginary(wc_pre[i])
       );
+
+      for (genvar b = 0; b < N_SAMPLES / 2; b++) begin
+        localparam int IX = (b % (1 << i)) * (N_SAMPLES / (2 * (1 << i)));
+        // if(IX == 0) begin
+        //   assign wr[i][b] = {{BIT_WIDTH-DECIMAL_PT-1{1'b0}},1'b1,{DECIMAL_PT{1'b0}}};
+        //   assign wc[i][b] = 0;
+        // end else if (IX == N_SAMPLES >> 1) begin
+        //   assign wr[i][b] = {{BIT_WIDTH-DECIMAL_PT{1'b1}},{DECIMAL_PT{1'b0}}};
+        //   assign wc[i][b] = 0;
+        // end else if (IX == N_SAMPLES >> 2) begin
+        //   assign wr[i][b] = 0;
+        //   assign wc[i][b] = {{BIT_WIDTH-DECIMAL_PT{1'b1}},{DECIMAL_PT{1'b0}}};
+        // end else if (IX == 3 * (N_SAMPLES >> 2)) begin
+        //   assign wr[i][b] = 0;
+        //   assign wc[i][b] = {{BIT_WIDTH-DECIMAL_PT-1{1'b0}},1'b1,{DECIMAL_PT{1'b0}}};
+        // end else begin
+          assign wr[i][b] = wr_pre[i][b];
+          assign wc[i][b] = wc_pre[i][b];
+        //end
+      end
     end
   endgenerate
 
@@ -147,7 +169,16 @@ module FFT #(
   end
 
   always_ff @(posedge clk) begin
-    $display(" %s|%d %x %x %x %x %x", (state==IDLE ? "IDLE" : state==COMP ? "COMP" : "DONE"), bstage, wc[0][0], wr[0][0], cr[0], dr[0], sine_wave_out[0]);
+    if(state == COMP && butterfly_recv_rdy && butterfly_recv_val) begin
+      $display(" %s| %x %x[%x]", "RCV", in_butterfly[0], in_butterfly[1], {wc[bstage][0],wr[bstage][0]});
+    end else if (state == COMP && butterfly_send_rdy && butterfly_send_val) begin
+      $display(" %s| %x %x ", "SND", out_butterfly[0], out_butterfly[1]);
+    end
+
+    if(recv_rdy && recv_val) begin
+      $display(" %s| %x %x ", "IN ", recv_msg[0], recv_msg[1]);
+    end
+
     if(reset) begin
       state <= IDLE;
       bstage <= 0;
@@ -161,15 +192,16 @@ module FFT #(
     for (genvar i = 0; i < N_SAMPLES; i++) begin
       always_ff @(posedge clk) begin
         if(reset) begin
-          in_stride[i] <= 0;
+          in_butterfly[i] <= 0;
           send_msg[i] <= 0;
         end else begin
           if (state == IDLE && recv_val) begin
-            in_stride[i][BIT_WIDTH-1:0] <= reversed_msg[i];
+            in_butterfly[i][BIT_WIDTH-1:0] <= reversed_msg[i];
+            in_butterfly[i][2*BIT_WIDTH-1:BIT_WIDTH] <= 0;
           end else if (state == COMP && butterfly_send_val ) begin
-            in_stride[i] <= out_butterfly[i];
+            in_butterfly[i] <= out_stride[i];
             if (bstage == max_bstage-1) begin
-              send_msg[i] <= out_butterfly[i][BIT_WIDTH-1:0];
+              send_msg[i] <= out_stride[i][BIT_WIDTH-1:0];
             end
           end
         end

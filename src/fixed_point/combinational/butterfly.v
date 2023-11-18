@@ -22,12 +22,7 @@ module FixedPointMultiButterfly #(
   parameter int n = 32,
   parameter int d = 16,
   parameter int b = 4
-  // Optimization parameter to save area:
-  // 0 if we include the multiplier
-  // 1 if omega = 1
-  // 2 if omega = -1
-  // 3 if omega = i (j)
-  // 4 if omega = -i (-j)
+  // Number of inputs to rotate around
 ) (
   input  logic clk,
   input  logic reset,
@@ -55,6 +50,10 @@ module FixedPointMultiButterfly #(
     | 1  w |   | a |   | c |
     | 1 -w | * | b | = | d |
   */
+
+  // always_ff @(posedge clk) begin
+  //   $display("[%x %x %x %x %x %x %x %x %x %x][%x, %x]",ar[0],ac[0],br[0],bc[0],wr[0],wc[0],cr[0],cc[0],dr[0],dc[0],recv_val && recv_rdy,send_val && send_rdy);
+  // end
 
   // registers for storing the inputs
   logic [n-1:0] s_ar[b];

@@ -1,5 +1,5 @@
 
-`include "src/fft/pease/fft.v"
+`include "src/fft/cooley_tukey/fft.v"
 `include "src/serdes/deserializer.v"
 `include "src/serdes/serializer.v"
 
