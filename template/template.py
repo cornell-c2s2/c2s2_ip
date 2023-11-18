@@ -20,5 +20,5 @@ class Template(VerilogPlaceholder, Component):
         # The ../ is necessary here because pytest is run from the build directory
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.join(path.dirname(__file__), "../template.v"),
+            path.join(path.dirname(__file__), "template.v"),
         )

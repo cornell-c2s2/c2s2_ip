@@ -15,5 +15,5 @@ class Router(VerilogPlaceholder, Component):
         # Source file path
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.join(path.dirname(__file__), "../router.v"),
+            path.join(path.dirname(__file__), "router.v"),
         )
