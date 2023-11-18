@@ -4,7 +4,7 @@ import json
 CONFIG_FILE = path.join(path.dirname(__file__), "config.json")
 
 
-def get_config():
+def get_config() -> dict:
     """
     Get the configuration fil
     """
@@ -17,7 +17,7 @@ def get_config():
     return config
 
 
-def get_user():
+def get_user() -> str:
     """
     Get the username from the config file
     """

@@ -1,21 +1,29 @@
-FILE: butterfly.v
-TOP_MODULE: Butterfly
-CONFIG:
+# Labels defined here will be used for all config designs
+DESIGN_NAME: Butterfly # Top module name
+FP_PIN_ORDER_CFG: butterfly_pins.cfg # Pin order configuration file
+DESIGN_IS_CORE: 0
+CLOCK_PORT: clk
+SYNTH_PARAMETERS: 
+  n: 32
+  d: 16
+DESIGNS:
 # First macro (n=32, d=16, with multiplier)
 # DESIGN_NAME can be skipped here as it is taken from TOP_MODULE
 # Documentation on parameters here: https://openlane.readthedocs.io/en/latest/reference/configuration.html
-  - SYNTH_PARAMETERS: 
-      n: 32
-      d: 16
+  - SYNTH_PARAMETERS:
       mult: 0
-    CLOCK_PERIOD: 10
-    CLOCK_PORT: clk
-    PL_TARGET_DENSITY: 0.8
-# Second macro (n=32, d=16, omega=1)
-  - SYNTH_PARAMETERS: 
-      n: 32
-      d: 16
-      mult: 1
-    CLOCK_PERIOD: 10
-    CLOCK_PORT: clk
-    PL_TARGET_DENSITY: 0.8
+    CLOCK_PERIOD: 10 # Target clock period in ns
+    PL_TARGET_DENSITY: 0.5 # Placement target density
+  # Designs can be nested hierarchically
+  - CLOCK_PERIOD: 2
+    PL_TARGET_DENSITY: 0.9
+    DESIGNS: # Here, designs take CLOCK_PERIOD: 2 and PL_TARGET_DENSITY: 0.9
+      - SYNTH_PARAMETERS: 
+          mult: 1
+      - SYNTH_PARAMETERS: 
+          mult: 2
+      - SYNTH_PARAMETERS: 
+          mult: 3
+      - SYNTH_PARAMETERS: 
+          mult: 4
+    
