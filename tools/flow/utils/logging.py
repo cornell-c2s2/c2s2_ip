@@ -1,6 +1,7 @@
 # Helper file with utility functions
 import logging as log
 import sys
+from halo import Halo
 
 
 def setup_logging(args):
@@ -22,3 +23,20 @@ def setup_logging(args):
         level = log.DEBUG
 
     log.basicConfig(format="%(levelname)s: %(message)s", stream=sys.stderr, level=level)
+
+
+class Spinner:
+    def __init__(self, args, message: str):
+        if args.verbose == 0:
+            self.spinner = Halo(spinner="dots", text=message)
+            self.spinner.start()
+        else:
+            self.spinner = None
+
+    def succeed(self, message: str):
+        if self.spinner:
+            self.spinner.succeed(message)
+
+    def rename(self, message: str):
+        if self.spinner:
+            self.spinner.text = message

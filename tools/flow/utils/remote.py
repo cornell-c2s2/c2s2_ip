@@ -1,4 +1,4 @@
-from fabric import Connection
+from fabric import Connection as FabricConnection
 from .config import get_user
 import logging as log
 from os import path
@@ -6,6 +6,18 @@ from os import path
 """
 Helper file to run remote commands on the ecelinux servers
 """
+
+
+class Connection(FabricConnection):
+    def run(self, command, **kwargs):
+        if "env" not in kwargs:
+            kwargs["env"] = {}
+        kwargs["env"] = {
+            "OPENLANE_ROOT": "/classes/c2s2/openlane",
+            "PDK_ROOT": "/classes/c2s2/pdk",
+            **kwargs["env"],
+        }
+        return super().run(command, **kwargs)
 
 
 # Custom directory where caravel is installed

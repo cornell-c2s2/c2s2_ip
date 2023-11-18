@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-from utils.config import get_user
 from utils.remote import connect
 from tools.flow.utils.logging import setup_logging
 from os import path
 import logging as log
 import utils.cmdline as cmdline
-from fabric import Connection
 from install import Install
 from synth import Synth
 
@@ -30,7 +28,11 @@ if __name__ == "__main__":
     connection = connect()
     for subcommand in subcommands:
         if subcommand.name() == args.command:
-            subcommand.run(connection, args)
+            err_code = subcommand.run(connection, args)
+            if err_code:
+                log.error(
+                    "Subcommand %s failed with error code %d", args.command, err_code
+                )
             break
 
     connection.close()

@@ -1,5 +1,7 @@
 # Labels defined here will be used for all config designs
 DESIGN_NAME: Butterfly # Top module name
+TEST_FILES: # pytest files
+  - tests/butterfly.py
 FP_PIN_ORDER_CFG: butterfly_pins.cfg # Pin order configuration file
 DESIGN_IS_CORE: 0
 CLOCK_PORT: clk

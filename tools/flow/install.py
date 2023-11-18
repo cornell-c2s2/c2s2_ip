@@ -28,7 +28,7 @@ class Install(SubCommand):
                 "Caravel is already installed. Run `caravel install --force` to reinstall."
             )
             connection.close()
-            exit(1)
+            return 1
 
         log.info("Installing caravel in %s", caravel_dir())
 
