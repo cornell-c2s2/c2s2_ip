@@ -18,20 +18,19 @@ module fft_pease_helpers_TwiddleGenerator #(
   logic [BIT_WIDTH - 1:0] t_imaginary[SIZE_FFT/2 - 1:0];
 
   generate
-    for (genvar i = 0; i < SIZE_FFT/2; i = i + 1) begin
+    for (genvar i = 0; i < SIZE_FFT / 2; i = i + 1) begin
       assign t_real[i] = sine_wave_in[i+SIZE_FFT/4];
-      assign t_imaginary[i] = sine_wave_in[i + SIZE_FFT/2];
+      assign t_imaginary[i] = sine_wave_in[i+SIZE_FFT/2];
     end
   endgenerate
 
   generate
-    if(STAGE_FFT == 0) begin
-      for (genvar i = 0; i < SIZE_FFT/2; i = i + 1) begin
-        assign twiddle_real[i] = {{BIT_WIDTH-DECIMAL_PT-1{1'b0}},1'b1,{DECIMAL_PT{1'b0}}};
+    if (STAGE_FFT == 0) begin
+      for (genvar i = 0; i < SIZE_FFT / 2; i = i + 1) begin
+        assign twiddle_real[i] = {{BIT_WIDTH - DECIMAL_PT - 1{1'b0}}, 1'b1, {DECIMAL_PT{1'b0}}};
         assign twiddle_imaginary[i] = 0;
       end
-    end
-    else begin
+    end else begin
       for (genvar m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin
         for (genvar j = 0; j < 2 ** ($clog2(SIZE_FFT) - STAGE_FFT - 1); j = j + 1) begin
           int stageLeft = $clog2(SIZE_FFT) - STAGE_FFT - 1;

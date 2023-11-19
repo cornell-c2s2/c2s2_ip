@@ -36,14 +36,14 @@ module fft_pease_FFT #(
   assign recv_rdy = (state == IDLE);
   assign send_val = (state == DONE);
 
-  logic [BstageBits-1:0] bstage;
-  logic [BstageBits-1:0] next_bstage;
+  logic [     BstageBits-1:0] bstage;
+  logic [     BstageBits-1:0] next_bstage;
 
-  logic [2 * BIT_WIDTH - 1:0] out_stride         [N_SAMPLES - 1:0];
-  logic [2 * BIT_WIDTH - 1:0] in_butterfly      [N_SAMPLES - 1:0];
-  logic [2 * BIT_WIDTH - 1:0] out_butterfly     [N_SAMPLES - 1:0];
+  logic [2 * BIT_WIDTH - 1:0] out_stride   [N_SAMPLES - 1:0];
+  logic [2 * BIT_WIDTH - 1:0] in_butterfly [N_SAMPLES - 1:0];
+  logic [2 * BIT_WIDTH - 1:0] out_butterfly[N_SAMPLES - 1:0];
 
-  logic [BIT_WIDTH - 1:0] reversed_msg [N_SAMPLES - 1:0];
+  logic [    BIT_WIDTH - 1:0] reversed_msg [N_SAMPLES - 1:0];
   fft_cooley_tukey_helpers_BitReverse #(
     .N_SAMPLES(N_SAMPLES),
     .BIT_WIDTH(BIT_WIDTH)
@@ -54,17 +54,17 @@ module fft_pease_FFT #(
 
   fft_pease_helpers_StridePermutation #(
     .N_SAMPLES(N_SAMPLES),
-    .BIT_WIDTH(BIT_WIDTH*2)
+    .BIT_WIDTH(BIT_WIDTH * 2)
   ) stride_permutation (
-    .recv (out_butterfly),
-    .send (out_stride)
+    .recv(out_butterfly),
+    .send(out_stride)
   );
 
-  logic [BIT_WIDTH - 1:0] sine_wave_out     [0:N_SAMPLES - 1];
-  logic [BIT_WIDTH - 1:0] wr_pre            [$clog2(N_SAMPLES)-1:0][N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] wc_pre            [$clog2(N_SAMPLES)-1:0][N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] wr                [$clog2(N_SAMPLES)-1:0][N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] wc                [$clog2(N_SAMPLES)-1:0][N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] sine_wave_out[      0:N_SAMPLES - 1];
+  logic [BIT_WIDTH - 1:0] wr_pre       [$clog2(N_SAMPLES)-1:0] [N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] wc_pre       [$clog2(N_SAMPLES)-1:0] [N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] wr           [$clog2(N_SAMPLES)-1:0] [N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] wc           [$clog2(N_SAMPLES)-1:0] [N_SAMPLES/2 - 1:0];
 
   generate
     for (genvar i = 0; i < $clog2(N_SAMPLES); i++) begin
@@ -94,8 +94,8 @@ module fft_pease_FFT #(
         //   assign wr[i][b] = 0;
         //   assign wc[i][b] = {{BIT_WIDTH-DECIMAL_PT-1{1'b0}},1'b1,{DECIMAL_PT{1'b0}}};
         // end else begin
-          assign wr[i][b] = wr_pre[i][b];
-          assign wc[i][b] = wc_pre[i][b];
+        assign wr[i][b] = wr_pre[i][b];
+        assign wc[i][b] = wc_pre[i][b];
         //end
       end
     end
@@ -110,36 +110,36 @@ module fft_pease_FFT #(
   );
 
 
-  logic [BIT_WIDTH - 1:0] ar [N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] ac [N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] br [N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] bc [N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] cr [N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] cc [N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] dr [N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] dc [N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] ar[N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] ac[N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] br[N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] bc[N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] cr[N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] cc[N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] dr[N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] dc[N_SAMPLES/2 - 1:0];
   logic butterfly_send_rdy = 1'b1;
   logic butterfly_send_val;
   logic butterfly_recv_val = (state == COMP);
   logic butterfly_recv_rdy;
 
   generate
-    for (genvar i = 0; i < N_SAMPLES/2; i++) begin
-      assign ar[i] = in_butterfly[i*2][BIT_WIDTH - 1:0];
-      assign ac[i] = in_butterfly[i*2][2*BIT_WIDTH - 1:BIT_WIDTH];
-      assign br[i] = in_butterfly[i*2 + 1][BIT_WIDTH - 1:0];
-      assign bc[i] = in_butterfly[i*2 + 1][2*BIT_WIDTH - 1:BIT_WIDTH];
-      assign out_butterfly[i*2][BIT_WIDTH - 1:0]               = cr[i];
-      assign out_butterfly[i*2][2*BIT_WIDTH - 1:BIT_WIDTH]     = cc[i];
-      assign out_butterfly[i*2 + 1][BIT_WIDTH - 1:0]           = dr[i];
-      assign out_butterfly[i*2 + 1][2*BIT_WIDTH - 1:BIT_WIDTH] = dc[i];
+    for (genvar i = 0; i < N_SAMPLES / 2; i++) begin
+      assign ar[i] = in_butterfly[i*2][BIT_WIDTH-1:0];
+      assign ac[i] = in_butterfly[i*2][2*BIT_WIDTH-1:BIT_WIDTH];
+      assign br[i] = in_butterfly[i*2+1][BIT_WIDTH-1:0];
+      assign bc[i] = in_butterfly[i*2+1][2*BIT_WIDTH-1:BIT_WIDTH];
+      assign out_butterfly[i*2][BIT_WIDTH-1:0] = cr[i];
+      assign out_butterfly[i*2][2*BIT_WIDTH-1:BIT_WIDTH] = cc[i];
+      assign out_butterfly[i*2+1][BIT_WIDTH-1:0] = dr[i];
+      assign out_butterfly[i*2+1][2*BIT_WIDTH-1:BIT_WIDTH] = dc[i];
     end
   endgenerate
 
   fixed_point_combinational_FixedPointMultiButterfly #(
     .n(BIT_WIDTH),
     .d(DECIMAL_PT),
-    .b(N_SAMPLES/2)
+    .b(N_SAMPLES / 2)
   ) fft_stage (
     .recv_val(butterfly_recv_val),
     .recv_rdy(butterfly_recv_rdy),
@@ -151,13 +151,13 @@ module fft_pease_FFT #(
   );
 
   always_comb begin
-    next_state = state;
+    next_state  = state;
     next_bstage = bstage;
     if (state == IDLE && recv_val) begin
       next_state = COMP;
     end else if (state == COMP && butterfly_send_val) begin
       if (bstage == max_bstage - 1) begin
-        next_state = DONE;
+        next_state  = DONE;
         next_bstage = 0;
       end else begin
         next_bstage = bstage + 1;
@@ -169,21 +169,11 @@ module fft_pease_FFT #(
   end
 
   always_ff @(posedge clk) begin
-    if(state == COMP && butterfly_recv_rdy && butterfly_recv_val) begin
-      $display(" %s| %x %x[%x]", "RCV", in_butterfly[0], in_butterfly[1], {wc[bstage][0],wr[bstage][0]});
-    end else if (state == COMP && butterfly_send_rdy && butterfly_send_val) begin
-      $display(" %s| %x %x ", "SND", out_butterfly[0], out_butterfly[1]);
-    end
-
-    if(recv_rdy && recv_val) begin
-      $display(" %s| %x %x ", "IN ", recv_msg[0], recv_msg[1]);
-    end
-
-    if(reset) begin
-      state <= IDLE;
+    if (reset) begin
+      state  <= IDLE;
       bstage <= 0;
     end else begin
-      state <= next_state;
+      state  <= next_state;
       bstage <= next_bstage;
     end
   end
@@ -191,17 +181,21 @@ module fft_pease_FFT #(
   generate
     for (genvar i = 0; i < N_SAMPLES; i++) begin
       always_ff @(posedge clk) begin
-        if(reset) begin
+        if (reset) begin
           in_butterfly[i] <= 0;
           send_msg[i] <= 0;
         end else begin
           if (state == IDLE && recv_val) begin
             in_butterfly[i][BIT_WIDTH-1:0] <= reversed_msg[i];
             in_butterfly[i][2*BIT_WIDTH-1:BIT_WIDTH] <= 0;
-          end else if (state == COMP && butterfly_send_val ) begin
-            in_butterfly[i] <= out_stride[i];
-            if (bstage == max_bstage-1) begin
-              send_msg[i] <= out_stride[i][BIT_WIDTH-1:0];
+          end else begin
+            if (state == COMP && butterfly_send_val) begin
+              in_butterfly[i] <= out_stride[i];
+              if (bstage == max_bstage - 1) begin
+                send_msg[i] <= out_stride[i][BIT_WIDTH-1:0];
+              end else begin
+              end
+            end else begin
             end
           end
         end
