@@ -28,7 +28,8 @@ module fft_pease_FFT #(
   logic [2:0] IDLE = 3'd0, COMP = 3'd1, DONE = 3'd2;
 
   localparam int BstageBits = (N_SAMPLES > 2) ? $clog2($clog2(N_SAMPLES)) + 1 : 1;
-  logic [BstageBits-1:0] max_bstage = $clog2(N_SAMPLES);
+  localparam int log = $clog2(N_SAMPLES);
+  logic [BstageBits-1:0] max_bstage = log[BstageBits-1:0];
 
   logic [2:0] state;
   logic [2:0] next_state;
@@ -80,20 +81,6 @@ module fft_pease_FFT #(
       );
 
       for (genvar b = 0; b < N_SAMPLES / 2; b++) begin
-        localparam int IX = (b % (1 << i)) * (N_SAMPLES / (2 * (1 << i)));
-        // if(IX == 0) begin
-        //   assign wr[i][b] = {{BIT_WIDTH-DECIMAL_PT-1{1'b0}},1'b1,{DECIMAL_PT{1'b0}}};
-        //   assign wc[i][b] = 0;
-        // end else if (IX == N_SAMPLES >> 1) begin
-        //   assign wr[i][b] = {{BIT_WIDTH-DECIMAL_PT{1'b1}},{DECIMAL_PT{1'b0}}};
-        //   assign wc[i][b] = 0;
-        // end else if (IX == N_SAMPLES >> 2) begin
-        //   assign wr[i][b] = 0;
-        //   assign wc[i][b] = {{BIT_WIDTH-DECIMAL_PT{1'b1}},{DECIMAL_PT{1'b0}}};
-        // end else if (IX == 3 * (N_SAMPLES >> 2)) begin
-        //   assign wr[i][b] = 0;
-        //   assign wc[i][b] = {{BIT_WIDTH-DECIMAL_PT-1{1'b0}},1'b1,{DECIMAL_PT{1'b0}}};
-        // end else begin
         assign wr[i][b] = wr_pre[i][b];
         assign wc[i][b] = wc_pre[i][b];
         //end
