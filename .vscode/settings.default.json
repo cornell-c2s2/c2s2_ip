@@ -41,5 +41,7 @@
       ]
     }
   },
-  "terminal.integrated.defaultProfile.linux": "c2s2_ip"
+  "terminal.integrated.defaultProfile.linux": "c2s2_ip",
+  "python.terminal.activateEnvironment": false,
+  "python.terminal.activateEnvInCurrentTerminal": false
 }
