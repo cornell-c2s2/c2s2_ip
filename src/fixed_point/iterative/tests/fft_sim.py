@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import numpy as np
 import math
 import random
@@ -9,45 +7,46 @@ from src.fixed_point.iterative.tests.butterfly import butterfly
 # Implements twiddle generator
 def twiddle_gen (bit_width=4, decimal_pt=2, size_fft=8, stage_fft=0):
 
-    twiddles = [] * (size_fft//2)
+    twiddles = [0]*(size_fft//2)
 
     for m in range(0, 2 ** stage_fft):
         for i in range(0, size_fft, 2 ** (stage_fft + 1)):
             idx = m * size_fft / (1 << (stage_fft + 1))
-            
-            real = CFixed(np.sin((idx+size_fft/4)%size_fft), bit_width, decimal_pt)
-            imag = CFixed(-np.sin(idx%size_fft), bit_width, decimal_pt)
-
-            twiddle = CFixed(0, bit_width, decimal_pt)
-            twiddle.value = CFixed(real, bit_width, decimal_pt).value + 1j * CFixed(imag, bit_width, decimal_pt).value
-
-            twiddles[i/2+m] = twiddle
+            twiddles[(i//2)+m] = CFixed((np.sin(int((idx+size_fft/4)%size_fft)), -np.sin(int(idx%size_fft))), bit_width, decimal_pt)
 
     return twiddles
 
 
-# Implements bit reverse
-def bit_reverse (input, bit_width=32, n_samples=8):
+def reverse_index(num):
+    # Number of bits in the given number
+    num_bits = num.bit_length()
+    result = 0
 
-    out = [0] * n_samples 
+    # Perform bit reversal
+    for i in range(num_bits):
+        result = (result << 1) | (num & 1)
+        num = num >> 1
+
+    return result
+
+
+# Implements bit reverse
+def bit_reverse (rev_in, bit_width=32, n_samples=8):
+
+    out = [0]*n_samples 
+
     n = math.ceil(math.log2(n_samples))
 
     for m in range(0, n_samples):
-        m_rev = [] * math.ceil(math.log2(n_samples))
-        for i in range(0, n):
-            m_rev[n-i-1] = m[i]
-        out[m_rev] = input[m]
+        m_rev = format(m, f'0{n}b')[::-1] 
+        reversed_index = int(m_rev, 2) 
+        out[reversed_index] = rev_in[m]
     
     return out
 
 
 # Implements one stage of the FFT
 def fft_stage(fft_stage_in, stage_fft=0, bit_width=32, decimal_pt=16, n_samples=8):
-
-    print('stage_fft', stage_fft)
-    print('bit_width', bit_width)
-    print('decimal_pt', decimal_pt)
-    print('n_samples', n_samples)
     
     buf_in = [0] * n_samples
     buf_out = [0] * n_samples
@@ -55,8 +54,6 @@ def fft_stage(fft_stage_in, stage_fft=0, bit_width=32, decimal_pt=16, n_samples=
     # Front crossbar
     for m in range(0, 2**stage_fft):
         for i in range(m, n_samples, 2**(stage_fft+1)):
-            print('i+m', i+m)
-            print('i+m+1', i+m+1)
             buf_in[i+m] = fft_stage_in[i]
             buf_in[i+m+1] = fft_stage_in[i+2**stage_fft]
 
@@ -64,10 +61,10 @@ def fft_stage(fft_stage_in, stage_fft=0, bit_width=32, decimal_pt=16, n_samples=
     twiddles = twiddle_gen(bit_width, decimal_pt, n_samples, stage_fft)
 
     # Butterflies
-    for b in range(0, n_samples/2):
-        (buf_out[b*2], buf_out[b*2+1]) = butterfly(n_samples, decimal_pt, twiddles[b], buf_in[b*2], buf_in[b*2 + 1])
+    for b in range(0, n_samples//2):
+        (buf_out[b*2], buf_out[b*2+1]) = butterfly(bit_width, decimal_pt, twiddles[b], buf_in[b*2], buf_in[b*2 + 1])
 
-    output = [] * n_samples
+    output = [0]*n_samples
 
     # Back crossbar
     for m in range(0, 2**stage_fft):
@@ -77,24 +74,26 @@ def fft_stage(fft_stage_in, stage_fft=0, bit_width=32, decimal_pt=16, n_samples=
 
     return output
 
+
 # Implements fft 
 def fft (fft_in, bit_width=32, decimal_pt=16, n_samples=8):
 
+    msg = [[0 for _ in range(n_samples)] for _ in range(math.ceil(math.log2(n_samples)+1))]
+
     # Bit reverse
-    stages_out = bit_reverse(fft_in, bit_width, n_samples)
+    msg[0] = bit_reverse(fft_in, bit_width, n_samples)
 
     # FFT Stages
-    stages_out = [0] * n_samples
-
     for i in range(0, math.ceil(math.log2(n_samples))):
-        stages_out[i+1] = fft_stage(fft_in[i], i, bit_width, decimal_pt, n_samples)
+        msg[i+1] = fft_stage(msg[i], i, bit_width, decimal_pt, n_samples)
 
     # FFT Out
-    fft_out = [] * n_samples
+    fft_out = [0]*n_samples
     for i in range(0, n_samples):
-        fft_out[i] = stages_out[math.ceil(math.log2(n_samples))]
+        fft_out[i] = msg[math.ceil(math.log2(n_samples))][i].real
     
-    return stages_out
+    return fft_out
+
 
 # return a random fixed point value
 def rand_cfixed(n, d):
@@ -108,11 +107,14 @@ def rand_cfixed(n, d):
 def main():
 
     rand_cfxp = [rand_cfixed(32, 16) for i in range(8)]
-    print(rand_cfxp)
-    
-    fft_stage_output = fft_stage(rand_cfxp, 0, 32, 16, 8)
 
-    print(fft_stage_output)
+    fft_output = fft(rand_cfxp, bit_width=32, decimal_pt=16, n_samples=8)
+
+    print("Input: ")
+    print(rand_cfxp)
+    print("\n")
+    print("Output: ")
+    print(fft_output)
 
 
 if __name__ == "__main__":
