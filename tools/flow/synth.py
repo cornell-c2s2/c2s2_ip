@@ -1,6 +1,6 @@
 # Push a file through caravel synthesis (openlane)
-from utils.remote import caravel_dir, caravel_installed
-from utils.cmdline import SubCommand
+from utils.remote import caravel_dir, caravel_installed, connect
+from utils.cmdline import SubCommand, multi_type, positive_int
 import logging as log
 from utils.misc import load_config, merge_dict, root_dir, split_path
 from utils.logging import Spinner
@@ -11,6 +11,7 @@ import os
 import tempfile
 import itertools
 import re
+import multiprocessing
 
 
 # Take a list of designs and collect the design files for them
@@ -156,6 +157,74 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
     return 0
 
 
+def synth_results(connection, build_dir, design_name: str, args):
+    # ----------------------------------------------------------------
+    # Copy the results back
+    # ----------------------------------------------------------------
+
+    log.info("Saving synthesis results for %s to %s", design_name, build_dir)
+    # First, zip the results
+    connection.run(
+        f"cd {path.join(caravel_dir(), "openlane", design_name, "runs")} && zip -r results.zip {design_name}",
+        hide=args.verbose < 2,
+    )
+
+    # Then, copy the results back
+    connection.get(
+        path.join(
+            caravel_dir(),
+            "openlane",
+            design_name,
+            "runs",
+            "results.zip",
+        ),
+        path.join(build_dir, f"{design_name}.zip"),
+    )
+
+    # Delete the results on the server
+    connection.run(
+        f"rm {path.join(caravel_dir(), "openlane", design_name, "runs", "results.zip")}"
+    )
+
+    # Unzip the results
+    subprocess.run(
+        ["unzip", "-o", path.join(build_dir, f"{design_name}.zip"), "-d", build_dir],
+        stdout=subprocess.DEVNULL if args.verbose < 2 else None,
+    )
+
+    # Delete the zip file
+    os.remove(path.join(build_dir, f"{design_name}.zip"))
+
+def synthesize(design, path_prefix, args):
+    # Create a new connection as this is running in a separate thread
+    connection = connect()
+
+    log.info("Running synthesis on %s", design["DESIGN_NAME"])
+    prefixed_design_name = f"{path_prefix}_{design['DESIGN_NAME']}"
+    # Run synthesis
+    synth_result = connection.run(
+        f"cd {caravel_dir()} && make {prefixed_design_name}",
+        warn=True,
+        hide=args.verbose == 0,
+    )
+    if synth_result.exited != 0:
+        log.error("Synthesis failed for %s", design["DESIGN_NAME"])
+        if args.verbose == 0:
+            # Log the stdout and stderr
+            log.error(synth_result.stdout)
+            log.error(synth_result.stderr)
+        synth_results(connection, path.join(root_dir(), args.dir), prefixed_design_name, args)
+        connection.close()
+        return 1
+
+    # Copy the results back
+    synth_results(connection, path.join(root_dir(), args.dir), prefixed_design_name, args)
+
+    connection.close()
+
+    return 0
+
+
 # Propogate config variables through a design
 def propogate(designs: dict) -> list[dict]:
     def propogate_rec(designs: dict, namespace: dict):
@@ -193,6 +262,25 @@ class Synth(SubCommand):
             help="Design to run synthesis on (a .yml or .json file)",
         )
 
+        args.add_argument(
+            "-d",
+            "--dir",
+            metavar="Directory",
+            type=str,
+            default="build",
+            help="Directory to save synthesis results to",
+        )
+
+        args.add_argument(
+            "-t",
+            "--threads",
+            metavar="Threads",
+            type=multi_type(positive_int, 'auto'), # expect an integer or the string 'auto'
+            default='auto',
+            help="Number of threads to use for synthesis",
+        )
+
+
     def run(connection, args):
         """Run synthesis on a design."""
         if not caravel_installed(connection):
@@ -226,7 +314,7 @@ class Synth(SubCommand):
         # ----------------------------------------------------------------
         # create a temporary build directory for saving files
         build_dir = tempfile.TemporaryDirectory(
-            prefix="build", dir=root_dir(), delete=args.verbose == 0
+            prefix="build", dir=root_dir(), delete=False
         )
 
         err_code = design_files(build_dir.name, designs, args)
@@ -254,6 +342,22 @@ class Synth(SubCommand):
             openlane_project_dir = path.join(remote_openlane_dir, prefixed_design_name)
             # Create the openlane project directory
             connection.run(f"mkdir -p {openlane_project_dir}")
+
+            # Replace the top module name in the verilog file
+            with open(design["VERILOG_FILE"], "r") as f:
+                verilog = f.read()
+
+            # Replace the top module name
+            verilog = re.sub(
+                f"module\\s+{re.escape(design['DESIGN_NAME'])}",
+                f"module {prefixed_design_name}",
+                verilog,
+                flags=re.MULTILINE,
+            )
+
+            # Write the verilog file
+            with open(design["VERILOG_FILE"], "w") as f:
+                f.write(verilog)
 
             # Copy the verilog file
             connection.put(
@@ -294,22 +398,32 @@ class Synth(SubCommand):
             # TODO: Copy the test files
 
         spinner.succeed("Finished copying files to caravel")
+        
+        # ----------------------------------------------------------------
+        # Run synthesis
+        # ----------------------------------------------------------------
 
-        spinner = Spinner(args, "Running synthesis...")
+        # create the output directory
+        os.makedirs(path.join(root_dir(), args.dir), exist_ok=True)
 
-        for i, design in enumerate(designs):
-            spinner.rename(
-                f"Running synthesis [{i/len(designs)*100:.0f}%] [{design['DESIGN_NAME']}]"
-            )
-            prefixed_design_name = f"{path_prefix}_{design['DESIGN_NAME']}"
-            # Run synthesis
-            connection.run(f"cd {caravel_dir()} && make {prefixed_design_name}")
+        spinner = Spinner(args, f"Running synthesis with {args.threads} threads...")
+
+        # Create threadpool
+        if args.threads == 'auto':
+            threads = multiprocessing.cpu_count()
+        else:
+            threads = args.threads
+        
+        with multiprocessing.Pool(threads) as pool:
+            results = pool.starmap(synthesize, [(design, path_prefix, args) for design in designs])
+            if any(results):
+                return 1
+        
+        spinner.succeed("Finished synthesis")
 
         # ----------------------------------------------------------------
         # Cleanup
         # ----------------------------------------------------------------
-        # Clean up if log level is not debug
-        if args.verbose == 0:
-            build_dir.cleanup()
+        build_dir.cleanup()
 
         return 0

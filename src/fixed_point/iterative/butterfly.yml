@@ -5,6 +5,7 @@ TEST_FILES: # pytest files
 FP_PIN_ORDER_CFG: butterfly_pins.cfg # Pin order configuration file
 DESIGN_IS_CORE: 0
 CLOCK_PORT: clk
+FP_ASPECT_RATIO: 2 # Aspect ratio of the core (we set it to 2 here because there are 128 pins on each side but only 64 on the bottom)
 SYNTH_PARAMETERS: 
   n: 32
   d: 16
@@ -15,7 +16,7 @@ DESIGNS:
   - SYNTH_PARAMETERS:
       mult: 0
     CLOCK_PERIOD: 10 # Target clock period in ns
-    PL_TARGET_DENSITY: 0.5 # Placement target density
+    PL_TARGET_DENSITY: 0.8 # Placement target density
   # Designs can be nested hierarchically
   - CLOCK_PERIOD: 2
     PL_TARGET_DENSITY: 0.9

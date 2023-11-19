@@ -13,8 +13,8 @@ class Connection(FabricConnection):
         if "env" not in kwargs:
             kwargs["env"] = {}
         kwargs["env"] = {
-            "OPENLANE_ROOT": "/classes/c2s2/openlane",
-            "PDK_ROOT": "/classes/c2s2/pdk",
+            # "OPENLANE_ROOT": "/classes/c2s2/openlane",
+            "PDK_ROOT": "/classes/c2s2/pdks",
             **kwargs["env"],
         }
         return super().run(command, **kwargs)

@@ -4,6 +4,35 @@ import sys
 from fabric import Connection
 
 
+def positive_int(value):
+    value = int(value)
+    if value <= 0:
+        raise argparse.ArgumentTypeError("Expected positive integer")
+    return value
+
+
+# Multitypes for argparse
+# Allows an argument to be one of multiple types
+# If an argument is not a function, it will be treated as an equality check
+def multi_type(*args):
+    def check_type(value):
+        nonlocal args
+        for arg in args:
+            if callable(arg):
+                try:
+                    return arg(value)
+                except Exception:
+                    pass
+            else:
+                if arg == value:
+                    return value
+        raise argparse.ArgumentTypeError(
+            "Invalid type for argument, expected one of {}".format(args)
+        )
+
+    return check_type
+
+
 class Parser(argparse.ArgumentParser):
     def error(self, message):
         sys.stderr.write("error: %s\n" % message)
