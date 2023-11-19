@@ -27,6 +27,7 @@ def setup_logging(args):
 
 class Spinner:
     def __init__(self, args, message: str):
+        log.info(message)
         if args.verbose == 0:
             self.spinner = Halo(spinner="dots", text=message)
             self.spinner.start()
@@ -34,9 +35,11 @@ class Spinner:
             self.spinner = None
 
     def succeed(self, message: str):
+        log.info(message)
         if self.spinner:
             self.spinner.succeed(message)
 
     def rename(self, message: str):
+        log.info(message)
         if self.spinner:
             self.spinner.text = message

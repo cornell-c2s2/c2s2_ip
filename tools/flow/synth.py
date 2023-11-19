@@ -19,11 +19,10 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
     # ----------------------------------------------------------------
     # Run pytest to generate the designs
     # ----------------------------------------------------------------
-    log.info("Running pytest in %s", build_dir)
     # get only the name of the build directory
     build_dir_name = path.basename(build_dir)
 
-    spinner = Spinner(args, "Running pytest to generate verilog files")
+    spinner = Spinner(args, f"Running pytest in {build_dir} to generate verilog files")
 
     design_dir = path.dirname(args.design)
     # get the pytest files
@@ -406,13 +405,13 @@ class Synth(SubCommand):
         # create the output directory
         os.makedirs(path.join(root_dir(), args.dir), exist_ok=True)
 
-        spinner = Spinner(args, f"Running synthesis with {args.threads} threads...")
-
         # Create threadpool
         if args.threads == 'auto':
             threads = multiprocessing.cpu_count()
         else:
             threads = args.threads
+
+        spinner = Spinner(args, f"Running synthesis with {threads} threads...")
         
         with multiprocessing.Pool(threads) as pool:
             results = pool.starmap(synthesize, [(design, path_prefix, args) for design in designs])
