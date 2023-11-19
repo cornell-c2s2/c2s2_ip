@@ -275,7 +275,7 @@ class Synth(SubCommand):
             "--nthreads",
             metavar="Number of Threads",
             type=multi_type(positive_int, 'auto'), # expect an integer or the string 'auto'
-            default=1,
+            default='auto',
             help="Number of threads to use for synthesis. Use 'auto' to use a threadcount equal to the number of CPU cores.",
         )
 
@@ -406,10 +406,10 @@ class Synth(SubCommand):
         os.makedirs(path.join(root_dir(), args.dir), exist_ok=True)
 
         # Create threadpool
-        if args.threads == 'auto':
+        if args.nthreads == 'auto':
             threads = multiprocessing.cpu_count()
         else:
-            threads = args.threads
+            threads = args.nthreads
 
         spinner = Spinner(args, f"Running synthesis with {threads} threads...")
         
