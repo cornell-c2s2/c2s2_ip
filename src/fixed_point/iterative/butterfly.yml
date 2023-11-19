@@ -18,7 +18,7 @@ DESIGNS:
     CLOCK_PERIOD: 10 # Target clock period in ns
     PL_TARGET_DENSITY: 0.8 # Placement target density
   # Designs can be nested hierarchically
-  - CLOCK_PERIOD: 2
+  - CLOCK_PERIOD: 10
     PL_TARGET_DENSITY: 0.9
     DESIGNS: # Here, designs take CLOCK_PERIOD: 2 and PL_TARGET_DENSITY: 0.9
       - SYNTH_PARAMETERS: 

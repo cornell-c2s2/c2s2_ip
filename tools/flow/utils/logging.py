@@ -34,6 +34,11 @@ class Spinner:
         else:
             self.spinner = None
 
+    def fail(self, message: str):
+        log.error(message)
+        if self.spinner:
+            self.spinner.fail(message)
+
     def succeed(self, message: str):
         log.info(message)
         if self.spinner:

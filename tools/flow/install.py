@@ -38,6 +38,6 @@ class Install(SubCommand):
             f"""
 cd {caravel_dir()} && \
     git clone --depth 1 --branch mpw-9g https://github.com/efabless/caravel_user_project.git . && \
-    make install check-env install_mcw setup-timing-scripts openlane
+    make install check-env install_mcw setup-timing-scripts
 """
         )

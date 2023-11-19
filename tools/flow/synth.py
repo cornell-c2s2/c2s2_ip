@@ -93,7 +93,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
             if match is not None:
                 design_name = match.group("design_name")
                 if design_name in verilog_files:
-                    log.error(
+                    spinner.fail(
                         "Found multiple verilog files for %s: %s and %s",
                         design_name,
                         verilog_files[design_name],
@@ -115,7 +115,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
     files: dict[str, dict[str, str]] = {}
     for design_name in verilog_files.keys():
         if design_name not in vtb_files:
-            log.error("No corresponding vtb cases found for %s", design_name)
+            spinner.fail("No corresponding vtb cases found for %s", design_name)
             return 1
         files[design_name] = {
             "verilog": verilog_files[design_name],
@@ -123,7 +123,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
         }
 
     if len(vtb_files) > 0:
-        log.error("Found extra vtb files not matching any verilog files: %s", vtb_files)
+        spinner.fail("Found extra vtb files not matching any verilog files: %s", vtb_files)
         return 1
 
     # delete these from the scope so they don't get used later
@@ -136,7 +136,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
         for name in design["DESIGN_NAME"]:
             if name in files:
                 if design_name is not None:
-                    log.error(
+                    spinner.fail(
                         "Found multiple verilog files/vtb cases for %s: %s and %s",
                         name,
                         files[name]["verilog"],
@@ -147,7 +147,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
                 design["TEST_FILES"] = files[name]["vtb"]
                 design_name = name
         if design_name is None:
-            log.error("No verilog file found matching any of %s", design["DESIGN_NAME"])
+            spinner.fail("No verilog file found matching any of %s", design["DESIGN_NAME"])
             return 1
         design["DESIGN_NAME"] = design_name
 
@@ -397,6 +397,12 @@ class Synth(SubCommand):
             # TODO: Copy the test files
 
         spinner.succeed("Finished copying files to caravel")
+
+        # ----------------------------------------------------------------
+        # Cleanup build directory
+        # ----------------------------------------------------------------
+
+        build_dir.cleanup()
         
         # ----------------------------------------------------------------
         # Run synthesis
@@ -411,22 +417,15 @@ class Synth(SubCommand):
         else:
             threads = args.nthreads
 
-        spinner = Spinner(args, f"Running synthesis with {threads} threads...")
+        spinner = Spinner(args, f"Running synthesis with {threads} threads")
         
         with multiprocessing.Pool(threads) as pool:
             results = pool.starmap(synthesize, [(design, path_prefix, args) for design in designs])
             if any(results):
-                log.error("Synthesis failed for the following designs:")
-                for design, result in zip(designs, results):
-                    if result:
-                        log.error(design["DESIGN_NAME"])
+                spinner.fail("Synthesis failed")
+                log.error(f"Synthesis failed for the following designs:{"\n".join([design["DESIGN_NAME"] for design, result in zip(designs, results) if result])}")
                 return 1
         
         spinner.succeed("Finished synthesis")
-
-        # ----------------------------------------------------------------
-        # Cleanup
-        # ----------------------------------------------------------------
-        build_dir.cleanup()
 
         return 0
