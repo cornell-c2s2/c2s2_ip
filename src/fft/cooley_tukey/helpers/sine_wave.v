@@ -4,7 +4,7 @@
 
 // Macro to generate a sine table for N evenly spaced values from 0 to 2pi.
 // Returns values in a fixedpoint format with D fractional bits and W total bits.
-module fft_helpers_SineWave #(
+module fft_cooley_tukey_helpers_SineWave #(
   parameter int N = 8,
   parameter int W = 32,
   parameter int D = 16

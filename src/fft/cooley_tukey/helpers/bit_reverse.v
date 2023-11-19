@@ -5,7 +5,7 @@
 /// FFT Bit Reversal
 /// @param BIT_WIDTH  : Data bit width
 /// @param N_SAMPLES   : Number of points in the FFT
-module fft_helpers_BitReverse #(
+module fft_cooley_tukey_helpers_BitReverse #(
   parameter int BIT_WIDTH = 32,
   parameter int N_SAMPLES = 8
 ) (

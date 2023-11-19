@@ -1,6 +1,6 @@
 `ifndef fft_helpers_TWIDDLE_GENERATOR
 `define fft_helpers_TWIDDLE_GENERATOR
-module fft_helpers_TwiddleGenerator #(
+module fft_cooley_tukey_helpers_TwiddleGenerator #(
   parameter int BIT_WIDTH  = 4,
   parameter int DECIMAL_PT = 2,
   parameter int SIZE_FFT   = 8,

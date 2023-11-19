@@ -2,8 +2,8 @@
 `ifndef fft_STAGE
 `define fft_STAGE
 
-`include "fft/helpers/twiddle_generator.v"
-`include "fft/helpers/crossbar.v"
+`include "fft/cooley_tukey/helpers/twiddle_generator.v"
+`include "fft/cooley_tukey/helpers/crossbar.v"
 `include "fixed_point/iterative/butterfly.v"
 
 
@@ -12,7 +12,7 @@
 /// @param DECIMAL_PT The number of decimal bits in each fixed point number
 /// @param N_SAMPLES  The number of samples in the FFT
 /// @param STAGE_FFT  The stage of the FFT to calculate
-module fft_Stage #(
+module fft_cooley_tukey_Stage #(
   parameter int BIT_WIDTH  = 32,
   parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES  = 8,
@@ -66,7 +66,7 @@ module fft_Stage #(
   logic                   val_interior_mini      [N_SAMPLES/2 - 1:0];
   logic                   rdy_interior_mini      [N_SAMPLES/2 - 1:0];
 
-  fft_helpers_Crossbar #(
+  fft_cooley_tukey_helpers_Crossbar #(
     .BIT_WIDTH(BIT_WIDTH),
     .SIZE_FFT(N_SAMPLES),
     .STAGE_FFT(STAGE_FFT),
@@ -126,7 +126,7 @@ module fft_Stage #(
 
 
 
-  fft_helpers_Crossbar #(
+  fft_cooley_tukey_helpers_Crossbar #(
     .BIT_WIDTH(BIT_WIDTH),
     .SIZE_FFT(N_SAMPLES),
     .STAGE_FFT(STAGE_FFT),
@@ -142,7 +142,7 @@ module fft_Stage #(
     .send_rdy(rdy_out)
   );
 
-  fft_helpers_TwiddleGenerator #(
+  fft_cooley_tukey_helpers_TwiddleGenerator #(
     .BIT_WIDTH (BIT_WIDTH),
     .DECIMAL_PT(DECIMAL_PT),
     .SIZE_FFT  (N_SAMPLES),

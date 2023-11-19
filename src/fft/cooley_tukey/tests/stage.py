@@ -3,8 +3,8 @@ import random
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
-from src.fft.stage import StageWrapper
-from src.fft.tests.sim import fixed_point_fft
+from src.fft.cooley_tukey.stage import StageWrapper
+from src.fft.cooley_tukey.tests.sim import fixed_point_fft
 import math
 
 # -------------------------------------------------------------------------
