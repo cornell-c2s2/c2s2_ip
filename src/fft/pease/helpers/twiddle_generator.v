@@ -14,8 +14,8 @@ module fft_pease_helpers_TwiddleGenerator #(
   output logic [BIT_WIDTH - 1:0] twiddle_imaginary[SIZE_FFT/2 - 1:0]
 );
 
-  logic [BIT_WIDTH - 1:0] t_real     [SIZE_FFT/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] t_imaginary[SIZE_FFT/2 - 1:0];
+  //logic [BIT_WIDTH - 1:0] t_real     [SIZE_FFT/2 - 1:0];
+  //logic [BIT_WIDTH - 1:0] t_imaginary[SIZE_FFT/2 - 1:0];
 
   generate
     if (STAGE_FFT == 0) begin
@@ -24,18 +24,18 @@ module fft_pease_helpers_TwiddleGenerator #(
         assign twiddle_imaginary[i] = 0;
       end
     end else begin
-      for (genvar i = 0; i < SIZE_FFT / 2; i = i + 1) begin
-        assign t_real[i] = sine_wave_in[i+SIZE_FFT/4];
-        assign t_imaginary[i] = sine_wave_in[i+SIZE_FFT/2];
-      end
+      // for (genvar i = 0; i < SIZE_FFT / 2; i = i + 1) begin
+      //   assign t_real[i] = sine_wave_in[i+SIZE_FFT/4];
+      //   assign t_imaginary[i] = sine_wave_in[i+SIZE_FFT/2];
+      // end
 
       for (genvar m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin
         for (genvar j = 0; j < 2 ** ($clog2(SIZE_FFT) - STAGE_FFT - 1); j = j + 1) begin
           localparam int stageLeft = $clog2(SIZE_FFT) - STAGE_FFT - 1;
           localparam int idx = m * (2 ** stageLeft);
           localparam int si = idx + j;
-          assign twiddle_real[si] = t_real[idx];
-          assign twiddle_imaginary[si] = t_imaginary[idx];
+          assign twiddle_real[si] = sine_wave_in[idx+SIZE_FFT/4];
+          assign twiddle_imaginary[si] = sine_wave_in[idx+SIZE_FFT/2];
         end
       end
     end
