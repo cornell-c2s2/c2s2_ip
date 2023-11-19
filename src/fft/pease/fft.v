@@ -144,17 +144,18 @@ module fft_pease_FFT #(
     next_bstage = bstage;
     if (state == IDLE && recv_val) begin
       next_state = COMP;
-    end else if (state == COMP && butterfly_send_val) begin
-      if (bstage == max_bstage) begin
-        next_state  = DONE;
-        next_bstage = 0;
-      end else begin
-        next_bstage = bstage + 1;
+    end else begin
+      if (state == COMP && butterfly_send_val) begin
+        if (bstage == max_bstage) begin
+          next_state  = DONE;
+          next_bstage = 0;
+        end else begin
+          next_bstage = bstage + 1;
+        end
+      end else if (state == DONE && send_rdy) begin
+        next_state = IDLE;
       end
-    end else if (state == DONE && send_rdy) begin
-      next_state = IDLE;
     end
-
   end
 
   always_ff @(posedge clk) begin
