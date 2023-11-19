@@ -23,6 +23,7 @@ module fft_pease_helpers_TwiddleGenerator #(
         assign twiddle_real[i] = {{BIT_WIDTH - DECIMAL_PT - 1{1'b0}}, 1'b1, {DECIMAL_PT{1'b0}}};
         assign twiddle_imaginary[i] = 0;
       end
+      logic unused = &sine_wave_in;
     end else begin
       // for (genvar i = 0; i < SIZE_FFT / 2; i = i + 1) begin
       //   assign t_real[i] = sine_wave_in[i+SIZE_FFT/4];

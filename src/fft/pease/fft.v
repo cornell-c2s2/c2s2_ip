@@ -27,8 +27,8 @@ module fft_pease_FFT #(
 
   logic [2:0] IDLE = 3'd0, COMP = 3'd1, DONE = 3'd2;
 
-  localparam int BstageBits = (N_SAMPLES > 2) ? $clog2($clog2(N_SAMPLES)) + 1 : 1;
-  localparam int log = $clog2(N_SAMPLES);
+  localparam int BstageBits = (N_SAMPLES > 2) ? $clog2($clog2(N_SAMPLES)) : 1;
+  localparam int log = $clog2(N_SAMPLES) - 1;
   logic [BstageBits-1:0] max_bstage = log[BstageBits-1:0];
 
   logic [2:0] state;
@@ -110,6 +110,8 @@ module fft_pease_FFT #(
   logic butterfly_recv_val = (state == COMP);
   logic butterfly_recv_rdy;
 
+  logic unused = &butterfly_recv_rdy;
+
   generate
     for (genvar i = 0; i < N_SAMPLES / 2; i++) begin
       assign ar[i] = in_butterfly[i*2][BIT_WIDTH-1:0];
@@ -143,7 +145,7 @@ module fft_pease_FFT #(
     if (state == IDLE && recv_val) begin
       next_state = COMP;
     end else if (state == COMP && butterfly_send_val) begin
-      if (bstage == max_bstage - 1) begin
+      if (bstage == max_bstage) begin
         next_state  = DONE;
         next_bstage = 0;
       end else begin
@@ -178,7 +180,7 @@ module fft_pease_FFT #(
           end else begin
             if (state == COMP && butterfly_send_val) begin
               in_butterfly[i] <= out_stride[i];
-              if (bstage == max_bstage - 1) begin
+              if (bstage == max_bstage) begin
                 send_msg[i] <= out_stride[i][BIT_WIDTH-1:0];
               end else begin
               end
