@@ -51,10 +51,6 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
     | 1 -w | * | b | = | d |
   */
 
-  // always_ff @(posedge clk) begin
-  //   $display("[%x %x %x %x %x %x %x %x %x %x][%x, %x]",ar[0],ac[0],br[0],bc[0],wr[0],wc[0],cr[0],cc[0],dr[0],dc[0],recv_val && recv_rdy,send_val && send_rdy);
-  // end
-
   // registers for storing the inputs
   logic [n-1:0] s_ar[b];
   logic [n-1:0] s_ac[b];

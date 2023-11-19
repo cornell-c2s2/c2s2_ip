@@ -31,8 +31,6 @@ module fixed_point_combinational_ComplexMultiplier #(
 
   logic [n-1:0] arXbr, acXbc, arcXbrc;
 
-  logic [2:0] IDLE = 3'd0, MUL1 = 3'd1, MUL2 = 3'd2, MUL3 = 3'd3, DONE = 3'd4;
-
   generate
     // 3 multiplier implementation, completes computations in a single cycle, no sequential logic required.
     if (num_mults == 3) begin
@@ -76,11 +74,16 @@ module fixed_point_combinational_ComplexMultiplier #(
       assign recv_rdy = send_rdy;
       assign send_val = recv_val;
 
+      logic unused = &({clk, reset});
+
       // 1 multiplier implementation, completes computations in three cycles.
     end else if (num_mults == 1) begin
+      logic [2:0] IDLE = 3'd0, MUL1 = 3'd1, MUL2 = 3'd2, MUL3 = 3'd3, DONE = 3'd4;
       logic [2:0] state;
       logic [2:0] next_state;
       logic [n-1:0] mul_a, mul_b, mul_c;
+
+      logic unused = &({IDLE, MUL1, MUL2, MUL3, DONE});
 
       always_ff @(posedge clk) begin
         if (reset) begin
@@ -166,7 +169,6 @@ module fixed_point_combinational_ComplexMultiplier #(
       assign cc = arcXbrc - arXbr - acXbc;
     end
   endgenerate
-
 endmodule
 
 `endif
