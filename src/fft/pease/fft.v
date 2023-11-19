@@ -152,8 +152,11 @@ module fft_pease_FFT #(
         end else begin
           next_bstage = bstage + 1;
         end
-      end else if (state == DONE && send_rdy) begin
-        next_state = IDLE;
+      end else begin
+        if (state == DONE && send_rdy) begin
+          next_state = IDLE;
+        end else begin
+        end
       end
     end
   end
