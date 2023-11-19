@@ -271,12 +271,12 @@ class Synth(SubCommand):
         )
 
         args.add_argument(
-            "-t",
-            "--threads",
-            metavar="Threads",
+            "-n",
+            "--nthreads",
+            metavar="Number of Threads",
             type=multi_type(positive_int, 'auto'), # expect an integer or the string 'auto'
-            default='auto',
-            help="Number of threads to use for synthesis",
+            default=1,
+            help="Number of threads to use for synthesis. Use 'auto' to use a threadcount equal to the number of CPU cores.",
         )
 
 
@@ -416,6 +416,10 @@ class Synth(SubCommand):
         with multiprocessing.Pool(threads) as pool:
             results = pool.starmap(synthesize, [(design, path_prefix, args) for design in designs])
             if any(results):
+                log.error("Synthesis failed for the following designs:")
+                for design, result in zip(designs, results):
+                    if result:
+                        log.error(design["DESIGN_NAME"])
                 return 1
         
         spinner.succeed("Finished synthesis")
