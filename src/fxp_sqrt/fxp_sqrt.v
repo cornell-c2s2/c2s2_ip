@@ -7,8 +7,8 @@
 // fxp_sqrt in Verilog
 
 module Fxp_sqrt #(
-  parameter int BIT_WIDTH = 16,
-  parameter int F_BITS = 8
+  parameter int BIT_WIDTH = 32,
+  parameter int F_BITS = 16
 ) (
   input logic reset,
   input logic clk,
@@ -31,10 +31,10 @@ module Fxp_sqrt #(
   logic msb_gtz;
 
   // Datapath Unit
-  datapath_module #(.BIT_WIDTH(BIT_WIDTH)) dpath (.*);
+  datapath_module #(.BIT_WIDTH(BIT_WIDTH),.F_BITS(F_BITS)) dpath (.*);
 
   // Control Unit
-  control_module #(.BIT_WIDTH(BIT_WIDTH)) ctrl (.*);
+  control_module #(.BIT_WIDTH(BIT_WIDTH),.F_BITS(F_BITS)) ctrl (.*);
 
 endmodule
 
@@ -42,8 +42,8 @@ endmodule
 // Datapath Module
 //========================================================================
 module datapath_module #(
-  parameter int BIT_WIDTH = 16,
-  parameter int F_BITS = 8
+  parameter int BIT_WIDTH = 32,
+  parameter int F_BITS = 16
 ) (
   input logic clk,
 
@@ -172,8 +172,8 @@ endmodule
 // Control Module
 //========================================================================
 module control_module #(
-  parameter int BIT_WIDTH = 16,
-  parameter int F_BITS = 8
+  parameter int BIT_WIDTH = 32,
+  parameter int F_BITS = 16
 ) (
   input logic clk,
   input logic reset,

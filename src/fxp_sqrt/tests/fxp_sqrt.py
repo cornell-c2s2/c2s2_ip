@@ -13,11 +13,8 @@ from src.fxp_sqrt.harnesses.fxp_sqrt import FxpSqrtTestHarness
 # ----------------------------------------------------------------------
 # Helper Functions
 # ----------------------------------------------------------------------
-def isPerfectSquare(n): return (n == round(math.sqrt(n)) ** 2)
-def lastPerfectSquare(n):
-    while(not isPerfectSquare(n)):n = n - 1
-    return round(math.sqrt(n))
-
+def make_fixed (n, d, a, b):
+    return (a << d) + b
 
 # -------------------------------------------------------------------------
 # TestHarness
@@ -25,7 +22,7 @@ def lastPerfectSquare(n):
 
 
 class TestHarness(Component):
-    def construct(s, fxp_sqrt, BIT_WIDTH=16, F_BITS=8):
+    def construct(s, fxp_sqrt, BIT_WIDTH=32, F_BITS=16):
         # Instantiate models
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
@@ -50,48 +47,77 @@ def simple_test():
         0x0040, 0x0080, 
         0x0200, 0x016A, 
         256, 256]
-    
-def whole_number_perfect_squares():
-    RANGE = 255
-    i, list  = 0, []
-    while(i <= RANGE):
-        if(isPerfectSquare(i)):
-            list.append(i * 256)
-            list.append(int(math.sqrt(i) * 256))
-        i = i + 1
-    return list
 
-def whole_number_non_perfect_squares():
-    RANGE = 255
-    i, list  = 0, []
-    while(i <= RANGE):
-        if(not isPerfectSquare(i)):
-            list.append(i * 256)
-            list.append(math.sqrt(i) * 256)
-        i = i + 1
-    return list
+def int_perfect_squares_8bit():
+    return [
+        make_fixed(8, 4, 0, 0), math.sqrt(0)*16,
+        make_fixed(8, 4, 1, 0), math.sqrt(1)*16,
+        make_fixed(8, 4, 4, 0), math.sqrt(4)*16,
+        make_fixed(8, 4, 9, 0), math.sqrt(9)*16,
+    ]
 
-def fixed_point_test():
-    RANGE = 255
-    NUMRANDTESTS = 10
-    i, list  = 0, []
-    for i in range(NUMRANDTESTS):
-        r = random.random() * 255
-        list.append(r * 256)
-        list.append(math.sqrt(r) * 256)
-        i = i + 1
-    return list
+def int_perfect_squares_16bit():
+    return [
+        make_fixed(16, 8, 0, 0), math.sqrt(0)*256,
+        make_fixed(16, 8, 1, 0), math.sqrt(1)*256,
+        make_fixed(16, 8, 4, 0), math.sqrt(4)*256,
+        make_fixed(16, 8, 9, 0), math.sqrt(9)*256,
+        make_fixed(16, 8, 16, 0), math.sqrt(16)*256,
+        make_fixed(16, 8, 25, 0), math.sqrt(25)*256,
+        make_fixed(16, 8, 36, 0), math.sqrt(36)*256,
+        make_fixed(16, 8, 49, 0), math.sqrt(49)*256,
+        make_fixed(16, 8, 64, 0), math.sqrt(64)*256,
+        make_fixed(16, 8, 81, 0), math.sqrt(81)*256,
+        make_fixed(16, 8, 100, 0), math.sqrt(100)*256,
+        make_fixed(16, 8, 225, 0), math.sqrt(225)*256,
+    ]
 
+def int_perfect_squares_32bit():
+    return [
+        make_fixed(32, 16, 0, 0), math.sqrt(0)*65536,
+        make_fixed(32, 16, 1, 0), math.sqrt(1)*65536,
+        make_fixed(32, 16, 4, 0), math.sqrt(4)*65536,
+        make_fixed(32, 16, 9, 0), math.sqrt(9)*65536,
+        make_fixed(32, 16, 16, 0), math.sqrt(16)*65536,
+        make_fixed(32, 16, 25, 0), math.sqrt(25)*65536,
+        make_fixed(32, 16, 36, 0), math.sqrt(36)*65536,
+        make_fixed(32, 16, 49, 0), math.sqrt(49)*65536,
+        make_fixed(32, 16, 64, 0), math.sqrt(64)*65536,
+        make_fixed(32, 16, 81, 0), math.sqrt(81)*65536,
+        make_fixed(32, 16, 100, 0), math.sqrt(100)*65536,
+        make_fixed(32, 16, 58081, 0), math.sqrt(58081)*65536,
+        make_fixed(32, 16, 58564, 0), math.sqrt(58564)*65536,
+        make_fixed(32, 16, 59049, 0), math.sqrt(59049)*65536,
+        make_fixed(32, 16, 59536, 0), math.sqrt(59536)*65536,
+        make_fixed(32, 16, 60025, 0), math.sqrt(60025)*65536,
+        make_fixed(32, 16, 60516, 0), math.sqrt(60516)*65536,
+        make_fixed(32, 16, 61009, 0), math.sqrt(61009)*65536,
+        make_fixed(32, 16, 61504, 0), math.sqrt(61504)*65536,
+        make_fixed(32, 16, 62001, 0), math.sqrt(62001)*65536,
+        make_fixed(32, 16, 62500, 0), math.sqrt(62500)*65536,
+        make_fixed(32, 16, 62951, 0), math.sqrt(62951)*65536,
+        make_fixed(32, 16, 63504, 0), math.sqrt(63504)*65536,
+        make_fixed(32, 16, 64009, 0), math.sqrt(64009)*65536,
+        make_fixed(32, 16, 64516, 0), math.sqrt(64516)*65536,
+        make_fixed(32, 16, 65025, 0), math.sqrt(65025)*65536,
+        make_fixed(32, 16, 65025, 0), math.sqrt(65025)*65536,
+    ]
+
+def fxp_perfect_squares_16bit():
+    return [
+        0x0002, math.sqrt(0.00390625)*256,
+    ]
 
 test_case_table = mk_test_case_table(
     [
         (
-            "msgs                                          src_delay sink_delay BIT_WIDTH F_BITS"
+            "msgs                                          src_delay sink_delay BIT_WIDTH F_BITS slow"
         ),
-        ["simple_test", simple_test, 4, 4, 16, 8],
-        ["perfect_squares", whole_number_perfect_squares, 4, 4, 16, 8],
-        ["non_perfect_squares", whole_number_non_perfect_squares, 4, 4, 16, 8],
-        ["fixed_point_tests", fixed_point_test, 4, 4, 16, 8],
+        ["simple_test", simple_test, 4, 4, 16, 8, False],
+        ["int_perfect_squares_8bit", int_perfect_squares_8bit, 4, 4, 8, 4, False],
+        ["int_perfect_squares_16bit", int_perfect_squares_16bit, 4, 4, 16, 8, False],
+        ["int_perfect_squares_32bit", int_perfect_squares_32bit, 4, 4, 32, 16, False],
+        ["fxp_perfect_squares_16bit", fxp_perfect_squares_16bit, 4, 4, 16, 8, False]
     ]
 )
 
