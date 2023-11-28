@@ -184,7 +184,7 @@ def test_random(
                 30 + ((n + 2) * 3 + 4) * len(dat)
             ),  # makes sure the time taken grows linearly with respect to n
         },
-        duts=["dut"],
+        duts=["dut.dut"],
     )
 
 
