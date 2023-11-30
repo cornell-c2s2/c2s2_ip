@@ -1,7 +1,7 @@
 `default_nettype none
-`include "src/wishbone/adder.v"
+`include "wishbone/adder.v"
 
-module AdderHarness 
+module wishbone_harnesses_AdderHarness 
 (
   input logic clk,
   input logic reset,

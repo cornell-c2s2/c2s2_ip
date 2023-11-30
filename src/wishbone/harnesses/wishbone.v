@@ -1,7 +1,7 @@
 `default_nettype none
-`include "src/wishbone/wishbone.v"
+`include "wishbone/wishbone.v"
 
-module WishboneHarness #(
+module wishbone_harnesses_WishboneHarness #(
   parameter int n_modules = 1
 ) (
   input logic clk,

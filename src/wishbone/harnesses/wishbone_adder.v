@@ -1,9 +1,8 @@
 `default_nettype none
-`include "src/wishbone/adder.v"
-`include "src/wishbone/wishbone.v"
-`include "src/cmn/trace.v"
+`include "wishbone/adder.v"
+`include "wishbone/wishbone.v"
 
-module WishboneAdderHarness (
+module wishbone_harnesses_WishboneAdderHarness (
   input logic clk,
   input logic reset,
 
@@ -82,22 +81,6 @@ module WishboneAdderHarness (
     .o_stream_val (c_o_stream_val),
     .o_stream_data(c_o_stream_data)
   );
-
-`ifndef SYNTHESIS
-
-  logic [32-1:0] str;
-  `CMN_TRACE_BEGIN
-  begin
-
-    $sformat(str, "%x", c_i_stream_data);
-    cmn_trace.append_val_rdy_str(
-        trace_str, c_i_stream_val, c_i_stream_rdy, str
-    ); cmn_trace.append_str(
-        trace_str, "("
-    );
-  end
-  `CMN_TRACE_END
-`endif  /* SYNTHESIS */
 
 
 endmodule

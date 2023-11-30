@@ -5,7 +5,6 @@
 `ifndef WISHBONE_V
 `define WISHBONE_V
 
-`include "src/cmn/trace.v"
 
 module Wishbone #(
   parameter n_modules = 1
@@ -148,18 +147,6 @@ module Wishbone #(
       end
     endcase
   end
-
-  `ifndef SYNTHESIS
-
-  logic [`CMN_TRACE_NBITS-1:0] str;
-  `CMN_TRACE_BEGIN
-  begin
-    $sformat( str, "%x", i_stream_data);
-    cmn_trace.append_str( trace_str, str );
-  end
-  `CMN_TRACE_END
-
-  `endif /* SYNTHESIS */
 
 endmodule
 
