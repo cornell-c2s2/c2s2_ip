@@ -1,4 +1,4 @@
-from tkinter import S
+# from tkinter import S
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.passes.backends.verilog import *
