@@ -84,6 +84,8 @@ def pytest_configure():
     logger = logging.getLogger()
     logger.addHandler(log_handler)
 
+    sys.modules["pymtl3"] = __import__("tools.pymtl3")
+
 
 @pytest.fixture(scope="function", autouse=True)
 def log_test_name_at_start(request):

@@ -352,7 +352,7 @@ class Synth(SubCommand):
 
             # Replace the top module name
             verilog = re.sub(
-                f"module\\s+{re.escape(design['DESIGN_NAME'])}",
+                f"\bmodule\\s+{re.escape(design['DESIGN_NAME'])}\b",
                 f"module {prefixed_design_name}",
                 verilog,
                 flags=re.MULTILINE,
