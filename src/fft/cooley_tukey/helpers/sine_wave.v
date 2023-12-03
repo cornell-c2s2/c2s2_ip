@@ -13,11 +13,9 @@ module fft_cooley_tukey_helpers_SineWave #(
 );
 
   generate
-    // arccos(-1) = pi
-    real PI = $acos(-1);
     for (genvar i = 0; i < N; i++) begin
-      real sinvalue = $sin(2 * PI * i / N);
-      int  fixedptvalue = $rtoi(sinvalue * (1 << D));
+      // arccos(-1) = pi
+      int fixedptvalue = $rtoi($sin(2 * $acos(-1) * i / N) * (1 << D));
 
       assign sine_wave_out[i] = fixedptvalue[W-1:0];
     end

@@ -13,11 +13,11 @@ module fft_pease_FFT #(
   parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES  = 8
 ) (
-  input  logic [BIT_WIDTH - 1:0] recv_msg[N_SAMPLES - 1:0],
+  input  logic [BIT_WIDTH - 1:0] recv_msg[N_SAMPLES-1:0],
   input  logic                   recv_val,
   output logic                   recv_rdy,
 
-  output logic [BIT_WIDTH - 1:0] send_msg[N_SAMPLES - 1:0],
+  output logic [BIT_WIDTH - 1:0] send_msg[N_SAMPLES-1:0],
   output logic                   send_val,
   input  logic                   send_rdy,
 
