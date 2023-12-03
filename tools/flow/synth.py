@@ -94,10 +94,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
                 design_name = match.group("design_name")
                 if design_name in verilog_files:
                     spinner.fail(
-                        "Found multiple verilog files for %s: %s and %s",
-                        design_name,
-                        verilog_files[design_name],
-                        path.join(root, file),
+                        f"Found multiple verilog files for {design_name}: {verilog_files[design_name]} and {path.join(root, file)}"
                     )
                     return 1
                 verilog_files[design_name] = path.join(root, file)
@@ -115,7 +112,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
     files: dict[str, dict[str, str]] = {}
     for design_name in verilog_files.keys():
         if design_name not in vtb_files:
-            spinner.fail("No corresponding vtb cases found for %s", design_name)
+            spinner.fail(f"No corresponding vtb cases found for {design_name}")
             return 1
         files[design_name] = {
             "verilog": verilog_files[design_name],
@@ -123,7 +120,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
         }
 
     if len(vtb_files) > 0:
-        spinner.fail("Found extra vtb files not matching any verilog files: %s", vtb_files)
+        spinner.fail(f"Found extra vtb files not matching any verilog files: {vtb_files}")
         return 1
 
     # delete these from the scope so they don't get used later
@@ -137,17 +134,17 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
             if name in files:
                 if design_name is not None:
                     spinner.fail(
-                        "Found multiple verilog files/vtb cases for %s: %s and %s",
-                        name,
+                        "Found multiple verilog files/vtb cases for %s: %s and %s" %
+                        (name,
                         files[name]["verilog"],
-                        design["VERILOG_FILE"],
+                        design["VERILOG_FILE"])
                     )
                     return 1
                 design["VERILOG_FILE"] = files[name]["verilog"]
                 design["TEST_FILES"] = files[name]["vtb"]
                 design_name = name
         if design_name is None:
-            spinner.fail("No verilog file found matching any of %s", design["DESIGN_NAME"])
+            spinner.fail(f"No verilog file found matching any of {design['DESIGN_NAME']}", )
             return 1
         design["DESIGN_NAME"] = design_name
 
