@@ -15,7 +15,7 @@ mkdir -p $DIR/bin
 export PATH=$PATH:$DIR/bin
 
 # link tools/flow/main.py to tools/bin/caravel
-rm $DIR/bin/caravel
+rm -f $DIR/bin/caravel
 ln -sf $DIR/flow/main.py $DIR/bin/caravel
 
 
