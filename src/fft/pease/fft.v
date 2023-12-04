@@ -1,6 +1,6 @@
 
-`ifndef FIXED_POINT_FFT
-`define FIXED_POINT_FFT
+`ifndef fft_pease_FFT
+`define fft_pease_FFT
 
 `include "fft/cooley_tukey/helpers/sine_wave.v"
 `include "fft/cooley_tukey/helpers/bit_reverse.v"

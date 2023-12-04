@@ -1,5 +1,5 @@
-`ifndef fft_helpers_BIT_REVERSE
-`define fft_helpers_BIT_REVERSE
+`ifndef fft_cooley_tukey_helpers_BIT_REVERSE
+`define fft_cooley_tukey_helpers_BIT_REVERSE
 `default_nettype none
 
 /// FFT Bit Reversal
