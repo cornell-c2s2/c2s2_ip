@@ -34,8 +34,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================*/
 
-`include "HardFloat_consts.vi"
-`include "HardFloat_specialize.vi"
+`include "src/floating_point/HardFloat/source/HardFloat_consts.vi"
+`include "src/floating_point/HardFloat/source/HardFloat_localFuncs.vi"
+`include "src/floating_point/HardFloat/source/RISCV/HardFloat_specialize.vi"
+`include "src/floating_point/HardFloat/source/HardFloat_rawFN.v"
+`include "src/floating_point/HardFloat/source/isSigNaNRecFN.v"
+
+
 
 /*----------------------------------------------------------------------------
 *----------------------------------------------------------------------------*/
@@ -55,7 +60,6 @@ module
         output signed [(expWidth + 1):0] out_sExp,
         output [(sigWidth + 2):0] out_sig
     );
-`include "HardFloat_localFuncs.vi"
 
     /*------------------------------------------------------------------------
     *------------------------------------------------------------------------*/
