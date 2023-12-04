@@ -28,6 +28,24 @@ def test_add(testfloat_gen, cmdline_opts):
     )
 
 @pytest.mark.slow
+def test_sub(testfloat_gen, cmdline_opts):
+    # Generate 100,000 test cases from testfloat.
+    testfloat_data = testfloat_gen("f32_sub", level=2, n=100000, extra_args="-tininessafter -rnear_even")
+
+    # Truncate the error flags here because we don't want them.
+    # testfloat_data = [test_case[0:3] for test_case in testfloat_data]
+    for test_case in testfloat_data:
+        test_case.append(Bits1(1)) # control bit 1=tininessafter
+        test_case.append(Bits1(1)) # subOp bit 
+        test_case.append(Bits3(0)) # rounding mode 0=rnear even
+
+    run_test_vector_sim(
+        addRecFN(8, 23),  # dut
+        [("a b out* exceptionFlags* control roundingMode subOp"), *testfloat_data],  # test cases
+        cmdline_opts,
+    )
+
+@pytest.mark.slow
 def test_mul(testfloat_gen, cmdline_opts):
     # Generate 100,000 test cases from testfloat.
     testfloat_data = testfloat_gen("f32_mul", level=2, n=100000, extra_args="-tininessafter -rnear_even")
