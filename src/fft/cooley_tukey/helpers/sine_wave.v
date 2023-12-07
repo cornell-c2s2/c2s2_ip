@@ -1,5 +1,5 @@
-`ifndef fft_helpers_SINE_WAVE
-`define fft_helpers_SINE_WAVE
+`ifndef fft_cooley_tukey_helpers_SINE_WAVE
+`define fft_cooley_tukey_helpers_SINE_WAVE
 `default_nettype none
 
 // Macro to generate a sine table for N evenly spaced values from 0 to 2pi.

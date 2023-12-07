@@ -1,6 +1,6 @@
 
-`ifndef fft_STAGE
-`define fft_STAGE
+`ifndef fft_cooley_tukey_STAGE
+`define fft_cooley_tukey_STAGE
 
 `include "fft/cooley_tukey/helpers/twiddle_generator.v"
 `include "fft/cooley_tukey/helpers/crossbar.v"

@@ -1,5 +1,5 @@
-`ifndef fft_helpers_BIT_REVERSE
-`define fft_helpers_BIT_REVERSE
+`ifndef fft_cooley_tukey_helpers_BIT_REVERSE
+`define fft_cooley_tukey_helpers_BIT_REVERSE
 `default_nettype none
 
 /// FFT Bit Reversal
@@ -16,18 +16,15 @@ module fft_cooley_tukey_helpers_BitReverse #(
   localparam int n = $clog2(N_SAMPLES);
 
   generate
-    begin
-      for (genvar m = 0; m < N_SAMPLES; m++) begin
-        logic [n-1:0] m_rev;
-        for (genvar i = 0; i < n; i++) begin
-          assign m_rev[n-i-1] = m[i];
-        end
-
-        assign out[m] = in[m_rev];
+    for (genvar m = 0; m < N_SAMPLES; m++) begin
+      logic [n-1:0] m_rev;
+      for (genvar i = 0; i < n; i++) begin
+        assign m_rev[n-i-1] = m[i];
       end
+
+      assign out[m] = in[m_rev];
     end
   endgenerate
 
 endmodule
-
 `endif

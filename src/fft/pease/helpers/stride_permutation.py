@@ -14,5 +14,5 @@ class StridePermutation(VerilogPlaceholder, Component):
         s.set_metadata(VerilogPlaceholderPass.top_module, "StridePermutation")
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.join(path.dirname(__file__), "../helpers/stride_permutation.v"),
+            path.join(path.dirname(__file__), "stride_permutation.v"),
         )
