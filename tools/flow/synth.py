@@ -93,11 +93,11 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
             if match is not None:
                 design_name = match.group("design_name")
                 if design_name in verilog_files:
-                    spinner.fail(
+                    log.warn(
                         f"Found multiple verilog files for {design_name}: {verilog_files[design_name]} and {path.join(root, file)}"
                     )
-                    return 1
-                verilog_files[design_name] = path.join(root, file)
+                else:
+                    verilog_files[design_name] = path.join(root, file)
             match = vtb_file_regex.match(file)
             if match is not None:
                 design_name = match.group("design_name")
@@ -386,10 +386,11 @@ class Synth(SubCommand):
                 config_json,
                 path.join(openlane_project_dir, "config.json"),
             )
-            connection.put(
-                path.join(design_dir, design["FP_PIN_ORDER_CFG"]),
-                path.join(openlane_project_dir, "pin_order.cfg"),
-            )
+            if "FP_PIN_ORDER_CFG" in design:
+                connection.put(
+                    path.join(design_dir, design["FP_PIN_ORDER_CFG"]),
+                    path.join(openlane_project_dir, "pin_order.cfg"),
+                )
 
             # TODO: Copy the test files
 

@@ -7,8 +7,8 @@ import random
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
-from src.fft.tests.sim import fixed_point_fft
-from src.fft.fft import FFTWrapper
+from src.fft.pease.tests.sim import fixed_point_fft
+from src.fft.pease.fft import FFTWrapper
 import math
 
 

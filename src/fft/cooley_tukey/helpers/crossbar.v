@@ -1,5 +1,5 @@
-`ifndef fft_helpers_CROSSBAR
-`define fft_helpers_CROSSBAR
+`ifndef fft_cooley_tukey_helpers_CROSSBAR
+`define fft_cooley_tukey_helpers_CROSSBAR
 `default_nettype none
 
 /// FFT Crossbar
@@ -7,7 +7,7 @@
 /// @param SIZE_FFT   : Number of points in the FFT
 /// @param STAGE_FFT  : Stage of the FFT to generate crossbar for
 /// @param FRONT      : 1 if the crossbar is in the front of the FFT, 0 if it is in the back
-module fft_helpers_Crossbar #(
+module fft_cooley_tukey_helpers_Crossbar #(
   parameter int BIT_WIDTH = 32,
   parameter int SIZE_FFT  = 8,
   parameter int STAGE_FFT = 0,

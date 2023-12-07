@@ -1,11 +1,11 @@
-`ifndef fft_helpers_BIT_REVERSE
-`define fft_helpers_BIT_REVERSE
+`ifndef fft_cooley_tukey_helpers_BIT_REVERSE
+`define fft_cooley_tukey_helpers_BIT_REVERSE
 `default_nettype none
 
 /// FFT Bit Reversal
 /// @param BIT_WIDTH  : Data bit width
 /// @param N_SAMPLES   : Number of points in the FFT
-module fft_helpers_BitReverse #(
+module fft_cooley_tukey_helpers_BitReverse #(
   parameter int BIT_WIDTH = 32,
   parameter int N_SAMPLES = 8
 ) (
@@ -22,10 +22,9 @@ module fft_helpers_BitReverse #(
         assign m_rev[n-i-1] = m[i];
       end
 
-      assign out[m_rev] = in[m];
+      assign out[m] = in[m_rev];
     end
   endgenerate
 
 endmodule
-
 `endif
