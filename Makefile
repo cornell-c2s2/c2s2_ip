@@ -18,7 +18,10 @@ PURPLE =\033[0;35m
 CYAN   =\033[0;36m
 WHITE  =\033[0;37m
 
-VENV:=. .venv/bin/activate
+VENV:=source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ./venv ; conda activate ./venv
+
+# Extra arguments to pass
+EXTRA_ARGS=
 
 # Pulls main branch
 --pull:
@@ -30,19 +33,16 @@ vscode:
 	@printf "${CYAN}Installing VSCode Extensions...${RESET}\n"
 	@cat .workspace-extensions | xargs code
 
-.venv:
-	@printf "${CYAN}Setting Up Virtual Environment...${RESET}\n"
-	@python3 -m venv .venv
-	@printf "${CYAN}Installing Python Dependencies...${RESET}\n"
-	@$(VENV) && pip install --upgrade pip
-	@$(VENV) && pip install -r requirements.txt
+venv:
+	@printf "${CYAN}Setting Up Conda Environment...${RESET}\n"
+	@conda env create -f environment.yml -p venv
 	@printf "${GREEN}Dependencies installed!${RESET}\n"
-	@printf "${YELLOW}Run ${RED}source .venv/bin/activate${YELLOW} to activate your virtual environment.${RESET}\n"
+	@printf "${YELLOW}Run ${RED}conda activate ./venv${YELLOW} to activate your virtual environment.${RESET}\n"
 
 
-install: --pull vscode .venv
+install: --pull vscode venv
 
---parse-name:
+--parse-name:  venv
 	@printf "${CYAN}"
 	@printf "Checking IP Name is set...\n"
 ifndef IP
@@ -59,6 +59,8 @@ endif
 clean:
 	@printf "${CYAN} Cleaning up build directories...${RESET}\n"
 	@rm -rf build*/
+	@printf "${CYAN} Cleaning up logs...${RESET}\n"
+	@rm -rf log*/
 	@printf "${GREEN} - Done!${RESET}\n"
 
 IP_NAME_PARSED = $(shell cat build/ip_name.txt)
@@ -82,7 +84,7 @@ check-ip: --pull --parse-name
 	@printf " - No similar-named IP exists!${RESET}\n"
 
 # Recipe for making new IP
-new-ip: check-ip
+new-ip: check-ip venv
 	@printf "${PURPLE}"
 	@printf "========================================\n"
 	@printf "C2S2 IP CREATOR\n"
@@ -137,17 +139,11 @@ lint:
 ifndef IP
 	@tools/lint.sh
 else
-	@tools/lint.sh "./src/${IP}"
+	@tools/lint.sh ${IP}
 endif
 
-INCLUDE = "."
-test:
-	@mkdir -p build
-ifndef IP
-	@pytest -k ${INCLUDE} --suppress-no-test-exit-code
-else
-	@pytest src/${IP} -k ${INCLUDE} --suppress-no-test-exit-code
-endif
+test: venv
+	@$(VENV) && tools/test.sh ${EXTRA_ARGS}
 
 # ------------------------------------------------------------------------------
 # Testfloat generation
@@ -159,7 +155,6 @@ endif
 # Files will be written to `build/testfloat_gen`
 # ------------------------------------------------------------------------------
 TESTFLOAT_DOCKER_IMAGE = $(shell docker build -q - < .docker/testfloat.Dockerfile)
-EXTRA_ARGS=
 OUTPUT_FILE="testfloat_gen"
 BUILD_DIR="build"
 testfloat_gen:
@@ -182,3 +177,4 @@ endif
 # ------------------------------------------------------------------------------
 new_ip: new-ip
 check_ip: check-ip
+testfloat-gen: testfloat_gen

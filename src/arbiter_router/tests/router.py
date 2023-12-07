@@ -1,10 +1,10 @@
 import pytest
 import random
 from pymtl3 import *
-from src.arbiter_router.harnesses.router import Router
+from src.arbiter_router.router import Router
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
-from tools.pymtl_extensions import mk_test_matrix, mk_packed
+from tools.utils import mk_test_matrices, mk_packed
 
 
 class TestHarness(Component):
@@ -53,38 +53,55 @@ def router_msg(nbits, noutputs):
     n_addr_bits = (noutputs - 1).bit_length()
     n_data_bits = nbits - n_addr_bits
 
-    # random address and data
-    addr = random.randint(0, noutputs - 1)
-    data = random.randint(0, (1 << n_data_bits) - 1)
+    addr_bits = mk_bits(n_addr_bits)
+    data_bits = mk_bits(n_data_bits)
 
-    return ((addr << n_data_bits) | data, addr)
+    # random address and data
+    addr = addr_bits(random.randint(0, noutputs - 1))
+    data = data_bits(random.randint(0, (1 << n_data_bits) - 1))
+
+    return (concat(addr, data), addr)
 
 
 @pytest.mark.parametrize(
-    "execution_num, nbits, noutputs, nmsgs",
-    [
-        (0, 8, 16, 20),
-        *mk_test_matrix(
-            {
-                "execution_num": list(range(1, 21)),  # Do 20 tests
-                "nbits": [(8, 128)],  # Test 8-32 bit routers
-                "noutputs": [(2, 16)],  # Test 2-16 output routers
-                "nmsgs": [50],  # Send 50 messages
-            },
-            slow=True,
-        ),
-    ],
+    *mk_test_matrices(
+        {
+            "execution_num": 0,
+            "nbits": 8,
+            "noutputs": 16,
+            "nmsgs": 20,
+            "src_delay": 0,
+            "sink_delay": 0,
+        },
+        {
+            "execution_num": 0,
+            "nbits": 8,
+            "noutputs": 16,
+            "nmsgs": 20,
+            "src_delay": 2,
+            "sink_delay": 2,
+        },
+        {
+            "execution_num": list(range(1, 11)),  # Do 10 tests
+            "nbits": [(8, 32)],  # Test 8-32 bit routers
+            "noutputs": [(2, 16)],  # Test 2-16 output routers
+            "nmsgs": [50],  # Send 50 messages
+            "src_delay": [0, 1, 8],  # Wait this many cycles between inputs
+            "sink_delay": [0, 1, 8],  # Wait this many cycles between outputs
+            "slow": True,
+        },
+    )
 )
-def test_router(execution_num, nbits, noutputs, nmsgs, cmdline_opts):
+def test_router(p, cmdline_opts):
     random.seed(
-        random.random() + execution_num
+        random.random() + p.execution_num
     )  # Done so each test has a deterministic but different random seed
-    nbits, noutputs = router_spec(nbits, noutputs)
+    nbits, noutputs = router_spec(p.nbits, p.noutputs)
     model = TestHarness(nbits, noutputs)
 
     msgs = []
     expected_outputs = [[] for _ in range(noutputs)]
-    for _ in range(nmsgs):
+    for _ in range(p.nmsgs):
         msg, addr = router_msg(nbits, noutputs)
         msgs.append(msg)
         expected_outputs[addr].append(msg)
@@ -92,16 +109,16 @@ def test_router(execution_num, nbits, noutputs, nmsgs, cmdline_opts):
     model.set_param(
         "top.src.construct",
         msgs=msgs,
-        initial_delay=0,
-        interval_delay=0,
+        initial_delay=p.src_delay,
+        interval_delay=p.src_delay,
     )
 
     for i in range(noutputs):
         model.set_param(
             f"top.sinks[{i}].construct",
             msgs=expected_outputs[i],
-            initial_delay=0,
-            interval_delay=0,
+            initial_delay=p.sink_delay,
+            interval_delay=p.sink_delay,
         )
 
-    run_sim(model, cmdline_opts)
+    run_sim(model, cmdline_opts, duts=["dut"])

@@ -1,9 +1,9 @@
 `default_nettype none
-`ifndef SERIALIZER
-`define SERIALIZER
-`include "src/cmn/regs.v"
+`ifndef serdes_SERIALIZER
+`define serdes_SERIALIZER
+`include "cmn/regs.v"
 
-module Serializer #(
+module serdes_Serializer #(
   parameter int BIT_WIDTH = 32,
   parameter int N_SAMPLES = 8
 ) (
@@ -18,38 +18,44 @@ module Serializer #(
   input logic reset,
   input logic clk
 );
-
-  logic [$clog2(N_SAMPLES) - 1:0] mux_sel;
-  logic reg_en;
-  logic [BIT_WIDTH - 1:0] reg_out[N_SAMPLES - 1:0];
-
   generate
-    for (genvar i = 0; i < N_SAMPLES; i++) begin : l_regs
-      cmn_EnResetReg #(BIT_WIDTH) register (
+    if (N_SAMPLES == 1) begin
+      assign recv_rdy = send_rdy;
+      assign send_val = recv_val;
+      assign send_msg = recv_msg[0];
+
+      logic unused = {1'b0, clk, reset, 1'b0};
+    end else begin
+      logic [$clog2(N_SAMPLES) - 1:0] mux_sel;
+      logic reg_en;
+      logic [BIT_WIDTH - 1:0] reg_out[N_SAMPLES - 1:0];
+
+      for (genvar i = 0; i < N_SAMPLES; i++) begin : l_regs
+        cmn_EnResetReg #(BIT_WIDTH) register (
+          .clk(clk),
+          .reset(reset),
+          .en(reg_en),
+          .d(recv_msg[i]),
+          .q(reg_out[i])
+        );
+      end
+
+      assign send_msg = reg_out[mux_sel];
+
+      SerializerControl #(
+        .N_SAMPLES(N_SAMPLES)
+      ) ctrl (
         .clk(clk),
         .reset(reset),
-        .en(reg_en),
-        .d(recv_msg[i]),
-        .q(reg_out[i])
+        .recv_val(recv_val),
+        .recv_rdy(recv_rdy),
+        .send_val(send_val),
+        .send_rdy(send_rdy),
+        .mux_sel(mux_sel),
+        .reg_en(reg_en)
       );
     end
   endgenerate
-
-  assign send_msg = reg_out[mux_sel];
-
-
-  SerializerControl #(
-    .N_SAMPLES(N_SAMPLES)
-  ) ctrl (
-    .clk(clk),
-    .reset(reset),
-    .recv_val(recv_val),
-    .recv_rdy(recv_rdy),
-    .send_val(send_val),
-    .send_rdy(send_rdy),
-    .mux_sel(mux_sel),
-    .reg_en(reg_en)
-  );
 endmodule
 
 
