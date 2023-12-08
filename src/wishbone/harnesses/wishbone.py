@@ -11,8 +11,8 @@ class WishboneHarness(VerilogPlaceholder, Component):
     def construct(s, n_modules = 1):
         # Interface
 
-        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(103+2*n_modules))
-        s.send = stream.ifcs.SendIfcRTL(mk_bits(65+2*n_modules))
+        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(71+32*n_modules+2*n_modules))
+        s.send = stream.ifcs.SendIfcRTL(mk_bits(32*(n_modules-1)+31 + 33+2*n_modules+1))
 
         # Name of the top level module to be imported
         s.set_metadata(VerilogPlaceholderPass.top_module, "WishboneHarness")
