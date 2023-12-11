@@ -27,6 +27,7 @@ module Fxp_sqrt #(
   logic ac_mux_sel;
   logic x_mux_sel;
   logic send_mux_sel;
+  logic q_en;
 
   logic msb_gtz;
 
@@ -64,6 +65,7 @@ module datapath_module #(
   input logic ac_mux_sel,
   input logic x_mux_sel,
   input logic send_mux_sel,
+  input logic q_en,
 
   output logic msb_gtz,
 
@@ -104,19 +106,20 @@ module datapath_module #(
   cmn_Mux2 #(
     .p_nbits(BIT_WIDTH)
   ) q_state_mux (
-    .in0({BIT_WIDTH{1'b0}}),
+    .in0(0),
     .in1(q_next),
     .sel(q_state_mux_sel),
     .out(q_out)
   );
 
   // q reg
-  cmn_Reg #(
+  cmn_EnReg #(
     .p_nbits(BIT_WIDTH)
   ) q_reg (
     .clk(clk),
     .d  (q_out),
-    .q  (q)
+    .q  (q),
+    .en (q_en)
   );
 
   logic [2*BIT_WIDTH+1:0] acx;
@@ -164,17 +167,19 @@ module datapath_module #(
     .q  (x)
   );
 
-  // send mux
-  cmn_Mux2 #(
-    .p_nbits(BIT_WIDTH)
-  ) send_mux (
-    .in0({BIT_WIDTH{1'b0}}),
-    .in1(q),
-    .sel(send_mux_sel),
-    .out(send_msg)
-  );
+  // // send mux
+  // cmn_Mux2 #(
+  //   .p_nbits(BIT_WIDTH)
+  // ) send_mux (
+  //   .in0(0),
+  //   .in1(q),
+  //   .sel(send_mux_sel),
+  //   .out(send_msg)
+  // );
 
-  assign msb_gtz = test_res[BIT_WIDTH+1] == 0;
+  assign send_msg = q;
+
+  assign msb_gtz  = test_res[BIT_WIDTH+1] == 0;
 
 endmodule
 
@@ -199,10 +204,11 @@ module control_module #(
   output logic q_state_mux_sel,
   output logic ac_mux_sel,
   output logic x_mux_sel,
-  output logic send_mux_sel
+  output logic send_mux_sel,
+  output logic q_en
 );
 
-  localparam int ITER = (BIT_WIDTH + F_BITS) >> 1;
+  localparam int ITER = (BIT_WIDTH + F_BITS) >> 1;  // iterations are half radicand width
   logic [$clog2(ITER):0] i;     // iteration counter
 
   logic [1:0] currentState;
@@ -234,6 +240,7 @@ module control_module #(
         x_mux_sel = 0;
         send_mux_sel = 0;
         send_val = 0;
+        q_en = 1;
       end
       CALC:
       if (msb_gtz) begin
@@ -244,6 +251,7 @@ module control_module #(
         x_mux_sel = 1;
         send_mux_sel = 0;
         send_val = 0;
+        q_en = 1;
       end else begin
         recv_rdy = 0;
         res_mux_sel = 1;
@@ -252,6 +260,7 @@ module control_module #(
         x_mux_sel = 1;
         send_mux_sel = 0;
         send_val = 0;
+        q_en = 1;
       end
       DONE: begin
         recv_rdy = 0;
@@ -261,6 +270,7 @@ module control_module #(
         x_mux_sel = 'x;
         send_mux_sel = 1;
         send_val = 1;
+        q_en = 0;
       end
       default: begin
         recv_rdy = 'x;
@@ -270,6 +280,7 @@ module control_module #(
         x_mux_sel = 'x;
         send_mux_sel = 'x;
         send_val = 'x;
+        q_en = 0;
       end
     endcase
   end
