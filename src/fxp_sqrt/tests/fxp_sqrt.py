@@ -41,6 +41,9 @@ class TestHarness(Component):
 # ----------------------------------------------------------------------
 # Test Case Table
 # ----------------------------------------------------------------------
+def five():
+    return [make_fixed(16, 8, 2, 0),math.sqrt(2)*256]
+
 def simple_test():
     return [
         0xE890, 0x0F40, 
@@ -117,7 +120,8 @@ test_case_table = mk_test_case_table(
         ["int_perfect_squares_8bit", int_perfect_squares_8bit, 4, 4, 8, 4, False],
         ["int_perfect_squares_16bit", int_perfect_squares_16bit, 4, 4, 16, 8, False],
         ["int_perfect_squares_32bit", int_perfect_squares_32bit, 4, 4, 32, 16, False],
-        ["fxp_perfect_squares_16bit", fxp_perfect_squares_16bit, 4, 4, 16, 8, False]
+        ["five", five, 4, 4, 16, 8, False],
+        #["fxp_perfect_squares_16bit", fxp_perfect_squares_16bit, 4, 4, 16, 8, False]
     ]
 )
 
