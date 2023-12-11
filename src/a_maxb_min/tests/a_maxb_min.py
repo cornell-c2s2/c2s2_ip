@@ -5,13 +5,17 @@ from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
 from src.a_maxb_min.harnesses.a_maxb_min import AMaxbMin
 
+
 def make_input(d, a, b):
     return (a << 24) + (b << 8)
+
+
 def get_answer(d, a, b):
     alpha = 0.95703125
     beta = 0.39453125
-    result = alpha * max(a,b) + beta * min(a,b)
+    result = alpha * max(a, b) + beta * min(a, b)
     return (int)(result * 2**d)
+
 
 class TestHarness(Component):
     def construct(s, a_maxb_min, BIT_WIDTH=32, F_BITS=16):
@@ -29,29 +33,19 @@ class TestHarness(Component):
     def done(s):
         return s.src.done() and s.sink.done()
 
-def a_equals_b_test():
-    return[
-        make_input(8, 1, 1), get_answer(8, 1, 1),
-        make_input(8, 2, 2), get_answer(8, 2, 2),
-        make_input(8, 13, 13), get_answer(8, 13, 13),
-        ]
 
-def a_not_equals_b_test():
-    return[
-        make_input(8, 1, 2), get_answer(8, 1, 2),
-        make_input(8, 2, 6), get_answer(8, 2, 6),
-        make_input(8, 10, 13), get_answer(8, 10, 13),
-        ]
+def simple_test():
+    return [2, 2]
+
 
 test_case_table = mk_test_case_table(
     [
-        ("msgs                          src_delay    sink_delay    BIT_WIDTH    F_BITS    slow"),
-        ["simple_test", simple_test,    4,           4,            32,          16,        False],
+        (
+            "msgs                          src_delay    sink_delay    BIT_WIDTH    F_BITS    slow"
+        ),
+        ["simple_test", simple_test, 4, 4, 32, 16, False],
     ]
 )
-
-
-
 
 
 @pytest.mark.parametrize(**test_case_table)
