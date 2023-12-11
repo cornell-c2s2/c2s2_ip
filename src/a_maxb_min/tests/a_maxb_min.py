@@ -14,7 +14,7 @@ def get_answer(d, a, b):
     return (int)(result * 2**d)
 
 class TestHarness(Component):
-    def construct(s, a_maxb_min, BIT_WIDTH=32, F_BITS=16):
+    def construct(s, a_maxb_min, BIT_WIDTH=32, F_BITS=8):
         # Instantiate models
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
@@ -76,12 +76,12 @@ def fixed_point_test():
 test_case_table = mk_test_case_table(
     [
         ("msgs                          src_delay    sink_delay    BIT_WIDTH    F_BITS    slow"),
-        ["a_equals_b_test", a_equals_b_test,    4,           4,            32,          16,        False],
-        ["a_not_equals_b_test", a_not_equals_b_test,    4,           4,            32,          16,        False],
-        ["both_zero_test", both_zero_test,    4,           4,            32,          16,        False],
-        ["a_zero_test", a_zero_test,    4,           4,            32,          16,        False],
-        ["b_zero_test", b_zero_test,    4,           4,            32,          16,        False],
-        ["order_test", order_test,    4,           4,            32,          16,        False],
+        ["a_equals_b_test", a_equals_b_test,    4,           4,            32,          8,        False],
+        ["a_not_equals_b_test", a_not_equals_b_test,    4,           4,            32,          8,        False],
+        ["both_zero_test", both_zero_test,    4,           4,            32,          8,        False],
+        ["a_zero_test", a_zero_test,    4,           4,            32,          8,        False],
+        ["b_zero_test", b_zero_test,    4,           4,            32,          8,        False],
+        ["order_test", order_test,    4,           4,            32,          8,        False],
     ]
 )
 
