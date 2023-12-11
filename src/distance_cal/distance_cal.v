@@ -96,6 +96,10 @@ module Distance_cal #(
     .send_rdy(send_rdy)
   );
 
+  // ========================================
+  // Control logic
+  // ========================================
+
   logic currentState, nextState;
   logic MULT = 1'b0, SQRT = 1'b1;
 
@@ -132,6 +136,8 @@ module Distance_cal #(
       default: begin
         recv_rdy = 0;
         send_val = 0;
+        a_mult_send_rdy = 0;
+        b_mult_send_rdy = 0;
         sqrt_recv_val = 0;
       end
     endcase
