@@ -31,10 +31,20 @@ module Fxp_sqrt #(
   logic msb_gtz;
 
   // Datapath Unit
-  datapath_module #(.BIT_WIDTH(BIT_WIDTH),.F_BITS(F_BITS)) dpath (.*);
+  datapath_module #(
+    .BIT_WIDTH(BIT_WIDTH),
+    .F_BITS(F_BITS)
+  ) dpath (
+    .*
+  );
 
   // Control Unit
-  control_module #(.BIT_WIDTH(BIT_WIDTH),.F_BITS(F_BITS)) ctrl (.*);
+  control_module #(
+    .BIT_WIDTH(BIT_WIDTH),
+    .F_BITS(F_BITS)
+  ) ctrl (
+    .*
+  );
 
 endmodule
 
@@ -192,7 +202,7 @@ module control_module #(
   output logic send_mux_sel
 );
 
-  localparam int ITER = (BIT_WIDTH+F_BITS) >> 1;  // iterations are half radicand width
+  localparam int ITER = (BIT_WIDTH + F_BITS) >> 1;  // iterations are half radicand width
   logic [$clog2(ITER):0] i;     // iteration counter
 
   logic [1:0] currentState;
