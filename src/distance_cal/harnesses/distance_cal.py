@@ -12,14 +12,14 @@ class DCalTestHarness(VerilogPlaceholder, Component):
         # Interface
         s.set_metadata(VerilogTranslationPass.explicit_module_name, "distance_cal")
 
-        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
+        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(2*BIT_WIDTH))
         s.send = stream.ifcs.SendIfcRTL(mk_bits(BIT_WIDTH))
 
         # Name of the top level module to be imported
-        s.set_metadata(VerilogPlaceholderPass.top_module, "Distance_cal")
+        s.set_metadata(VerilogPlaceholderPass.top_module, "HarnessDCal")
         # Source file path
         # The ../ is necessary here because pytest is run from the build directory
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.join(path.dirname(__file__), "../distance_cal.v"),
+            "../src/distance_cal/harnesses/distance_cal.v",
         )
