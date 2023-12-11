@@ -104,7 +104,7 @@ module datapath_module #(
   cmn_Mux2 #(
     .p_nbits(BIT_WIDTH)
   ) q_state_mux (
-    .in0(0),
+    .in0({BIT_WIDTH{1'b0}}),
     .in1(q_next),
     .sel(q_state_mux_sel),
     .out(q_out)
@@ -168,7 +168,7 @@ module datapath_module #(
   cmn_Mux2 #(
     .p_nbits(BIT_WIDTH)
   ) send_mux (
-    .in0(0),
+    .in0({BIT_WIDTH{1'b0}}),
     .in1(q),
     .sel(send_mux_sel),
     .out(send_msg)
@@ -202,7 +202,7 @@ module control_module #(
   output logic send_mux_sel
 );
 
-  localparam int ITER = (BIT_WIDTH + F_BITS) >> 1;  // iterations are half radicand width
+  localparam int ITER = (BIT_WIDTH + F_BITS) >> 1;
   logic [$clog2(ITER):0] i;     // iteration counter
 
   logic [1:0] currentState;
