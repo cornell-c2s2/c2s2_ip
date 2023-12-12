@@ -6,7 +6,7 @@ import signal
 import pytest
 import random
 from os import path
-import os, psutil
+import os
 import numpy as np
 import subprocess
 from tempfile import NamedTemporaryFile
