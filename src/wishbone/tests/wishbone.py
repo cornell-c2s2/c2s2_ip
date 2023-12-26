@@ -225,8 +225,70 @@ def read_err_out(n):
         gen_out(n,   0x0,                0,   1,   0,   0),
         err_o(n), # read error reg
         ]
+
+def read_stall_m0_in(n):
+    return [
+        #                                                        ostream istream
+        # n_modules,    addr, dat, ostream_dat, sel, we, cyc, stb, val, rdy
+        gen_in(n,        0x0,   0,           0,   0,  0,   0,   0,   0,   0),
+        gen_in(n,0x3000_0008,   0,           0,   0,  1,   1,   1,   0,   gen_vr(0,1)), # write to module 0
+        err_i(n), 
+        gen_in(n,0x3000_0008,   0,           0,   0,  0,   1,   1,   0,   0), # read to module 0
+        gen_in(n,        0x0,   0,           0,   0,  0,   0,   0,   0,   0), # stall 1
+        gen_in(n,        0x0,   0,           0,   0,  0,   0,   0,   0,   0), # stall 2
+        gen_in(n,        0x0,   0,           0,   0,  0,   0,   0,   0,   0), # stall 3
+        gen_in(n,        0x0,   0,         0xF,   0,  0,   0,   0,   1,   0), # output valid
+        # err_i(n), 
+        ]
     
-# TODO: stalling tests
+def read_stall_m0_out(n):
+    return [
+        #                                     istream ostream
+        #n_modules,  dat,      istream_dat, ack, val, rdy
+        gen_out(n,    0,                 0,   0,   0,   0),
+        gen_out(n,   0x0,                0,   1,   1,   0),
+        nerr_o(n), # read error reg
+        gen_out(n,   0x0,                0,   0,   0,   0),
+        gen_out(n,   0x0,                0,   0,   0,   0),
+        gen_out(n,   0x0,                0,   0,   0,   0),
+        gen_out(n,   0x0,                0,   0,   0,   0),
+        gen_out(n,   0xF,                0,   1,   0,   1),
+        # nerr_o(n), # read error reg
+        ]
+    
+def read_stall_m1_in(n):
+    return [
+        #                                                        ostream istream
+        # n_modules,    addr, dat, ostream_dat, sel, we, cyc, stb, val, rdy
+        gen_in(n,        0x0,   0,           0,   0,  0,   0,   0,   0,   0),
+        gen_in(n,0x3000_000c,   0,           0,   0,  1,   1,   1,   0,   gen_vr(1,0)), # write to module 0
+        err_i(n), 
+        gen_in(n,0x3000_000c,   0,           0,   0,  0,   1,   1,   0,   0), # read to module 0
+        gen_in(n,        0x0,   0,           0,   0,  0,   0,   0,   0,   0), # stall 1
+        gen_in(n,        0x0,   0,           0,   0,  0,   0,   0,   0,   0), # stall 2
+        gen_in(n,        0x0,   0,           0,   0,  0,   0,   0,   0,   0), # stall 3
+        gen_in(n,        0x0,   0, gen_dat(0xF,0),0,  0,   0,   0,gen_vr(1,0),   0), # output valid
+        # err_i(n), 
+        ]
+    
+def read_stall_m1_out(n):
+    return [
+        #                                     istream ostream
+        #n_modules,  dat,      istream_dat, ack, val, rdy
+        gen_out(n,    0,                 0,   0,   0,   0),
+        gen_out(n,   0x0,                0,   1, gen_vr(1,0), 0),
+        nerr_o(n), # read error reg
+        gen_out(n,   0x0,                0,   0,   0,   0),
+        gen_out(n,   0x0,                0,   0,   0,   0),
+        gen_out(n,   0x0,                0,   0,   0,   0),
+        gen_out(n,   0x0,                0,   0,   0,   0),
+        gen_out(n,   0xF,                0,   1,   0,   gen_vr(1,0)),
+        # nerr_o(n), # read error reg
+        ]
+    
+# TODO: read stall, mixed read stall with various stall
+# TODO: (non)mixed write, read stall
+#       (non)mixed write error, read error
 
 @pytest.mark.parametrize(
     "n_modules, f_in, f_out",
@@ -238,6 +300,8 @@ def read_err_out(n):
         (2, mixed_write_read_in, mixed_write_read_out),
         (2, write_err_in, write_err_out),
         (2, read_err_in, read_err_out),
+        (2, read_stall_m0_in, read_stall_m0_out),
+        (2, read_stall_m1_in, read_stall_m1_out),
         # (1, test_fft_in, test_fft_out),
         # (1, test_fft_delay_in, test_fft_delay_out),
     ],

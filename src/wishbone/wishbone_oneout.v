@@ -26,12 +26,15 @@ module Wishbone #(
   output logic [31:0] wbs_dat_o,
 
   // Ports to connect to modules
-  input logic [n_modules-1:0] i_stream_rdy,
-  output logic [n_modules-1:0] i_stream_val,
-  output logic [n_modules-1:0] o_stream_rdy,
-  input logic [n_modules-1:0] o_stream_val,
-  input logic [31:0] o_stream_data [n_modules],
-  output logic [31:0] i_stream_data [n_modules]
+  input logic i_stream_rdy,
+  output logic i_stream_val,
+  output logic o_stream_rdy,
+  input logic o_stream_val,
+  input logic [31:0] o_stream_data,
+  output logic [31:0] i_stream_data,
+
+  output logic [$clog2(n_modules)-1:0] xbar_config,
+  output logic xbar_val
 
 );
 
@@ -73,19 +76,6 @@ module Wishbone #(
     .en(error_reg_en)
   );
 
-  ////////////////////
-  // Index register //
-  ////////////////////
-  logic [$clog2(n_modules)-1:0] index_reg;
-  logic index_reg_en;
-  cmn_EnResetReg #(32, 0) index_enset_reg (
-    .clk(clk),
-    .reset(reset),
-    .q(index_reg),
-    .d(index),
-    .en(index_reg_en)
-  );
-
   ////////////////////////
   // Wishbone data mux //
   ///////////////////////
@@ -98,18 +88,15 @@ module Wishbone #(
 
   logic [1:0] wbs_dat_o_sel;
 
-  cmn_Mux4 #( 32 ) wbs_dat_o_mux (
+  cmn_Mux3 #( 32 ) wbs_dat_o_mux (
     .in0(loopback_reg),
-    .in1(o_stream_data[index]),
-    .in2(o_stream_data[index_reg]),
-    .in3(error_reg),
+    .in1(o_stream_data),
+    .in2(error_reg),
     .sel(wbs_dat_o_sel),
     .out(wbs_dat_o)
   );
 
-  logic [$clog2(n_modules)-1:0] index;
-
-  assign index = (wbs_adr_i >> 2) - 4'd12;
+  assign xbar_config = (wbs_adr_i >> 2) - 4'd12;
 
   // Logic for states
   logic is_write_module;
@@ -125,15 +112,15 @@ module Wishbone #(
     is_write_loop = wbs_stb_i && wbs_cyc_i && wbs_we_i && (wbs_adr_i == BASE_ADDRESS);
     is_read_loop = wbs_stb_i && wbs_cyc_i && !wbs_we_i && (wbs_adr_i == BASE_ADDRESS);
     is_read_error = wbs_stb_i && wbs_cyc_i && !wbs_we_i && (wbs_adr_i == ERROR_ADDRESS);
-    is_write_module = wbs_stb_i && wbs_cyc_i && wbs_we_i && i_stream_rdy[index] &&
+    is_write_module = wbs_stb_i && wbs_cyc_i && wbs_we_i && i_stream_rdy &&
       (wbs_adr_i <= UPPER_BOUND_ADDRESS && wbs_adr_i > ERROR_ADDRESS && wbs_adr_i[1:0] == 2'b0);
-    is_write_module_error = wbs_stb_i && wbs_cyc_i && wbs_we_i && !i_stream_rdy[index] &&
+    is_write_module_error = wbs_stb_i && wbs_cyc_i && wbs_we_i && !i_stream_rdy &&
       (wbs_adr_i <= UPPER_BOUND_ADDRESS && wbs_adr_i > ERROR_ADDRESS && wbs_adr_i[1:0] == 2'b0);
-    is_read_module = wbs_stb_i && wbs_cyc_i && !wbs_we_i && o_stream_val[index] &&
+    is_read_module = wbs_stb_i && wbs_cyc_i && !wbs_we_i && o_stream_val &&
       (wbs_adr_i <= UPPER_BOUND_ADDRESS && wbs_adr_i > ERROR_ADDRESS && wbs_adr_i[1:0] == 2'b0);
-    is_read_module_error = wbs_stb_i && wbs_cyc_i && !wbs_we_i && !o_stream_val[index] && i_stream_rdy[index] &&
+    is_read_module_error = wbs_stb_i && wbs_cyc_i && !wbs_we_i && !o_stream_val && i_stream_rdy &&
       (wbs_adr_i <= UPPER_BOUND_ADDRESS && wbs_adr_i > ERROR_ADDRESS && wbs_adr_i[1:0] == 2'b0);
-    is_read_busy_module = wbs_stb_i && wbs_cyc_i && !wbs_we_i && !o_stream_val[index] && !i_stream_rdy[index] &&
+    is_read_busy_module = wbs_stb_i && wbs_cyc_i && !wbs_we_i && !o_stream_val && !i_stream_rdy &&
       (wbs_adr_i <= UPPER_BOUND_ADDRESS && wbs_adr_i > ERROR_ADDRESS && wbs_adr_i[1:0] == 2'b0);
   end
 
@@ -166,7 +153,7 @@ module Wishbone #(
         if (is_read_busy_module) next_state = BUSY;
         else next_state = IDLE;
       end
-      BUSY: if (o_stream_val[index]) next_state = IDLE;
+      BUSY: if (o_stream_val) next_state = IDLE;
     endcase
   end
 
@@ -180,30 +167,11 @@ module Wishbone #(
   localparam [1:0] error_sel = 2'd3;
   localparam [1:0] x_sel = 2'dx;
 
-  logic [n_modules-1:0] one_index;
-  logic [n_modules-1:0] one_index_reg;
-  cmn_LeftLogicalShifter #(
-    n_modules,
-    $clog2(n_modules)
-  ) index_reg_shifter (
-    .in(32'b1),
-    .shamt(index_reg),
-    .out(one_index_reg)
-  );
-
-  cmn_LeftLogicalShifter #(
-    n_modules,
-    $clog2(n_modules)
-  ) index_shifter (
-    .in(32'b1),
-    .shamt(index),
-    .out(one_index)
-  );
 
   task cs(
     // module interface
-    input logic [n_modules-1:0] cs_i_stream_val,
-    input logic [n_modules-1:0] cs_o_stream_rdy,
+    input logic cs_i_stream_val,
+    input logic cs_o_stream_rdy,
 
     // loopback reg
     input logic cs_loopback_reg_en,
@@ -213,20 +181,21 @@ module Wishbone #(
     input logic [31:0] cs_next_error_reg,
 
     // index reg
-    input logic cs_index_reg_en,
 
     // wb reg
     input logic cs_wbs_ack_o,
-    input logic [1:0] cs_wbs_dat_o_sel );
+    input logic [1:0] cs_wbs_dat_o_sel,
+    input logic cs_xbar_val
+    );
     begin
       i_stream_val = cs_i_stream_val;
       o_stream_rdy = cs_o_stream_rdy;
       loopback_reg_en = cs_loopback_reg_en;
       error_reg_en = cs_error_reg_en;
       next_error_reg = cs_next_error_reg;
-      index_reg_en = cs_index_reg_en;
       wbs_ack_o    = cs_wbs_ack_o;
       wbs_dat_o_sel = cs_wbs_dat_o_sel;
+      xbar_val = cs_xbar_val;
     end
   endtask
 
@@ -237,18 +206,18 @@ module Wishbone #(
     //                                     istream | ostream | loopback | error | error | index | wbs |   wbs
     //                                      val    |  rdy    |  regen   | regen |  reg  | regen | ack | dat sel
       IDLE: begin
-        if      (is_read_loop)          cs( 0,        0,         0,       1,       0,      0,     1,    loop_sel);
-        else if (is_write_loop)         cs( 0,        0,         1,       1,       0,      0,     1,       x_sel);
-        else if (is_read_error)         cs( 0,        0,         0,       0,       0,      0,     1,   error_sel);
-        else if (is_read_module)        cs( 0,    one_index,     0,       1,       0,      0,     1,    data_sel);
-        else if (is_read_busy_module)   cs( 0,        0,         0,       1,       0,      1,     0,       x_sel);
-        else if (is_read_module_error)  cs( 0,        0,         0,       1,       1,      0,     1,       x_sel);
-        else if (is_write_module)       cs(one_index, 0,         0,       1,       0,      0,     1,       x_sel);
-        else if (is_write_module_error) cs( 0,        0,         0,       1,       1,      0,     1,       x_sel);
+        if      (is_read_loop)          cs( 0,        0,         0,       1,       0,             1,    loop_sel,   0);
+        else if (is_write_loop)         cs( 0,        0,         1,       1,       0,             1,       x_sel,   0);
+        else if (is_read_error)         cs( 0,        0,         0,       0,       0,             1,   error_sel,   0);
+        else if (is_read_module)        cs( 0,        1,         0,       1,       0,             1,    data_sel,   1);
+        else if (is_read_busy_module)   cs( 0,        0,         0,       1,       0,             0,       x_sel,   1);
+        else if (is_read_module_error)  cs( 0,        0,         0,       1,       1,             1,       x_sel,   1);
+        else if (is_write_module)       cs( 1,        0,         0,       1,       0,             1,       x_sel,   1);
+        else if (is_write_module_error) cs( 0,        0,         0,       1,       1,             1,       x_sel,   1);
       end
       BUSY: begin
-        if (o_stream_val[index_reg])    cs( 0,  one_index_reg,   0,       1,       1,      0,     1,data_reg_sel);
-        else                            cs( 0,        0,         0,       0,       0,      0,     0,       x_sel);
+        if (o_stream_val)               cs( 0,        1,         0,       1,       1,             1,data_reg_sel,   0);
+        else                            cs( 0,        0,         0,       0,       0,             0,       x_sel,   0);
       end
       default: cs(0, 0, 0, 0, 0, 0, 0, 0);
     endcase
