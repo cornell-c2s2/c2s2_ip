@@ -12,7 +12,7 @@ SYNTH_PARAMETERS:
 CLOCK_PERIOD: 25
 FP_CORE_UTIL: 50
 DESIGNS:
-  - PL_TARGET_DENSITY: 0.7 # this synthesizes an 8-point FFT with a density of 0.75
+  - PL_TARGET_DENSITY: 0.7 # this synthesizes an 8-point FFT with a density of 0.7
   - PL_TARGET_DENSITY: 0.5 # Designs specified in this list target a density of 0.5
     DESIGNS:
       - SYNTH_PARAMETERS:

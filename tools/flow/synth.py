@@ -93,7 +93,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
             if match is not None:
                 design_name = match.group("design_name")
                 if design_name in verilog_files:
-                    log.warn(
+                    log.info(
                         f"Found multiple verilog files for {design_name}: {verilog_files[design_name]} and {path.join(root, file)}"
                     )
                 else:
