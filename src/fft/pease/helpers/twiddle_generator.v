@@ -25,10 +25,6 @@ module fft_pease_helpers_TwiddleGenerator #(
       end
       logic unused = &sine_wave_in;
     end else begin
-      // for (genvar i = 0; i < SIZE_FFT / 2; i = i + 1) begin
-      //   assign t_real[i] = sine_wave_in[i+SIZE_FFT/4];
-      //   assign t_imaginary[i] = sine_wave_in[i+SIZE_FFT/2];
-      // end
 
       for (genvar m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin
         for (genvar j = 0; j < 2 ** ($clog2(SIZE_FFT) - STAGE_FFT - 1); j = j + 1) begin
@@ -41,15 +37,6 @@ module fft_pease_helpers_TwiddleGenerator #(
       end
     end
 
-    // for (genvar m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin
-    //   for (genvar i = 0; i < SIZE_FFT; i = i + 2 ** (STAGE_FFT + 1)) begin
-    //     // the index of the sine wave to use.
-    //     int idx = m * SIZE_FFT / (1 << (STAGE_FFT + 1));
-
-    //     assign twiddle_real[i/2+m] = sine_wave_in[(idx+SIZE_FFT/4)%SIZE_FFT];
-    //     assign twiddle_imaginary[i/2+m] = -sine_wave_in[idx%SIZE_FFT];
-    //   end
-    // end
   endgenerate
 
 endmodule

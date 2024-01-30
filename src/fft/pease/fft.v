@@ -105,7 +105,7 @@ module fft_pease_FFT #(
   logic [BIT_WIDTH - 1:0] cc[N_SAMPLES/2 - 1:0];
   logic [BIT_WIDTH - 1:0] dr[N_SAMPLES/2 - 1:0];
   logic [BIT_WIDTH - 1:0] dc[N_SAMPLES/2 - 1:0];
-  logic butterfly_send_rdy = 1'b1;
+  logic butterfly_send_rdy;
   logic butterfly_send_val;
   logic butterfly_recv_val = (state == COMP);
   logic butterfly_recv_rdy;
@@ -139,22 +139,44 @@ module fft_pease_FFT #(
     .*
   );
 
+  generate
+    for (genvar i = 0; i < N_SAMPLES; i++) begin
+      always_comb begin
+        if (state == COMP && bstage == 0) begin
+          in_butterfly[i][BIT_WIDTH-1:0] = reversed_msg[i];
+          in_butterfly[i][2*BIT_WIDTH-1:BIT_WIDTH] = 0;
+        end else begin
+          in_butterfly[i] = out_stride[i];
+        end
+      end
+
+      assign send_msg[i] = out_stride[i][BIT_WIDTH-1:0];
+    end
+  endgenerate
+
+
   always_comb begin
-    next_state  = state;
+    next_state = state;
     next_bstage = bstage;
+    butterfly_send_rdy = 1'b1;
     if (state == IDLE && recv_val) begin
       next_state = COMP;
     end else begin
       if (state == COMP && butterfly_send_val) begin
         if (bstage == max_bstage) begin
-          next_state  = DONE;
+          next_state = DONE;
           next_bstage = 0;
+          butterfly_send_rdy = 1'b0;
         end else begin
           next_bstage = bstage + 1;
         end
       end else begin
-        if (state == DONE && send_rdy) begin
-          next_state = IDLE;
+        if (state == DONE) begin
+          butterfly_send_rdy = send_rdy;
+          if (send_rdy) begin
+            next_state = IDLE;
+          end else begin
+          end
         end else begin
         end
       end
@@ -171,30 +193,30 @@ module fft_pease_FFT #(
     end
   end
 
-  generate
-    for (genvar i = 0; i < N_SAMPLES; i++) begin
-      always_ff @(posedge clk) begin
-        if (reset) begin
-          in_butterfly[i] <= 0;
-          send_msg[i] <= 0;
-        end else begin
-          if (state == IDLE && recv_val) begin
-            in_butterfly[i][BIT_WIDTH-1:0] <= reversed_msg[i];
-            in_butterfly[i][2*BIT_WIDTH-1:BIT_WIDTH] <= 0;
-          end else begin
-            if (state == COMP && butterfly_send_val) begin
-              in_butterfly[i] <= out_stride[i];
-              if (bstage == max_bstage) begin
-                send_msg[i] <= out_stride[i][BIT_WIDTH-1:0];
-              end else begin
-              end
-            end else begin
-            end
-          end
-        end
-      end
-    end
-  endgenerate
+  // generate
+  //   for (genvar i = 0; i < N_SAMPLES; i++) begin
+  //     always_ff @(posedge clk) begin
+  //       if (reset) begin
+  //         in_butterfly[i] <= 0;
+  //         send_msg[i] <= 0;
+  //       end else begin
+  //         if (state == IDLE && recv_val) begin
+  //           in_butterfly[i][BIT_WIDTH-1:0] <= reversed_msg[i];
+  //           in_butterfly[i][2*BIT_WIDTH-1:BIT_WIDTH] <= 0;
+  //         end else begin
+  //           if (state == COMP && butterfly_send_val) begin
+  //             in_butterfly[i] <= out_stride[i];
+  //             if (bstage == max_bstage) begin
+  //               send_msg[i] <= out_stride[i][BIT_WIDTH-1:0];
+  //             end else begin
+  //             end
+  //           end else begin
+  //           end
+  //         end
+  //       end
+  //     end
+  //   end
+  // endgenerate
 
 endmodule
 
