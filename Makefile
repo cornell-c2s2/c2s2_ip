@@ -177,3 +177,4 @@ endif
 # ------------------------------------------------------------------------------
 new_ip: new-ip
 check_ip: check-ip
+testfloat-gen: testfloat_gen

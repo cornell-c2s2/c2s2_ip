@@ -39,3 +39,5 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+.hypothesis/
