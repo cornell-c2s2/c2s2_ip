@@ -4,8 +4,9 @@ A useful library of PYMTL3 test helper functions
 
 from collections import namedtuple
 import pytest
-from pymtl3 import mk_bits, concat, bitstruct
+from pymtl3 import mk_bits, concat, bitstruct, Bits
 from pymtl3.stdlib.test_utils import mk_test_case_table as mk_test_case_table_native
+from fixedpt import Fixed, CFixed
 
 
 # Creates a transaction packer from a list of transaction sizes
@@ -123,3 +124,23 @@ def mk_test_matrices(*args):
         "p",
         sum([(mk_test_matrix(arg, arg.get("slow", False))[1]) for arg in args], []),
     ]
+
+
+# Cast a Fixed object to a Bits object
+def fixed_bits(f: Fixed) -> Bits:
+    value = f.get()
+
+    return mk_bits(len(f))(value)
+
+
+# Cast a CFixed object to a tuple of Bits objects
+def cfixed_bits(cf: CFixed) -> tuple[Bits, Bits]:
+    return fixed_bits(cf.real), fixed_bits(cf.imag)
+
+
+# Convert a Bits object to an unsigned integer
+def uint(x: Bits) -> int:
+    i = int(x)
+    if i < 0:
+        i += 1 << len(x)
+    return i

@@ -7,9 +7,11 @@ import random
 from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
-from src.fft.tests.sim import fixed_point_fft
+from src.fft.tests.sim import FFTApprox, FFTInterface
 from src.fft.fft import FFTWrapper
 import math
+from fixedpt import CFixed
+from tools.utils import cfixed_bits
 
 
 # -------------------------------------------------------------------------
@@ -18,14 +20,14 @@ import math
 
 
 class TestHarness(Component):
-    def construct(s, BIT_WIDTH, DECIMAL_PT, N_SAMPLES):
+    def construct(s, BIT_WIDTH, DECIMAL_PT, N_SAMPLES, cmp):
         # Instantiate models
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.sink = stream.SinkRTL(
             mk_bits(BIT_WIDTH),
             # Compare by approximation
-            cmp_fn=lambda a, b: abs(a.int() - b.int()) <= (1 << (DECIMAL_PT // 2)),
+            cmp_fn=cmp,
         )
         s.dut = FFTWrapper(BIT_WIDTH, DECIMAL_PT, N_SAMPLES)
 
@@ -60,15 +62,29 @@ def packed_msg(array, bitwidth, fft_size):  # Array of ints
     return array[:fft_size]
 
 
-"""Creates a singular FFT call and resposne """
+def fft_call_response(
+    array_of_sample_integers: list[int],
+    bitwidth: int,
+    fft_size: int,
+    fft_model: FFTInterface = FFTApprox,
+) -> list[Bits]:
+    """
+    Creates a singular FFT call and expected response
 
+    :param array_of_sample_integers: Input list of bits
+    :param bitwidth: Bitwidth of the inputs
+    :param fft_size: Size of the FFT
+    :param fft_model: The FFT model to use
 
-def fft_call_response(array_of_sample_integers, bitwidth, fft_size):
-    array = []
+    :return: List of integers representing the FFT call and expected response
+    """
 
-    output_array_unpacked = fixed_point_fft(
-        BIT_WIDTH=bitwidth, DECIMAL_PT=16, SIZE_FFT=fft_size, x=array_of_sample_integers
-    )
+    data = [
+        CFixed(v=(x, 0), n=bitwidth, d=16, raw=True) for x in array_of_sample_integers
+    ]
+
+    output_array_unpacked = fft_model(bitwidth, 16, fft_size).transform(data)
+    output_array_unpacked = [cfixed_bits(x)[0] for x in output_array_unpacked]
     input_array = []
     output_array = []
 
@@ -579,6 +595,8 @@ def test(test_params, cmdline_opts):
         test_params.BIT_WIDTH,
         test_params.DECIMAL_PT,
         test_params.N_SAMPLES,
+        cmp_fn=lambda a, b: abs(a.int() - b.int())
+        <= max(abs(a.int()), abs(b.int())) >> 10,
     )
 
     msgs = test_params.msgs(
@@ -591,8 +609,6 @@ def test(test_params, cmdline_opts):
     recv_msgs = chunk(
         msgs, test_params.N_SAMPLES, test_params.N_SAMPLES, test_params.N_SAMPLES * 2
     )
-
-    print("Expecting", send_msgs, recv_msgs)
 
     th.set_param(
         "top.src.construct",
@@ -608,4 +624,4 @@ def test(test_params, cmdline_opts):
         interval_delay=test_params.sink_delay,
     )
 
-    run_sim(th, cmdline_opts, duts=["dut.dut"])
+    run_sim(th, cmdline_opts, duts=["dut.dut"], print_line_trace=False)
