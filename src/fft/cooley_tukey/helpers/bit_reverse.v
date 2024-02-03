@@ -16,12 +16,23 @@ module fft_cooley_tukey_helpers_BitReverse #(
   localparam int n = $clog2(N_SAMPLES);
 
   generate
-    for (genvar m = 0; m < N_SAMPLES; m++) begin
-      logic [n-1:0] m_rev;
-      for (genvar i = 0; i < n; i++) begin
-        assign m_rev[n-i-1] = m[i];
+    if (N_SAMPLES == 8) begin
+      assign out[0] = in[0];
+      assign out[1] = in[4];
+      assign out[2] = in[2];
+      assign out[3] = in[6];
+      assign out[4] = in[1];
+      assign out[5] = in[5];
+      assign out[6] = in[3];
+      assign out[7] = in[7];
+    end else begin
+      for (genvar m = 0; m < N_SAMPLES; m++) begin
+        logic [n-1:0] m_rev;
+        for (genvar i = 0; i < n; i++) begin
+          assign m_rev[n-i-1] = m[i];
+        end
+        assign out[m] = in[m_rev];
       end
-      assign out[m] = in[m_rev];
     end
   endgenerate
 

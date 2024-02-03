@@ -4,7 +4,7 @@
 
 `include "fft/cooley_tukey/helpers/sine_wave.v"
 `include "fft/cooley_tukey/helpers/bit_reverse.v"
-`include "fixed_point/combinational/butterfly.v"
+`include "fixed_point/combinational/butterflyAlt.v"
 `include "fft/pease/helpers/stride_permutation.v"
 `include "fft/pease/helpers/twiddle_generator.v"
 
@@ -168,12 +168,6 @@ module fft_pease_FFT_main #(
   logic [BIT_WIDTH - 1:0] cc[N_SAMPLES/2 - 1:0];
   logic [BIT_WIDTH - 1:0] dr[N_SAMPLES/2 - 1:0];
   logic [BIT_WIDTH - 1:0] dc[N_SAMPLES/2 - 1:0];
-  logic butterfly_send_rdy = 1'b1;
-  logic butterfly_send_val;
-  logic butterfly_recv_val = (state == COMP);
-  logic butterfly_recv_rdy;
-
-  logic unused = &butterfly_recv_rdy;
 
   generate
     for (genvar i = 0; i < N_SAMPLES / 2; i++) begin
@@ -188,15 +182,17 @@ module fft_pease_FFT_main #(
     end
   endgenerate
 
-  fixed_point_combinational_FixedPointMultiButterfly #(
+  generate
+    for (genvar i = 0; i < N_SAMPLES; i++) begin
+      assign send_msg[i] = in_butterfly[i][BIT_WIDTH-1:0];
+    end
+  endgenerate
+
+  fixed_point_combinational_Butterfly #(
     .n(BIT_WIDTH),
     .d(DECIMAL_PT),
     .b(N_SAMPLES / 2)
   ) fft_stage (
-    .recv_val(butterfly_recv_val),
-    .recv_rdy(butterfly_recv_rdy),
-    .send_val(butterfly_send_val),
-    .send_rdy(butterfly_send_rdy),
     .wr(wr[bstage]),
     .wc(wc[bstage]),
     .*
@@ -208,7 +204,7 @@ module fft_pease_FFT_main #(
     if (state == IDLE && recv_val) begin
       next_state = COMP;
     end else begin
-      if (state == COMP && butterfly_send_val) begin
+      if (state == COMP) begin
         if (bstage == max_bstage) begin
           next_state  = DONE;
           next_bstage = 0;
@@ -239,18 +235,19 @@ module fft_pease_FFT_main #(
       always_ff @(posedge clk) begin
         if (reset) begin
           in_butterfly[i] <= 0;
-          send_msg[i] <= 0;
+          //send_msg[i] <= 0;
         end else begin
           if (state == IDLE && recv_val) begin
             in_butterfly[i][BIT_WIDTH-1:0] <= reversed_msg[i];
             in_butterfly[i][2*BIT_WIDTH-1:BIT_WIDTH] <= 0;
           end else begin
-            if (state == COMP && butterfly_send_val) begin
+            if (state == COMP) begin
+              //if (state == COMP && bstage != max_bstage) begin
               in_butterfly[i] <= out_stride[i];
-              if (bstage == max_bstage) begin
-                send_msg[i] <= out_stride[i][BIT_WIDTH-1:0];
-              end else begin
-              end
+              // if (bstage == max_bstage) begin
+              //   send_msg[i] <= out_stride[i][BIT_WIDTH-1:0];
+              // end else begin
+              // end
             end else begin
             end
           end

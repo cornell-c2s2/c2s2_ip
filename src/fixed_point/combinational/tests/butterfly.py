@@ -164,7 +164,7 @@ def concat_Bits(list, n):
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d, bin1",
     # Runs tests on smaller number sizes
-    mk_params(50, [1, 50], (2, 8), (0, 8), bin1=[1, 2, 4], slow=True) +
+    mk_params(50, [1, 50], (2, 8), (0, 8), bin1=[1, 2, 16], slow=True) +
     # Runs tests on 20 randomly sized fixed point numbers, inputting 1, 5, and 50 numbers to the stream
     mk_params(20, [1, 100], (16, 32), (0, 32), bin1=[1, 2, 4], slow=True) +
     # Extensively tests numbers with certain important bit sizes.

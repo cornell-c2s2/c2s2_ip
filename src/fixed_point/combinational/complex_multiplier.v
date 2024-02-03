@@ -4,6 +4,61 @@
 
 `include "fixed_point/combinational/multiplier.v"
 
+module fixed_point_combinational_ComplexMultiplierS #(
+  parameter int n = 32,  // bit width
+  parameter int d = 16   // number of decimal bits
+) (
+  input  logic [n-1:0] ar,
+  input  logic [n-1:0] ac,
+  input  logic [n-1:0] br,
+  input  logic [n-1:0] bc,
+  output logic [n-1:0] cr,
+  output logic [n-1:0] cc
+);
+
+  logic [n-1:0] c_ar, c_ac, c_br, c_bc;
+  logic [n-1:0] arXbr, acXbc, arcXbrc;
+
+  assign c_ar = ar;
+  assign c_ac = ac;
+  assign c_br = br;
+  assign c_bc = bc;
+
+  fixed_point_combinational_Multiplier #(
+    .n(n),
+    .d(d),
+    .sign(1)
+  ) arXbrMult (
+    .a(c_ar),
+    .b(c_br),
+    .c(arXbr)
+  );
+
+  fixed_point_combinational_Multiplier #(
+    .n(n),
+    .d(d),
+    .sign(1)
+  ) acXbcMult (
+    .a(c_ac),
+    .b(c_bc),
+    .c(acXbc)
+  );
+
+  fixed_point_combinational_Multiplier #(
+    .n(n),
+    .d(d),
+    .sign(1)
+  ) arXbrcMult (
+    .a(c_ar + c_ac),
+    .b(c_br + c_bc),
+    .c(arcXbrc)
+  );
+
+  assign cr = arXbr - acXbc;
+  assign cc = arcXbrc - arXbr - acXbc;
+
+endmodule
+
 module fixed_point_combinational_ComplexMultiplier #(
   parameter int n = 32,  // bit width
   parameter int d = 16,  // number of decimal bits
