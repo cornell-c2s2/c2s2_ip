@@ -12,7 +12,7 @@ class SineWave(VerilogPlaceholder, Component):
     def construct(s, N, W, D):
         # Interface
 
-        s.sine_wave_out = [OutPort(W) for _ in range(N)]
+        s.out = [OutPort(W) for _ in range(N)]
 
         s.set_metadata(VerilogPlaceholderPass.top_module, "SineWave")
         s.set_metadata(

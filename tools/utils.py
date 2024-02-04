@@ -92,10 +92,22 @@ def mk_test_matrix(values, slow=False):
 
     tp = namedtuple("_".join(keys), keys)
 
+    def smartstr(v):
+        if "__name__" in dir(v):
+            return v.__name__
+        # If this is a callable, get the name of the function
+        if callable(v):
+            return v.__name__
+        if isinstance(v, list):
+            return f"[{','.join([smartstr(x) for x in v])}]"
+        if isinstance(v, tuple):
+            return f"({','.join([smartstr(x) for x in v])})"
+        return str(v)
+
     params = [
         pytest.param(
             tp(**dict(p)),
-            id=",".join([f"{p[i][0]}={p[i][1]}" for i in range(len(keys))]),
+            id=",".join([f"{p[i][0]}={smartstr(p[i][1])}" for i in range(len(keys))]),
             marks=pytest.mark.slow if slow else [],
         )
         for p in params

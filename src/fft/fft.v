@@ -48,7 +48,7 @@ module fft_FFT #(
     .W(BIT_WIDTH),
     .D(DECIMAL_PT)
   ) sine_wave (
-    .sine_wave_out(sine_wave_out)
+    .out(sine_wave_out)
   );
 
   fft_helpers_BitReverse #(

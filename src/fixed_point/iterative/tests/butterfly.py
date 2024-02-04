@@ -199,10 +199,7 @@ def test_random(
     sum(
         [
             mk_params(1, [100], n, d, m=range(1, 5), slow=True)
-            for (n, d) in [
-                (8, 4),
-                (32, 16),
-            ]
+            for (n, d) in [(8, 4), (32, 16), (64, 32)]
         ],
         [],
     ),
