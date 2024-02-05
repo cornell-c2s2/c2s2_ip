@@ -3,7 +3,7 @@ import random
 from pymtl3 import mk_bits, Component, Bits
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
-from src.fft.tests.sim import FFTNumpy, FFTInterface
+from src.fft.tests.sim import FFTNumpy, FFTInterface, FFTExact
 from src.fft.fft import FFTWrapper
 import math
 from fixedpt import CFixed, Fixed

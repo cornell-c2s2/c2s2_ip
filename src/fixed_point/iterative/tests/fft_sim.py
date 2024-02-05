@@ -95,28 +95,3 @@ def fft (fft_in, bit_width=32, decimal_pt=16, n_samples=8):
     return fft_out
 
 
-# return a random fixed point value
-def rand_cfixed(n, d):
-    return CFixed(
-        (random.randint(0, (1 << n) - 1), random.randint(0, (1 << n) - 1)),
-        n,
-        d,
-        raw=True,
-    )
-
-def main():
-
-    rand_cfxp = [rand_cfixed(32, 16) for i in range(8)]
-
-    fft_output = fft(rand_cfxp, bit_width=32, decimal_pt=16, n_samples=8)
-
-    print("Input: ")
-    print(rand_cfxp)
-    print("\n")
-    print("Output: ")
-    print(fft_output)
-
-
-if __name__ == "__main__":
-    main()
-    
