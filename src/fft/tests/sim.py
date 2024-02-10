@@ -113,19 +113,15 @@ class FFTExact(FFTInterface):
 
         # Implements fft
         def fft(fft_in: list[CFixed], bit_width=32, decimal_pt=16, n_samples=8):
-
-            msg: list[list[CFixed]] = [
-                [CFixed((0, 0), bit_width, decimal_pt, True) for _ in range(n_samples)]
-                for _ in range(math.ceil(math.log2(n_samples) + 1))
-            ]
+            data = fft_in
 
             # Bit reverse
-            msg[0] = bit_reverse(fft_in, n_samples)
+            data = bit_reverse(data, n_samples)  # Do bit reversal
 
             # FFT Stages
             for i in range(0, math.ceil(math.log2(n_samples))):
-                msg[i + 1] = fft_stage(msg[i], i, bit_width, decimal_pt, n_samples)
+                data = fft_stage(data, i, bit_width, decimal_pt, n_samples)
 
-            return msg[-1]
+            return data
 
         return fft(data, self.bit_width, self.decimal_pt, self.n_samples)
