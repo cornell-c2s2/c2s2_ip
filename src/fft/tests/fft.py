@@ -286,8 +286,14 @@ def test_single_freqs(
             "model_spec": [
                 (
                     FFTNumpy,  # Model (must implement FFTInterface)
-                    mk_cmp_approx(0.05),  # Comparison function (expecting an accuracy of ~5% here)
-                )
+                    mk_cmp_approx(
+                        0.05
+                    ),  # Comparison function (expecting an accuracy of ~5% here)
+                ),
+                (
+                    FFTExact,  # Model (must implement FFTInterface)
+                    cmp_exact,
+                ),
             ],
             "n_samples": [8, 32, 128],
             "input_mag": [1, 10],  # Maximum magnitude of the input signal

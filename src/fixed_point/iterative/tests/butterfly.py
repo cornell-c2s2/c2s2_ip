@@ -17,7 +17,7 @@ from src.fixed_point.utils import rand_fxp_spec
 
 # Performs the butterfly operation on two complex numbers
 # Used to generate the expected output
-def butterfly(n, d, a, b, w):
+def butterfly(n: int, d: int, a: CFixed, b: CFixed, w: CFixed):
     t = cmul(n, d, b, w)
     return ((a + t).resize(n, d), (a - t).resize(n, d))
 
