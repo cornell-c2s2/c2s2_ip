@@ -286,7 +286,7 @@ def test_single_freqs(
             "model_spec": [
                 (
                     FFTNumpy,  # Model (must implement FFTInterface)
-                    mk_cmp_approx(0.05),  # Comparison function
+                    mk_cmp_approx(0.05),  # Comparison function (expecting an accuracy of ~5% here)
                 )
             ],
             "n_samples": [8, 32, 128],
