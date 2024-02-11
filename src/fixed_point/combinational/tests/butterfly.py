@@ -63,14 +63,14 @@ def mk_params(execution_number, sequence_lengths, n, d, bin1, slow=False):
 # Test harness for streaming data
 class Harness(Component):
     def construct(s, mult, n, b=1):
-        s.mult = mult
+        s.dut = mult
 
         s.src = stream.SourceRTL(mk_bits(6 * n * b))
 
         s.sink = stream.SinkRTL(mk_bits(4 * n * b))
 
-        s.src.send //= s.mult.recv
-        s.mult.send //= s.sink.recv
+        s.src.send //= s.dut.recv
+        s.dut.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
@@ -79,7 +79,7 @@ class Harness(Component):
         return (
             s.src.line_trace()
             + " > "
-            + s.mult.line_trace()
+            + s.dut.line_trace()
             + " > "
             + s.sink.line_trace()
         )
@@ -145,6 +145,7 @@ def test_edge(n, d, a, b, w):
     run_sim(
         model,
         cmdline_opts={"dump_textwave": False, "dump_vcd": "edge", "max_cycles": None},
+        duts=["dut"],
     )
 
     # out = Fixed(int(eval_until_ready(model, a, b)), s, n, d, raw=True)
@@ -171,7 +172,7 @@ def concat_Bits(list, n):
     sum(
         [
             [
-                *mk_params(1, [20], n, d, [1, 2, 4], slow=False),
+                *mk_params(1, [20], n, d, [1, 2, 4, 16], slow=False),
                 *mk_params(1, [1000], n, d, [1, 2, 4], slow=True),
             ]
             for (n, d) in [(8, 4), (24, 8), (32, 24), (32, 16)]
@@ -180,7 +181,7 @@ def concat_Bits(list, n):
     ),
 )
 def test_random(
-    execution_number, sequence_length, n, d, bin1
+    cmdline_opts, execution_number, sequence_length, n, d, bin1
 ):  # test individual and sequential multiplications to assure stream system works
     random.seed(random.random() + execution_number)
     n, d = rand_fxp_spec(n, d)
@@ -215,10 +216,10 @@ def test_random(
     run_sim(
         model,
         cmdline_opts={
-            "dump_textwave": False,
-            "dump_vcd": f"rand_{execution_number}_{sequence_length}_{n}_{d}_{bin1}",
+            **cmdline_opts,
             "max_cycles": (
-                30 + ((n + 2) * 3 + 4) * len(dat)
+                300 + 30 + ((n + 2) * 3 + 4) * len(dat)
             ),  # makes sure the time taken grows linearly with respect to n
         },
+        duts=["dut"],
     )
