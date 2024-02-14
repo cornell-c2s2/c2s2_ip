@@ -2,6 +2,7 @@
 Floating Point FFT on arbitrary signal.
 By. Steven Sun '25 and Will Salcedo '23
 """
+
 import math
 import numpy as np
 
@@ -77,8 +78,7 @@ def fixed_point_fft_stage(
             if m != 0:
                 w_r = sine_table[
                     round(
-                        (m * SIZE_FFT / (2 * (2**STAGE_FFT))) % SIZE_FFT
-                        + SIZE_FFT / 4
+                        (m * SIZE_FFT / (2 * (2**STAGE_FFT))) % SIZE_FFT + SIZE_FFT / 4
                     )
                 ]
                 w_im = -sine_table[

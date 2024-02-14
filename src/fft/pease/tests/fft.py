@@ -11,7 +11,6 @@ from src.fft.pease.tests.sim import fixed_point_fft
 from src.fft.pease.fft import FFTWrapper
 import math
 
-
 # -------------------------------------------------------------------------
 # TestHarness
 # -------------------------------------------------------------------------
@@ -94,15 +93,11 @@ def two_point_dc(bits, fft_size, frac_bits):
 
 def two_point_dc_generated(bits, fft_size, frac_bits):
     # print([Fxp( 1, signed = True, n_word = bits, n_frac = frac_bits ),Fxp( 1, signed = True, n_word = bits, n_frac = frac_bits )])
-    return fft_call_response(
-        [1 * (2**frac_bits), 1 * (2**frac_bits)], bits, fft_size
-    )
+    return fft_call_response([1 * (2**frac_bits), 1 * (2**frac_bits)], bits, fft_size)
 
 
 def two_point_dc_generated_negative(bits, fft_size, frac_bits):
-    return fft_call_response(
-        [1 * (2**frac_bits), 1 * (2**frac_bits)], bits, fft_size
-    )
+    return fft_call_response([1 * (2**frac_bits), 1 * (2**frac_bits)], bits, fft_size)
 
 
 def eight_point_dc(bits, fft_size, frac_bits):

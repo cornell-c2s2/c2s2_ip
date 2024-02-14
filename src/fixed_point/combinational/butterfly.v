@@ -211,7 +211,7 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
       end else begin
       end
     end else if (state == COMP) begin
-      if (comp_state == bb[((b==1)?0 : $clog2(b)-1):0]) begin
+      if (comp_state == bb[((b == 1)?0 : $clog2(b)-1):0]) begin
         next_state = DONE;
         next_comp_state = 0;
       end else begin
