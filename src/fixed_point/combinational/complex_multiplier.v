@@ -4,6 +4,30 @@
 
 `include "fixed_point/combinational/multiplier.v"
 
+/* Fully Combinational Complex Multipler.
+ *
+ * This modules contains three combinational multipliers, and 
+ * performs a complex multiplication combinationally.
+ *
+ * 
+ * 
+ * Params:
+ *  n: bit width 
+ *  d: number of decimal bits
+ * 
+ * Inputs:
+ *  ar, ac: real and complex parts of the first number
+ *  br, bc: real and complex parts of the second number
+ *
+ * Outputs:
+ *  cr, cc: real and complex parts of the result
+ *
+ * Tests: UNTESTED
+ * Used In: N/A
+ *
+ * Author: Barry Lyu.
+ * Date: Feb 14th 2024
+ */
 module fixed_point_combinational_ComplexMultiplierS #(
   parameter int n = 32,  // bit width
   parameter int d = 16   // number of decimal bits
@@ -16,6 +40,8 @@ module fixed_point_combinational_ComplexMultiplierS #(
   output logic [n-1:0] cc
 );
 
+  // cr = (ar * br) - (ac * bc)
+  // cc = (ar * bc) + (br * ac) = (ar + ac)(br + bc) - (ac * bc) - (ar * br)
   logic [n-1:0] c_ar, c_ac, c_br, c_bc;
   logic [n-1:0] arXbr, acXbc, arcXbrc;
 
@@ -59,6 +85,40 @@ module fixed_point_combinational_ComplexMultiplierS #(
 
 endmodule
 
+/* Parameterized Complex Multipler.
+ *
+ * ************************** IMPORTANT ***************************
+ * Depending on num_mults, this module can be single or multi-cycle.
+ * ************************** IMPORTANT ***************************
+ *
+ * This modules contains three combinational multipliers, and 
+ * performs a complex multiplication combinationally.
+ * 
+ * Params:
+ * - n: bit width 
+ * - d: number of decimal bits
+ * - num_mults: number of multipliers to use (1 or 3)
+ *   - 1: single multiplier, multi-cycle (3 cycles with val/rdy)
+ *   - 3: three multipliers, single-cycle (val/rdy connection optional)
+ * 
+ * Inputs:
+ * - val/rdy interface: [recv_val, recv_rdy]
+ *   - ar, ac: real and complex parts of the first number
+ *   - br, bc: real and complex parts of the second number
+ *
+ * Outputs:
+ * - val/rdy interface: send_val, send_rdy
+ *   - cr, cc: real and complex parts of the result
+ * 
+ * Tests: FULLY_TESTED
+ *  - tests/fixed_point/combinational/complex_multiplier_test.py [PASSED]
+ *
+ * Used In:
+ *  - Combinational Multi-Butterfly Module: fixed_point/combinational/butterfly.v 
+ *  
+ * Author: Barry Lyu.
+ * Date: Feb 14th 2024
+ */
 module fixed_point_combinational_ComplexMultiplier #(
   parameter int n = 32,  // bit width
   parameter int d = 16,  // number of decimal bits
@@ -133,9 +193,12 @@ module fixed_point_combinational_ComplexMultiplier #(
 
       // 1 multiplier implementation, completes computations in three cycles.
     end else if (num_mults == 1) begin
+      // State machine to control the 3-cycle computation
       logic [2:0] IDLE = 3'd0, MUL1 = 3'd1, MUL2 = 3'd2, MUL3 = 3'd3, DONE = 3'd4;
       logic [2:0] state;
       logic [2:0] next_state;
+
+      // Intermediate results
       logic [n-1:0] mul_a, mul_b, mul_c;
 
       logic unused = &({IDLE, MUL1, MUL2, MUL3, DONE});
@@ -153,6 +216,7 @@ module fixed_point_combinational_ComplexMultiplier #(
         end else begin
           state <= next_state;
           if (state == IDLE && recv_val) begin
+            // Store inputs in registers.
             c_ar <= ar;
             c_ac <= ac;
             c_br <= br;
@@ -172,7 +236,7 @@ module fixed_point_combinational_ComplexMultiplier #(
       end
 
       always_comb begin
-
+        // Combinational logic for the next state.
         next_state = state;
         recv_rdy = 0;
         send_val = 0;

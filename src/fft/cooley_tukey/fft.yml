@@ -9,8 +9,8 @@ FP_ASPECT_RATIO: 1 # Aspect ratio of the core (we set it to 2 here because there
 SYNTH_PARAMETERS: 
   BIT_WIDTH : 32
   DECIMAL_PT : 16
-  N_SAMPLES : 8
-CLOCK_PERIOD: 25
+  N_SAMPLES : 32
+CLOCK_PERIOD: 10
 DESIGNS:
   - PL_TARGET_DENSITY: 0.52
 

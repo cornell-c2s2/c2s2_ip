@@ -7,10 +7,10 @@ FP_PIN_ORDER_CFG: butterfly_pins.cfg
 CLOCK_PORT: clk
 FP_ASPECT_RATIO: 1 # Aspect ratio of the core (we set it to 2 here because there are 128 pins on each side but only 64 on the bottom)
 CLOCK_PERIOD: 25
-PL_TARGET_DENSITY: 0.7
+PL_TARGET_DENSITY: 0.8
 SYNTH_PARAMETERS: 
   n : 32
   d : 16
-  b : 1
+  b : 4
 
     

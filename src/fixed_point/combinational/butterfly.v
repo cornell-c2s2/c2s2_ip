@@ -18,6 +18,42 @@
 `define FIXED_POINT_MULTI_BUTTERFLY
 `include "fixed_point/combinational/complex_multiplier.v"
 
+/* Parameterized Multi-Butterfly Unit.
+ *
+ * ************************** IMPORTANT ***************************
+ * Depending on b, this module can take variable cycles.
+ * ************************** IMPORTANT ***************************
+ *
+ * This modules is a buffered version of the butterfly unit and allows
+ * multiple butterfly inputs. There is only one butterfly computation
+ * pipeline, so the module computes one butterfly at a time and rotates
+ * between the inputs until all are computed.
+ * 
+ * Params:
+ * - n: bit width 
+ * - d: number of decimal bits
+ * - b: how many butterflies inputs and outputs this multi-butterfly contains
+ * 
+ * Inputs:
+ * - val/rdy interface: [recv_val, recv_rdy]
+ *   - ar[], ac[]: real and complex parts of the first number for each butterfly
+ *   - br[], bc[]: real and complex parts of the second number for each butterfly
+ *
+ * Outputs:
+ * - val/rdy interface: send_val, send_rdy
+ *   - cr[], cc[]: real and complex parts of the result for each butterfly
+ * 
+ * Tests: NOT FULLY TESTED
+ *  - tests/fixed_point/combinational/butterfly.py [PASSED]
+ *  Butterflies with b more than 1 are not unit tested. Instead, they are used
+ *  in the pease FFT module, which is tested.
+ *
+ * Used In:
+ *  - Pease FFT Module: fft/pease/fft.v
+ *  
+ * Author: Barry Lyu.
+ * Date: Feb 14th 2024
+ */
 module fixed_point_combinational_FixedPointMultiButterfly #(
   parameter int n = 32,
   parameter int d = 16,
@@ -44,7 +80,7 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
   output logic [n-1:0] dc[b]
 );
 
-  localparam int bb = b-1;
+  localparam int bb = b - 1;
 
   /* performs the butterfly operation, equivalent to doing
     | 1  w |   | a |   | c |
@@ -81,13 +117,13 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
 
   logic mult_recv_rdy, mult_send_val;
 
-  logic unused = &({IDLE,COMP,DONE,mult_recv_rdy,mult_send_val});
+  logic unused = &({IDLE, COMP, DONE, mult_recv_rdy, mult_send_val});
 
   // complex multiplier instantiation as combinatorial
   fixed_point_combinational_ComplexMultiplier #(
     .n(n),
     .d(d),
-    .num_mults(3) // with 3 mults, can output in same cycle
+    .num_mults(3)  // with 3 mults, can output in same cycle
   ) mult (
     .recv_val(1'b1),
     .recv_rdy(mult_recv_rdy),
@@ -109,7 +145,7 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
 
   // registers for storing the inputs / outputs
   generate
-    for (genvar i = 0; i < b; i++) begin: g_loop
+    for (genvar i = 0; i < b; i++) begin : g_loop
       always_ff @(posedge clk) begin
         if (reset) begin
           s_ac[i] <= 0;
@@ -129,7 +165,8 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
           s_wc[i] <= wc[i];
           s_cc[i] <= 0;
           s_cr[i] <= 0;
-        end else begin end
+        end else begin
+        end
       end
 
       assign cr[i] = s_cr[i];
@@ -151,7 +188,8 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
       s_cc[comp_state] <= s_ac[comp_state] + m_cc;
       s_dr[comp_state] <= s_ar[comp_state] - m_cr;
       s_dc[comp_state] <= s_ac[comp_state] - m_cc;
-    end else begin end
+    end else begin
+    end
   end
 
   // state transition logic
@@ -165,13 +203,15 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
     end else if (state == IDLE && recv_rdy) begin
       if (recv_val) begin
         next_state = COMP;
-      end else begin end
+      end else begin
+      end
     end else if (state == DONE && send_val) begin
       if (send_rdy) begin
         next_state = IDLE;
-      end else begin end
+      end else begin
+      end
     end else if (state == COMP) begin
-      if (comp_state == bb[((b == 1) ? 0 : $clog2(b)-1):0]) begin
+      if (comp_state == bb[((b==1)?0 : $clog2(b)-1):0]) begin
         next_state = DONE;
         next_comp_state = 0;
       end else begin
