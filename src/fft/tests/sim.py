@@ -4,6 +4,8 @@ from fixedpt import Fixed
 import numpy as np
 import math
 from src.fixed_point.iterative.tests.butterfly import butterfly
+from src.fft.tests.sine_wave import sine_wave
+from src.fft.tests.twiddle_generator import twiddle_generator
 
 
 # Python interface for the FFT module
@@ -34,36 +36,6 @@ class FFTNumpy(FFTInterface):
 # Version of the FFT simulation that uses the exact same algorithm as the Verilog implementation. This is used to verify the Verilog implementation.
 class FFTExact(FFTInterface):
     def transform(self, data: list[CFixed]) -> list[CFixed]:
-        def sine_wave(n_samples, bit_width, decimal_pt) -> list[Fixed]:
-            fixed_sinvalue = [Fixed(0, 1, bit_width, decimal_pt)] * n_samples
-            for i in range(n_samples):
-                sinvalue = np.sin(2 * np.pi * i / n_samples)
-                fixed_sinvalue[i] = Fixed(sinvalue, 1, bit_width, decimal_pt)
-            return fixed_sinvalue
-
-        # Implements twiddle generator
-        def twiddle_gen(
-            sine_wave_in: list[Fixed],
-            bit_width=4,
-            decimal_pt=2,
-            size_fft=8,
-            stage_fft=0,
-        ) -> list[CFixed]:
-            twiddles = [0] * (size_fft // 2)
-
-            for m in range(0, 2**stage_fft):
-                for i in range(0, size_fft, 2 ** (stage_fft + 1)):
-                    idx = m * size_fft / (1 << (stage_fft + 1))
-                    twiddles[(i // 2) + m] = CFixed(
-                        (
-                            sine_wave_in[int((idx + size_fft / 4) % size_fft)],
-                            -sine_wave_in[int(idx % size_fft)],
-                        ),
-                        bit_width,
-                        decimal_pt,
-                    )
-
-            return twiddles
 
         # Implements bit reverse
         def bit_reverse(rev_in: list, n_samples: int):
@@ -97,9 +69,7 @@ class FFTExact(FFTInterface):
                     buf_in[i + m + 1] = fft_stage_in[i + 2**stage_fft]
 
             # Twiddles
-            twiddles = twiddle_gen(
-                sine_wave_in, bit_width, decimal_pt, n_samples, stage_fft
-            )
+            twiddles = twiddle_generator(bit_width, decimal_pt, n_samples, stage_fft)
 
             # Butterflies
             for b in range(0, n_samples // 2):
@@ -119,24 +89,6 @@ class FFTExact(FFTInterface):
 
         # Implements fft
         def fft(fft_in: list[CFixed], bit_width=32, decimal_pt=16, n_samples=8):
-            # msg = [
-            #     [CFixed((0, 0), bit_width, decimal_pt) for _ in range(n_samples)]
-            #     for _ in range(math.ceil(math.log2(n_samples) + 1))
-            # ]
-
-            # # Bit reverse
-            # msg[0] = bit_reverse(fft_in, n_samples)
-
-            # # FFT Stages
-            # for i in range(0, math.ceil(math.log2(n_samples))):
-            #     msg[i + 1] = fft_stage(msg[i], i, bit_width, decimal_pt, n_samples)
-
-            # # FFT Out
-            # fft_out = [0] * n_samples
-            # for i in range(0, n_samples):
-            #     fft_out[i] = msg[math.ceil(math.log2(n_samples))][i]
-
-            # return fft_out
             data = fft_in
 
             # Bit reverse
