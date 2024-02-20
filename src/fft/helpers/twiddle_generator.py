@@ -1,8 +1,6 @@
 from pymtl3 import *
-from pymtl3.stdlib import stream
 from pymtl3.passes.backends.verilog import *
 from os import path
-from src.serdes.deserializer import Deserializer
 
 
 # Sine Wave Generator

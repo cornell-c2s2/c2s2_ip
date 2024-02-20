@@ -59,8 +59,8 @@ class FFTExact(FFTInterface):
             decimal_pt=16,
             n_samples=8,
         ):
-            buf_in = [0] * n_samples
-            buf_out = [0] * n_samples
+            buf_in = [None for _ in range(n_samples)]
+            buf_out = [None for _ in range(n_samples)]
 
             # Front crossbar
             for m in range(0, 2**stage_fft):
