@@ -3,11 +3,11 @@ from pymtl3.passes.backends.verilog import *
 from os import path
 
 
-# Sine Wave Generator
-class SineWave(VerilogPlaceholder, Component):
+# Crossbar Generator
+class Crossbar(VerilogPlaceholder, Component):
     # Constructor
 
-    def construct(s, BIT_WIDTH, SIZE_FFT, STAGE_FFT):
+    def construct(s, BIT_WIDTH, SIZE_FFT, STAGE_FFT, FRONT):
         # Interface
 
         s.recv_real = [InPort(BIT_WIDTH) for _ in range(SIZE_FFT)]
