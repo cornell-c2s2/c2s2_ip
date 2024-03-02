@@ -5,7 +5,7 @@ if [ -f /classes/c2s2/setup-c2s2.sh ]; then
   source setup-c2s2.sh
 fi
 
-conda activate ./venv
+source ./venv/bin/activate
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # get the directory of this file
 
