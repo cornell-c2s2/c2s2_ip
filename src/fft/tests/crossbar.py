@@ -39,9 +39,6 @@ def crossbar_front(
             send_val[i + m] = cbar_in[i][1]
             send_val[i + m + 1] = cbar_in[i + 2**stage_fft][1]
 
-    print("recv_rdy: " + str(recv_rdy))
-    print("send_val: " + str(send_val))
-    print([(a, b, c) for a, b, c in zip(cbar_out, recv_rdy, send_val)])
     return [(a, b, c) for a, b, c in zip(cbar_out, recv_rdy, send_val)]
 
 
@@ -104,19 +101,15 @@ def crossbar_back(n_samples: int, stage_fft: int, cbar_in: list[any]) -> list[an
 
 
 def gen_crossbar_front(n_samples, stage_fft, cbar_in: list[tuple[CFixed, bool, bool]]):
-    print(cbar_in)
-    print(Bits1(int(x[1])) for x in cbar_in)
-    # print(n_samples)
     return [
         (
-            " ".join([f"recv_real[{i}] recv_imaginary[{i}]" for i in range(n_samples)])
-            + " ".join([f"recv_val[{i}]" for i in range(n_samples)])
-            + " ".join([f"recv_rdy[{i}]*" for i in range(n_samples)])
-            + " ".join(
-                [f"send_real[{i}]* send_imaginary[{i}]*" for i in range(n_samples)]
-            )
-            + " ".join([f"send_val[{i}]*" for i in range(n_samples)])
-            + " ".join([f"send_rdy[{i}]" for i in range(n_samples)])
+            " ".join(
+                [f"recv_real[{i}] recv_imaginary[{i}]" for i in range(n_samples)]
+                + [f"recv_val[{i}]" for i in range(n_samples)] + [f"recv_rdy[{i}]*" for i in range(n_samples)]
+                + [f"send_real[{i}]* send_imaginary[{i}]*" for i in range(n_samples)]
+                + [f"send_val[{i}]*" for i in range(n_samples)] 
+                + [f"send_rdy[{i}]" for i in range(n_samples)]
+                )
         ),
         sum(  # recv real and imaginary
             [
@@ -235,23 +228,13 @@ def gen_input(
         }
     )
 )
-# def test_front(cmdline_opts, p):
-#     for stage in range(0, int(math.log2(p.n_samples))):
-#         run_test_vector_sim(
-#             Crossbar(p.fp_spec[0], p.n_samples, stage, 1),
-#             gen_crossbar_front(p.n_samples, stage, gen_input(*p.fp_spec, p.n_samples)),
-#             cmdline_opts,
-#         )
-
-
 def test_front(cmdline_opts, p):
-    stage = 0
-    run_test_vector_sim(
-        Crossbar(p.fp_spec[0], p.n_samples, stage, 1),
-        gen_crossbar_front(p.n_samples, stage, gen_input(*p.fp_spec, p.n_samples)),
-        cmdline_opts,
-    )
-
+    for stage in range(0, int(math.log2(p.n_samples))):
+        run_test_vector_sim(
+            Crossbar(p.fp_spec[0], p.n_samples, stage, 1),
+            gen_crossbar_front(p.n_samples, stage, gen_input(*p.fp_spec, p.n_samples)),
+            cmdline_opts,
+        )
 
 # @pytest.mark.parametrize(
 #     *mk_test_matrices(
