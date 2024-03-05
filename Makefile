@@ -40,7 +40,7 @@ vscode:
 
 install: --pull vscode --pip
 
---parse-name:
+--parse-name: --pip
 	@printf "${CYAN}"
 	@printf "Checking IP Name is set...\n"
 ifndef IP
@@ -82,7 +82,7 @@ check-ip: --pull --parse-name
 	@printf " - No similar-named IP exists!${RESET}\n"
 
 # Recipe for making new IP
-new-ip: check-ip
+new-ip: check-ip --pip
 	@printf "${PURPLE}"
 	@printf "========================================\n"
 	@printf "C2S2 IP CREATOR\n"
@@ -133,14 +133,14 @@ else
 
 endif
 
-lint:
+lint: --pip
 ifndef IP
 	@tools/lint.sh
 else
 	@tools/lint.sh ${IP}
 endif
 
-test:
+test: --pip
 	@tools/test.sh ${EXTRA_ARGS}
 
 # ------------------------------------------------------------------------------
