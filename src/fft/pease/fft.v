@@ -139,15 +139,15 @@ module fft_pease_FFT_main #(
         .STAGE_FFT (i)
       ) twiddle_generator (
         .sine_wave_in(sine_wave_out),
-        .twiddle_real(wr_pre[i]),
-        .twiddle_imaginary(wc_pre[i])
+        .twiddle_real(wr[i]),
+        .twiddle_imaginary(wc[i])
       );
 
-      for (genvar b = 0; b < N_SAMPLES / 2; b++) begin
-        assign wr[i][b] = wr_pre[i][b];
-        assign wc[i][b] = wc_pre[i][b];
-        //end
-      end
+      // for (genvar b = 0; b < N_SAMPLES / 2; b++) begin
+      //   assign wr[i][b] = wr_pre[i][b];
+      //   assign wc[i][b] = wc_pre[i][b];
+      //   //end
+      // end
     end
   endgenerate
 
