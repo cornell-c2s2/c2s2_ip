@@ -18,8 +18,6 @@ PURPLE =\033[0;35m
 CYAN   =\033[0;36m
 WHITE  =\033[0;37m
 
-VENV:=. venv/bin/activate
-
 # Extra arguments to pass
 EXTRA_ARGS=
 
@@ -33,21 +31,16 @@ vscode:
 	@printf "${CYAN}Installing VSCode Extensions...${RESET}\n"
 	@cat .workspace-extensions | xargs code
 
-venv: --venv
-
---venv:
-	@printf "${CYAN}Setting Up Virtual Environment...${RESET}\n"
-	@python3 -m venv venv
+--pip:
 	@printf "${CYAN}Installing Python Dependencies...${RESET}\n"
-	@$(VENV) && pip install --upgrade pip
-	@$(VENV) && pip install -r requirements.txt
+	@pip install --upgrade pip
+	@pip install -r requirements.txt
 	@printf "${GREEN}Dependencies installed!${RESET}\n"
-	@printf "${YELLOW}Run ${RED}source ./venv/bin/activate${YELLOW} to activate your virtual environment.${RESET}\n"
 
 
-install: --pull vscode --venv
+install: --pull vscode --pip
 
---parse-name:  venv
+--parse-name: --pip
 	@printf "${CYAN}"
 	@printf "Checking IP Name is set...\n"
 ifndef IP
@@ -58,7 +51,7 @@ ifndef IP
 	@exit 1
 else
 	@mkdir -p build
-	@$(VENV) && python tools/parse-ip-name.py ${IP} | tee /dev/tty | tail -n 1 > build/ip_name.txt
+	@python tools/parse-ip-name.py ${IP} | tee /dev/tty | tail -n 1 > build/ip_name.txt
 endif
 
 clean:
@@ -89,7 +82,7 @@ check-ip: --pull --parse-name
 	@printf " - No similar-named IP exists!${RESET}\n"
 
 # Recipe for making new IP
-new-ip: check-ip venv
+new-ip: check-ip --pip
 	@printf "${PURPLE}"
 	@printf "========================================\n"
 	@printf "C2S2 IP CREATOR\n"
@@ -118,7 +111,7 @@ else
 	@printf "${CYAN}"
 	@printf "Creating starter IP\n"
 
-	@$(VENV) && python tools/new-ip.py ${IP_NAME_PARSED}
+	@python tools/new-ip.py ${IP_NAME_PARSED}
 
 # Make a new branch for the IP
 	@printf "${CYAN}"
@@ -140,15 +133,15 @@ else
 
 endif
 
-lint:
+lint: --pip
 ifndef IP
 	@tools/lint.sh
 else
 	@tools/lint.sh ${IP}
 endif
 
-test: venv
-	@$(VENV) && tools/test.sh ${EXTRA_ARGS}
+test: --pip
+	@tools/test.sh ${EXTRA_ARGS}
 
 # ------------------------------------------------------------------------------
 # Testfloat generation
