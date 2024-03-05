@@ -33,74 +33,57 @@ def crossbar_front(
             cbar_out[i + m] = cbar_in[i][0]
             cbar_out[i + m + 1] = cbar_in[i + 2**stage_fft][0]
 
-            recv_rdy[i + m] = cbar_in[i][2]
-            recv_rdy[i + m + 1] = cbar_in[i + 2**stage_fft][2]
+            recv_rdy[i + m] = cbar_in[i][1]
+            recv_rdy[i + m + 1] = cbar_in[i + 2**stage_fft][1]
 
-            send_val[i + m] = cbar_in[i][1]
-            send_val[i + m + 1] = cbar_in[i + 2**stage_fft][1]
+            send_val[i + m] = cbar_in[i][2]
+            send_val[i + m + 1] = cbar_in[i + 2**stage_fft][2]
 
-    return [(a, b, c) for a, b, c in zip(cbar_out, recv_rdy, send_val)]
+    return list(zip(cbar_out, recv_rdy, send_val))
 
 
 # back crossbar (set FRONT = 0 in verilog model)
-def crossbar_back(n_samples: int, stage_fft: int, cbar_in: list[any]) -> list[any]:
+def crossbar_back(n_samples: int, stage_fft: int, cbar_in: list[tuple[any, bool, bool]]) -> list[tuple[any, bool, bool]]:
     cbar_out = [None for _ in range(n_samples)]
+    recv_rdy = [None for _ in range(n_samples)]
+    send_val = [None for _ in range(n_samples)]
 
     for m in range(0, 2**stage_fft):
         for i in range(m, n_samples, 2 ** (stage_fft + 1)):
-            cbar_out[i] = cbar_in[i + m]
-            cbar_out[i + 2**stage_fft] = cbar_in[i + m + 1]
+            cbar_out[i] = cbar_in[i + m][0]
+            cbar_out[i + 2**stage_fft] = cbar_in[i + m + 1][0]
 
-    return cbar_out
+            recv_rdy[i] = cbar_in[i + m][1]
+            recv_rdy[i + 2**stage_fft] = cbar_in[i + m + 1][1]
 
+            send_val[i] = cbar_in[i + m][2]
+            send_val[i + 2**stage_fft] = cbar_in[i + m + 1][2]
 
-# get output of crossbar_front
-# def gen_crossbar_front(n_samples, stage_fft, cbar_in: list[tuple[CFixed, bool, bool]]):
-#     # print(n_samples)
-#     return [
-#         (
-#             " ".join([f"recv_real[{i}] recv_imaginary[{i}]" for i in range(n_samples)])
-#             + " ".join([f"recv_val[{i}] recv_rdy[{i}]*" for i in range(n_samples)])
-#             + " ".join(
-#                 [f"send_real[{i}]* send_imaginary[{i}]*" for i in range(n_samples)]
-#             )
-#             + " ".join([f"send_val[{i}]*" for i in range(n_samples)])
-#             + " ".join([f"send_rdy[{i}]" for i in range(n_samples)])
-#         ),
-#         sum(  # recv real and imaginary
-#             [
-#                 list(
-#                     cfixed_bits(x[0])
-#                 )  # Returns a tuple here so we unpack it to a list and take the sum
-#                 for x in cbar_in
-#             ],
-#             [],
-#         )
-#         + sum(  # recv val and recv rdy
-#             [[Bits1(int(x[1])), Bits1(int(x[2]))] for x in cbar_in],
-#             [],
-#         )
-#         + sum(  # send real and imaginary
-#             [
-#                 list(
-#                     cfixed_bits(x)
-#                 )  # Returns a tuple here so we unpack it to a list and take the sum
-#                 for x in crossbar_front(n_samples, stage_fft, [c[0] for c in cbar_in])
-#             ],
-#             [],
-#         )
-#         + [
-#             Bits1(int(x))
-#             for x in crossbar_front(n_samples, stage_fft, [c[1] for c in cbar_in])
-#         ]  # send val
-#         + [
-#             Bits1(int(x))
-#             for x in crossbar_front(n_samples, stage_fft, [c[2] for c in cbar_in])
-#         ],  # send rdy
-#     ]
+    return list(zip(cbar_out, recv_rdy, send_val))
+
+# Generate a test vector for the crossbar
+def gen_crossbar_test(n_samples: int, stage_fft: int, cbar_in: list[tuple[CFixed, bool, bool]], front: bool):
+    crossbar_fn = crossbar_front if front else crossbar_back
+
+    output = crossbar_fn(n_samples, stage_fft, cbar_in)
+
+    send_msg, recv_rdy, send_val = zip(*output)
+
+    recv_msg, send_rdy, recv_val = zip(*cbar_in)
+
+    recv_msg = sum(map(list, map(cfixed_bits, recv_msg)), [])
+    recv_val = list(map(Bits1, recv_val))
+    send_rdy = list(map(Bits1, send_rdy))
+
+    send_msg = sum(map(list, map(cfixed_bits, send_msg)), [])
+    send_val = list(map(Bits1, send_val))
+    recv_rdy = list(map(Bits1, recv_rdy))
+
+    print(
+        send_msg, recv_rdy, send_val, recv_msg, recv_val, send_rdy
+    )
 
 
-def gen_crossbar_front(n_samples, stage_fft, cbar_in: list[tuple[CFixed, bool, bool]]):
     return [
         (
             " ".join(
@@ -111,79 +94,14 @@ def gen_crossbar_front(n_samples, stage_fft, cbar_in: list[tuple[CFixed, bool, b
                 + [f"send_rdy[{i}]" for i in range(n_samples)]
                 )
         ),
-        sum(  # recv real and imaginary
-            [
-                list(
-                    cfixed_bits(x[0])
-                )  # Returns a tuple here so we unpack it to a list and take the sum
-                for x in cbar_in
-            ],
-            [],
-        )
-        + [Bits1(int(x[1])) for x in cbar_in]  # recv val
-        + [
-            Bits1(int(x[1])) for x in crossbar_front(n_samples, stage_fft, cbar_in)
-        ]  # recv rdy
-        + sum(  # send real and imaginary
-            [
-                list(
-                    cfixed_bits(x[0])
-                )  # Returns a tuple here so we unpack it to a list and take the sum
-                for x in crossbar_front(n_samples, stage_fft, cbar_in)
-            ],
-            [],
-        )
-        + [
-            Bits1(int(x[2])) for x in crossbar_front(n_samples, stage_fft, cbar_in)
-        ]  # send val
-        + [Bits1(int(x[2])) for x in cbar_in],  # send rdy
+        recv_msg
+        + recv_val
+        + recv_rdy
+        + send_msg
+        + send_val
+        + send_rdy
     ]
 
-
-# get output of crossbar_back
-# def gen_crossbar_back(n_samples, stage_fft, cbar_in: list[tuple[CFixed, bool, bool]]):
-#     # print(n_samples)
-#     return [
-#         (
-#             " ".join([f"recv_real[{i}] recv_imaginary[{i}]" for i in range(n_samples)])
-#             + " ".join([f"recv_val[{i}] recv_rdy[{i}]*" for i in range(n_samples)])
-#             + " ".join(
-#                 [f"send_real[{i}]* send_imaginary[{i}]*" for i in range(n_samples)]
-#             )
-#             + " ".join([f"send_val[{i}]*" for i in range(n_samples)])
-#             + " ".join([f"send_rdy[{i}]" for i in range(n_samples)])
-#         ),
-#         sum(  # recv real and imaginary
-#             [
-#                 list(
-#                     cfixed_bits(x[0])
-#                 )  # Returns a tuple here so we unpack it to a list and take the sum
-#                 for x in cbar_in
-#             ],
-#             [],
-#         )
-#         + sum(  # recv val and recv rdy
-#             [[Bits1(int(x[1])), Bits1(int(x[2]))] for x in cbar_in],
-#             [],
-#         )
-#         + sum(  # send real and imaginary
-#             [
-#                 list(
-#                     cfixed_bits(x)
-#                 )  # Returns a tuple here so we unpack it to a list and take the sum
-#                 for x in crossbar_back(n_samples, stage_fft, [c[0] for c in cbar_in])
-#             ],
-#             [],
-#         )
-#         + [
-#             Bits1(int(x))
-#             for x in crossbar_back(n_samples, stage_fft, [c[1] for c in cbar_in])
-#         ]  # send val
-#         + [
-#             Bits1(int(x))
-#             for x in crossbar_back(n_samples, stage_fft, [c[2] for c in cbar_in])
-#         ],  # send rdy
-#     ]
 
 
 # generate a random CFixed value
@@ -202,13 +120,10 @@ def gen_input(
 ) -> list[tuple[CFixed, bool, bool]]:
     return [
         (
-            rand_cfixed(bit_width, decimal_pt),
-            True,
-            True
-            # random.choice([True, False]),
-            # random.choice([True, False]),
+            CFixed((i, 0), bit_width, decimal_pt),
+            True, True
         )
-        for _ in range(n_samples)
+        for i in range(n_samples)
     ]
 
 
@@ -225,6 +140,7 @@ def gen_input(
         {
             "fp_spec": [(32, 16)],
             "n_samples": [8],
+            "front": [False, True],
         }
     )
 )
@@ -232,7 +148,7 @@ def test_front(cmdline_opts, p):
     for stage in range(0, int(math.log2(p.n_samples))):
         run_test_vector_sim(
             Crossbar(p.fp_spec[0], p.n_samples, stage, 1),
-            gen_crossbar_front(p.n_samples, stage, gen_input(*p.fp_spec, p.n_samples)),
+            gen_crossbar_test(p.n_samples, stage, gen_input(*p.fp_spec, p.n_samples), p.front),
             cmdline_opts,
         )
 
