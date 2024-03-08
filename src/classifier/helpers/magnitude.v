@@ -7,7 +7,7 @@
 
 module magnitude_Magnitude #(
   parameter int BIT_WIDTH = 32,
-  parameter int FIXED_BITS = 16,
+  parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES = 8,
 ) (
   input logic [BIT_WIDTH - 1:0] recv_msg [N_SAMPLES - 1:0],

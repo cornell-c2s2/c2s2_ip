@@ -7,7 +7,7 @@
 
 module comparison_Comparison #(
   parameter int BIT_WIDTH  = 32,
-  parameter int FIXED_BITS = 16,
+  parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES  = 8,
   parameter int CUTOFF_MAG = 20
 ) (
@@ -23,23 +23,21 @@ module comparison_Comparison #(
       compare_out <= 0;
       done <= 0;
       i <= 0;
-    end 
-    else if (!done) begin
+    end else if (!done) begin
       if (i < N_SAMPLES) begin
         if (filtered_valid[i] && (mag_in[i] > CUTOFF_MAG)) begin
-          compare_out <= 1; 
-          done <= 1; 
-          i <= i + 1; 
+          compare_out <= 1;
+          done <= 1;
+          i <= i + 1;
         end else begin
-          compare_out <= compare_out; 
-          done <= done; 
-          i <= i + 1; 
+          compare_out <= compare_out;
+          done <= done;
+          i <= i + 1;
         end
       end else begin
         done <= 1;
       end
-    end
-    else begin
+    end else begin
       compare_out <= compare_out;
       done <= done;
       i <= i;

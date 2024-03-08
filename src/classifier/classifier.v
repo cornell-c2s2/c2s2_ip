@@ -10,10 +10,10 @@
 
 module classifier_Classifier #(
   parameter int BIT_WIDTH   = 32,
-  parameter int FIXED_BITS  = 16,
+  parameter int DECIMAL_PT  = 16,
   parameter int N_SAMPLES   = 8,
-  parameter int CUTOFF_FREQ = 65536000, // 1000 in 16.16 : 1000*2^16
-  parameter int CUTOFF_MAG  = 1310720   // 20 in 16.16 : 20*2^16
+  parameter int CUTOFF_FREQ = 65536000,  // 1000 in 16.16 : 1000*2^16
+  parameter int CUTOFF_MAG  = 1310720    // 20 in 16.16 : 20*2^16
 ) (
   input logic clk,
   input logic reset,
@@ -45,9 +45,9 @@ module classifier_Classifier #(
   logic [BIT_WIDTH-1:0] out_mag[N_SAMPLES - 1:0];
 
   magnitude_Magnitude#(
-    .BIT_WIDTH(BIT_WIDTH),
-    .FIXED_BITS(FIXED_BITS),
-    .N_SAMPLES(N_SAMPLES),
+    .BIT_WIDTH (BIT_WIDTH),
+    .DECIMAL_PT(DECIMAL_PT),
+    .N_SAMPLES (N_SAMPLES),
   ) (
       .recv_msg(in_mag), .send_msg(out_mag)
   );
@@ -70,7 +70,7 @@ module classifier_Classifier #(
 
   highpass_Highpass#(
     .BIT_WIDTH  (BIT_WIDTH),
-    .FIXED_BITS(FIXED_BITS),
+    .DECIMAL_PT (DECIMAL_PT),
     .N_SAMPLES  (N_SAMPLES),
     .CUTOFF_FREQ(CUTOFF_FREQ)
   ) (
@@ -98,11 +98,14 @@ module classifier_Classifier #(
 
   comparison_Comparison#(
     .BIT_WIDTH (BIT_WIDTH),
-    .FIXED_BITS(FIXED_BITS),
+    .DECIMAL_PT(DECIMAL_PT),
     .N_SAMPLES (N_SAMPLES),
     .CUTOFF_MAG(CUTOFF_MAG)
   ) (
-      .filtered_valid(out_highpass_reg), .mag_in(out_mag_reg), .compare_out(out_comparison), .done(comparison_done)
+      .filtered_valid(out_highpass_reg),
+      .mag_in(out_mag_reg),
+      .compare_out(out_comparison),
+      .done(comparison_done)
   );
 
   // Register for output
