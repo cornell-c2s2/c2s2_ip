@@ -13,7 +13,8 @@ module classifier_Classifier #(
   parameter int DECIMAL_PT  = 16,
   parameter int N_SAMPLES   = 8,
   parameter int CUTOFF_FREQ = 65536000,  // 1000 in 16.16 : 1000*2^16
-  parameter int CUTOFF_MAG  = 1310720    // 20 in 16.16 : 20*2^16
+  parameter int CUTOFF_MAG  = 1310720,   // 20 in 16.16 : 20*2^16
+  parameter int SAMPLING_FREQUENCY = 44000
 ) (
   input logic clk,
   input logic reset,
@@ -66,6 +67,18 @@ module classifier_Classifier #(
   );
 
   // Filter based on cutoff
+
+  logic [BIT_WIDTH-1:0] frequency_array [N_SAMPLES-1:0];
+  
+  frequency_arr #(
+    .BIT_WIDTH         (BIT_WIDTH),
+    .DECIMAL_PT        (DECIMAL_PT),
+    .N_SAMPLES         (N_SAMPLES),
+    .SAMPLING_FREQUENCY(SAMPLING_FREQUENCY)
+  ) (
+    .frequency_out(frequency_array)
+  );
+
   logic [BIT_WIDTH-1:0] out_filter[N_SAMPLES - 1:0];
 
   highpass_Highpass#(
@@ -74,7 +87,7 @@ module classifier_Classifier #(
     .N_SAMPLES  (N_SAMPLES),
     .CUTOFF_FREQ(CUTOFF_FREQ)
   ) (
-      .freq_in(),  // TODO: figure out frequency in stuff
+      .freq_in(frequency_array),
       .mag_in(in_filter),
       .filtered_valid(out_filter)
   );
