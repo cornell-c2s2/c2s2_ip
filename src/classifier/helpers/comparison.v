@@ -11,13 +11,16 @@ module comparison_Comparison #(
   parameter int N_SAMPLES  = 8,
   parameter int CUTOFF_MAG = 20
 ) (
+  input                          clk,
+  input                          reset,
   input  logic [BIT_WIDTH - 1:0] filtered_valid[N_SAMPLES - 1:0],
   input  logic [BIT_WIDTH - 1:0] mag_in        [N_SAMPLES - 1:0],
   output logic                   compare_out,
   output logic                   done
 );
 
-  genvar i;
+  logic [$clog2(N_SAMPLES)-1:0] i;
+
   always_ff @(posedge clk) begin
     if (reset) begin
       compare_out <= 0;

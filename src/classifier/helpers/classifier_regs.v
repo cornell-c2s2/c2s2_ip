@@ -13,7 +13,17 @@ module arr_ResetReg #(
   input  logic [BIT_WIDTH-1:0] d    [N_ELEMENTS-1:0]   // Data input
 );
 
-  always_ff @(posedge clk) q <= reset ? RESET_VALUE : d;
+  always_ff @(posedge clk) begin
+    if (reset) begin
+      for (int i = 0; i < N_ELEMENTS; i++) begin
+        q[i] <= RESET_VALUE;
+      end
+    end else begin
+      for (int i = 0; i < N_ELEMENTS; i++) begin
+        q[i] <= d[i];
+      end
+    end
+  end
 
 endmodule
 
@@ -33,7 +43,23 @@ module arr_EnResetReg #(
   input  logic                 en                      // Enable input
 );
 
-  always_ff @(posedge clk) if (reset || en) q <= reset ? RESET_VALUE : d;
+  always_ff @(posedge clk) begin
+    if (reset) begin
+      for (int i = 0; i < N_ELEMENTS; i++) begin
+        q[i] <= RESET_VALUE;
+      end
+    end 
+    else if (en) begin
+      for (int i = 0; i < N_ELEMENTS; i++) begin
+        q[i] <= d[i];
+      end
+    end
+    else begin
+      for (int i = 0; i < N_ELEMENTS; i++) begin
+        q[i] <= q[i];
+      end
+    end
+  end
 
 endmodule
 

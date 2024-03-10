@@ -36,7 +36,7 @@ module classifier_Classifier #(
   // Register for classifier input data
   arr_EnResetReg #(
     .BIT_WIDTH  (BIT_WIDTH),
-    .RESET_VALUE(0),
+    .RESET_VALUE({BIT_WIDTH{1'b0}}),
     .N_ELEMENTS (N_SAMPLES)
   ) classifier_in (
     .clk  (clk),
@@ -63,7 +63,7 @@ module classifier_Classifier #(
 
   arr_ResetReg #(
     .BIT_WIDTH  (BIT_WIDTH),
-    .RESET_VALUE(0),
+    .RESET_VALUE({BIT_WIDTH{1'b0}}),
     .N_ELEMENTS (N_SAMPLES)
   ) mag_reg (
     .clk(clk),
@@ -102,7 +102,7 @@ module classifier_Classifier #(
 
   arr_ResetReg #(
     .BIT_WIDTH  (BIT_WIDTH),
-    .RESET_VALUE(0),
+    .RESET_VALUE({BIT_WIDTH{1'b0}}),
     .N_ELEMENTS (N_SAMPLES)
   ) highpass_reg (
     .clk(clk),
@@ -120,7 +120,7 @@ module classifier_Classifier #(
     .DECIMAL_PT(DECIMAL_PT),
     .N_SAMPLES (N_SAMPLES),
     .CUTOFF_MAG(CUTOFF_MAG)
-  ) comparator (
+  ) comparison (
     .clk(clk),
     .reset(reset),
     .filtered_valid(out_highpass_reg),
@@ -132,8 +132,8 @@ module classifier_Classifier #(
   // Register for output
   logic on_off;
   cmn_EnResetReg #(
-    .p_nbits  (1),
-    .p_reset_value(0)
+    .p_nbits(1),
+    .p_reset_value({BIT_WIDTH{1'b0}})
   ) classifier_out (
     .clk  (clk),
     .reset(reset),
