@@ -5,15 +5,18 @@
 `ifndef CLASSIFIER_V
 `define CLASSIFIER_V
 `include "cmn/regs.v"
+`include "classifier/helpers/classifier_regs.v"
 `include "classifier/helpers/magnitude.v"
 `include "classifier/helpers/highpass.v"
+`include "classifier/helpers/frequency_arr.v"
+`include "classifier/helpers/comparison.v"
 
 module classifier_Classifier #(
-  parameter int BIT_WIDTH   = 32,
-  parameter int DECIMAL_PT  = 16,
-  parameter int N_SAMPLES   = 8,
+  parameter int BIT_WIDTH = 32,
+  parameter int DECIMAL_PT = 16,
+  parameter int N_SAMPLES = 8,
   parameter int CUTOFF_FREQ = 65536000,  // 1000 in 16.16 : 1000*2^16
-  parameter int CUTOFF_MAG  = 1310720,   // 20 in 16.16 : 20*2^16
+  parameter int CUTOFF_MAG = 1310720,  // 20 in 16.16 : 20*2^16
   parameter int SAMPLING_FREQUENCY = 44000
 ) (
   input logic clk,
@@ -31,9 +34,10 @@ module classifier_Classifier #(
   logic [BIT_WIDTH-1:0] in_mag[N_SAMPLES - 1:0];
 
   // Register for classifier input data
-  cmn_EnResetReg #(
-    .p_nbits      (BIT_WIDTH),
-    .p_reset_value(0)
+  arr_EnResetReg #(
+    .BIT_WIDTH  (BIT_WIDTH),
+    .RESET_VALUE(0),
+    .N_ELEMENTS (N_SAMPLES)
   ) classifier_in (
     .clk  (clk),
     .reset(reset),
@@ -45,20 +49,22 @@ module classifier_Classifier #(
   // Calculate the magnitude combinational
   logic [BIT_WIDTH-1:0] out_mag[N_SAMPLES - 1:0];
 
-  magnitude_Magnitude#(
+  magnitude_Magnitude #(
     .BIT_WIDTH (BIT_WIDTH),
     .DECIMAL_PT(DECIMAL_PT),
-    .N_SAMPLES (N_SAMPLES),
-  ) (
-      .recv_msg(in_mag), .send_msg(out_mag)
+    .N_SAMPLES (N_SAMPLES)
+  ) mag_calc (
+    .recv_msg(in_mag),
+    .send_msg(out_mag)
   );
 
   // Register for magnitude output
   logic [BIT_WIDTH-1:0] out_mag_reg[N_SAMPLES - 1:0];
 
-  cmn_ResetReg #(
-    .p_nbits      (BIT_WIDTH),
-    .p_reset_value(0)
+  arr_ResetReg #(
+    .BIT_WIDTH  (BIT_WIDTH),
+    .RESET_VALUE(0),
+    .N_ELEMENTS (N_SAMPLES)
   ) mag_reg (
     .clk(clk),
     .reset(reset),
@@ -68,36 +74,36 @@ module classifier_Classifier #(
 
   // Filter based on cutoff
 
-  logic [BIT_WIDTH-1:0] frequency_array [N_SAMPLES-1:0];
-  
+  logic [BIT_WIDTH-1:0] frequency_array[N_SAMPLES-1:0];
+
   frequency_arr #(
     .BIT_WIDTH         (BIT_WIDTH),
     .DECIMAL_PT        (DECIMAL_PT),
     .N_SAMPLES         (N_SAMPLES),
     .SAMPLING_FREQUENCY(SAMPLING_FREQUENCY)
-  ) (
+  ) freq_gen (
     .frequency_out(frequency_array)
   );
 
   logic [BIT_WIDTH-1:0] out_filter[N_SAMPLES - 1:0];
 
-  highpass_Highpass#(
+  highpass_Highpass #(
     .BIT_WIDTH  (BIT_WIDTH),
     .DECIMAL_PT (DECIMAL_PT),
     .N_SAMPLES  (N_SAMPLES),
     .CUTOFF_FREQ(CUTOFF_FREQ)
-  ) (
-      .freq_in(frequency_array),
-      .mag_in(in_filter),
-      .filtered_valid(out_filter)
+  ) highpass_fil (
+    .freq_in(frequency_array),
+    .filtered_valid(out_filter)
   );
 
   // Register for classify 
   logic [BIT_WIDTH-1:0] out_highpass_reg[N_SAMPLES - 1:0];
 
-  cmn_ResetReg #(
-    .p_nbits      (BIT_WIDTH),
-    .p_reset_value(0)
+  arr_ResetReg #(
+    .BIT_WIDTH  (BIT_WIDTH),
+    .RESET_VALUE(0),
+    .N_ELEMENTS (N_SAMPLES)
   ) highpass_reg (
     .clk(clk),
     .reset(reset),
@@ -109,24 +115,26 @@ module classifier_Classifier #(
   logic out_comparison;
   logic comparison_done;
 
-  comparison_Comparison#(
+  comparison_Comparison #(
     .BIT_WIDTH (BIT_WIDTH),
     .DECIMAL_PT(DECIMAL_PT),
     .N_SAMPLES (N_SAMPLES),
     .CUTOFF_MAG(CUTOFF_MAG)
-  ) (
-      .filtered_valid(out_highpass_reg),
-      .mag_in(out_mag_reg),
-      .compare_out(out_comparison),
-      .done(comparison_done)
+  ) comparator (
+    .clk(clk),
+    .reset(reset),
+    .filtered_valid(out_highpass_reg),
+    .mag_in(out_mag_reg),
+    .compare_out(out_comparison),
+    .done(comparison_done)
   );
 
   // Register for output
   logic on_off;
   cmn_EnResetReg #(
-    .p_nbits      (BIT_WIDTH),
+    .p_nbits  (1),
     .p_reset_value(0)
-  ) classifier_in (
+  ) classifier_out (
     .clk  (clk),
     .reset(reset),
     .d    (out_comparison),
@@ -148,7 +156,7 @@ module classifier_Classifier #(
     case (currentState)
       IDLE: if (recv_rdy && recv_val) nextState = CALC;
  else nextState = IDLE;
-      CALC: if (compare_done) nextState = CALC;
+      CALC: if (comparison_done) nextState = CALC;
  else nextState = DONE;
       DONE: if (send_rdy && send_val) nextState = IDLE;
  else nextState = DONE;
@@ -159,6 +167,9 @@ module classifier_Classifier #(
   end
 
   // Output Comb Logic
+
+  logic result_en;
+
   always_comb begin
     case (currentState)
       IDLE: begin
