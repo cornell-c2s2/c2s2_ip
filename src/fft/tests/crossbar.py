@@ -7,19 +7,6 @@ import random
 from tools.utils import mk_test_matrices, cfixed_bits, fixed_bits
 from fixedpt import Fixed, CFixed
 
-
-# front crossbar (set FRONT = 1 in verilog model)
-# def crossbar_front(n_samples: int, stage_fft: int, cbar_in: list[any]) -> list[any]:
-#     cbar_out = [None for _ in range(n_samples)]
-
-#     for m in range(0, 2**stage_fft):
-#         for i in range(m, n_samples, 2 ** (stage_fft + 1)):
-#             cbar_out[i + m] = cbar_in[i]
-#             cbar_out[i + m + 1] = cbar_in[i + 2**stage_fft]
-
-#     return cbar_out
-
-
 # the two bools are recv_val and send_rdy
 def crossbar_front(
     n_samples: int, stage_fft: int, cbar_in: list[tuple[any, bool, bool]]
