@@ -62,11 +62,14 @@ def packed_msg(array, bitwidth, fft_size):  # Array of ints
 """Creates a singular FFT call and resposne """
 
 
-def fft_call_response(array_of_sample_integers, bitwidth, fft_size):
+def fft_call_response(array_of_sample_integers, bitwidth, fft_size, d_point):
     array = []
 
     output_array_unpacked = fixed_point_fft(
-        BIT_WIDTH=bitwidth, DECIMAL_PT=16, SIZE_FFT=fft_size, x=array_of_sample_integers
+        BIT_WIDTH=bitwidth,
+        DECIMAL_PT=d_point,
+        SIZE_FFT=fft_size,
+        x=array_of_sample_integers,
     )
     input_array = []
     output_array = []
@@ -93,11 +96,15 @@ def two_point_dc(bits, fft_size, frac_bits):
 
 def two_point_dc_generated(bits, fft_size, frac_bits):
     # print([Fxp( 1, signed = True, n_word = bits, n_frac = frac_bits ),Fxp( 1, signed = True, n_word = bits, n_frac = frac_bits )])
-    return fft_call_response([1 * (2**frac_bits), 1 * (2**frac_bits)], bits, fft_size)
+    return fft_call_response(
+        [1 * (2**frac_bits), 1 * (2**frac_bits)], bits, fft_size, frac_bits
+    )
 
 
 def two_point_dc_generated_negative(bits, fft_size, frac_bits):
-    return fft_call_response([1 * (2**frac_bits), 1 * (2**frac_bits)], bits, fft_size)
+    return fft_call_response(
+        [1 * (2**frac_bits), 1 * (2**frac_bits)], bits, fft_size, frac_bits
+    )
 
 
 def eight_point_dc(bits, fft_size, frac_bits):
@@ -437,7 +444,7 @@ def descend_signal(bits, fft_size, frac_bits):
     for i in range(fft_size):
         signal.append((fft_size - i) * (2**frac_bits))
 
-    return fft_call_response(signal, bits, fft_size)
+    return fft_call_response(signal, bits, fft_size, frac_bits)
 
 
 def random_signal(bits, fft_size, frac_bits):
@@ -446,7 +453,7 @@ def random_signal(bits, fft_size, frac_bits):
     for i in range(fft_size):
         signal.append(math.trunc(random.uniform(-smax, smax)))
 
-    return fft_call_response(signal, bits, fft_size)
+    return fft_call_response(signal, bits, fft_size, frac_bits)
 
 
 def random_stream(bits, fft_size, frac_bits):
@@ -458,7 +465,7 @@ def random_stream(bits, fft_size, frac_bits):
         for i in range(fft_size):
             signal.append(math.trunc(random.uniform(-smax, smax)))
 
-        output += fft_call_response(signal, bits, fft_size)
+        output += fft_call_response(signal, bits, fft_size, frac_bits)
 
     return output
 

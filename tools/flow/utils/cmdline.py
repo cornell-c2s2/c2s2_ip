@@ -27,9 +27,7 @@ def multi_type(*args):
                 if arg == value:
                     return value
         raise argparse.ArgumentTypeError(
-            f"Invalid type for argument, expected one of {
-                ', '.join(arg.__name__ if callable(arg) else str(arg) for arg in args)
-            }"
+            f"Invalid type for argument, expected one of {', '.join(arg.__name__ if callable(arg) else str(arg) for arg in args)}"
         )
 
     return check_type

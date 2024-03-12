@@ -120,7 +120,9 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
         }
 
     if len(vtb_files) > 0:
-        spinner.fail(f"Found extra vtb files not matching any verilog files: {vtb_files}")
+        spinner.fail(
+            f"Found extra vtb files not matching any verilog files: {vtb_files}"
+        )
         return 1
 
     # delete these from the scope so they don't get used later
@@ -134,17 +136,17 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
             if name in files:
                 if design_name is not None:
                     spinner.fail(
-                        "Found multiple verilog files/vtb cases for %s: %s and %s" %
-                        (name,
-                        files[name]["verilog"],
-                        design["VERILOG_FILE"])
+                        "Found multiple verilog files/vtb cases for %s: %s and %s"
+                        % (name, files[name]["verilog"], design["VERILOG_FILE"])
                     )
                     return 1
                 design["VERILOG_FILE"] = files[name]["verilog"]
                 design["TEST_FILES"] = files[name]["vtb"]
                 design_name = name
         if design_name is None:
-            spinner.fail(f"No verilog file found matching any of {design['DESIGN_NAME']}", )
+            spinner.fail(
+                f"No verilog file found matching any of {design['DESIGN_NAME']}",
+            )
             return 1
         design["DESIGN_NAME"] = design_name
 
@@ -161,7 +163,7 @@ def synth_results(connection, build_dir, design_name: str, args):
     log.info("Saving synthesis results for %s to %s", design_name, build_dir)
     # First, zip the results
     connection.run(
-        f"cd {path.join(caravel_dir(), "openlane", design_name, "runs")} && zip -r results.zip {design_name}",
+        f"cd {path.join(caravel_dir(), 'openlane', design_name, 'runs')} && zip -r results.zip {design_name}",
         hide=args.verbose < 2,
     )
 
@@ -179,7 +181,7 @@ def synth_results(connection, build_dir, design_name: str, args):
 
     # Delete the results on the server
     connection.run(
-        f"rm {path.join(caravel_dir(), "openlane", design_name, "runs", "results.zip")}"
+        f"rm {path.join(caravel_dir(), 'openlane', design_name, 'runs', 'results.zip')}"
     )
 
     # Unzip the results
@@ -190,6 +192,7 @@ def synth_results(connection, build_dir, design_name: str, args):
 
     # Delete the zip file
     os.remove(path.join(build_dir, f"{design_name}.zip"))
+
 
 def synthesize(design, path_prefix, args):
     # Create a new connection as this is running in a separate thread
@@ -209,12 +212,16 @@ def synthesize(design, path_prefix, args):
             # Log the stdout and stderr
             log.error(synth_result.stdout)
             log.error(synth_result.stderr)
-        synth_results(connection, path.join(root_dir(), args.dir), prefixed_design_name, args)
+        synth_results(
+            connection, path.join(root_dir(), args.dir), prefixed_design_name, args
+        )
         connection.close()
         return 1
 
     # Copy the results back
-    synth_results(connection, path.join(root_dir(), args.dir), prefixed_design_name, args)
+    synth_results(
+        connection, path.join(root_dir(), args.dir), prefixed_design_name, args
+    )
 
     connection.close()
 
@@ -271,11 +278,12 @@ class Synth(SubCommand):
             "-n",
             "--nthreads",
             metavar="Number of Threads",
-            type=multi_type(positive_int, 'auto'), # expect an integer or the string 'auto'
-            default='auto',
+            type=multi_type(
+                positive_int, "auto"
+            ),  # expect an integer or the string 'auto'
+            default="auto",
             help="Number of threads to use for synthesis. Use 'auto' to use a threadcount equal to the number of CPU cores.",
         )
-
 
     def run(connection, args):
         """Run synthesis on a design."""
@@ -309,9 +317,7 @@ class Synth(SubCommand):
         # Collect the design files
         # ----------------------------------------------------------------
         # create a temporary build directory for saving files
-        build_dir = tempfile.TemporaryDirectory(
-            prefix="build", dir=root_dir(), delete=False
-        )
+        build_dir = tempfile.TemporaryDirectory(prefix="build", dir=root_dir())
 
         err_code = design_files(build_dir.name, designs, args)
         if err_code:
@@ -401,7 +407,7 @@ class Synth(SubCommand):
         # ----------------------------------------------------------------
 
         build_dir.cleanup()
-        
+
         # ----------------------------------------------------------------
         # Run synthesis
         # ----------------------------------------------------------------
@@ -410,20 +416,24 @@ class Synth(SubCommand):
         os.makedirs(path.join(root_dir(), args.dir), exist_ok=True)
 
         # Create threadpool
-        if args.nthreads == 'auto':
+        if args.nthreads == "auto":
             threads = multiprocessing.cpu_count()
         else:
             threads = args.nthreads
 
         spinner = Spinner(args, f"Running synthesis with {threads} threads")
-        
+
         with multiprocessing.Pool(threads) as pool:
-            results = pool.starmap(synthesize, [(design, path_prefix, args) for design in designs])
+            results = pool.starmap(
+                synthesize, [(design, path_prefix, args) for design in designs]
+            )
             if any(results):
                 spinner.fail("Synthesis failed")
-                log.error(f"Synthesis failed for the following designs:{"\n".join([design["DESIGN_NAME"] for design, result in zip(designs, results) if result])}")
+                log.error(
+                    f"Synthesis failed for the following designs:{chr(10).join([design['DESIGN_NAME'] for design, result in zip(designs, results) if result])}"
+                )
                 return 1
-        
+
         spinner.succeed("Finished synthesis")
 
         return 0
