@@ -65,7 +65,7 @@ def false_test():
     audio_array = np.array([0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5,0,0.5,1,0.5])
     audio_array = audio_array - 0.5
     sample_rate = 50000
-    frq_arr = np.fft.fft(audio_array[:8])
+    frq_arr = np.fft.fft(audio_array[:16])
     real_part = frq_arr.real
     return [real_part, 0]
 
@@ -87,7 +87,7 @@ test_case_table = mk_test_case_table(
         (
                         "msgs        src_delay sink_delay BIT_WIDTH DECIMAL_PT N_SAMPLES CUTOFF_FREQ CUTOFF_MAG SAMPLING_FREQUENCY slow"
         ),
-        ["false_test",   false_test, 4,        4,         32,       16,        8,       65536000,   1310720,   5000,         False],
+        ["false_test",   false_test, 4,        4,         32,       16,        16,       65536000,   1310720,   50000,         False],
         #["true_test",    true_test,  4,        4,         32,       16,        8,       65536000,   1310720,   96000,        False],
     ]
 )

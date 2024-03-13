@@ -27,7 +27,7 @@ module comparison_Comparison #(
       done <= 0;
       i <= 0;
     end else if (!done) begin
-      if (i < N_SAMPLES) begin
+      if (i < N_SAMPLES - 1) begin
         if (filtered_valid[i] && (mag_in[i] > CUTOFF_MAG)) begin
           compare_out <= 1;
           done <= 1;
