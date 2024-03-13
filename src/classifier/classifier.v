@@ -149,15 +149,15 @@ module classifier_Classifier #(
   logic [1:0] currentState;
   logic [1:0] nextState;
 
-  parameter [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd3;
+  parameter [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
 
   // Next State Comb Logic
   always_comb begin
     case (currentState)
       IDLE: if (recv_rdy && recv_val) nextState = CALC;
  else nextState = IDLE;
-      CALC: if (comparison_done) nextState = CALC;
- else nextState = DONE;
+      CALC: if (comparison_done) nextState = DONE;
+ else nextState = CALC;
       DONE: if (send_rdy && send_val) nextState = IDLE;
  else nextState = DONE;
       default: begin
