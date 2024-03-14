@@ -1,9 +1,9 @@
 fixedpt
 numpy
-pymtl3
+pymtl3==3.1.16
 pytest
 pytest-custom_exit_code
-pytest-xdist
+pytest-xdist==3.5.0
 psutil
 fabric
 halo
