@@ -57,7 +57,8 @@
 module fixed_point_combinational_FixedPointMultiButterfly #(
   parameter int n = 32,
   parameter int d = 16,
-  parameter int b = 4
+  parameter int b = 4,
+  parameter int num_mults = 2
   // Number of inputs to rotate around
 ) (
   input  logic clk,
@@ -80,7 +81,7 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
   output logic [n-1:0] dc[b]
 );
 
-  localparam int bb = b - 1;
+  localparam int bb = b / num_mults - 1;
 
   /* performs the butterfly operation, equivalent to doing
     | 1  w |   | a |   | c |
@@ -108,36 +109,59 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
   logic [((b == 1) ? 0 : $clog2(b)-1):0] next_comp_state;
 
   // wiring for the complex multipliers
-  logic [n-1:0] m_ar;
-  logic [n-1:0] m_ac;
-  logic [n-1:0] m_br;
-  logic [n-1:0] m_bc;
-  logic [n-1:0] m_cr;
-  logic [n-1:0] m_cc;
+  logic [n-1:0] m_ar[0:num_mults-1];
+  logic [n-1:0] m_ac[0:num_mults-1];
+  logic [n-1:0] m_br[0:num_mults-1];
+  logic [n-1:0] m_bc[0:num_mults-1];
+  logic [n-1:0] m_cr[0:num_mults-1];
+  logic [n-1:0] m_cc[0:num_mults-1];
 
-  logic mult_recv_rdy, mult_send_val;
+  logic [num_mults-1:0] mult_recv_rdy, mult_send_val;
 
   logic unused = &({IDLE, COMP, DONE, mult_recv_rdy, mult_send_val});
 
-  // complex multiplier instantiation as combinatorial
-  fixed_point_combinational_ComplexMultiplier #(
-    .n(n),
-    .d(d),
-    .num_mults(3)  // with 3 mults, can output in same cycle
-  ) mult (
-    .recv_val(1'b1),
-    .recv_rdy(mult_recv_rdy),
-    .send_val(mult_send_val),
-    .send_rdy(1'b1),
-    .clk(clk),
-    .reset(reset),
-    .ar(m_ar),
-    .ac(m_ac),
-    .br(m_br),
-    .bc(m_bc),
-    .cr(m_cr),
-    .cc(m_cc)
-  );
+  generate
+    for (genvar i = 0; i < num_mults; i++) begin
+      // complex multiplier instantiation as combinatorial
+      localparam logic [((b == 1) ? 0 : $clog2(b)-1):0] offset = i * b / num_mults;
+      fixed_point_combinational_ComplexMultiplier #(
+        .n(n),
+        .d(d),
+        .num_mults(3)  // with 3 mults, can output in same cycle
+      ) mult (
+        .recv_val(1'b1),
+        .recv_rdy(mult_recv_rdy[i]),
+        .send_val(mult_send_val[i]),
+        .send_rdy(1'b1),
+        .clk(clk),
+        .reset(reset),
+        .ar(m_ar[i]),
+        .ac(m_ac[i]),
+        .br(m_br[i]),
+        .bc(m_bc[i]),
+        .cr(m_cr[i]),
+        .cc(m_cc[i])
+      );
+
+      always_ff @(posedge clk) begin
+        if (state == COMP) begin
+          s_cr[comp_state+offset] <= s_ar[comp_state+offset] + m_cr[i];
+          s_cc[comp_state+offset] <= s_ac[comp_state+offset] + m_cc[i];
+          s_dr[comp_state+offset] <= s_ar[comp_state+offset] - m_cr[i];
+          s_dc[comp_state+offset] <= s_ac[comp_state+offset] - m_cc[i];
+        end else begin
+        end
+      end
+
+      always_comb begin
+        m_ac[i] = s_bc[comp_state+offset];
+        m_ar[i] = s_br[comp_state+offset];
+        m_bc[i] = s_wc[comp_state+offset];
+        m_br[i] = s_wr[comp_state+offset];
+      end
+
+    end
+  endgenerate
 
   // val_rdy logic
   assign recv_rdy = (state == IDLE);
@@ -183,13 +207,13 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
     // $display("comp_state: %d", comp_state);
     // $display("next_comp_state: %d\n", next_comp_state);
     comp_state <= next_comp_state;
-    if (state == COMP) begin
-      s_cr[comp_state] <= s_ar[comp_state] + m_cr;
-      s_cc[comp_state] <= s_ac[comp_state] + m_cc;
-      s_dr[comp_state] <= s_ar[comp_state] - m_cr;
-      s_dc[comp_state] <= s_ac[comp_state] - m_cc;
-    end else begin
-    end
+    // if (state == COMP) begin
+    //   s_cr[comp_state] <= s_ar[comp_state] + m_cr;
+    //   s_cc[comp_state] <= s_ac[comp_state] + m_cc;
+    //   s_dr[comp_state] <= s_ar[comp_state] - m_cr;
+    //   s_dc[comp_state] <= s_ac[comp_state] - m_cc;
+    // end else begin
+    // end
   end
 
   // state transition logic
@@ -211,7 +235,7 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
       end else begin
       end
     end else if (state == COMP) begin
-      if (comp_state == bb[((b == 1)?0 : $clog2(b)-1):0]) begin
+      if (comp_state == bb[((b==1)?0 : $clog2(b)-1):0]) begin
         next_state = DONE;
         next_comp_state = 0;
       end else begin
@@ -220,10 +244,10 @@ module fixed_point_combinational_FixedPointMultiButterfly #(
     end else begin
     end
 
-    m_ac = s_bc[comp_state];
-    m_ar = s_br[comp_state];
-    m_bc = s_wc[comp_state];
-    m_br = s_wr[comp_state];
+    // m_ac = s_bc[comp_state];
+    // m_ar = s_br[comp_state];
+    // m_bc = s_wc[comp_state];
+    // m_br = s_wr[comp_state];
   end
 endmodule
 `endif
