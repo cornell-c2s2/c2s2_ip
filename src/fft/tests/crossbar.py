@@ -18,12 +18,11 @@ def crossbar_front(
     for m in range(2**stage_fft):
         for i in range(m, n_samples, 2 ** (stage_fft + 1)):
             cbar_out[i + m] = cbar_in[i][0]
-            cbar_out[i + m + 1] = cbar_in[i + 2**stage_fft][0]
-
             recv_rdy[i + m] = cbar_in[i][1]
-            recv_rdy[i + m + 1] = cbar_in[i + 2**stage_fft][1]
-
             send_val[i + m] = cbar_in[i][2]
+
+            cbar_out[i + m + 1] = cbar_in[i + 2**stage_fft][0]
+            recv_rdy[i + m + 1] = cbar_in[i + 2**stage_fft][1]
             send_val[i + m + 1] = cbar_in[i + 2**stage_fft][2]
 
     return list(zip(cbar_out, recv_rdy, send_val))
@@ -38,12 +37,11 @@ def crossbar_back(n_samples: int, stage_fft: int, cbar_in: list[tuple[any, bool,
     for m in range(0, 2**stage_fft):
         for i in range(m, n_samples, 2 ** (stage_fft + 1)):
             cbar_out[i] = cbar_in[i + m][0]
-            cbar_out[i + 2**stage_fft] = cbar_in[i + m + 1][0]
-
             recv_rdy[i] = cbar_in[i + m][1]
-            recv_rdy[i + 2**stage_fft] = cbar_in[i + m + 1][1]
-
             send_val[i] = cbar_in[i + m][2]
+
+            cbar_out[i + 2**stage_fft] = cbar_in[i + m + 1][0]
+            recv_rdy[i + 2**stage_fft] = cbar_in[i + m + 1][1]
             send_val[i + 2**stage_fft] = cbar_in[i + m + 1][2]
 
     return list(zip(cbar_out, recv_rdy, send_val))
@@ -65,10 +63,6 @@ def gen_crossbar_test(n_samples: int, stage_fft: int, cbar_in: list[tuple[CFixed
     send_msg = sum(map(list, map(cfixed_bits, send_msg)), [])
     send_val = list(map(Bits1, send_val))
     recv_rdy = list(map(Bits1, recv_rdy))
-
-    print(
-        send_msg, recv_rdy, send_val, recv_msg, recv_val, send_rdy
-    )
 
 
     return [
@@ -107,8 +101,9 @@ def gen_input(
 ) -> list[tuple[CFixed, bool, bool]]:
     return [
         (
-            CFixed((i, 0), bit_width, decimal_pt),
-            True, True
+            rand_cfixed(bit_width, decimal_pt),
+            random.choice([True, False]),
+            random.choice([True, False]),
         )
         for i in range(n_samples)
     ]
@@ -125,16 +120,16 @@ def gen_input(
 @pytest.mark.parametrize(
     *mk_test_matrices(
         {
-            "fp_spec": [(32, 16)],
-            "n_samples": [8],
-            "front": [False, True],
+            "fp_spec": [(8, 0)],
+            "n_samples": [2, 32, 512],
+            "front": [True, False],
         }
     )
 )
 def test_front(cmdline_opts, p):
     for stage in range(0, int(math.log2(p.n_samples))):
         run_test_vector_sim(
-            Crossbar(p.fp_spec[0], p.n_samples, stage, 1),
+            Crossbar(p.fp_spec[0], p.n_samples, stage, int(p.front)),
             gen_crossbar_test(p.n_samples, stage, gen_input(*p.fp_spec, p.n_samples), p.front),
             cmdline_opts,
         )
