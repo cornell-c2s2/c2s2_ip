@@ -7,43 +7,39 @@ import random
 from tools.utils import mk_test_matrices, cfixed_bits, fixed_bits
 from fixedpt import Fixed, CFixed
 
+def crossbar(n_samples: int, stage_fft: int, cbar_in: list[any], front: bool) -> list[any]:
+    cbar_out = [None for _ in range(n_samples)]
+
+    for m in range(2**stage_fft):
+        for i in range(m, n_samples, 2 ** (stage_fft + 1)):
+            if front:
+                cbar_out[i + m] = cbar_in[i]
+                cbar_out[i + m + 1] = cbar_in[i + 2**stage_fft]
+            else:
+                cbar_out[i] = cbar_in[i + m]
+                cbar_out[i + 2**stage_fft] = cbar_in[i + m + 1]
+
+    return cbar_out
+
 # the two bools are recv_val and send_rdy
 def crossbar_front(
     n_samples: int, stage_fft: int, cbar_in: list[tuple[any, bool, bool]]
 ) -> list[tuple[any, bool, bool]]:
-    cbar_out = [None for _ in range(n_samples)]
-    recv_rdy = [None for _ in range(n_samples)]
-    send_val = [None for _ in range(n_samples)]
+    cbar_in, send_rdy, recv_val = map(list, zip(*cbar_in))
 
-    for m in range(2**stage_fft):
-        for i in range(m, n_samples, 2 ** (stage_fft + 1)):
-            cbar_out[i + m] = cbar_in[i][0]
-            recv_rdy[i + m] = cbar_in[i][1]
-            send_val[i + m] = cbar_in[i][2]
-
-            cbar_out[i + m + 1] = cbar_in[i + 2**stage_fft][0]
-            recv_rdy[i + m + 1] = cbar_in[i + 2**stage_fft][1]
-            send_val[i + m + 1] = cbar_in[i + 2**stage_fft][2]
-
+    cbar_out = crossbar(n_samples, stage_fft, cbar_in, True)
+    recv_rdy = crossbar(n_samples, stage_fft, send_rdy, True)
+    send_val = crossbar(n_samples, stage_fft, recv_val, True)
     return list(zip(cbar_out, recv_rdy, send_val))
 
 
 # back crossbar (set FRONT = 0 in verilog model)
 def crossbar_back(n_samples: int, stage_fft: int, cbar_in: list[tuple[any, bool, bool]]) -> list[tuple[any, bool, bool]]:
-    cbar_out = [None for _ in range(n_samples)]
-    recv_rdy = [None for _ in range(n_samples)]
-    send_val = [None for _ in range(n_samples)]
+    cbar_in, send_rdy, recv_val = map(list, zip(*cbar_in))
 
-    for m in range(0, 2**stage_fft):
-        for i in range(m, n_samples, 2 ** (stage_fft + 1)):
-            cbar_out[i] = cbar_in[i + m][0]
-            recv_rdy[i] = cbar_in[i + m][1]
-            send_val[i] = cbar_in[i + m][2]
-
-            cbar_out[i + 2**stage_fft] = cbar_in[i + m + 1][0]
-            recv_rdy[i + 2**stage_fft] = cbar_in[i + m + 1][1]
-            send_val[i + 2**stage_fft] = cbar_in[i + m + 1][2]
-
+    cbar_out = crossbar(n_samples, stage_fft, cbar_in, False)
+    recv_rdy = crossbar(n_samples, stage_fft, send_rdy, False)
+    send_val = crossbar(n_samples, stage_fft, recv_val, False)
     return list(zip(cbar_out, recv_rdy, send_val))
 
 # Generate a test vector for the crossbar
@@ -118,7 +114,7 @@ def gen_input(
         }
     )
 )
-def test_front(cmdline_opts, p):
+def test_crossbar(cmdline_opts, p):
     for stage in range(0, int(math.log2(p.n_samples))):
         run_test_vector_sim(
             Crossbar(p.fp_spec[0], p.n_samples, stage, int(p.front)),

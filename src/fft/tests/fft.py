@@ -138,145 +138,145 @@ def mk_cmp_approx(n: int):
     return lambda x, y: cmp_approx(x, y, n)
 
 
-# @pytest.mark.parametrize(
-#     *mk_test_matrices(
-#         *[
-#             {"src_delay": [0, 1, 5], "sink_delay": [0, 1, 5], **d}
-#             for d in [
-#                 {  # 8 point DC
-#                     "bit_width": 32,
-#                     "decimal_pt": 16,
-#                     "n_samples": 8,
-#                     "inputs": [  # 1, 1, 1, 1, 1, 1, 1, 1
-#                         [[Fixed(1, True, 32, 16) for _ in range(8)]]
-#                     ],
-#                     "outputs": [  # 8, 0, 0, 0, 0, 0, 0, 0
-#                         [
-#                             [Fixed(8, True, 32, 16)]
-#                             + [Fixed(0, True, 32, 16) for _ in range(7)]
-#                         ]
-#                     ],
-#                     "cmp_fn": cmp_exact,
-#                 },
-#                 {  # 8 point alternating
-#                     "bit_width": 32,
-#                     "decimal_pt": 16,
-#                     "n_samples": 8,
-#                     "inputs": [  # 1, 0, 1, 0, 1, 0, 1, 0
-#                         [
-#                             sum(
-#                                 [
-#                                     [Fixed(1, True, 32, 16), Fixed(0, True, 32, 16)]
-#                                     for _ in range(4)
-#                                 ],
-#                                 [],
-#                             )
-#                         ]
-#                     ],
-#                     "outputs": [  # 4, 0, 0, 0, 4, 0, 0, 0
-#                         [
-#                             sum(
-#                                 [
-#                                     [Fixed(4, True, 32, 16)]
-#                                     + [Fixed(0, True, 32, 16) for _ in range(3)]
-#                                     for _ in range(2)
-#                                 ],
-#                                 [],
-#                             )
-#                         ]
-#                     ],
-#                     "cmp_fn": cmp_exact,
-#                 },
-#             ]
-#         ]
-#     )
-# )
-# def test_manual(cmdline_opts, p):
-#     # Test the FFT implementation with manually calculated inputs and outputs
-#     check_fft(
-#         p.bit_width,
-#         p.decimal_pt,
-#         p.n_samples,
-#         cmdline_opts,
-#         src_delay=0,
-#         sink_delay=0,
-#         comparison_fn=p.cmp_fn,
-#         inputs=p.inputs,
-#         outputs=p.outputs,
-#     )
+@pytest.mark.parametrize(
+    *mk_test_matrices(
+        *[
+            {"src_delay": [0, 1, 5], "sink_delay": [0, 1, 5], **d}
+            for d in [
+                {  # 8 point DC
+                    "bit_width": 32,
+                    "decimal_pt": 16,
+                    "n_samples": 8,
+                    "inputs": [  # 1, 1, 1, 1, 1, 1, 1, 1
+                        [[Fixed(1, True, 32, 16) for _ in range(8)]]
+                    ],
+                    "outputs": [  # 8, 0, 0, 0, 0, 0, 0, 0
+                        [
+                            [Fixed(8, True, 32, 16)]
+                            + [Fixed(0, True, 32, 16) for _ in range(7)]
+                        ]
+                    ],
+                    "cmp_fn": cmp_exact,
+                },
+                {  # 8 point alternating
+                    "bit_width": 32,
+                    "decimal_pt": 16,
+                    "n_samples": 8,
+                    "inputs": [  # 1, 0, 1, 0, 1, 0, 1, 0
+                        [
+                            sum(
+                                [
+                                    [Fixed(1, True, 32, 16), Fixed(0, True, 32, 16)]
+                                    for _ in range(4)
+                                ],
+                                [],
+                            )
+                        ]
+                    ],
+                    "outputs": [  # 4, 0, 0, 0, 4, 0, 0, 0
+                        [
+                            sum(
+                                [
+                                    [Fixed(4, True, 32, 16)]
+                                    + [Fixed(0, True, 32, 16) for _ in range(3)]
+                                    for _ in range(2)
+                                ],
+                                [],
+                            )
+                        ]
+                    ],
+                    "cmp_fn": cmp_exact,
+                },
+            ]
+        ]
+    )
+)
+def test_manual(cmdline_opts, p):
+    # Test the FFT implementation with manually calculated inputs and outputs
+    check_fft(
+        p.bit_width,
+        p.decimal_pt,
+        p.n_samples,
+        cmdline_opts,
+        src_delay=0,
+        sink_delay=0,
+        comparison_fn=p.cmp_fn,
+        inputs=p.inputs,
+        outputs=p.outputs,
+    )
 
 
-# @pytest.mark.parametrize(
-#     *mk_test_matrices(
-#         {
-#             "fp_spec": [(32, 16), (32, 24)],
-#             "n_samples": [8, 32, 128],
-#         }
-#     )
-# )
-# def test_single_freqs(
-#     cmdline_opts, p
-# ):  # Tests the FFT implementation for all divisible single frequency inputs.
-#     # Get the number of stages
-#     n_stages = int(math.log2(p.n_samples))
+@pytest.mark.parametrize(
+    *mk_test_matrices(
+        {
+            "fp_spec": [(32, 16), (32, 24)],
+            "n_samples": [8, 32, 128],
+        }
+    )
+)
+def test_single_freqs(
+    cmdline_opts, p
+):  # Tests the FFT implementation for all divisible single frequency inputs.
+    # Get the number of stages
+    n_stages = int(math.log2(p.n_samples))
 
-#     assert 1 << n_stages == p.n_samples
+    assert 1 << n_stages == p.n_samples
 
-#     """
-#     Generate the inputs:
-#         For every divisible frequency, generate the input signal with the given frequency.
+    """
+    Generate the inputs:
+        For every divisible frequency, generate the input signal with the given frequency.
 
-#     For example:
-#         8 Point FFT Inputs:
-#             1. 8Hz = 1, 1, 1, 1, 1, 1, 1, 1  ->  8, 0, 0, 0, 0, 0, 0, 0
-#             2. 4Hz = 1, 0, 1, 0, 1, 0, 1, 0  ->  4, 0, 0, 0, 4, 0, 0, 0
-#             3. 2Hz = 1, 0, 0, 0, 1, 0, 0, 0  ->  2, 0, 2, 0, 2, 0, 2, 0
-#             4. 1Hz = 1, 0, 0, 0, 0, 0, 0, 0  ->  1, 0, 1, 0, 1, 0, 1, 0
-#     """
+    For example:
+        8 Point FFT Inputs:
+            1. 8Hz = 1, 1, 1, 1, 1, 1, 1, 1  ->  8, 0, 0, 0, 0, 0, 0, 0
+            2. 4Hz = 1, 0, 1, 0, 1, 0, 1, 0  ->  4, 0, 0, 0, 4, 0, 0, 0
+            3. 2Hz = 1, 0, 0, 0, 1, 0, 0, 0  ->  2, 0, 2, 0, 2, 0, 2, 0
+            4. 1Hz = 1, 0, 0, 0, 0, 0, 0, 0  ->  1, 0, 1, 0, 1, 0, 1, 0
+    """
 
-#     inputs = []
-#     outputs = []
+    inputs = []
+    outputs = []
 
-#     for i in range(0, n_stages + 1):
-#         inp_wavelength = 1 << i
+    for i in range(0, n_stages + 1):
+        inp_wavelength = 1 << i
 
-#         # Generate the input signal
-#         inputs.append(
-#             sum(
-#                 [
-#                     [Fixed(1, True, *p.fp_spec)]
-#                     + [Fixed(0, True, *p.fp_spec)] * (inp_wavelength - 1)
-#                     for _ in range(p.n_samples // inp_wavelength)
-#                 ],
-#                 [],
-#             )
-#         )
+        # Generate the input signal
+        inputs.append(
+            sum(
+                [
+                    [Fixed(1, True, *p.fp_spec)]
+                    + [Fixed(0, True, *p.fp_spec)] * (inp_wavelength - 1)
+                    for _ in range(p.n_samples // inp_wavelength)
+                ],
+                [],
+            )
+        )
 
-#         out_wavelength = p.n_samples // inp_wavelength
+        out_wavelength = p.n_samples // inp_wavelength
 
-#         # Generate the expected output signal
-#         outputs.append(
-#             sum(
-#                 [
-#                     [Fixed(out_wavelength, True, *p.fp_spec)]
-#                     + [Fixed(0, True, *p.fp_spec)] * (out_wavelength - 1)
-#                     for _ in range(inp_wavelength)
-#                 ],
-#                 [],
-#             )
-#         )
+        # Generate the expected output signal
+        outputs.append(
+            sum(
+                [
+                    [Fixed(out_wavelength, True, *p.fp_spec)]
+                    + [Fixed(0, True, *p.fp_spec)] * (out_wavelength - 1)
+                    for _ in range(inp_wavelength)
+                ],
+                [],
+            )
+        )
 
-#     check_fft(
-#         p.fp_spec[0],
-#         p.fp_spec[1],
-#         p.n_samples,
-#         cmdline_opts,
-#         src_delay=0,
-#         sink_delay=0,
-#         comparison_fn=cmp_exact,
-#         inputs=inputs,
-#         outputs=outputs,
-#     )
+    check_fft(
+        p.fp_spec[0],
+        p.fp_spec[1],
+        p.n_samples,
+        cmdline_opts,
+        src_delay=0,
+        sink_delay=0,
+        comparison_fn=cmp_exact,
+        inputs=inputs,
+        outputs=outputs,
+    )
 
 
 @pytest.mark.parametrize(
@@ -284,12 +284,12 @@ def mk_cmp_approx(n: int):
         {
             "fp_spec": [(32, 16), (32, 20), (64, 16)],
             "model_spec": [
-                # (
-                #     FFTNumpy,  # Model (must implement FFTInterface)
-                #     mk_cmp_approx(
-                #         0.05
-                #     ),  # Comparison function (expecting an accuracy of ~5% here)
-                # ),
+                (
+                    FFTNumpy,  # Model (must implement FFTInterface)
+                    mk_cmp_approx(
+                        0.05
+                    ),  # Comparison function (expecting an accuracy of ~5% here)
+                ),
                 (
                     FFTExact,  # Model (must implement FFTInterface)
                     cmp_exact,

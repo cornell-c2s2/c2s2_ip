@@ -6,6 +6,7 @@ import math
 from src.fixed_point.iterative.tests.butterfly import butterfly
 from src.fft.tests.sine_wave import sine_wave
 from src.fft.tests.twiddle_generator import twiddle_generator
+from src.fft.tests.crossbar import crossbar
 
 
 # Python interface for the FFT module
@@ -62,28 +63,18 @@ class FFTExact(FFTInterface):
             buf_in = [None for _ in range(n_samples)]
             buf_out = [None for _ in range(n_samples)]
 
-            # Front crossbar
-            for m in range(0, 2**stage_fft):
-                for i in range(m, n_samples, 2 ** (stage_fft + 1)):
-                    buf_in[i + m] = fft_stage_in[i]
-                    buf_in[i + m + 1] = fft_stage_in[i + 2**stage_fft]
-
+            buf_in = crossbar(n_samples, stage_fft, fft_stage_in, True)
             # Twiddles
             twiddles = twiddle_generator(bit_width, decimal_pt, n_samples, stage_fft)
 
             # Butterflies
             for b in range(0, n_samples // 2):
                 (buf_out[b * 2], buf_out[b * 2 + 1]) = butterfly(
-                    bit_width, decimal_pt, twiddles[b], buf_in[b * 2], buf_in[b * 2 + 1]
+                    bit_width, decimal_pt, buf_in[b * 2], buf_in[b * 2 + 1],  twiddles[b]
                 )
 
-            output = [0] * n_samples
-
             # Back crossbar
-            for m in range(0, 2**stage_fft):
-                for i in range(m, n_samples, 2 ** (stage_fft + 1)):
-                    output[i] = buf_out[i + m]
-                    output[i + 2**stage_fft] = buf_out[i + m + 1]
+            output = crossbar(n_samples, stage_fft, buf_out, False)
 
             return output
 
