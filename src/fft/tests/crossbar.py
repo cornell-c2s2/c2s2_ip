@@ -109,14 +109,6 @@ def gen_input(
     ]
 
 
-# @pytest.mark.parametrize(
-#     *mk_test_matrices(
-#         {
-#             "fp_spec": [(32, 16), (32, 31), (32, 24)],
-#             "n_samples": [8, 32, 256, 512],
-#         }
-#     )
-# )
 @pytest.mark.parametrize(
     *mk_test_matrices(
         {
@@ -133,19 +125,3 @@ def test_front(cmdline_opts, p):
             gen_crossbar_test(p.n_samples, stage, gen_input(*p.fp_spec, p.n_samples), p.front),
             cmdline_opts,
         )
-
-# @pytest.mark.parametrize(
-#     *mk_test_matrices(
-#         {
-#             "fp_spec": [(32, 16), (32, 31), (32, 24)],
-#             "n_samples": [8, 32, 256, 512],
-#         }
-#     )
-# )
-# def test_back(cmdline_opts, p):
-#     for stage in range(0, int(math.log2(p.n_samples))):
-#         run_test_vector_sim(
-#             Crossbar(p.fp_spec[0], p.n_samples, stage, 0),,
-#             gen_crossbar_back(p.n_samples, stage, gen_input(*p.fp_spec, p.n_samples)),
-#             cmdline_opts,
-#         )
