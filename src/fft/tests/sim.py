@@ -70,7 +70,7 @@ class FFTExact(FFTInterface):
             # Butterflies
             for b in range(0, n_samples // 2):
                 (buf_out[b * 2], buf_out[b * 2 + 1]) = butterfly(
-                    bit_width, decimal_pt, buf_in[b * 2], buf_in[b * 2 + 1],  twiddles[b]
+                    bit_width, decimal_pt, buf_in[b * 2], buf_in[b * 2 + 1], twiddles[b]
                 )
 
             # Back crossbar

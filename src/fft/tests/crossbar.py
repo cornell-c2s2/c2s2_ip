@@ -7,7 +7,10 @@ import random
 from tools.utils import mk_test_matrices, cfixed_bits, fixed_bits
 from fixedpt import Fixed, CFixed
 
-def crossbar(n_samples: int, stage_fft: int, cbar_in: list[any], front: bool) -> list[any]:
+
+def crossbar(
+    n_samples: int, stage_fft: int, cbar_in: list[any], front: bool
+) -> list[any]:
     cbar_out = [None for _ in range(n_samples)]
 
     for m in range(2**stage_fft):
@@ -20,6 +23,7 @@ def crossbar(n_samples: int, stage_fft: int, cbar_in: list[any], front: bool) ->
                 cbar_out[i + 2**stage_fft] = cbar_in[i + m + 1]
 
     return cbar_out
+
 
 # the two bools are recv_val and send_rdy
 def crossbar_front(
@@ -34,7 +38,9 @@ def crossbar_front(
 
 
 # back crossbar (set FRONT = 0 in verilog model)
-def crossbar_back(n_samples: int, stage_fft: int, cbar_in: list[tuple[any, bool, bool]]) -> list[tuple[any, bool, bool]]:
+def crossbar_back(
+    n_samples: int, stage_fft: int, cbar_in: list[tuple[any, bool, bool]]
+) -> list[tuple[any, bool, bool]]:
     cbar_in, send_rdy, recv_val = map(list, zip(*cbar_in))
 
     cbar_out = crossbar(n_samples, stage_fft, cbar_in, False)
@@ -42,8 +48,14 @@ def crossbar_back(n_samples: int, stage_fft: int, cbar_in: list[tuple[any, bool,
     send_val = crossbar(n_samples, stage_fft, recv_val, False)
     return list(zip(cbar_out, recv_rdy, send_val))
 
+
 # Generate a test vector for the crossbar
-def gen_crossbar_test(n_samples: int, stage_fft: int, cbar_in: list[tuple[CFixed, bool, bool]], front: bool):
+def gen_crossbar_test(
+    n_samples: int,
+    stage_fft: int,
+    cbar_in: list[tuple[CFixed, bool, bool]],
+    front: bool,
+):
     crossbar_fn = crossbar_front if front else crossbar_back
 
     output = crossbar_fn(n_samples, stage_fft, cbar_in)
@@ -60,25 +72,19 @@ def gen_crossbar_test(n_samples: int, stage_fft: int, cbar_in: list[tuple[CFixed
     send_val = list(map(Bits1, send_val))
     recv_rdy = list(map(Bits1, recv_rdy))
 
-
     return [
         (
             " ".join(
                 [f"recv_real[{i}] recv_imaginary[{i}]" for i in range(n_samples)]
-                + [f"recv_val[{i}]" for i in range(n_samples)] + [f"recv_rdy[{i}]*" for i in range(n_samples)]
+                + [f"recv_val[{i}]" for i in range(n_samples)]
+                + [f"recv_rdy[{i}]*" for i in range(n_samples)]
                 + [f"send_real[{i}]* send_imaginary[{i}]*" for i in range(n_samples)]
-                + [f"send_val[{i}]*" for i in range(n_samples)] 
+                + [f"send_val[{i}]*" for i in range(n_samples)]
                 + [f"send_rdy[{i}]" for i in range(n_samples)]
-                )
+            )
         ),
-        recv_msg
-        + recv_val
-        + recv_rdy
-        + send_msg
-        + send_val
-        + send_rdy
+        recv_msg + recv_val + recv_rdy + send_msg + send_val + send_rdy,
     ]
-
 
 
 # generate a random CFixed value
@@ -118,6 +124,8 @@ def test_crossbar(cmdline_opts, p):
     for stage in range(0, int(math.log2(p.n_samples))):
         run_test_vector_sim(
             Crossbar(p.fp_spec[0], p.n_samples, stage, int(p.front)),
-            gen_crossbar_test(p.n_samples, stage, gen_input(*p.fp_spec, p.n_samples), p.front),
+            gen_crossbar_test(
+                p.n_samples, stage, gen_input(*p.fp_spec, p.n_samples), p.front
+            ),
             cmdline_opts,
         )
