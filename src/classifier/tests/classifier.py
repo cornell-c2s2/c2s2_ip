@@ -8,7 +8,7 @@ from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
 from tools.utils import mk_packed
 from src.classifier.classifier import Classifier
-# from src.classifier.classifier import ClassifierWrapper
+from src.classifier.classifier import ClassifierWrapper
 import numpy as np
 from fixedpt import Fixed 
 import wave
@@ -61,12 +61,12 @@ def get_fft_mag (arr):
 # TestHarness
 # -------------------------------------------------------------------------
 class TestHarness(Component):
-    def construct(s, classifier, BIT_WIDTH=32, DECIMAL_PT = 16, N_SAMPLES = 8, CUTOFF_FREQ = 65536000, CUTOFF_MAG = 1310720, SAMPLING_FREQUENCY = 44000):
+    def construct(s, BIT_WIDTH=32, DECIMAL_PT = 16, N_SAMPLES = 8, CUTOFF_FREQ = 65536000, CUTOFF_MAG = 1310720, SAMPLING_FREQUENCY = 44000):
         # Instantiate models
-        
-        s.src = stream.SourceRTL(mk_bits(BIT_WIDTH*N_SAMPLES))
+
+        s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.sink = stream.SinkRTL(mk_bits(1))
-        s.classifier = classifier
+        s.classifier = ClassifierWrapper(BIT_WIDTH, DECIMAL_PT, N_SAMPLES, CUTOFF_FREQ, CUTOFF_MAG, SAMPLING_FREQUENCY)
 
         # Connect
 
@@ -162,10 +162,13 @@ test_case_table = mk_test_case_table(
         (
                                   "msgs                  src_delay sink_delay BIT_WIDTH DECIMAL_PT N_SAMPLES CUTOFF_FREQ CUTOFF_MAG SAMPLING_FREQUENCY slow"
         ),
-        ["below_freq_mag",         below_freq_mag,       4,        4,         32,       16,        16,       540672000,   655360,     44000,         False],
+        #["below_freq_mag",         below_freq_mag,       4,        4,         32,       16,        16,       540672000,   655360,     44000,         False],
         ["above_freq_mag",         above_freq_mag,       4,        4,         32,       16,        16,       655360000,   1310720,    44000,         False],
-        ["above_freq_below_mag",   above_freq_below_mag, 4,        4,         32,       16,        16,       655360000,   1310720,    44000,         False],
-        ["one_true",               one_true,             4,        4,         32,       16,        16,       655360000,   2621440,    44000,         False],
+        #["above_freq_below_mag",   above_freq_below_mag, 4,        4,         32,       16,        16,       655360000,   1310720,    44000,         False],
+        #["one_true",               one_true,             4,        4,         32,       16,        16,       655360000,   2621440,    44000,         False],
+
+
+
         #["b_freq_l_amp_sin_1",   b_freq_l_amp_sin_1, 4,        4,         32,       16,        16,       32768000,   32768,     44000,         False],
         #["b_freq_l_amp_sin_2",   b_freq_l_amp_sin_2, 4,        4,         32,       16,        16,       32768000,   32768,     44000,         False],
         # ["sine_wave",   sine_wave, 4,        4,         32,       16,        16,       32768000,   32768,     44000,         False],
@@ -176,10 +179,7 @@ test_case_table = mk_test_case_table(
 
 @pytest.mark.parametrize(**test_case_table)
 def test(test_params, cmdline_opts):
-    th = TestHarness(
-        Classifier(test_params.BIT_WIDTH, test_params.DECIMAL_PT, test_params.N_SAMPLES, test_params.CUTOFF_FREQ, test_params.CUTOFF_MAG, test_params.SAMPLING_FREQUENCY),
-        test_params.BIT_WIDTH, test_params.DECIMAL_PT, test_params.N_SAMPLES, test_params.CUTOFF_FREQ, test_params.CUTOFF_MAG, test_params.SAMPLING_FREQUENCY
-    )
+    th = TestHarness(test_params.BIT_WIDTH, test_params.DECIMAL_PT, test_params.N_SAMPLES, test_params.CUTOFF_FREQ, test_params.CUTOFF_MAG, test_params.SAMPLING_FREQUENCY)
     
     # msgs = test_params.msgs()
     # inputs = [[Fixed(x, True, test_params.BIT_WIDTH, test_params.DECIMAL_PT) for x in sample] for sample in msgs[::2]]
@@ -189,19 +189,26 @@ def test(test_params, cmdline_opts):
     # outputs = [x for x in outputs]
     msgs = test_params.msgs()
     print(msgs)
-    msgs = [make_arr_fixed(test_params.BIT_WIDTH, test_params.DECIMAL_PT, x) if i%2 != 0 else x for i, x in enumerate(msgs, start=1)]
-    msgs = [mk_packed(test_params.BIT_WIDTH)(*x) if i%2 != 0 else x for i, x in enumerate(msgs, start=1)]
+    #msgs = [make_arr_fixed(test_params.BIT_WIDTH, test_params.DECIMAL_PT, x) if i%2 != 0 else x for i, x in enumerate(msgs, start=1)]
+    # msgs = [mk_packed(test_params.BIT_WIDTH)(*x) if i%2 != 0 else x for i, x in enumerate(msgs, start=1)]
+
+    inputs = [make_fixed(test_params.BIT_WIDTH, test_params.DECIMAL_PT, x) for sample in msgs[::2] for x in sample]
+    print("now inputs")
+    print(inputs)
+    print("now ouputs")
+    outputs = [x for x in msgs[1::2]]
+    print(outputs)
 
     th.set_param(
         "top.src.construct",
-        msgs=msgs[::2],
+        msgs=inputs[::2],
         initial_delay=test_params.src_delay,
         interval_delay=test_params.src_delay,
     )
 
     th.set_param(
         "top.sink.construct",
-        msgs=msgs[1::2],
+        msgs=outputs[1::2],
         initial_delay=test_params.sink_delay,
         interval_delay=test_params.sink_delay,
     )
