@@ -519,7 +519,8 @@ test_case_table = mk_tests(
         ["four_point_offset_sine", four_point_offset_sine, 0, 0, 32, 16, 4, False],
         ["four_point_non_sine", four_point_non_sine, 0, 0, 32, 16, 4, False],
         ["eight_point_random", random_signal, 0, 0, 32, 16, 8, False],
-        ["eight_point_random", random_signal, 0, 0, 16, 8, 32, False],
+        ["32_point_random", random_signal, 0, 0, 16, 8, 32, False],
+        ["32_points_random_stream", random_stream, 0, 0, 16, 8, 32, False],
         ["two_point_two_samples", two_point_two_samples, 0, 0, 32, 16, 2, False],
         ["eight_point_two_ops", eight_point_two_samples, 0, 0, 32, 16, 8, False],
         [

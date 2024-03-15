@@ -4,10 +4,14 @@
 
 `include "fft/cooley_tukey/helpers/sine_wave.v"
 `include "fft/cooley_tukey/helpers/bit_reverse.v"
-`include "fixed_point/combinational/butterflyAlt.v"
+`include "cmn/trace.v"
+
+//`include "fixed_point/combinational/butterflyAlt.v"
+
+`include "fixed_point/combinational/butterfly.v"
+
 `include "fft/pease/helpers/stride_permutation.v"
 `include "fft/pease/helpers/twiddle_generator.v"
-
 `include "serdes/deserializer.v"
 `include "serdes/serializer.v"
 
@@ -188,15 +192,33 @@ module fft_pease_FFT_main #(
     end
   endgenerate
 
-  fixed_point_combinational_Butterfly #(
+  logic btfy_recv_val, btfy_recv_rdy, btfy_send_val;
+  assign btfy_recv_val = state == COMP;
+
+  fixed_point_combinational_FixedPointMultiButterfly #(
     .n(BIT_WIDTH),
     .d(DECIMAL_PT),
-    .b(N_SAMPLES / 2)
+    .b(N_SAMPLES / 2),
+    .num_mults(2)
   ) fft_stage (
+    .recv_val(btfy_recv_val),
+    .recv_rdy(btfy_recv_rdy),
+    .send_val(btfy_send_val),
+    .send_rdy(1'b1),
     .wr(wr[bstage]),
     .wc(wc[bstage]),
     .*
   );
+
+  // fixed_point_combinational_Butterfly #(
+  //   .n(BIT_WIDTH),
+  //   .d(DECIMAL_PT),
+  //   .b(N_SAMPLES / 2)
+  // ) fft_stage (
+  //   .wr(wr[bstage]),
+  //   .wc(wc[bstage]),
+  //   .*
+  // );
 
   always_comb begin
     next_state  = state;
@@ -205,11 +227,12 @@ module fft_pease_FFT_main #(
       next_state = COMP;
     end else begin
       if (state == COMP) begin
-        if (bstage == max_bstage) begin
+        if (bstage == max_bstage && btfy_send_val) begin
           next_state  = DONE;
           next_bstage = 0;
         end else begin
-          next_bstage = bstage + 1;
+          //next_bstage = bstage + 1;
+          next_bstage = bstage + btfy_send_val;
         end
       end else begin
         if (state == DONE && send_rdy) begin
@@ -218,6 +241,7 @@ module fft_pease_FFT_main #(
         end
       end
     end
+
   end
 
   always_ff @(posedge clk) begin
@@ -228,6 +252,8 @@ module fft_pease_FFT_main #(
       state  <= next_state;
       bstage <= next_bstage;
     end
+    //$display("btfy_send_val: %b", btfy_send_val, " bstage: %d", bstage, " maxbstage: %d",
+    //         max_bstage, " state: %d", state, " next_state: %d", next_state);
   end
 
   generate
@@ -241,13 +267,8 @@ module fft_pease_FFT_main #(
             in_butterfly[i][BIT_WIDTH-1:0] <= reversed_msg[i];
             in_butterfly[i][2*BIT_WIDTH-1:BIT_WIDTH] <= 0;
           end else begin
-            if (state == COMP) begin
-              //if (state == COMP && bstage != max_bstage) begin
+            if (state == COMP && btfy_send_val) begin
               in_butterfly[i] <= out_stride[i];
-              // if (bstage == max_bstage) begin
-              //   send_msg[i] <= out_stride[i][BIT_WIDTH-1:0];
-              // end else begin
-              // end
             end else begin
             end
           end
@@ -256,6 +277,37 @@ module fft_pease_FFT_main #(
     end
   endgenerate
 
+  //----------------------------------------------------------------------
+  // Line Tracing
+  //----------------------------------------------------------------------
+
+`ifndef SYNTHESIS
+
+  logic [`CMN_TRACE_NBITS-1:0] str;
+  `CMN_TRACE_BEGIN
+  begin
+
+    // $sformat( str, "%x", istream_msg );
+    // cmn_trace.append_val_rdy_str(
+    //     trace_str, istream_val, istream_rdy, str
+    // ); 
+    cmn_trace.append_str(
+        trace_str, "("
+    ); cmn_trace.append_str(
+        trace_str, ")"
+    );
+
+    // $sformat( str, "%x", ostream_msg );
+    // cmn_trace.append_val_rdy_str(
+    //     trace_str, ostream_val, ostream_rdy, str
+    // );
+
+  end
+  `CMN_TRACE_END
+
+`endif
+
 endmodule
 
 `endif
+

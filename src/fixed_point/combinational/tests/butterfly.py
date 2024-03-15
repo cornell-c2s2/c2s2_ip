@@ -53,7 +53,7 @@ def mk_params(execution_number, sequence_lengths, n, d, bin1, slow=False):
                         d,  # `d` bounds
                         k,  # k in one butterfly
                         id=f"{i} ({n[0]}-{n[1]})-bit, ({d[0]}-{d[1]})-decimal-bit numbers"
-                        + (f", {k}in1 butterfly "),
+                        + (f", {k}in1 butterfly"),
                         marks=pytest.mark.slow if slow else [],
                     )
                 )

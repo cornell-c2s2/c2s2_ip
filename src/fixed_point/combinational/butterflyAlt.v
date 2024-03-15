@@ -14,8 +14,8 @@
 // multiplier in certain cases.
 //================================================
 `default_nettype none
-`ifndef FIXED_POINT_MULTI_BUTTERFLY
-`define FIXED_POINT_MULTI_BUTTERFLY
+`ifndef FIXED_POINT_COMB_BUTTERFLY
+`define FIXED_POINT_COMB_BUTTERFLY
 `include "fixed_point/combinational/complex_multiplier.v"
 
 module fixed_point_combinational_Butterfly #(

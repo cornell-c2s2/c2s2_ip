@@ -26,8 +26,10 @@ class FFT(VerilogPlaceholder, Component):
             VerilogPlaceholderPass.src_file,
             path.join(path.dirname(__file__), "fft.v"),
         )
+        
 
-
+    str = f"FFT"
+    
 class FFTWrapper(Component):
     def construct(s, BIT_WIDTH, DECIMAL_PT, N_SAMPLES):
         s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
