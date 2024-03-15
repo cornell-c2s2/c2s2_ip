@@ -61,16 +61,16 @@ module classifier_Classifier #(
   // Register for magnitude output
   logic [BIT_WIDTH-1:0] out_mag_reg[N_SAMPLES - 1:0];
 
-  arr_ResetReg #(
-    .BIT_WIDTH  (BIT_WIDTH),
-    .RESET_VALUE({BIT_WIDTH{1'b0}}),
-    .N_ELEMENTS (N_SAMPLES)
-  ) mag_reg (
-    .clk(clk),
-    .reset(reset),
-    .d(out_mag),
-    .q(out_mag_reg)
-  );
+  // arr_ResetReg #(
+  //   .BIT_WIDTH  (BIT_WIDTH),
+  //   .RESET_VALUE({BIT_WIDTH{1'b0}}),
+  //   .N_ELEMENTS (N_SAMPLES)
+  // ) mag_reg (
+  //   .clk(clk),
+  //   .reset(reset),
+  //   .d(out_mag),
+  //   .q(out_mag_reg)
+  // );
 
   // Filter based on cutoff
 
@@ -100,16 +100,16 @@ module classifier_Classifier #(
   // Register for classify 
   logic [BIT_WIDTH-1:0] out_highpass_reg[N_SAMPLES - 1:0];
 
-  arr_ResetReg #(
-    .BIT_WIDTH  (BIT_WIDTH),
-    .RESET_VALUE({BIT_WIDTH{1'b0}}),
-    .N_ELEMENTS (N_SAMPLES)
-  ) highpass_reg (
-    .clk(clk),
-    .reset(reset),
-    .d(out_filter),
-    .q(out_highpass_reg)
-  );
+  // arr_ResetReg #(
+  //   .BIT_WIDTH  (BIT_WIDTH),
+  //   .RESET_VALUE({BIT_WIDTH{1'b0}}),
+  //   .N_ELEMENTS (N_SAMPLES)
+  // ) highpass_reg (
+  //   .clk(clk),
+  //   .reset(reset),
+  //   .d(out_filter),
+  //   .q(out_highpass_reg)
+  // );
 
   // Do comparison mag > cutoff_mag
   logic out_comparison;
@@ -123,8 +123,8 @@ module classifier_Classifier #(
   ) comparison (
     .clk(clk),
     .reset(reset),
-    .filtered_valid(out_highpass_reg),
-    .mag_in(out_mag_reg),
+    .filtered_valid(out_filter),
+    .mag_in(out_mag),
     .compare_out(out_comparison),
     .done(comparison_done)
   );
