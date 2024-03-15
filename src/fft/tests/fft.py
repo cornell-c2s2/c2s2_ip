@@ -3,11 +3,13 @@ import random
 from pymtl3 import mk_bits, Component, Bits
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
-from src.fft.tests.sim import FFTNumpy, FFTInterface, FFTExact
+from src.fft.sim import fft
 from src.fft.fft import FFTWrapper
 import math
 from fixedpt import CFixed, Fixed
-from tools.utils import fixed_bits, mk_test_matrices
+from tools.utils import fixed_bits, mk_test_matrices, cmp_exact, mk_cmp_approx
+from abc import ABC, abstractmethod
+import numpy as np
 
 
 # Test harness module
@@ -18,7 +20,6 @@ class TestHarness(Component):
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.sink = stream.SinkRTL(
             mk_bits(BIT_WIDTH),
-            # Compare by approximation
             cmp_fn=cmp,
         )
         s.dut = FFTWrapper(BIT_WIDTH, DECIMAL_PT, N_SAMPLES)
@@ -39,6 +40,38 @@ class TestHarness(Component):
             + " > "
             + s.sink.line_trace()
         )
+
+
+# Python interface for the FFT Simulation model-based testing
+class FFTInterface(ABC):
+    def __init__(self, bit_width, decimal_pt, n_samples):
+        self.bit_width = bit_width
+        self.decimal_pt = decimal_pt
+        self.n_samples = n_samples
+
+    @abstractmethod
+    def transform(self, data: list[CFixed]) -> list[CFixed]:
+        # Perform the FFT on the given data
+        pass
+
+
+# Version of the FFT simulation that uses a normal numpy FFT algorithm. This is used to verify the Verilog implementation approximately.
+class FFTNumpy(FFTInterface):
+    def transform(self, data: list[CFixed]) -> list[CFixed]:
+        # Convert the data to a list of complex numbers
+        d = [complex(x) for x in data]
+
+        # Perform the FFT
+        d = np.fft.fft(d, self.n_samples)
+
+        return [CFixed(x, self.bit_width, self.decimal_pt) for x in d]
+
+
+# Version of the FFT simulation that uses the exact same algorithm as the Verilog implementation. This is used to verify the Verilog implementation.
+class FFTExact(FFTInterface):
+    def transform(self, data: list[CFixed]) -> list[CFixed]:
+        # Use the exact software simulation instead
+        return fft(data, self.bit_width, self.decimal_pt, self.n_samples)
 
 
 def check_fft(
@@ -70,6 +103,8 @@ def check_fft(
         bool: True if the test passes, False otherwise.
     """
     assert len(inputs) == len(outputs)
+    assert all(len(x) == n_samples for x in inputs)
+    assert all(len(x) == n_samples for x in outputs)
 
     model = TestHarness(bit_width, decimal_pt, n_samples, comparison_fn)
 
@@ -93,49 +128,6 @@ def check_fft(
     )
 
     run_sim(model, cmdline_opts, duts=["dut.dut"], print_line_trace=False)
-
-
-# -----------------------------------------------------------------------
-# Comparison Functions
-# -----------------------------------------------------------------------
-
-
-# Exact comparison
-def cmp_exact(x: Bits, y: Bits):
-    return x == y
-
-
-# Approximate comparison
-def cmp_approx(x: Bits, y: Bits, n: float):
-    """
-    In this comparison function, we want to ensure that the FFT
-    is accurate within a fraction n.
-
-    In other words, this checks whether n * max(|x|, |y|) > |x - y|
-    If n = 0.01, then we are checking whether the difference is within 1%
-    of the largest magnitude.
-
-    Args:
-        x (Bits): First number
-        y (Bits): Second number
-        n (int): Number of bits to preserve
-    """
-
-    x = x.int()
-    y = y.int()
-
-    diff = abs(x - y)
-
-    # Get the largest magnitude
-    max_val = max(abs(x), abs(y))
-
-    # If the difference is less than or equal to n times of the largest magnitude
-    # Then we consider the values to be the same
-    return diff <= max_val * n
-
-
-def mk_cmp_approx(n: int):
-    return lambda x, y: cmp_approx(x, y, n)
 
 
 @pytest.mark.parametrize(
@@ -327,15 +319,7 @@ def test_model(cmdline_opts, p):
     inputs = [[x.real for x in sample] for sample in inputs]
     outputs = [[x.real for x in sample] for sample in outputs]
 
-    print(inputs)
-    print(outputs)
-
     def test(x: Bits, y: Bits):
-        print(x, y)
-        print(
-            Fixed(x.int(), True, *p.fp_spec),
-            Fixed(y.int(), True, *p.fp_spec),
-        )
         return p.model_spec[1](x, y)
 
     # Run the test

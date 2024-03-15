@@ -1,23 +1,8 @@
 from src.fft.helpers.sine_wave import SineWave
 from pymtl3.stdlib.test_utils import run_test_vector_sim
-from pymtl3 import mk_bits
 import pytest
-import math
 from tools.utils import mk_test_matrices, fixed_bits
-from fixedpt import Fixed
-
-
-def sine_wave(n_samples: int, bit_width: int, decimal_pt: int) -> list[Fixed]:
-    return [
-        Fixed(
-            round((math.sin(2 * math.pi * i / n_samples)) * (1 << decimal_pt)),
-            1,
-            bit_width,
-            decimal_pt,
-            True,
-        )
-        for i in range(n_samples)
-    ]
+from src.fft.sim import sine_wave
 
 
 def gen_sine_wave(n_samples, bit_width, decimal_pt):

@@ -10,11 +10,11 @@ module fft_FFT #(
   parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES  = 8
 ) (
-  input  logic [BIT_WIDTH - 1:0] recv_msg[N_SAMPLES - 1:0],
+  input  logic [BIT_WIDTH - 1:0] recv_msg[N_SAMPLES],
   input  logic                   recv_val,
   output logic                   recv_rdy,
 
-  output logic [BIT_WIDTH - 1:0] send_msg[N_SAMPLES - 1:0],
+  output logic [BIT_WIDTH - 1:0] send_msg[N_SAMPLES],
   output logic                   send_val,
   input  logic                   send_rdy,
 
@@ -22,13 +22,13 @@ module fft_FFT #(
   input logic clk
 );
 
-  logic [BIT_WIDTH - 1:0] real_msg     [$clog2(N_SAMPLES):0] [N_SAMPLES - 1:0];
-  logic [BIT_WIDTH - 1:0] complex_msg  [$clog2(N_SAMPLES):0] [N_SAMPLES - 1:0];
+  logic [BIT_WIDTH - 1:0] real_msg     [$clog2(N_SAMPLES)+1] [N_SAMPLES];
+  logic [BIT_WIDTH - 1:0] complex_msg  [$clog2(N_SAMPLES)+1] [N_SAMPLES];
 
-  logic                   val_in       [$clog2(N_SAMPLES):0];
-  logic                   rdy_in       [$clog2(N_SAMPLES):0];
+  logic                   val_in       [$clog2(N_SAMPLES)+1];
+  logic                   rdy_in       [$clog2(N_SAMPLES)+1];
 
-  logic [BIT_WIDTH - 1:0] sine_wave_out[    0:N_SAMPLES - 1];
+  logic [BIT_WIDTH - 1:0] sine_wave_out[          N_SAMPLES];
 
 
   assign val_in[0]                 = recv_val;

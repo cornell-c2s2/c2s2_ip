@@ -6,23 +6,7 @@ import math
 import random
 from tools.utils import mk_test_matrices, cfixed_bits, fixed_bits
 from fixedpt import Fixed, CFixed
-
-
-def crossbar(
-    n_samples: int, stage_fft: int, cbar_in: list[any], front: bool
-) -> list[any]:
-    cbar_out = [None for _ in range(n_samples)]
-
-    for m in range(2**stage_fft):
-        for i in range(m, n_samples, 2 ** (stage_fft + 1)):
-            if front:
-                cbar_out[i + m] = cbar_in[i]
-                cbar_out[i + m + 1] = cbar_in[i + 2**stage_fft]
-            else:
-                cbar_out[i] = cbar_in[i + m]
-                cbar_out[i + 2**stage_fft] = cbar_in[i + m + 1]
-
-    return cbar_out
+from src.fft.sim import crossbar
 
 
 # the two bools are recv_val and send_rdy
