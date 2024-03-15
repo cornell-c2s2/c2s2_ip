@@ -58,20 +58,6 @@ module classifier_Classifier #(
     .send_msg(out_mag)
   );
 
-  // Register for magnitude output
-  logic [BIT_WIDTH-1:0] out_mag_reg[N_SAMPLES - 1:0];
-
-  // arr_ResetReg #(
-  //   .BIT_WIDTH  (BIT_WIDTH),
-  //   .RESET_VALUE({BIT_WIDTH{1'b0}}),
-  //   .N_ELEMENTS (N_SAMPLES)
-  // ) mag_reg (
-  //   .clk(clk),
-  //   .reset(reset),
-  //   .d(out_mag),
-  //   .q(out_mag_reg)
-  // );
-
   // Filter based on cutoff
 
   logic [BIT_WIDTH-1:0] frequency_array[N_SAMPLES-1:0];
@@ -96,20 +82,6 @@ module classifier_Classifier #(
     .freq_in(frequency_array),
     .filtered_valid(out_filter)
   );
-
-  // Register for classify 
-  logic [BIT_WIDTH-1:0] out_highpass_reg[N_SAMPLES - 1:0];
-
-  // arr_ResetReg #(
-  //   .BIT_WIDTH  (BIT_WIDTH),
-  //   .RESET_VALUE({BIT_WIDTH{1'b0}}),
-  //   .N_ELEMENTS (N_SAMPLES)
-  // ) highpass_reg (
-  //   .clk(clk),
-  //   .reset(reset),
-  //   .d(out_filter),
-  //   .q(out_highpass_reg)
-  // );
 
   // Do comparison mag > cutoff_mag
   logic out_comparison;
