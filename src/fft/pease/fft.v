@@ -4,7 +4,6 @@
 
 `include "fft/cooley_tukey/helpers/sine_wave.v"
 `include "fft/cooley_tukey/helpers/bit_reverse.v"
-`include "cmn/trace.v"
 
 //`include "fixed_point/combinational/butterflyAlt.v"
 
@@ -281,31 +280,31 @@ module fft_pease_FFT_main #(
   // Line Tracing
   //----------------------------------------------------------------------
 
-`ifndef SYNTHESIS
+  // `ifndef SYNTHESIS
 
-  logic [`CMN_TRACE_NBITS-1:0] str;
-  `CMN_TRACE_BEGIN
-  begin
+  //   logic [`CMN_TRACE_NBITS-1:0] str;
+  //   `CMN_TRACE_BEGIN
+  //   begin
 
-    // $sformat( str, "%x", istream_msg );
-    // cmn_trace.append_val_rdy_str(
-    //     trace_str, istream_val, istream_rdy, str
-    // ); 
-    cmn_trace.append_str(
-        trace_str, "("
-    ); cmn_trace.append_str(
-        trace_str, ")"
-    );
+  //     // $sformat( str, "%x", istream_msg );
+  //     // cmn_trace.append_val_rdy_str(
+  //     //     trace_str, istream_val, istream_rdy, str
+  //     // ); 
+  //     cmn_trace.append_str(
+  //         trace_str, "("
+  //     ); cmn_trace.append_str(
+  //         trace_str, ")"
+  //     );
 
-    // $sformat( str, "%x", ostream_msg );
-    // cmn_trace.append_val_rdy_str(
-    //     trace_str, ostream_val, ostream_rdy, str
-    // );
+  //     // $sformat( str, "%x", ostream_msg );
+  //     // cmn_trace.append_val_rdy_str(
+  //     //     trace_str, ostream_val, ostream_rdy, str
+  //     // );
 
-  end
-  `CMN_TRACE_END
+  //   end
+  //   `CMN_TRACE_END
 
-`endif
+  // `endif
 
 endmodule
 
