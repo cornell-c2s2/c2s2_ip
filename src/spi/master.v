@@ -106,10 +106,12 @@ module spi_Master #(
   input  logic             send_rdy,
   output logic [nbits-1:0] send_msg,
 
+  // Val/Rdy interface allowing us to change the packet size
   input  logic                packet_size_ifc_val,
   output logic                packet_size_ifc_rdy,
   input  logic [logBitsN-1:0] packet_size_ifc_msg,
 
+  // Val/Rdy interface allowing us to change the chip select address
   input  logic              cs_addr_ifc_val,
   output logic              cs_addr_ifc_rdy,
   input  logic [logCSN-1:0] cs_addr_ifc_msg,
