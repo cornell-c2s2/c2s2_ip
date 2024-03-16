@@ -33,23 +33,18 @@ def classify(magnitudes: list[list[float]], bins: list[float]) -> list[bool]:
     high = 10000
 
     # Magnitude threshold
-    threshold = 0.9
+    threshold = 0.2
 
     increment = 10
 
-    running_avg_max_len = 100
-
     count = 0
     classifications = []
-    running_avg_max = 0
     for sample in magnitudes:
-        running_avg_max += max(sample) / (running_avg_max_len + 1)
-        running_avg_max *= running_avg_max_len / (running_avg_max_len + 1)
         # Check if there is a bin with a magnitude above the threshold
         for i, mag in enumerate(sample):
             if bins[i] < low or bins[i] > high:
                 continue
-            if mag > threshold * running_avg_max:
+            if mag > threshold:
                 count += increment
                 break
 
