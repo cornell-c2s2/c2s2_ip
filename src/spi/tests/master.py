@@ -16,7 +16,7 @@ Notes: figure out cs_addr and packet_szie registers
 """
 # array format [ val, rdy, msg ]
 
-def t( dut, cs_addr: list[int], packet_size: list[int], recv: list[int], send: list[int], cs, sclk, mosi, miso, freq):
+def t(dut, cs_addr: list[int], packet_size: list[int], recv: list[int], send: list[int], cs: list[int], sclk: int, mosi: int, miso: int, freq: list[int]):
   """
   Simulate an SPI Transaction
 
@@ -26,6 +26,10 @@ def t( dut, cs_addr: list[int], packet_size: list[int], recv: list[int], send: l
     recv: list[int] - [val, rdy, msg] for the recv interface
     send: list[int] - [val, rdy, msg] for the send interface
     cs: list[int] - list of chip select values
+    sclk: int - sclk value
+    mosi: int - mosi value
+    miso: int - miso value
+    freq: list[int] - [val, rdy, msg] for the freq interface
   """
 
   # Write input value to input port
