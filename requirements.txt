@@ -8,3 +8,5 @@ psutil
 fabric
 halo
 pyyaml
+matplotlib
+librosa
