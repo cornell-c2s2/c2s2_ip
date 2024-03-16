@@ -50,6 +50,14 @@ class TestHarness(Component):
             "sink_delay": [0, 1, 5],
         },
         {
+            "execution_num": [0],
+            "nbits": [16, 32],
+            "nsamples": [1, 2, 8],
+            "nmsgs": [50],
+            "src_delay": [0, 1, 5],
+            "sink_delay": [0, 1, 5],
+        },
+        {
             "execution_num": list(range(1, 5)),
             "nmsgs": 50,
             "nbits": None,
