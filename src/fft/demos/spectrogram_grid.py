@@ -8,6 +8,9 @@ from os import path
 import multiprocessing as mp
 
 
+# Runs a spectrogram with the given parameters
+# This is necessary because we cannot directly pass functions into a process pool
+# So instead we just pass the name and parameters of the function to this intermediate function
 def run_spectrogram(f, data, sample_rate, n_samples, n_overlap):
     if f[0] == "numpy":
         f = numpy_fft
@@ -18,6 +21,8 @@ def run_spectrogram(f, data, sample_rate, n_samples, n_overlap):
 
 
 if __name__ == "__main__":
+    # Generates a grid of spectrograms comparing different bit widths and numbers of samples
+
     # Check if the spectrograms have already been generated
     if path.exists(path.join(path.dirname(__file__), "spectrogram_results.pkl")):
 
