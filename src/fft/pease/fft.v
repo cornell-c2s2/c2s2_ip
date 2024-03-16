@@ -97,7 +97,7 @@ module fft_pease_FFT_main #(
   logic [2:0] state;
   logic [2:0] next_state;
 
-  assign recv_rdy = (state == IDLE);
+  assign recv_rdy = (state == IDLE || state == DONE);
   assign send_val = (state == DONE);
 
   logic [     BstageBits-1:0] bstage;
@@ -213,7 +213,11 @@ module fft_pease_FFT_main #(
         end
       end else begin
         if (state == DONE && send_rdy) begin
-          next_state = IDLE;
+          if (recv_val) begin
+            next_state = COMP;
+          end else begin
+            next_state = IDLE;
+          end
         end else begin
         end
       end
@@ -237,7 +241,7 @@ module fft_pease_FFT_main #(
           in_butterfly[i] <= 0;
           //send_msg[i] <= 0;
         end else begin
-          if (state == IDLE && recv_val) begin
+          if (state == IDLE || state == DONE && recv_val) begin
             in_butterfly[i][BIT_WIDTH-1:0] <= reversed_msg[i];
             in_butterfly[i][2*BIT_WIDTH-1:BIT_WIDTH] <= 0;
           end else begin

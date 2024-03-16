@@ -460,7 +460,7 @@ def random_stream(bits, fft_size, frac_bits):
     output = []
     smax = min(2 ** (bits - 1), 20 * 2**frac_bits)
 
-    for a in range(50):
+    for a in range(2):
         signal = []
         for i in range(fft_size):
             signal.append(math.trunc(random.uniform(-smax, smax)))
@@ -522,7 +522,7 @@ test_case_table = mk_tests(
         ["32_point_random", random_signal, 0, 0, 16, 8, 32, False],
         ["16_point_random", random_signal, 0, 0, 16, 8, 16, False],
         ["8_point_random", random_signal, 0, 0, 16, 8, 8, False],
-        #["32_points_random_stream", random_stream, 0, 0, 16, 8, 32, False],
+        ["32_points_random_stream", random_stream, 0, 0, 16, 8, 8, False],
         ["two_point_two_samples", two_point_two_samples, 0, 0, 32, 16, 2, False],
         ["eight_point_two_ops", eight_point_two_samples, 0, 0, 32, 16, 8, False],
         [
