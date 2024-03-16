@@ -6,6 +6,7 @@ from src.fft.demos.utils import spectrogram, plot_spectrogram, numpy_fft, mk_har
 import librosa
 from os import path
 import multiprocessing as mp
+import argparse
 
 
 # Runs a spectrogram with the given parameters
@@ -22,9 +23,28 @@ def run_spectrogram(f, data, sample_rate, n_samples, n_overlap):
 
 if __name__ == "__main__":
     # Generates a grid of spectrograms comparing different bit widths and numbers of samples
+    parser = argparse.ArgumentParser(description="Generate spectrogram grid")
+    parser.add_argument(
+        "--file",
+        "-f",
+        type=str,
+        default="SSR1F_MixPre-1363.WAV",
+        help="The file to generate the spectrogram from. The program will search in the audio folder.",
+    )
+
+    parser.add_argument(
+        "--cache",
+        "-c",
+        action="store_true",
+        help="If set, the program will not regenerate the spectrograms, but instead load them from the cache.",
+    )
+
+    args = parser.parse_args()
 
     # Check if the spectrograms have already been generated
-    if path.exists(path.join(path.dirname(__file__), "spectrogram_results.pkl")):
+    if args.cache and path.exists(
+        path.join(path.dirname(__file__), "spectrogram_results.pkl")
+    ):
 
         spinner = Halo(text="Generating spectrograms", spinner="dots")
         spinner.start()
@@ -38,7 +58,7 @@ if __name__ == "__main__":
     else:
         sample_rate = 44800
 
-        wav_file = path.join(path.dirname(__file__), "test.wav")
+        wav_file = path.join(path.dirname(__file__), "audio", args.file)
         spinner = Halo(text="Loading audio file", spinner="dots")
         spinner.start()
         data = librosa.load(wav_file, sr=sample_rate, mono=True)[0]
