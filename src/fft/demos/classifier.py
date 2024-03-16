@@ -29,22 +29,27 @@ def run_spectrogram(sample_rate, file):
 
 def classify(magnitudes: list[list[float]], bins: list[float]) -> list[bool]:
     # Cutoff values for frequency
-    low = 1000
+    low = 2000
     high = 10000
 
     # Magnitude threshold
-    threshold = 0.2
+    threshold = 0.9
 
     increment = 10
 
+    running_avg_max_len = 100
+
     count = 0
     classifications = []
+    running_avg_max = 0
     for sample in magnitudes:
+        running_avg_max += max(sample) / (running_avg_max_len + 1)
+        running_avg_max *= running_avg_max_len / (running_avg_max_len + 1)
         # Check if there is a bin with a magnitude above the threshold
         for i, mag in enumerate(sample):
             if bins[i] < low or bins[i] > high:
                 continue
-            if mag > threshold:
+            if mag > threshold * running_avg_max:
                 count += increment
                 break
 
@@ -65,6 +70,8 @@ if __name__ == "__main__":
         "SHI1F_MixPre-1620_01.WAV",
         "OS1F_MixPre-1472_01.WAV",
         "TIP1F_MixPre-1026.WAV",
+        "rainstorm.wav",
+        "wind.wav",
     ]
 
     # Check if the spectrograms have already been generated
@@ -89,7 +96,7 @@ if __name__ == "__main__":
 
         gs = gridspec.GridSpec(
             5,
-            len(group),
+            3,
             wspace=0.0,
             hspace=0.0,
             top=0.95,
@@ -98,7 +105,7 @@ if __name__ == "__main__":
             right=0.95,
         )
 
-        plt.figure(figsize=(len(group) * 4, 5))
+        plt.figure(figsize=(12, 5))
 
         for i, numpy_res in enumerate(group):
             # Give the first plot 4/5 slots
@@ -106,7 +113,7 @@ if __name__ == "__main__":
             plot_spectrogram(ax, sample_rate, numpy_res[0], numpy_res[1])
             if i == 0:
                 ax.set_ylabel("Frequency (Hz)")
-                ax.set_yticks(numpy_res[1][::4])
+                ax.set_yticks(numpy_res[1][::2])
 
             # Create a line plot in the bottom
             ax = plt.subplot(gs[4, i])
@@ -121,6 +128,7 @@ if __name__ == "__main__":
             )
 
             ax.set_xlim(0, max(xspace))
+            ax.set_ylim(0, 1.5)
 
             if i == 0:
                 ax.set_xlabel("Time (s)")
