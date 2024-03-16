@@ -6,6 +6,7 @@ import numpy as np
 from halo import Halo
 import librosa
 import multiprocessing as mp
+import argparse
 
 
 def run_spectrogram(sample_rate, file):
