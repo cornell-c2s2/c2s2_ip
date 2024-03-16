@@ -1,3 +1,5 @@
+More documentation available at [Confluence](https://confluence.cornell.edu/display/c2s2/FFT+and+Classifier+Demos).
+
 # File setup
 
 Files will be created in the demos directory.
