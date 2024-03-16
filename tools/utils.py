@@ -4,8 +4,53 @@ A useful library of PYMTL3 test helper functions
 
 from collections import namedtuple
 import pytest
-from pymtl3 import mk_bits, concat, bitstruct
+from pymtl3 import mk_bits, concat, bitstruct, Bits
 from pymtl3.stdlib.test_utils import mk_test_case_table as mk_test_case_table_native
+from fixedpt import Fixed, CFixed
+
+
+# -----------------------------------------------------------------------
+# Comparison Functions
+# -----------------------------------------------------------------------
+
+
+# Exact comparison
+def cmp_exact(x: Bits, y: Bits):
+    return x == y
+
+
+# Approximate comparison
+def cmp_approx(x: Bits, y: Bits, n: float):
+    """
+    In this comparison function, we want to ensure that the FFT
+    is accurate within a fraction n.
+
+    In other words, this checks whether n * max(|x|, |y|) > |x - y|
+    If n = 0.01, then we are checking whether the difference is within 1%
+    of the largest magnitude.
+
+    Args:
+        x (Bits): First number
+        y (Bits): Second number
+        n (float): Accuracy requirement
+    """
+
+    x = x.int()
+    y = y.int()
+
+    diff = abs(x - y)
+
+    # Get the largest magnitude
+    max_val = max(abs(x), abs(y))
+
+    # If the difference is less than or equal to n times of the largest magnitude
+    # Then we consider the values to be the same
+    return diff <= max_val * n
+
+
+# Create a comparison function with a specific lenience
+def mk_cmp_approx(n: float):
+    return lambda x, y: cmp_approx(x, y, n)
 
 
 # Creates a transaction packer from a list of transaction sizes
@@ -91,10 +136,22 @@ def mk_test_matrix(values, slow=False):
 
     tp = namedtuple("_".join(keys), keys)
 
+    def smartstr(v):
+        if "__name__" in dir(v):
+            return v.__name__
+        # If this is a callable, get the name of the function
+        if callable(v):
+            return v.__name__
+        if isinstance(v, list):
+            return f"[{','.join([smartstr(x) for x in v])}]"
+        if isinstance(v, tuple):
+            return f"({','.join([smartstr(x) for x in v])})"
+        return str(v)
+
     params = [
         pytest.param(
             tp(**dict(p)),
-            id=",".join([f"{p[i][0]}={p[i][1]}" for i in range(len(keys))]),
+            id=",".join([f"{p[i][0]}={smartstr(p[i][1])}" for i in range(len(keys))]),
             marks=pytest.mark.slow if slow else [],
         )
         for p in params
@@ -123,3 +180,23 @@ def mk_test_matrices(*args):
         "p",
         sum([(mk_test_matrix(arg, arg.get("slow", False))[1]) for arg in args], []),
     ]
+
+
+# Cast a Fixed object to a Bits object
+def fixed_bits(f: Fixed) -> Bits:
+    value = f.get()
+
+    return mk_bits(len(f))(value)
+
+
+# Cast a CFixed object to a tuple of Bits objects
+def cfixed_bits(cf: CFixed) -> tuple[Bits, Bits]:
+    return fixed_bits(cf.real), fixed_bits(cf.imag)
+
+
+# Convert a Bits object to an unsigned integer
+def uint(x: Bits) -> int:
+    i = int(x)
+    if i < 0:
+        i += 1 << len(x)
+    return i

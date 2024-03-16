@@ -9,17 +9,9 @@ from src.fixed_point.utils import (
     mk_butterfly_input,
     mk_butterfly_output,
 )
-from src.fixed_point.iterative.tests.complex_multiplier import cmul
 import random
-from tools.utils import mk_packed
 from src.fixed_point.utils import rand_fxp_spec
-
-
-# Performs the butterfly operation on two complex numbers
-# Used to generate the expected output
-def butterfly(n, d, a, b, w):
-    t = cmul(n, d, b, w)
-    return ((a + t).resize(n, d), (a - t).resize(n, d))
+from src.fixed_point.sim import butterfly
 
 
 # Merge inputs into a single bus
@@ -113,7 +105,7 @@ def test_edge(cmdline_opts, n, d, a, b, w):
         interval_delay=0,
     )
 
-    (c, d) = butterfly(n, d, a, b, w)
+    (c, d) = butterfly(a, b, w)
 
     model.set_param(
         "top.sink.construct",
@@ -161,7 +153,7 @@ def test_random(
         (rand_cfixed(n, d), rand_cfixed(n, d), rand_cfixed(n, d))
         for i in range(sequence_length)
     ]
-    solns = [butterfly(n, d, i[0], i[1], i[2]) for i in dat]
+    solns = [butterfly(*i) for i in dat]
 
     model = TestHarness(n, d)
 
@@ -199,10 +191,7 @@ def test_random(
     sum(
         [
             mk_params(1, [100], n, d, m=range(1, 5), slow=True)
-            for (n, d) in [
-                (8, 4),
-                (32, 16),
-            ]
+            for (n, d) in [(8, 4), (32, 16), (64, 32)]
         ],
         [],
     ),
@@ -218,7 +207,7 @@ def test_optimizations(
         (rand_cfixed(n, d), rand_cfixed(n, d), rand_cfixed(n, d))
         for _ in range(sequence_length)
     ]
-    solns = [butterfly(n, d, i[0], i[1], opt_omega[m - 1]) for i in dat]
+    solns = [butterfly(i[0], i[1], opt_omega[m - 1]) for i in dat]
 
     model = TestHarness(n, d, m)
 
