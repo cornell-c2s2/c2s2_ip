@@ -93,7 +93,7 @@ module spi_Master #(
   input logic clk,
   input logic reset,
 
-  output logic spi_ifc_cs  [0:ncs-1],
+  output logic spi_ifc_cs  [ncs],
   input  logic spi_ifc_miso,
   output logic spi_ifc_mosi,
   output logic spi_ifc_sclk,
@@ -227,9 +227,11 @@ module spi_Master #(
     spi_ifc_sclk = 0;
     packet_size_reg_en = 0;
     cs_addr_reg_en = 0;
+    /* svlint off loop_statement_in_always_comb */
     for (integer i = 0; i < ncs; i++) begin
       spi_ifc_cs[i] = 1;
     end
+    /* svlint on loop_statement_in_always_comb */
     sclk_negedge = 0;
     sclk_posedge = 0;
     sclk_counter_en = 0;
@@ -329,7 +331,7 @@ module spi_Master #(
     .reset(reset),
     .d(0),
     .en(sclk_negedge),
-    .override(recv_msg << (nbits - packet_size_reg_out)),  // put message into most significant bits
+    .override(recv_msg << (nbits[logBitsN-1:0] - packet_size_reg_out)),  // put message into most significant bits
     .override_en(recv_rdy & recv_val),
     .q(shreg_out_out)
   );

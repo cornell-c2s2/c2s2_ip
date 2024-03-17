@@ -12,7 +12,7 @@
 `include "spi/helpers/synchronizer.v"
 
 module spi_Minion #(
-  parameter nbits = 8
+  parameter int nbits = 8
 ) (
   input  logic             clk,
   input  logic             cs,
@@ -52,9 +52,9 @@ module spi_Minion #(
 
   logic mosi_sync_clk;
   logic mosi_sync_in_;
-  logic mosi_sync_negedge_;
   logic mosi_sync_out;
-  logic mosi_sync_posedge_;
+  logic mosi_sync_negedge_;  // not used
+  logic mosi_sync_posedge_;  // not used
   logic mosi_sync_reset;
 
   spi_helpers_Synchronizer #(1'b0) mosi_sync (
@@ -73,7 +73,7 @@ module spi_Minion #(
   logic sclk_sync_clk;
   logic sclk_sync_in_;
   logic sclk_sync_negedge_;
-  logic sclk_sync_out;
+  logic sclk_sync_out;  // not used
   logic sclk_sync_posedge_;
   logic sclk_sync_reset;
 
@@ -159,6 +159,11 @@ module spi_Minion #(
   assign push_en             = cs_sync_posedge_;
   assign push_msg            = shreg_in_out;
   assign parity              = (^push_msg[nbits-3:0]) & push_en;
+
+
+  // unused net
+  logic unused;
+  assign unused = &{1'b0, mosi_sync_negedge_, mosi_sync_posedge_, sclk_sync_out, 1'b0};
 
 endmodule
 

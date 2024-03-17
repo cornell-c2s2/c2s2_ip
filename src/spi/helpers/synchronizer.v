@@ -12,7 +12,7 @@ Synchronizer.v
 `define SPI_HELPERS_SYNCHRONIZER
 
 module spi_helpers_Synchronizer #(
-  parameter reset_value = 1'b0
+  parameter bit reset_value = 0
 ) (
   input  logic clk,
   input  logic reset,
