@@ -103,8 +103,8 @@ module spi_Minion #(
     .reset(shreg_in_reset),
     .d(shreg_in_in_),
     .en(shreg_in_shift_en),
-    .override(shreg_in_load_data),
-    .override_en(shreg_in_load_en),
+    .load(shreg_in_load_data),
+    .load_en(shreg_in_load_en),
     .q(shreg_in_out)
   );
 
@@ -125,8 +125,8 @@ module spi_Minion #(
     .reset(shreg_out_reset),
     .d(shreg_out_in_),
     .en(shreg_out_shift_en),
-    .override(shreg_out_load_data),
-    .override_en(shreg_out_load_en),
+    .load(shreg_out_load_data),
+    .load_en(shreg_out_load_en),
     .q(shreg_out_out)
   );
 

@@ -10,8 +10,8 @@ class ComplexMultiplier(VerilogPlaceholder, Component):
         s.d = InPort()
         s.en = InPort()
 
-        s.override = InPort(mk_bits(p_nbits))
-        s.override_en = InPort()
+        s.load = InPort(mk_bits(p_nbits))
+        s.load_en = InPort()
 
         s.q = OutPort(mk_bits(p_nbits))
 

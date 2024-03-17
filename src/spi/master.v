@@ -321,8 +321,8 @@ module spi_Master #(
     .reset(shreg_out_rst),
     .d(spi_ifc_miso),
     .en(sclk_posedge),
-    .override(0),
-    .override_en(0),
+    .load(0),
+    .load_en(0),
     .q(shreg_in_out)
   );
 
@@ -331,8 +331,8 @@ module spi_Master #(
     .reset(reset),
     .d(0),
     .en(sclk_negedge),
-    .override(recv_msg << (nbits[logBitsN-1:0] - packet_size_reg_out)),  // put message into most significant bits
-    .override_en(recv_rdy & recv_val),
+    .load(recv_msg << (nbits[logBitsN-1:0] - packet_size_reg_out)),  // put message into most significant bits
+    .load_en(recv_rdy & recv_val),
     .q(shreg_out_out)
   );
 
