@@ -38,9 +38,14 @@ def gen_twiddle(BIT_WIDTH, DECIMAL_PT, SIZE_FFT, STAGE_FFT):
 @pytest.mark.parametrize(
     *mk_test_matrices(
         {
-            "fp_spec": [(32, 16), (32, 31), (32, 24)],
-            "n_samples": [8, 32, 256, 512],
-        }
+            "fp_spec": [(32, 16), (32, 31), (16, 8)],
+            "n_samples": [8, 32],
+        },
+        {
+            "fp_spec": [(32, 16), (8, 0)],
+            "n_samples": [256, 512],
+            "slow": True,
+        },
     )
 )
 def test(cmdline_opts, p):
