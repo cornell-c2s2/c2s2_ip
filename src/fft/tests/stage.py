@@ -109,7 +109,12 @@ def check_fft_stage(
         {
             "fp_spec": [(8, 0), (16, 8)],
             "n_samples": [8, 32, 128],
-        }
+        },
+        {
+            "fp_spec": [(8, 4)],
+            "n_samples": [256],
+            "slow": True,
+        },
     )
 )
 def test_dc(cmdline_opts, p):
@@ -170,6 +175,7 @@ def test_dc(cmdline_opts, p):
             "input_mag": [1, 10],  # Maximum magnitude of the input signal
             "input_num": [1, 10],  # Number of random inputs to generate
             "seed": list(range(2)),  # Random seed
+            "slow": True,
         }
     )
 )

@@ -136,29 +136,29 @@ def check_fft(
             {"src_delay": [0, 1, 5], "sink_delay": [0, 1, 5], **d}
             for d in [
                 {  # 8 point DC
-                    "bit_width": 32,
-                    "decimal_pt": 16,
-                    "n_samples": 8,
+                    "bit_width": 16,
+                    "decimal_pt": 8,
+                    "n_samples": [8, 32],
                     "inputs": [  # 1, 1, 1, 1, 1, 1, 1, 1
-                        [[Fixed(1, True, 32, 16) for _ in range(8)]]
+                        [[Fixed(1, True, 16, 8) for _ in range(8)]]
                     ],
                     "outputs": [  # 8, 0, 0, 0, 0, 0, 0, 0
                         [
-                            [Fixed(8, True, 32, 16)]
-                            + [Fixed(0, True, 32, 16) for _ in range(7)]
+                            [Fixed(8, True, 16, 8)]
+                            + [Fixed(0, True, 16, 8) for _ in range(7)]
                         ]
                     ],
                     "cmp_fn": cmp_exact,
                 },
                 {  # 8 point alternating
-                    "bit_width": 32,
-                    "decimal_pt": 16,
-                    "n_samples": 8,
+                    "bit_width": 16,
+                    "decimal_pt": 8,
+                    "n_samples": [8, 32],
                     "inputs": [  # 1, 0, 1, 0, 1, 0, 1, 0
                         [
                             sum(
                                 [
-                                    [Fixed(1, True, 32, 16), Fixed(0, True, 32, 16)]
+                                    [Fixed(1, True, 16, 8), Fixed(0, True, 16, 8)]
                                     for _ in range(4)
                                 ],
                                 [],
@@ -169,8 +169,8 @@ def check_fft(
                         [
                             sum(
                                 [
-                                    [Fixed(4, True, 32, 16)]
-                                    + [Fixed(0, True, 32, 16) for _ in range(3)]
+                                    [Fixed(4, True, 16, 8)]
+                                    + [Fixed(0, True, 16, 8) for _ in range(3)]
                                     for _ in range(2)
                                 ],
                                 [],
@@ -291,6 +291,7 @@ def test_single_freqs(
             "input_mag": [1, 10],  # Maximum magnitude of the input signal
             "input_num": [1, 10],  # Number of random inputs to generate
             "seed": list(range(2)),  # Random seed
+            "slow": True,
         }
     )
 )
