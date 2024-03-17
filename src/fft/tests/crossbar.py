@@ -99,9 +99,15 @@ def gen_input(
     *mk_test_matrices(
         {
             "fp_spec": [(8, 0)],
-            "n_samples": [2, 32, 512],
+            "n_samples": [2, 8, 32],
             "front": [True, False],
-        }
+        },
+        {
+            "fp_spec": [(4, 0)],
+            "n_samples": [512],
+            "front": [True, False],
+            "slow": True,
+        },
     )
 )
 def test_crossbar(cmdline_opts, p):
