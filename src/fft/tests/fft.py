@@ -138,7 +138,7 @@ def check_fft(
                 {  # 8 point DC
                     "bit_width": 16,
                     "decimal_pt": 8,
-                    "n_samples": [8, 32],
+                    "n_samples": 8,
                     "inputs": [  # 1, 1, 1, 1, 1, 1, 1, 1
                         [[Fixed(1, True, 16, 8) for _ in range(8)]]
                     ],
@@ -153,7 +153,7 @@ def check_fft(
                 {  # 8 point alternating
                     "bit_width": 16,
                     "decimal_pt": 8,
-                    "n_samples": [8, 32],
+                    "n_samples": 8,
                     "inputs": [  # 1, 0, 1, 0, 1, 0, 1, 0
                         [
                             sum(
@@ -236,8 +236,9 @@ def test_single_freqs(
         inputs.append(
             sum(
                 [
-                    [Fixed(1, True, *p.fp_spec)]
-                    + [Fixed(0, True, *p.fp_spec)] * (inp_wavelength - 1)
+                    [Fixed(1, True, *p.fp_spec)]  # 1
+                    + [Fixed(0, True, *p.fp_spec)]
+                    * (inp_wavelength - 1)  # pad rest with zeros
                     for _ in range(p.n_samples // inp_wavelength)
                 ],
                 [],

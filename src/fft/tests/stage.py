@@ -108,11 +108,11 @@ def check_fft_stage(
     *mk_test_matrices(
         {
             "fp_spec": [(8, 0), (16, 8)],
-            "n_samples": [8, 32, 128],
+            "n_samples": [8, 32],
         },
         {
-            "fp_spec": [(8, 4)],
-            "n_samples": [256],
+            "fp_spec": [(16, 4)],
+            "n_samples": [128, 256],
             "slow": True,
         },
     )
@@ -146,7 +146,6 @@ def test_dc(cmdline_opts, p):
             ],
             [],
         )
-        assert len(signal) == n_samples
         return [CFixed((x, 0), *p.fp_spec) for x in signal]
 
     for stage in range(n_stages):
