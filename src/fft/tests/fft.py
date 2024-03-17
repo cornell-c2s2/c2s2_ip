@@ -201,9 +201,14 @@ def test_manual(cmdline_opts, p):
 @pytest.mark.parametrize(
     *mk_test_matrices(
         {
-            "fp_spec": [(32, 16), (32, 24)],
-            "n_samples": [8, 32, 128],
-        }
+            "fp_spec": [(16, 8), (32, 16)],
+            "n_samples": [8, 32],
+        },
+        {
+            "fp_spec": [(16, 8), (32, 16)],
+            "n_samples": [64, 128],
+            "slow": True,
+        },
     )
 )
 def test_single_freqs(
