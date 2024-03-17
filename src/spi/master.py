@@ -2,18 +2,7 @@ from os import path
 from pymtl3 import mk_bits, Component, clog2, InPort, OutPort, Interface
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
-
-
-# PYMTL interface for the SPI Master
-class SPIMasterIfc(Interface):
-    def construct(s, ncs):
-        s.cs = [OutPort() for _ in range(ncs)]
-        s.sclk = OutPort()
-        s.mosi = OutPort()
-        s.miso = InPort()
-
-    def __str__(s):
-        return f"{s.sclk}|{s.cs}|{s.mosi}|{s.miso}"
+from src.spi.interfaces import SPIMasterIfc
 
 
 class SPIMaster(VerilogPlaceholder, Component):

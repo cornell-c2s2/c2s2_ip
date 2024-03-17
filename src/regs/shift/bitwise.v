@@ -26,8 +26,8 @@ The entire register can be overridden by the `override` input when `override_en`
 Data cannot be inputted when `override_en` is high.
 */
 module regs_shift_Bitwise #(
-  parameter p_nbits = 8,
-  parameter p_reset_value = 0
+  parameter int p_nbits = 8,
+  parameter bit p_reset_value = 0
 ) (
   input  logic               clk,          // Clock input
   input  logic               reset,        // Sync reset input
