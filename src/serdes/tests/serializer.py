@@ -89,7 +89,7 @@ def test_serializer(p, cmdline_opts):
 
     th.set_param(
         "top.src.construct",
-        msgs=[mk_msg(msg[::-1]) for msg in msgs],
+        msgs=[mk_msg(msg) for msg in msgs],
         initial_delay=p.src_delay,
         interval_delay=p.src_delay,
     )

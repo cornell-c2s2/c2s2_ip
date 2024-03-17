@@ -1,31 +1,26 @@
-# =========================================================================
-# IntMulFixedLatRTL_test
-# =========================================================================
-
 import pytest
 import random
-from pymtl3 import *
+from pymtl3 import mk_bits, Component, Bits
 from pymtl3.stdlib import stream
-from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
-from src.fft.cooley_tukey.tests.sim import fixed_point_fft
+from pymtl3.stdlib.test_utils import run_sim
+from src.fft.sim import fft
 from src.fft.cooley_tukey.fft import FFTWrapper
 import math
+from fixedpt import CFixed, Fixed
+from tools.utils import fixed_bits, mk_test_matrices, cmp_exact, mk_cmp_approx
+from abc import ABC, abstractmethod
+import numpy as np
 
 
-# -------------------------------------------------------------------------
-# TestHarness
-# -------------------------------------------------------------------------
-
-
+# Test harness module
 class TestHarness(Component):
-    def construct(s, BIT_WIDTH, DECIMAL_PT, N_SAMPLES):
+    def construct(s, BIT_WIDTH, DECIMAL_PT, N_SAMPLES, cmp):
         # Instantiate models
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.sink = stream.SinkRTL(
             mk_bits(BIT_WIDTH),
-            # Compare by approximation
-            cmp_fn=lambda a, b: abs(a.int() - b.int()) <= (1 << (DECIMAL_PT // 2)),
+            cmp_fn=cmp,
         )
         s.dut = FFTWrapper(BIT_WIDTH, DECIMAL_PT, N_SAMPLES)
 
@@ -47,561 +42,302 @@ class TestHarness(Component):
         )
 
 
-def packed_msg(array, bitwidth, fft_size):  # Array of ints
-    #  input = Bits(1)
-    #  bit_convert = mk_bits(bitwidth)
-    #  output = input
-    #  for i in range(len(array)):
+# Python interface for the FFT Simulation model-based testing
+class FFTInterface(ABC):
+    def __init__(self, bit_width, decimal_pt, n_samples):
+        self.bit_width = bit_width
+        self.decimal_pt = decimal_pt
+        self.n_samples = n_samples
 
-    #    output = concat( bit_convert(array[i]), output )
-
-    #  output = output[1:bitwidth * fft_size + 1]
-
-    return array[:fft_size]
-
-
-"""Creates a singular FFT call and resposne """
+    @abstractmethod
+    def transform(self, data: list[CFixed]) -> list[CFixed]:
+        # Perform the FFT on the given data
+        pass
 
 
-def fft_call_response(array_of_sample_integers, bitwidth, fft_size):
-    array = []
+# Version of the FFT simulation that uses a normal numpy FFT algorithm. This is used to verify the Verilog implementation approximately.
+class FFTNumpy(FFTInterface):
+    def transform(self, data: list[CFixed]) -> list[CFixed]:
+        # Convert the data to a list of complex numbers
+        d = [complex(x) for x in data]
 
-    output_array_unpacked = fixed_point_fft(
-        BIT_WIDTH=bitwidth, DECIMAL_PT=16, SIZE_FFT=fft_size, x=array_of_sample_integers
+        # Perform the FFT
+        d = np.fft.fft(d, self.n_samples)
+
+        return [CFixed(x, self.bit_width, self.decimal_pt) for x in d]
+
+
+# Version of the FFT simulation that uses the exact same algorithm as the Verilog implementation. This is used to verify the Verilog implementation.
+class FFTExact(FFTInterface):
+    def transform(self, data: list[CFixed]) -> list[CFixed]:
+        # Use the exact software simulation instead
+        return fft(data, self.bit_width, self.decimal_pt, self.n_samples)
+
+
+def check_fft(
+    bit_width: int,
+    decimal_pt: int,
+    n_samples: int,
+    cmdline_opts: dict,
+    src_delay: int,
+    sink_delay: int,
+    comparison_fn: callable,
+    inputs: list[list[Fixed]],
+    outputs: list[list[Fixed]],
+) -> None:
+    """
+    Check the FFT implementation.
+
+    Args:
+        bit_width (int): Number of bits.
+        decimal_pt (int): Number of decimal points.
+        n_samples (int): Number of samples.
+        cmdline_opts (dict): Command line options.
+        src_delay (int): Source delay.
+        sink_delay (int): Sink delay.
+        comparison_fn (callable): Comparison function.
+        inputs (list[list[Fixed]]): List of inputs (only contains the real part of the complex input).
+        outputs (list[list[Fixed]]): List of expected outputs (only contains the real part of the complex output).
+
+    Returns:
+        bool: True if the test passes, False otherwise.
+    """
+    assert len(inputs) == len(outputs)
+    assert all(len(x) == n_samples for x in inputs)
+    assert all(len(x) == n_samples for x in outputs)
+
+    model = TestHarness(bit_width, decimal_pt, n_samples, comparison_fn)
+
+    # Convert inputs and outputs into a single list of bits
+    inputs = [fixed_bits(x) for sample in inputs for x in sample]
+    outputs = [fixed_bits(x) for sample in outputs for x in sample]
+
+    # Run the model
+    model.set_param(
+        "top.src.construct",
+        msgs=inputs,
+        initial_delay=src_delay + 3,
+        interval_delay=src_delay,
     )
-    input_array = []
-    output_array = []
 
-    for n in range(fft_size):
-        input_array.append(array_of_sample_integers[n])
-        output_array.append(output_array_unpacked[n])
+    model.set_param(
+        "top.sink.construct",
+        msgs=outputs,
+        initial_delay=sink_delay + 3,
+        interval_delay=sink_delay,
+    )
 
-    return revchunk(
-        packed_msg(input_array, bitwidth, fft_size)
-        + packed_msg(output_array, bitwidth, fft_size),
-        fft_size,
+    run_sim(model, cmdline_opts, duts=["dut.dut"], print_line_trace=False)
+
+
+@pytest.mark.parametrize(
+    *mk_test_matrices(
+        *[
+            {"src_delay": [0, 1, 5], "sink_delay": [0, 1, 5], **d}
+            for d in [
+                {  # 8 point DC
+                    "bit_width": 16,
+                    "decimal_pt": 8,
+                    "n_samples": 8,
+                    "inputs": [  # 1, 1, 1, 1, 1, 1, 1, 1
+                        [[Fixed(1, True, 16, 8) for _ in range(8)]]
+                    ],
+                    "outputs": [  # 8, 0, 0, 0, 0, 0, 0, 0
+                        [
+                            [Fixed(8, True, 16, 8)]
+                            + [Fixed(0, True, 16, 8) for _ in range(7)]
+                        ]
+                    ],
+                    "cmp_fn": cmp_exact,
+                },
+                {  # 8 point alternating
+                    "bit_width": 16,
+                    "decimal_pt": 8,
+                    "n_samples": 8,
+                    "inputs": [  # 1, 0, 1, 0, 1, 0, 1, 0
+                        [
+                            sum(
+                                [
+                                    [Fixed(1, True, 16, 8), Fixed(0, True, 16, 8)]
+                                    for _ in range(4)
+                                ],
+                                [],
+                            )
+                        ]
+                    ],
+                    "outputs": [  # 4, 0, 0, 0, 4, 0, 0, 0
+                        [
+                            sum(
+                                [
+                                    [Fixed(4, True, 16, 8)]
+                                    + [Fixed(0, True, 16, 8) for _ in range(3)]
+                                    for _ in range(2)
+                                ],
+                                [],
+                            )
+                        ]
+                    ],
+                    "cmp_fn": cmp_exact,
+                },
+            ]
+        ]
+    )
+)
+def test_manual(cmdline_opts, p):
+    # Test the FFT implementation with manually calculated inputs and outputs
+    check_fft(
+        p.bit_width,
+        p.decimal_pt,
+        p.n_samples,
+        cmdline_opts,
+        src_delay=0,
+        sink_delay=0,
+        comparison_fn=p.cmp_fn,
+        inputs=p.inputs,
+        outputs=p.outputs,
     )
 
 
-# ----------------------------------------------------------------------
-# Test Case: small positive * positive
-# ----------------------------------------------------------------------
+@pytest.mark.parametrize(
+    *mk_test_matrices(
+        {
+            "fp_spec": [(16, 8), (32, 16)],
+            "n_samples": [8, 32],
+        },
+        {
+            "fp_spec": [(16, 8), (32, 16)],
+            "n_samples": [64, 128],
+            "slow": True,
+        },
+    )
+)
+def test_single_freqs(
+    cmdline_opts, p
+):  # Tests the FFT implementation for all divisible single frequency inputs.
+    # Get the number of stages
+    n_stages = int(math.log2(p.n_samples))
 
+    assert 1 << n_stages == p.n_samples
 
-def two_point_dc(bits, fft_size, frac_bits):
-    return [0x00010000, 0x00010000, 0x00000000, 0x00020000]
+    """
+    Generate the inputs:
+        For every divisible frequency, generate the input signal with the given frequency.
 
+    For example:
+        8 Point FFT Inputs:
+            1. 8Hz = 1, 1, 1, 1, 1, 1, 1, 1  ->  8, 0, 0, 0, 0, 0, 0, 0
+            2. 4Hz = 1, 0, 1, 0, 1, 0, 1, 0  ->  4, 0, 0, 0, 4, 0, 0, 0
+            3. 2Hz = 1, 0, 0, 0, 1, 0, 0, 0  ->  2, 0, 2, 0, 2, 0, 2, 0
+            4. 1Hz = 1, 0, 0, 0, 0, 0, 0, 0  ->  1, 0, 1, 0, 1, 0, 1, 0
+    """
 
-def two_point_dc_generated(bits, fft_size, frac_bits):
-    # print([Fxp( 1, signed = True, n_word = bits, n_frac = frac_bits ),Fxp( 1, signed = True, n_word = bits, n_frac = frac_bits )])
-    return fft_call_response([1 * (2**frac_bits), 1 * (2**frac_bits)], bits, fft_size)
+    inputs = []
+    outputs = []
 
+    for i in range(0, n_stages + 1):
+        inp_wavelength = 1 << i
 
-def two_point_dc_generated_negative(bits, fft_size, frac_bits):
-    return fft_call_response([1 * (2**frac_bits), 1 * (2**frac_bits)], bits, fft_size)
-
-
-def eight_point_dc(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00080000,
-    ]
-
-
-def eight_point_offset_sine(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00000000,
-        0x00010000,
-        0x00000000,
-        0x00010000,
-        0x00000000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0xFFFC0000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-    ]
-
-
-##################################################################################################################################################################
-def eight_point_ones_alt_twos(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00020000,
-        0x00010000,
-        0x00020000,
-        0x00010000,
-        0x00020000,
-        0x00010000,
-        0x00020000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x000C0000,
-    ]
-
-
-def eight_point_one_to_eight(bits, fft_size, frac_bits):
-    return [
-        0x00080000,
-        0x00070000,
-        0x00060000,
-        0x00050000,
-        0x00040000,
-        0x00030000,
-        0x00020000,
-        0x00010000,
-        0xFFFC0000,
-        0xFFFC0000,
-        0xFFFC0000,
-        0xFFFC0000,
-        0xFFFC0000,
-        0xFFFC0000,
-        0xFFFC0000,
-        0x00240000,
-    ]
-
-
-def eight_point_assorted(bits, fft_size, frac_bits):
-    return [
-        0xFFFC0000,
-        0x00000000,
-        0x00030000,
-        0x00000000,
-        0x00050000,
-        0xFFFF0000,
-        0x00010000,
-        0x00020000,
-        0xFFF70000,
-        0x00030000,
-        0x000D0000,
-        0xFFFC0000,
-        0x000D0000,
-        0x00030000,
-        0xFFF70000,
-        0x00060000,
-    ]
-
-
-def four_point_assorted(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00000000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0xFFFE0000,
-        0x00000000,
-        0x00020000,
-    ]
-
-
-def four_point_offset_sine(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00020000,
-        0x00010000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00060000,
-    ]
-
-
-def four_point_non_sine(bits, fft_size, frac_bits):
-    return [
-        0x00020000,
-        0x00020000,
-        0x00030000,
-        0x00020000,
-        0x00000000,
-        0xFFFF0000,
-        0x00000000,
-        0x00090000,
-    ]
-
-
-def four_point_dc(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-    ]
-
-
-def four_point_one_to_four(bits, fft_size, frac_bits):
-    return [
-        0x00040000,
-        0x00030000,
-        0x00020000,
-        0x00010000,
-        0xFFFE0000,
-        0xFFFE0000,
-        0xFFFE0000,
-        0x000A0000,
-    ]
-
-
-def sixteen_point_dc(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00100000,
-    ]
-
-
-def thirtytwo_point_dc(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00200000,
-    ]
-
-
-def n_point_dc(bits, fft_size, frac_bits):
-    return [1 << frac_bits] * fft_size + [0] * (fft_size - 1) + [fft_size << frac_bits]
-
-
-######################################################################################################################################################################
-def two_point_two_samples(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00010000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-    ]
-
-
-def eight_point_two_samples(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00000000,
-        0x00010000,
-        0x00000000,
-        0x00010000,
-        0x00000000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0xFFFC0000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00080000,
-    ]
-
-
-def descend_signal(bits, fft_size, frac_bits):
-    signal = []
-    for i in range(fft_size):
-        signal.append((fft_size - i) * (2**frac_bits))
-
-    return fft_call_response(signal, bits, fft_size)
-
-
-def random_signal(bits, fft_size, frac_bits):
-    signal = []
-    smax = min(2 ** (bits - 1), 20 * 2**frac_bits)
-    for i in range(fft_size):
-        signal.append(math.trunc(random.uniform(-smax, smax)))
-
-    return fft_call_response(signal, bits, fft_size)
-
-
-def random_stream(bits, fft_size, frac_bits):
-    output = []
-    smax = min(2 ** (bits - 1), 20 * 2**frac_bits)
-
-    for a in range(50):
-        signal = []
-        for i in range(fft_size):
-            signal.append(math.trunc(random.uniform(-smax, smax)))
-
-        output += fft_call_response(signal, bits, fft_size)
-
-    return output
-
-
-# ----------------------------------------------------------------------
-# Test Case Table
-# ----------------------------------------------------------------------
-
-
-# Helper function that does the same thing as `mk_test_case_table` but allows for marking tests slow
-def mk_tests(test_cases):
-    table = mk_test_case_table(test_cases)
-
-    params = {
-        "argnames": table["argnames"],
-        "argvalues": [],
-    }
-
-    for i in range(len(table["ids"])):
-        params["argvalues"].append(
-            pytest.param(
-                table["argvalues"][i],
-                id=table["ids"][i],
-                marks=pytest.mark.slow if table["argvalues"][i].slow else [],
+        # Generate the input signal
+        inputs.append(
+            sum(
+                [
+                    [Fixed(1, True, *p.fp_spec)]  # 1
+                    + [Fixed(0, True, *p.fp_spec)]
+                    * (inp_wavelength - 1)  # pad rest with zeros
+                    for _ in range(p.n_samples // inp_wavelength)
+                ],
+                [],
             )
         )
 
-    return params
+        out_wavelength = p.n_samples // inp_wavelength
+
+        # Generate the expected output signal
+        outputs.append(
+            sum(
+                [
+                    [Fixed(out_wavelength, True, *p.fp_spec)]
+                    + [Fixed(0, True, *p.fp_spec)] * (out_wavelength - 1)
+                    for _ in range(inp_wavelength)
+                ],
+                [],
+            )
+        )
+
+    check_fft(
+        p.fp_spec[0],
+        p.fp_spec[1],
+        p.n_samples,
+        cmdline_opts,
+        src_delay=0,
+        sink_delay=0,
+        comparison_fn=cmp_exact,
+        inputs=inputs,
+        outputs=outputs,
+    )
 
 
-test_case_table = mk_tests(
-    [
-        ("msgs src_delay sink_delay BIT_WIDTH DECIMAL_PT N_SAMPLES slow"),
-        ["two_point_dc", two_point_dc, 0, 0, 32, 16, 2, False],
-        ["two_point_dc_generated", two_point_dc_generated, 0, 0, 32, 16, 2, False],
-        [
-            "two_point_dc_generated_negative",
-            two_point_dc_generated_negative,
-            0,
-            0,
-            32,
-            16,
-            2,
-            False,
-        ],
-        ["eight_point_dc", eight_point_dc, 0, 0, 32, 16, 8, False],
-        ["eight_point_offset_sine", eight_point_offset_sine, 0, 0, 32, 16, 8, False],
-        ["two_point_random", random_signal, 0, 0, 32, 16, 2, False],
-        ["two_points_random_stream", random_stream, 0, 0, 32, 16, 2, False],
-        ["four_point_assorted", four_point_assorted, 0, 0, 32, 16, 4, False],
-        ["four_point_offset_sine", four_point_offset_sine, 0, 0, 32, 16, 4, False],
-        ["four_point_non_sine", four_point_non_sine, 0, 0, 32, 16, 4, False],
-        ["eight_point_random", random_signal, 0, 0, 32, 16, 8, False],
-        ["two_point_two_samples", two_point_two_samples, 0, 0, 32, 16, 2, False],
-        ["eight_point_two_ops", eight_point_two_samples, 0, 0, 32, 16, 8, False],
-        [
-            "eight_point_ones_alt_twos",
-            eight_point_ones_alt_twos,
-            0,
-            0,
-            32,
-            16,
-            8,
-            False,
-        ],
-        ["eight_point_one_to_eight", eight_point_one_to_eight, 0, 0, 32, 16, 8, False],
-        # [ "eight_point_assorted",            eight_point_assorted,                      0,        0,         32,        16,       8         ],
-        ["four_point_dc", four_point_dc, 0, 0, 32, 16, 4, False],
-        ["four_point_one_to_four", four_point_one_to_four, 0, 0, 32, 16, 4, False],
-        ["sixteen_point_dc", sixteen_point_dc, 0, 0, 32, 16, 16, True],
-        ["thirtytwo_point_dc", thirtytwo_point_dc, 0, 0, 32, 16, 32, True],
-        ["descend_signal_2", descend_signal, 0, 0, 32, 16, 2, False],
-        ["descend_signal_4", descend_signal, 0, 0, 32, 16, 4, False],
-        ["descend_signal_16", descend_signal, 0, 0, 32, 16, 16, False],
-        *[
-            [f"{n}_point_dc_generated", n_point_dc, 0, 0, 32, 16, n, True]
-            for n in [16, 64, 128]
-        ],
-        *[
-            [f"{n}_point_{f.__name__}", f, 0, 0, 32, 16, n, True]
-            for n in [16, 64, 128]
-            for f in [random_signal]
-        ],
-    ],
+@pytest.mark.parametrize(
+    *mk_test_matrices(
+        {
+            "fp_spec": [(32, 16), (32, 20), (64, 16)],
+            "model_spec": [
+                (
+                    FFTNumpy,  # Model (must implement FFTInterface)
+                    mk_cmp_approx(
+                        0.05
+                    ),  # Comparison function (expecting an accuracy of ~5% here)
+                ),
+                (
+                    FFTExact,  # Model (must implement FFTInterface)
+                    cmp_exact,
+                ),
+            ],
+            "n_samples": [8, 32, 128],
+            "input_mag": [1, 10],  # Maximum magnitude of the input signal
+            "input_num": [1, 10],  # Number of random inputs to generate
+            "seed": list(range(2)),  # Random seed
+            "slow": True,
+        }
+    )
 )
+def test_model(cmdline_opts, p):
+    random.seed(
+        random.random() + p.seed
+    )  # Done so each test has a deterministic but different random seed
 
-# -------------------------------------------------------------------------
-# TestHarness
-# -------------------------------------------------------------------------
+    # Test the FFT implementation with a specified model
 
+    # Create the model
+    model: FFTInterface = p.model_spec[0](p.fp_spec[0], p.fp_spec[1], p.n_samples)
 
-# Reverse chunks (reverses endianness for serdes)
-def revchunk(l, i):
-    return sum([(l[k : k + i])[::-1] for k in range(0, len(l), i)], [])
+    # Generate random inputs
+    inputs = [
+        [
+            CFixed((random.uniform(-p.input_mag, p.input_mag), 0), *p.fp_spec)
+            for i in range(p.n_samples)
+        ]
+        for _ in range(p.input_num)
+    ]
 
+    # Generate the expected outputs
+    outputs = [model.transform(x) for x in inputs]
+    # Convert to Fixed by keeping only the real part
+    inputs = [[x.real for x in sample] for sample in inputs]
+    outputs = [[x.real for x in sample] for sample in outputs]
 
-def chunk(l, i, n, sep):
-    return sum([l[k : k + n] for k in range(i, len(l), sep)], [])
+    def test(x: Bits, y: Bits):
+        return p.model_spec[1](x, y)
 
-
-def make_signed(i, n):
-    if isinstance(i, int):
-        return mk_bits(n)(i)
-    elif isinstance(i, float):
-        return make_signed(int(i), n)
-    else:
-        return i
-
-
-@pytest.mark.parametrize(**test_case_table)
-def test(test_params, cmdline_opts):
-    th = TestHarness(
-        test_params.BIT_WIDTH,
-        test_params.DECIMAL_PT,
-        test_params.N_SAMPLES,
+    # Run the test
+    check_fft(
+        p.fp_spec[0],
+        p.fp_spec[1],
+        p.n_samples,
+        cmdline_opts,
+        src_delay=0,
+        sink_delay=0,
+        comparison_fn=test,
+        inputs=inputs,
+        outputs=outputs,
     )
-
-    msgs = test_params.msgs(
-        test_params.BIT_WIDTH, test_params.N_SAMPLES, test_params.DECIMAL_PT
-    )
-    msgs = revchunk(msgs, test_params.N_SAMPLES)
-    msgs = [make_signed(m, test_params.BIT_WIDTH) for m in msgs]
-
-    send_msgs = chunk(msgs, 0, test_params.N_SAMPLES, test_params.N_SAMPLES * 2)
-    recv_msgs = chunk(
-        msgs, test_params.N_SAMPLES, test_params.N_SAMPLES, test_params.N_SAMPLES * 2
-    )
-
-    print("Expecting", send_msgs, recv_msgs)
-
-    th.set_param(
-        "top.src.construct",
-        msgs=send_msgs,
-        initial_delay=test_params.src_delay + 3,
-        interval_delay=test_params.src_delay,
-    )
-
-    th.set_param(
-        "top.sink.construct",
-        msgs=recv_msgs,
-        initial_delay=test_params.sink_delay + 3,
-        interval_delay=test_params.sink_delay,
-    )
-
-    run_sim(th, cmdline_opts, duts=["dut.dut"])

@@ -12,18 +12,7 @@ from src.fixed_point.utils import (
     mk_complex_multiplier_input,
     mk_complex_multiplier_output,
 )
-
-
-# Complex multiplication with fixed precision
-def cmul(n, d, a, b):
-    ac = (a.real * b.real).resize(None, n, d)
-    bc = (a.imag * b.imag).resize(None, n, d)
-
-    c = (
-        (a.real + a.imag).resize(None, n, d) * (b.real + b.imag).resize(None, n, d)
-    ).resize(None, n, d)
-
-    return CFixed.cast((ac - bc, c - ac - bc)).resize(n, d)
+from src.fixed_point.sim import complex_multiply
 
 
 # Merge a and b into a larger number
@@ -94,7 +83,7 @@ def test_edge(n, d, a, b, cmdline_opts):
 
     model.set_param(
         "top.sink.construct",
-        msgs=[mk_ret(n, cmul(n, d, a, b).get())],
+        msgs=[mk_ret(n, complex_multiply(a, b).get())],
         initial_delay=0,
         interval_delay=0,
     )
@@ -127,7 +116,7 @@ def test_random_1mult(cmdline_opts, execution_number, sequence_length, n, d):
     random.seed(random.random() + execution_number)
     n, d = rand_fxp_spec(n, d)
     dat = [(rand_cfixed(n, d), rand_cfixed(n, d)) for i in range(sequence_length)]
-    solns = [cmul(n, d, i[0], i[1]) for i in dat]
+    solns = [complex_multiply(*i) for i in dat]
     print(
         "Testing",
         [(i[0].bin(dot=True), i[1].bin(dot=True)) for i in dat],

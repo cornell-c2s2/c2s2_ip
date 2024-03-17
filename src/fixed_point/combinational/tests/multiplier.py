@@ -4,6 +4,7 @@ import random
 from src.fixed_point.combinational.multiplier import Multiplier
 from fixedpt import Fixed
 from src.fixed_point.utils import mk_params, rand_fxp_spec
+from src.fixed_point.sim import multiply
 
 
 # Get a random fixed point number
@@ -17,7 +18,7 @@ def gen_random_test_case(n, d, num):
     for _ in range(num):
         a = rand_fixed(n, d)
         b = rand_fixed(n, d)
-        c = (a * b).resize(None, n, d)
+        c = multiply(a, b)
         test_cases.append([a.get(), b.get(), c.get()])
     return test_cases
 
@@ -40,7 +41,7 @@ def mk_msg(n, a, b):
 def test_edge(cmdline_opts, n, d, a, b):
     a = Fixed(a, 1, n, d)
     b = Fixed(b, 1, n, d)
-    c = (a * b).resize(None, n, d)
+    c = multiply(a, b)
 
     test_case = [("a b c* ")]
     test_case.append([a.get(), b.get(), c.get()])

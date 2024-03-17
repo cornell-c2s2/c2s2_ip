@@ -57,23 +57,23 @@ class StageWrapper(Component):
 
         # Hook up the deserializer to the FFT Stage
         for i in range(N_SAMPLES):
-            s.deserializer.send_msg[i + N_SAMPLES] //= s.dut.recv_msg_real[i]
-            s.deserializer.send_msg[i] //= s.dut.recv_msg_imag[i]
+            s.deserializer.send_msg[i * 2] //= s.dut.recv_msg_real[i]
+            s.deserializer.send_msg[i * 2 + 1] //= s.dut.recv_msg_imag[i]
 
         s.deserializer.send_val //= s.dut.recv_val
         s.dut.recv_rdy //= s.deserializer.send_rdy
 
         # Hook up the FFT Stage to the serializer
         for i in range(N_SAMPLES):
-            s.dut.send_msg_real[i] //= s.serializer.recv_msg[i + N_SAMPLES]
-            s.dut.send_msg_imag[i] //= s.serializer.recv_msg[i]
+            s.dut.send_msg_real[i] //= s.serializer.recv_msg[i * 2]
+            s.dut.send_msg_imag[i] //= s.serializer.recv_msg[i * 2 + 1]
 
         s.dut.send_val //= s.serializer.recv_val
         s.serializer.recv_rdy //= s.dut.send_rdy
 
         # Hook up the sinewave to the FFT Stage
         for i in range(N_SAMPLES):
-            s.sine_wave.sine_wave_out[i] //= s.dut.sine_wave_out[i]
+            s.sine_wave.out[i] //= s.dut.sine_wave_out[i]
 
     def line_trace(s):
         return f"{s.deserializer.line_trace()} > {s.dut.line_trace()} > {s.serializer.line_trace()}"

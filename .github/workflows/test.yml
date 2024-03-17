@@ -12,11 +12,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11.5
       - name: Create Build Directory
         run: mkdir build
       - name: Install verilator
         run: sudo apt-get install -y verilator
+      - name: Check python version
+        run: python --version
+      - name: Install pip dependencies
+        run: pip install -r requirements.txt
       - name: Test with pytest
         run: |
           make test EXTRA_ARGS='-n auto --tb=short -v --suppress-no-test-exit-code ${{ matrix.pytest-flags }}'
-    

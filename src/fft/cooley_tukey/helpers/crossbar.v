@@ -13,15 +13,15 @@ module fft_cooley_tukey_helpers_Crossbar #(
   parameter int STAGE_FFT = 0,
   parameter bit FRONT     = 1
 ) (
-  input  logic [BIT_WIDTH - 1:0] recv_real     [SIZE_FFT - 1:0],
-  input  logic [BIT_WIDTH - 1:0] recv_imaginary[SIZE_FFT - 1:0],
-  input  logic                   recv_val      [SIZE_FFT - 1:0],
-  output logic                   recv_rdy      [SIZE_FFT - 1:0],
+  input  logic [BIT_WIDTH - 1:0] recv_real     [SIZE_FFT],
+  input  logic [BIT_WIDTH - 1:0] recv_imaginary[SIZE_FFT],
+  input  logic                   recv_val      [SIZE_FFT],
+  output logic                   recv_rdy      [SIZE_FFT],
 
-  output logic [BIT_WIDTH - 1:0] send_real     [SIZE_FFT - 1:0],
-  output logic [BIT_WIDTH - 1:0] send_imaginary[SIZE_FFT - 1:0],
-  output logic                   send_val      [SIZE_FFT - 1:0],
-  input  logic                   send_rdy      [SIZE_FFT - 1:0]
+  output logic [BIT_WIDTH - 1:0] send_real     [SIZE_FFT],
+  output logic [BIT_WIDTH - 1:0] send_imaginary[SIZE_FFT],
+  output logic                   send_val      [SIZE_FFT],
+  input  logic                   send_rdy      [SIZE_FFT]
 );
   generate
     for (genvar m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin

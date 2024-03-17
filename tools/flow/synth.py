@@ -1,8 +1,8 @@
 # Push a file through caravel synthesis (openlane)
-from utils.remote import caravel_dir, caravel_installed, connect
+from utils.invoke import caravel_dir, caravel_link, caravel_installed, run, link, cp
 from utils.cmdline import SubCommand, multi_type, positive_int
 import logging as log
-from utils.misc import load_config, merge_dict, root_dir, split_path
+from utils.misc import load_config, merge_dict, root_dir, build_dir, split_path
 from utils.logging import Spinner
 import json
 import subprocess
@@ -15,14 +15,14 @@ import multiprocessing
 
 
 # Take a list of designs and collect the design files for them
-def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
+def design_files(build: str, designs: list[dict], args) -> list[dict]:
     # ----------------------------------------------------------------
     # Run pytest to generate the designs
     # ----------------------------------------------------------------
     # get only the name of the build directory
-    build_dir_name = path.basename(build_dir)
+    build_name = path.basename(build)
 
-    spinner = Spinner(args, f"Running pytest in {build_dir} to generate verilog files")
+    spinner = Spinner(args, f"Running pytest in {build} to generate verilog files")
 
     design_dir = path.dirname(args.design)
     # get the pytest files
@@ -43,7 +43,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
             "--test-verilog",
             "--dump-vtb",
             "--build-dir",
-            build_dir_name,
+            build_name,
         ]
         + (["-v"] if args.verbose > 1 else []),
         stdout=subprocess.DEVNULL if args.verbose == 0 else None,
@@ -82,28 +82,40 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
     vtb_file_regex = re.compile(
         f"^(?P<design_name>{design_names_regex}).*_tb\\.v\\.cases$"
     )
-    verilog_files: dict[str, str] = {}
+    verilog_files: dict[str, list[(str, float)]] = {}
     vtb_files: dict[str, list[str]] = {}
 
-    for root, _, files in os.walk(build_dir):
+    for root, _, files in os.walk(build):
         for file in files:
             # Check if the file is a verilog file matching
             # DESIGNNAME__pickled.v
             match = verilog_file_regex.match(file)
             if match is not None:
                 design_name = match.group("design_name")
-                if design_name in verilog_files:
-                    log.warn(
-                        f"Found multiple verilog files for {design_name}: {verilog_files[design_name]} and {path.join(root, file)}"
-                    )
-                else:
-                    verilog_files[design_name] = path.join(root, file)
+                if design_name not in verilog_files:
+                    verilog_files[design_name] = []
+
+                verilog_files[design_name].append(
+                    (path.join(root, file), path.getmtime(path.join(root, file)))
+                )
             match = vtb_file_regex.match(file)
             if match is not None:
                 design_name = match.group("design_name")
                 if design_name not in vtb_files:
                     vtb_files[design_name] = []
                 vtb_files[design_name].append(path.join(root, file))
+
+    # Loop through the verilog files and find the most recent one
+    for design_name, files in verilog_files.items():
+        if len(files) > 1:
+            most_recent = max(files, key=lambda x: x[1])[0]
+            log.warn(
+                f"Found multiple verilog files for {design_name}:\n\t%s\nUsing the last modified file %s"
+                % ("\n\t".join(f[0] for f in files), most_recent)
+            )
+        else:
+            most_recent = files[0][0]
+        verilog_files[design_name] = most_recent
 
     log.debug("Collected verilog files %s", verilog_files)
     log.debug("Collected vtb files %s", vtb_files)
@@ -155,6 +167,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
     return 0
 
 
+<<<<<<< HEAD
 def synth_results(connection, build_dir, design_name: str, args):
     # ----------------------------------------------------------------
     # Copy the results back
@@ -194,14 +207,13 @@ def synth_results(connection, build_dir, design_name: str, args):
     os.remove(path.join(build_dir, f"{design_name}.zip"))
 
 
+=======
+>>>>>>> main
 def synthesize(design, path_prefix, args):
-    # Create a new connection as this is running in a separate thread
-    connection = connect()
-
     log.info("Running synthesis on %s", design["DESIGN_NAME"])
     prefixed_design_name = f"{path_prefix}_{design['DESIGN_NAME']}"
     # Run synthesis
-    synth_result = connection.run(
+    synth_result = run(
         f"cd {caravel_dir()} && make {prefixed_design_name}",
         warn=True,
         hide=args.verbose == 0,
@@ -212,6 +224,7 @@ def synthesize(design, path_prefix, args):
             # Log the stdout and stderr
             log.error(synth_result.stdout)
             log.error(synth_result.stderr)
+<<<<<<< HEAD
         synth_results(
             connection, path.join(root_dir(), args.dir), prefixed_design_name, args
         )
@@ -225,6 +238,10 @@ def synthesize(design, path_prefix, args):
 
     connection.close()
 
+=======
+        return 1
+
+>>>>>>> main
     return 0
 
 
@@ -285,9 +302,13 @@ class Synth(SubCommand):
             help="Number of threads to use for synthesis. Use 'auto' to use a threadcount equal to the number of CPU cores.",
         )
 
+<<<<<<< HEAD
     def run(connection, args):
+=======
+    def run(args):
+>>>>>>> main
         """Run synthesis on a design."""
-        if not caravel_installed(connection):
+        if not caravel_installed():
             log.error("Caravel not yet installed, run `caravel install` first.")
             return 1
 
@@ -317,9 +338,13 @@ class Synth(SubCommand):
         # Collect the design files
         # ----------------------------------------------------------------
         # create a temporary build directory for saving files
+<<<<<<< HEAD
         build_dir = tempfile.TemporaryDirectory(prefix="build", dir=root_dir())
+=======
+        build = build_dir()
+>>>>>>> main
 
-        err_code = design_files(build_dir.name, designs, args)
+        err_code = design_files(build, designs, args)
         if err_code:
             return err_code
 
@@ -336,14 +361,14 @@ class Synth(SubCommand):
         # Copy files to remote
         # ----------------------------------------------------------------
         spinner = Spinner(args, "Copying files to caravel")
-        design_dir = path.dirname(args.design)
+        design_dir = path.abspath(path.dirname(args.design))
         remote_rtl_dir = path.join(caravel_dir(), "verilog", "rtl")
         remote_openlane_dir = path.join(caravel_dir(), "openlane")
         for design in designs:
             prefixed_design_name = f"{path_prefix}_{design['DESIGN_NAME']}"
             openlane_project_dir = path.join(remote_openlane_dir, prefixed_design_name)
             # Create the openlane project directory
-            connection.run(f"mkdir -p {openlane_project_dir}")
+            run(f"mkdir -p {openlane_project_dir}")
 
             # Replace the top module name in the verilog file
             with open(design["VERILOG_FILE"], "r") as f:
@@ -361,20 +386,18 @@ class Synth(SubCommand):
             with open(design["VERILOG_FILE"], "w") as f:
                 f.write(verilog)
 
-            # Copy the verilog file
-            connection.put(
+            # Copy files to caravel
+            cp(
                 design["VERILOG_FILE"],
                 path.join(remote_rtl_dir, f"{prefixed_design_name}.sv"),
             )
             # Run sv2v on the verilog file
-            connection.run(
+            run(
                 f"cd {remote_rtl_dir} && /classes/c2s2/install/stow-pkgs/x86_64-rhel7/bin/sv2v -w adjacent {prefixed_design_name}.sv"
             )
 
             # Write the openlane config.json
-            config_json = path.join(
-                build_dir.name, f"{prefixed_design_name}_config.json"
-            )
+            config_json = path.join(build, f"{prefixed_design_name}_config.json")
             with open(config_json, "w") as f:
                 json.dump(
                     {
@@ -388,27 +411,37 @@ class Synth(SubCommand):
                     f,
                 )
 
-            connection.put(
+            cp(
                 config_json,
                 path.join(openlane_project_dir, "config.json"),
             )
+<<<<<<< HEAD
             if "FP_PIN_ORDER_CFG" in design:
                 connection.put(
                     path.join(design_dir, design["FP_PIN_ORDER_CFG"]),
                     path.join(openlane_project_dir, "pin_order.cfg"),
                 )
+=======
+            cp(
+                path.join(design_dir, design["FP_PIN_ORDER_CFG"]),
+                path.join(openlane_project_dir, "pin_order.cfg"),
+            )
+>>>>>>> main
 
             # TODO: Copy the test files
 
         spinner.succeed("Finished copying files to caravel")
 
         # ----------------------------------------------------------------
+<<<<<<< HEAD
         # Cleanup build directory
         # ----------------------------------------------------------------
 
         build_dir.cleanup()
 
         # ----------------------------------------------------------------
+=======
+>>>>>>> main
         # Run synthesis
         # ----------------------------------------------------------------
 
@@ -430,7 +463,22 @@ class Synth(SubCommand):
             if any(results):
                 spinner.fail("Synthesis failed")
                 log.error(
+<<<<<<< HEAD
                     f"Synthesis failed for the following designs:{chr(10).join([design['DESIGN_NAME'] for design, result in zip(designs, results) if result])}"
+=======
+                    "Synthesis failed for the following designs:\n\t%s",
+                    "\n\t".join(
+                        [
+                            path.join(
+                                caravel_link(),
+                                "openlane",
+                                f"{path_prefix}_{design['DESIGN_NAME']}",
+                            )
+                            for design, result in zip(designs, results)
+                            if result
+                        ]
+                    ),
+>>>>>>> main
                 )
                 return 1
 

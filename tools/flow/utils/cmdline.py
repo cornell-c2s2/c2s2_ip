@@ -65,5 +65,5 @@ class SubCommand:
     @staticmethod
     @abstractmethod
     # Must return an integer representing the exit code
-    def run(connection: Connection, args: argparse.Namespace) -> int:
+    def run(args: argparse.Namespace) -> int:
         pass

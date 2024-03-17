@@ -1,19 +1,20 @@
 import pytest
 import random
-from pymtl3 import *
-from pymtl3.stdlib import stream
-from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
-from src.fft.cooley_tukey.stage import StageWrapper
-from src.fft.cooley_tukey.tests.sim import fixed_point_fft
 import math
+from pymtl3.stdlib import stream
+from pymtl3.stdlib.test_utils import run_sim
+from pymtl3 import mk_bits, Component
+from tools.utils import mk_test_matrices, cfixed_bits, cmp_exact, mk_cmp_approx
+from src.fft.cooley_tukey.stage import StageWrapper
+from fixedpt import Fixed, CFixed
+from src.fft.sim import fft_stage
+
 
 # -------------------------------------------------------------------------
 # TestHarness
 # -------------------------------------------------------------------------
-
-
 class TestHarness(Component):
-    def construct(s, BIT_WIDTH=32, DECIMAL_PT=16, N_SAMPLES=8, STAGE_FFT=0):
+    def construct(s, BIT_WIDTH: int, DECIMAL_PT: int, N_SAMPLES: int, STAGE_FFT: int):
         # Instantiate models
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
@@ -43,1130 +44,167 @@ class TestHarness(Component):
         )
 
 
-def packed_msg(array, bitwidth, fft_size):  # Array of ints
-    input = Bits(1)
-    bit_convert = mk_bits(bitwidth)
-    output = input
-    for i in range(len(array)):
-        output = concat(bit_convert(array[i]), output)
+def check_fft_stage(
+    bit_width: int,
+    decimal_pt: int,
+    n_samples: int,
+    stage: int,
+    cmdline_opts: dict,
+    src_delay: int,
+    sink_delay: int,
+    inputs: list[list[CFixed]],
+    outputs: list[list[CFixed]],
+) -> None:
+    """
+    Check the FFT Stage implementation.
 
-    output = output[1 : bitwidth * fft_size + 1]
+    Args:
+        bit_width (int): Number of bits.
+        decimal_pt (int): Number of decimal points.
+        n_samples (int): Number of samples.
+        stage (int): Stage of the FFT.
+        cmdline_opts (dict): Command line options.
+        src_delay (int): Source delay.
+        sink_delay (int): Sink delay.
+        inputs (list[list[CFixed]]): List of samples to send.
+        outputs (list[list[CFixed]]): List of expected output samples.
 
-    return output
+    Returns:
+        bool: True if the test passes, False otherwise.
+    """
+    assert len(inputs) == len(outputs)
+    assert all(len(x) == n_samples for x in inputs)
+    assert all(len(x) == n_samples for x in outputs)
 
+    model = TestHarness(bit_width, decimal_pt, n_samples, stage)
 
-"""Creates a singular FFT call and resposne """
+    # Convert inputs and outputs into a single list of bits
+    inputs = [cfixed_bits(x) for sample in inputs for x in sample]
+    outputs = [cfixed_bits(x) for sample in outputs for x in sample]
 
+    # Flatten the lists so that we get [real, imag, real, imag]
+    inputs = sum(map(list, inputs), [])
+    outputs = sum(map(list, outputs), [])
 
-def fft_stage_call_response(array_of_sample_integers, bitwidth, fft_size, stage):
-    array = []
-    output_array_unpacked = fixed_point_fft(array_of_sample_integers, fft_size)
-    input_array = []
-    output_array = []
-    for n in range(fft_size):
-        input_array.append(array_of_sample_integers[n])
-        output_array.append(output_array_unpacked[n])
-
-    array.append(packed_msg(input_array, bitwidth, fft_size))
-    array.append(packed_msg(output_array, bitwidth, fft_size))
-
-    return array
-
-
-# ----------------------------------------------------------------------
-# Test Case: small positive * positive
-# ----------------------------------------------------------------------
-
-
-def two_point_dc(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00000000,
-    ]
-
-
-def eight_point_dc(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-    ]
-
-
-def eight_point_dc_two(bits, fft_size, frac_bits):
-    return [
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-    ]
-
-
-def eight_point_dc_three(bits, fft_size, frac_bits):
-    return [
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00080000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-    ]
-
-
-def eight_point_assorted(bits, fft_size, frac_bits):
-    return [
-        0x00040000,
-        0x00050000,
-        0x00030000,
-        0x00010000,
-        0x00000000,
-        0xFFFF0000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00010000,
-        0x00090000,
-        0xFFFE0000,
-        0x00040000,
-        0xFFFF0000,
-        0xFFFF0000,
-        0x00020000,
-        0x00020000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-    ]
-
-
-def eight_point_assorted_two(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00090000,
-        0xFFFE0000,
-        0x00040000,
-        0xFFFF0000,
-        0xFFFF0000,
-        0x00020000,
-        0x00020000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0xFFFE0000,
-        0xFFFB0000,
-        0xFFFE0000,
-        0x000D0000,
-        0x00020000,
-        0x00030000,
-        0x00020000,
-        0x00010000,
-        0x00010000,
-        0x00000000,
-        0xFFFF0000,
-        0x00000000,
-        0xFFFF0000,
-        0x00000000,
-        0x00010000,
-        0x00000000,
-    ]
-
-
-def eight_point_assorted_three(bits, fft_size, frac_bits):
-    return [
-        0xFFFE0000,
-        0xFFFB0000,
-        0xFFFE0000,
-        0x000D0000,
-        0x00020000,
-        0x00030000,
-        0x00020000,
-        0x00010000,
-        0x00010000,
-        0x00000000,
-        0xFFFF0000,
-        0x00000000,
-        0xFFFF0000,
-        0x00000000,
-        0x00010000,
-        0x00000000,
-        0xFFFFE0F4,
-        0x00030000,
-        0x00041F0C,
-        0xFFF40000,
-        0x00041F0C,
-        0x00030000,
-        0xFFFFE0F4,
-        0x000E0000,
-        0xFFFE4AFC,
-        0xFFFB0000,
-        0x00004AFC,
-        0x00000000,
-        0xFFFFB504,
-        0x00050000,
-        0x0001B504,
-        0x00000000,
-    ]
-
-
-def two_point_two_samples(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00000000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0xFFFF0000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-    ]
-
-
-def four_point_assorted_one(bits, fft_size, frac_bits):
-    return [
-        0x00020000,
-        0x00030000,
-        0x00020000,
-        0x00020000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00010000,
-        0x00050000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-    ]
-
-
-def four_point_assorted_two(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00050000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0xFFFF0000,
-        0x00000000,
-        0x00090000,
-        0x00010000,
-        0x00000000,
-        0xFFFF0000,
-        0x00000000,
-    ]
-
-
-def thirtytwo_point_dc(bits, fft_size, frac_bits):
-    return [
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00010000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-    ]
-
-
-def thirtytwo_point_dc_two(bits, fft_size, frac_bits):
-    return [
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00020000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-    ]
-
-
-def thirtytwo_point_dc_three(bits, fft_size, frac_bits):
-    return [
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00040000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00080000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00080000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00080000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00080000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-    ]
-
-
-def thirtytwo_point_dc_four(bits, fft_size, frac_bits):
-    return [
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00080000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00080000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00080000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00080000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00100000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00100000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-    ]
-
-
-def thirtytwo_point_dc_five(bits, fft_size, frac_bits):
-    return [
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00100000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00100000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00200000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-        0x00000000,
-    ]
-
-
-def random_signal(bits, fft_size, frac_bits):
-    signal = []
-    for i in range(fft_size):
-        signal.append(math.trunc(random.uniform(-20, 20) * (2**frac_bits)))
-
-    print(fft_stage_call_response(signal, bits, fft_size))
-
-    return fft_stage_call_response(signal, bits, fft_size)
-
-
-# ----------------------------------------------------------------------
-# Test Case Table
-# ----------------------------------------------------------------------
-
-
-# Helper function that does the same thing as `mk_test_case_table` but allows for marking tests slow
-def mk_tests(test_cases):
-    table = mk_test_case_table(test_cases)
-
-    params = {
-        "argnames": table["argnames"],
-        "argvalues": [],
-    }
-
-    for i in range(len(table["ids"])):
-        params["argvalues"].append(
-            pytest.param(
-                table["argvalues"][i],
-                id=table["ids"][i],
-                marks=pytest.mark.slow if table["argvalues"][i].slow else [],
-            )
-        )
-
-    return params
-
-
-test_case_table = mk_tests(
-    [
-        ("msgs src_delay sink_delay BIT_WIDTH DECIMAL_PT N_SAMPLES  STAGE_FFT slow"),
-        ["two_point_dc", two_point_dc, 0, 0, 32, 16, 2, 0, False],
-        ["eight_point_dc", eight_point_dc, 0, 0, 32, 16, 8, 0, False],
-        ["eight_point_dc_two", eight_point_dc_two, 0, 0, 32, 16, 8, 1, False],
-        ["eight_point_dc_three", eight_point_dc_three, 0, 0, 32, 16, 8, 2, False],
-        ["eight_assorted", eight_point_assorted, 0, 0, 32, 16, 8, 0, False],
-        ["eight_assorted_two", eight_point_assorted_two, 0, 0, 32, 16, 8, 1, False],
-        ["eight_assorted_three", eight_point_assorted_three, 0, 0, 32, 16, 8, 2, False],
-        ["two_point_two_samples", two_point_two_samples, 0, 0, 32, 16, 2, 0, False],
-        ["four_point_assorted_one", four_point_assorted_one, 0, 0, 32, 16, 4, 0, False],
-        ["four_point_assorted_two", four_point_assorted_two, 0, 0, 32, 16, 4, 1, False],
-        ["thirtytwo_point_dc", thirtytwo_point_dc, 0, 0, 32, 16, 32, 0, True],
-        ["thirtytwo_point_dc_two", thirtytwo_point_dc_two, 0, 0, 32, 16, 32, 1, True],
-        [
-            "thirtytwo_point_dc_three",
-            thirtytwo_point_dc_three,
-            0,
-            0,
-            32,
-            16,
-            32,
-            2,
-            True,
-        ],
-        ["thirtytwo_point_dc_four", thirtytwo_point_dc_four, 0, 0, 32, 16, 32, 3, True],
-        ["thirtytwo_point_dc_five", thirtytwo_point_dc_five, 0, 0, 32, 16, 32, 4, True],
-    ]
-)
-
-# -------------------------------------------------------------------------
-# TestHarness
-# -------------------------------------------------------------------------
-
-
-# Reverse chunks (reverses endianness for serdes)
-def revchunk(l, i):
-    return sum([(l[k : k + i])[::-1] for k in range(0, len(l), i)], [])
-
-
-def chunk(l, i, n, sep):
-    return sum([l[k : k + n] for k in range(i, len(l), sep)], [])
-
-
-@pytest.mark.parametrize(**test_case_table)
-def test(request, test_params, cmdline_opts):
-    th = TestHarness(
-        test_params.BIT_WIDTH,
-        test_params.DECIMAL_PT,
-        test_params.N_SAMPLES,
-        test_params.STAGE_FFT,
-    )
-
-    msgs = test_params.msgs(
-        test_params.BIT_WIDTH, test_params.N_SAMPLES, test_params.DECIMAL_PT
-    )
-    msgs = revchunk(msgs, test_params.N_SAMPLES)
-    print(chunk(msgs, 0, test_params.N_SAMPLES * 2, test_params.N_SAMPLES * 4))
-    print(
-        chunk(
-            msgs,
-            test_params.N_SAMPLES * 2,
-            test_params.N_SAMPLES * 2,
-            test_params.N_SAMPLES * 4,
-        )
-    )
-
-    th.set_param(
+    # Run the model
+    model.set_param(
         "top.src.construct",
-        msgs=chunk(msgs, 0, test_params.N_SAMPLES * 2, test_params.N_SAMPLES * 4),
-        initial_delay=test_params.src_delay + 3,
-        interval_delay=test_params.src_delay,
+        msgs=inputs,
+        initial_delay=src_delay + 3,
+        interval_delay=src_delay,
     )
 
-    th.set_param(
+    model.set_param(
         "top.sink.construct",
-        msgs=chunk(
-            msgs,
-            test_params.N_SAMPLES * 2,
-            test_params.N_SAMPLES * 2,
-            test_params.N_SAMPLES * 4,
-        ),
-        initial_delay=test_params.sink_delay + 3,
-        interval_delay=test_params.sink_delay,
+        msgs=outputs,
+        initial_delay=sink_delay + 3,
+        interval_delay=sink_delay,
     )
 
-    run_sim(
-        th,
-        cmdline_opts,
-        duts=["dut.dut"],
-        print_line_trace=False,  # Turned off because line traces for large modules are very large
+    run_sim(model, cmdline_opts, duts=["dut.dut"], print_line_trace=False)
+
+
+@pytest.mark.parametrize(
+    *mk_test_matrices(
+        {
+            "fp_spec": [(8, 0), (16, 8)],
+            "n_samples": [8, 32],
+        },
+        {
+            "fp_spec": [(16, 4)],
+            "n_samples": [128, 256],
+            "slow": True,
+        },
     )
+)
+def test_dc(cmdline_opts, p):
+    """
+    Simulates what a DC signal would look like for every stage of an FFT.
+
+    Example (8 point):
+
+    DC Input looks like
+        1, 1, 1, 1, 1, 1, 1, 1
+    Stage 1 transforms it to
+        2, 0, 2, 0, 2, 0, 2, 0
+    Stage 2 transforms it to
+        4, 0, 0, 0, 4, 0, 0, 0
+    Stage 3 transforms it to
+        8, 0, 0, 0, 0, 0, 0, 0
+    This is the expected FFT Output!
+    """
+
+    n_stages = int(math.log2(p.n_samples))
+
+    # Generates the input to the nth stage for an n_samples FFT
+    # given DC as an initial input
+    def gen_dc(n_samples: int, stage: int) -> list[CFixed]:
+        signal = sum(
+            [
+                [2**stage] + [0] * (2 ** (stage) - 1)
+                for _ in range(int(n_samples / (2**stage)))
+            ],
+            [],
+        )
+        return [CFixed((x, 0), *p.fp_spec) for x in signal]
+
+    for stage in range(n_stages):
+        # Calculate the expected inputs and outputs
+        inputs = gen_dc(p.n_samples, stage)
+        outputs = gen_dc(p.n_samples, stage + 1)
+
+        # Run the test
+        check_fft_stage(
+            *p.fp_spec,
+            p.n_samples,
+            stage,
+            cmdline_opts,
+            src_delay=0,
+            sink_delay=0,
+            inputs=[inputs],
+            outputs=[outputs],
+        )
+
+
+@pytest.mark.parametrize(
+    *mk_test_matrices(
+        {
+            "fp_spec": [(32, 16), (16, 8)],
+            "n_samples": [8, 64],
+            "input_mag": [1, 10],  # Maximum magnitude of the input signal
+            "input_num": [1, 10],  # Number of random inputs to generate
+            "seed": list(range(2)),  # Random seed
+            "slow": True,
+        }
+    )
+)
+def test_model(cmdline_opts, p):
+    random.seed(
+        random.random() + p.seed
+    )  # Done so each test has a deterministic but different random seed
+
+    # Test the FFT implementation with a specified model
+
+    # Generate random inputs
+    inputs = [
+        [CFixed((1, 0), *p.fp_spec) for __ in range(p.n_samples)]
+        for _ in range(p.input_num)
+    ]
+
+    for stage in range(int(math.log2(p.n_samples))):
+        # Generate the expected outputs
+        outputs = [fft_stage(x, stage, *p.fp_spec, p.n_samples) for x in inputs]
+        print(inputs)
+        print(outputs)
+
+        # Run the test
+        check_fft_stage(
+            *p.fp_spec,
+            p.n_samples,
+            stage,
+            cmdline_opts,
+            src_delay=0,
+            sink_delay=0,
+            inputs=inputs,
+            outputs=outputs,
+        )

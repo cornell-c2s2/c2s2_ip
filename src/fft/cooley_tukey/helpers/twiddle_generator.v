@@ -6,10 +6,10 @@ module fft_cooley_tukey_helpers_TwiddleGenerator #(
   parameter int SIZE_FFT   = 8,
   parameter int STAGE_FFT  = 0
 ) (
-  input logic [BIT_WIDTH - 1:0] sine_wave_in[0:SIZE_FFT - 1],  //sine_wave_in = sin(2*pi m / N)
+  input logic [BIT_WIDTH - 1:0] sine_wave_in[SIZE_FFT],  //sine_wave_in = sin(2*pi m / N)
 
-  output logic [BIT_WIDTH - 1:0] twiddle_real     [SIZE_FFT/2 - 1:0],
-  output logic [BIT_WIDTH - 1:0] twiddle_imaginary[SIZE_FFT/2 - 1:0]
+  output logic [BIT_WIDTH - 1:0] twiddle_real     [SIZE_FFT/2],
+  output logic [BIT_WIDTH - 1:0] twiddle_imaginary[SIZE_FFT/2]
 );
 
   generate

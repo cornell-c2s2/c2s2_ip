@@ -43,5 +43,9 @@
   },
   "terminal.integrated.defaultProfile.linux": "c2s2_ip",
   "python.terminal.activateEnvironment": false,
-  "python.terminal.activateEnvInCurrentTerminal": false
+  "python.terminal.activateEnvInCurrentTerminal": false,
+  "python.analysis.extraPaths": [
+    "/classes/c2s2/easybuild/software/C2S2PythonPackages/2024.02-foss-2023b/lib/python3.11/site-packages",
+    "~/.local/lib/python3.11/site-packages/"
+  ]
 }
