@@ -27,9 +27,7 @@ def multi_type(*args):
                 if arg == value:
                     return value
         raise argparse.ArgumentTypeError(
-            f"Invalid type for argument, expected one of {
-                ', '.join(arg.__name__ if callable(arg) else str(arg) for arg in args)
-            }"
+            f"Invalid type for argument, expected one of {', '.join(arg.__name__ if callable(arg) else str(arg) for arg in args)}"
         )
 
     return check_type
@@ -67,5 +65,5 @@ class SubCommand:
     @staticmethod
     @abstractmethod
     # Must return an integer representing the exit code
-    def run(connection: Connection, args: argparse.Namespace) -> int:
+    def run(args: argparse.Namespace) -> int:
         pass

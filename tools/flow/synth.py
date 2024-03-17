@@ -1,5 +1,5 @@
 # Push a file through caravel synthesis (openlane)
-from utils.remote import caravel_dir, caravel_installed, connect
+from utils.invoke import caravel_dir, caravel_installed, run, link
 from utils.cmdline import SubCommand, multi_type, positive_int
 import logging as log
 from utils.misc import load_config, merge_dict, root_dir, split_path
@@ -120,7 +120,9 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
         }
 
     if len(vtb_files) > 0:
-        spinner.fail(f"Found extra vtb files not matching any verilog files: {vtb_files}")
+        spinner.fail(
+            f"Found extra vtb files not matching any verilog files: {vtb_files}"
+        )
         return 1
 
     # delete these from the scope so they don't get used later
@@ -134,17 +136,17 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
             if name in files:
                 if design_name is not None:
                     spinner.fail(
-                        "Found multiple verilog files/vtb cases for %s: %s and %s" %
-                        (name,
-                        files[name]["verilog"],
-                        design["VERILOG_FILE"])
+                        "Found multiple verilog files/vtb cases for %s: %s and %s"
+                        % (name, files[name]["verilog"], design["VERILOG_FILE"])
                     )
                     return 1
                 design["VERILOG_FILE"] = files[name]["verilog"]
                 design["TEST_FILES"] = files[name]["vtb"]
                 design_name = name
         if design_name is None:
-            spinner.fail(f"No verilog file found matching any of {design['DESIGN_NAME']}", )
+            spinner.fail(
+                f"No verilog file found matching any of {design['DESIGN_NAME']}",
+            )
             return 1
         design["DESIGN_NAME"] = design_name
 
@@ -153,52 +155,11 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
     return 0
 
 
-def synth_results(connection, build_dir, design_name: str, args):
-    # ----------------------------------------------------------------
-    # Copy the results back
-    # ----------------------------------------------------------------
-
-    log.info("Saving synthesis results for %s to %s", design_name, build_dir)
-    # First, zip the results
-    connection.run(
-        f"cd {path.join(caravel_dir(), "openlane", design_name, "runs")} && zip -r results.zip {design_name}",
-        hide=args.verbose < 2,
-    )
-
-    # Then, copy the results back
-    connection.get(
-        path.join(
-            caravel_dir(),
-            "openlane",
-            design_name,
-            "runs",
-            "results.zip",
-        ),
-        path.join(build_dir, f"{design_name}.zip"),
-    )
-
-    # Delete the results on the server
-    connection.run(
-        f"rm {path.join(caravel_dir(), "openlane", design_name, "runs", "results.zip")}"
-    )
-
-    # Unzip the results
-    subprocess.run(
-        ["unzip", "-o", path.join(build_dir, f"{design_name}.zip"), "-d", build_dir],
-        stdout=subprocess.DEVNULL if args.verbose < 2 else None,
-    )
-
-    # Delete the zip file
-    os.remove(path.join(build_dir, f"{design_name}.zip"))
-
 def synthesize(design, path_prefix, args):
-    # Create a new connection as this is running in a separate thread
-    connection = connect()
-
     log.info("Running synthesis on %s", design["DESIGN_NAME"])
     prefixed_design_name = f"{path_prefix}_{design['DESIGN_NAME']}"
     # Run synthesis
-    synth_result = connection.run(
+    synth_result = run(
         f"cd {caravel_dir()} && make {prefixed_design_name}",
         warn=True,
         hide=args.verbose == 0,
@@ -209,14 +170,7 @@ def synthesize(design, path_prefix, args):
             # Log the stdout and stderr
             log.error(synth_result.stdout)
             log.error(synth_result.stderr)
-        synth_results(connection, path.join(root_dir(), args.dir), prefixed_design_name, args)
-        connection.close()
         return 1
-
-    # Copy the results back
-    synth_results(connection, path.join(root_dir(), args.dir), prefixed_design_name, args)
-
-    connection.close()
 
     return 0
 
@@ -271,15 +225,16 @@ class Synth(SubCommand):
             "-n",
             "--nthreads",
             metavar="Number of Threads",
-            type=multi_type(positive_int, 'auto'), # expect an integer or the string 'auto'
-            default='auto',
+            type=multi_type(
+                positive_int, "auto"
+            ),  # expect an integer or the string 'auto'
+            default="auto",
             help="Number of threads to use for synthesis. Use 'auto' to use a threadcount equal to the number of CPU cores.",
         )
 
-
-    def run(connection, args):
+    def run(args):
         """Run synthesis on a design."""
-        if not caravel_installed(connection):
+        if not caravel_installed():
             log.error("Caravel not yet installed, run `caravel install` first.")
             return 1
 
@@ -309,9 +264,7 @@ class Synth(SubCommand):
         # Collect the design files
         # ----------------------------------------------------------------
         # create a temporary build directory for saving files
-        build_dir = tempfile.TemporaryDirectory(
-            prefix="build", dir=root_dir(), delete=False
-        )
+        build_dir = tempfile.TemporaryDirectory(prefix="build", dir=root_dir())
 
         err_code = design_files(build_dir.name, designs, args)
         if err_code:
@@ -337,7 +290,7 @@ class Synth(SubCommand):
             prefixed_design_name = f"{path_prefix}_{design['DESIGN_NAME']}"
             openlane_project_dir = path.join(remote_openlane_dir, prefixed_design_name)
             # Create the openlane project directory
-            connection.run(f"mkdir -p {openlane_project_dir}")
+            run(f"mkdir -p {openlane_project_dir}")
 
             # Replace the top module name in the verilog file
             with open(design["VERILOG_FILE"], "r") as f:
@@ -355,13 +308,13 @@ class Synth(SubCommand):
             with open(design["VERILOG_FILE"], "w") as f:
                 f.write(verilog)
 
-            # Copy the verilog file
-            connection.put(
+            # Link
+            link(
                 design["VERILOG_FILE"],
                 path.join(remote_rtl_dir, f"{prefixed_design_name}.sv"),
             )
             # Run sv2v on the verilog file
-            connection.run(
+            run(
                 f"cd {remote_rtl_dir} && /classes/c2s2/install/stow-pkgs/x86_64-rhel7/bin/sv2v -w adjacent {prefixed_design_name}.sv"
             )
 
@@ -382,11 +335,11 @@ class Synth(SubCommand):
                     f,
                 )
 
-            connection.put(
+            link(
                 config_json,
                 path.join(openlane_project_dir, "config.json"),
             )
-            connection.put(
+            link(
                 path.join(design_dir, design["FP_PIN_ORDER_CFG"]),
                 path.join(openlane_project_dir, "pin_order.cfg"),
             )
@@ -400,7 +353,7 @@ class Synth(SubCommand):
         # ----------------------------------------------------------------
 
         build_dir.cleanup()
-        
+
         # ----------------------------------------------------------------
         # Run synthesis
         # ----------------------------------------------------------------
@@ -409,20 +362,31 @@ class Synth(SubCommand):
         os.makedirs(path.join(root_dir(), args.dir), exist_ok=True)
 
         # Create threadpool
-        if args.nthreads == 'auto':
+        if args.nthreads == "auto":
             threads = multiprocessing.cpu_count()
         else:
             threads = args.nthreads
 
         spinner = Spinner(args, f"Running synthesis with {threads} threads")
-        
+
         with multiprocessing.Pool(threads) as pool:
-            results = pool.starmap(synthesize, [(design, path_prefix, args) for design in designs])
+            results = pool.starmap(
+                synthesize, [(design, path_prefix, args) for design in designs]
+            )
             if any(results):
                 spinner.fail("Synthesis failed")
-                log.error(f"Synthesis failed for the following designs:{"\n".join([design["DESIGN_NAME"] for design, result in zip(designs, results) if result])}")
+                log.error(
+                    f"Synthesis failed for the following designs:%s",
+                    "\n".join(
+                        [
+                            design["DESIGN_NAME"]
+                            for design, result in zip(designs, results)
+                            if result
+                        ]
+                    ),
+                )
                 return 1
-        
+
         spinner.succeed("Finished synthesis")
 
         return 0
