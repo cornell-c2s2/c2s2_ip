@@ -1,8 +1,8 @@
 # Push a file through caravel synthesis (openlane)
-from utils.invoke import caravel_dir, caravel_installed, run, link, cp
+from utils.invoke import caravel_dir, caravel_link, caravel_installed, run, link, cp
 from utils.cmdline import SubCommand, multi_type, positive_int
 import logging as log
-from utils.misc import load_config, merge_dict, root_dir, split_path
+from utils.misc import load_config, merge_dict, root_dir, build_dir, split_path
 from utils.logging import Spinner
 import json
 import subprocess
@@ -15,14 +15,14 @@ import multiprocessing
 
 
 # Take a list of designs and collect the design files for them
-def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
+def design_files(build: str, designs: list[dict], args) -> list[dict]:
     # ----------------------------------------------------------------
     # Run pytest to generate the designs
     # ----------------------------------------------------------------
     # get only the name of the build directory
-    build_dir_name = path.basename(build_dir)
+    build_name = path.basename(build)
 
-    spinner = Spinner(args, f"Running pytest in {build_dir} to generate verilog files")
+    spinner = Spinner(args, f"Running pytest in {build} to generate verilog files")
 
     design_dir = path.dirname(args.design)
     # get the pytest files
@@ -43,7 +43,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
             "--test-verilog",
             "--dump-vtb",
             "--build-dir",
-            build_dir_name,
+            build_name,
         ]
         + (["-v"] if args.verbose > 1 else []),
         stdout=subprocess.DEVNULL if args.verbose == 0 else None,
@@ -85,7 +85,7 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
     verilog_files: dict[str, str] = {}
     vtb_files: dict[str, list[str]] = {}
 
-    for root, _, files in os.walk(build_dir):
+    for root, _, files in os.walk(build):
         for file in files:
             # Check if the file is a verilog file matching
             # DESIGNNAME__pickled.v
@@ -93,11 +93,11 @@ def design_files(build_dir: str, designs: list[dict], args) -> list[dict]:
             if match is not None:
                 design_name = match.group("design_name")
                 if design_name in verilog_files:
-                    spinner.fail(
-                        f"Found multiple verilog files for {design_name}: {verilog_files[design_name]} and {path.join(root, file)}"
+                    log.warn(
+                        f"Found multiple verilog files for {design_name}: {verilog_files[design_name]} and {path.join(root, file)}. Skipping the latter..."
                     )
-                    return 1
-                verilog_files[design_name] = path.join(root, file)
+                else:
+                    verilog_files[design_name] = path.join(root, file)
             match = vtb_file_regex.match(file)
             if match is not None:
                 design_name = match.group("design_name")
@@ -264,9 +264,9 @@ class Synth(SubCommand):
         # Collect the design files
         # ----------------------------------------------------------------
         # create a temporary build directory for saving files
-        build_dir = tempfile.TemporaryDirectory(prefix="build", dir=root_dir())
+        build = build_dir()
 
-        err_code = design_files(build_dir.name, designs, args)
+        err_code = design_files(build, designs, args)
         if err_code:
             return err_code
 
@@ -283,7 +283,7 @@ class Synth(SubCommand):
         # Copy files to remote
         # ----------------------------------------------------------------
         spinner = Spinner(args, "Copying files to caravel")
-        design_dir = path.dirname(args.design)
+        design_dir = path.abspath(path.dirname(args.design))
         remote_rtl_dir = path.join(caravel_dir(), "verilog", "rtl")
         remote_openlane_dir = path.join(caravel_dir(), "openlane")
         for design in designs:
@@ -319,9 +319,7 @@ class Synth(SubCommand):
             )
 
             # Write the openlane config.json
-            config_json = path.join(
-                build_dir.name, f"{prefixed_design_name}_config.json"
-            )
+            config_json = path.join(build, f"{prefixed_design_name}_config.json")
             with open(config_json, "w") as f:
                 json.dump(
                     {
@@ -339,7 +337,7 @@ class Synth(SubCommand):
                 config_json,
                 path.join(openlane_project_dir, "config.json"),
             )
-            link(
+            cp(
                 path.join(design_dir, design["FP_PIN_ORDER_CFG"]),
                 path.join(openlane_project_dir, "pin_order.cfg"),
             )
@@ -347,12 +345,6 @@ class Synth(SubCommand):
             # TODO: Copy the test files
 
         spinner.succeed("Finished copying files to caravel")
-
-        # ----------------------------------------------------------------
-        # Cleanup build directory
-        # ----------------------------------------------------------------
-
-        build_dir.cleanup()
 
         # ----------------------------------------------------------------
         # Run synthesis
@@ -376,10 +368,14 @@ class Synth(SubCommand):
             if any(results):
                 spinner.fail("Synthesis failed")
                 log.error(
-                    f"Synthesis failed for the following designs:%s",
-                    "\n".join(
+                    "Synthesis failed for the following designs:\n\t%s",
+                    "\n\t".join(
                         [
-                            design["DESIGN_NAME"]
+                            path.join(
+                                caravel_link(),
+                                "openlane",
+                                f"{path_prefix}_{design['DESIGN_NAME']}",
+                            )
                             for design, result in zip(designs, results)
                             if result
                         ]

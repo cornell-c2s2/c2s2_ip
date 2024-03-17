@@ -2,6 +2,7 @@ from .config import get_user
 import logging as log
 from os import path
 from invoke import run as invoke_run
+from utils.misc import root_dir
 
 """
 Helper file to run commands on the ecelinux servers
@@ -21,12 +22,12 @@ def run(command, **kwargs):
 
 def link(src, dst):
     log.debug(f"Linking {src} to {dst}")
-    run(f"ln -sf {src} {dst}")
+    run(f"rm -rf {dst} && ln -snf {src} {dst}")
 
 
 def cp(src, dst):
     log.debug(f"Copying {src} to {dst}")
-    run(f"cp -rf {src} {dst}")
+    run(f"rm -rf {dst} && cp -rf {src} {dst}")
 
 
 # Custom directory where caravel is installed
@@ -34,8 +35,9 @@ def caravel_dir() -> str:
     return path.join("/scratch", "caravel", get_user())
 
 
+# Local link to the caravel directory
 def caravel_link() -> str:
-    return path.join(path.dirname(__file__), "..", "..", "..", "caravel")
+    return path.join(root_dir(), "caravel")
 
 
 def caravel_installed() -> bool:
