@@ -5,7 +5,7 @@ pytest==8.0.1
 pytest-custom_exit_code
 pytest-xdist==3.5.0
 psutil
-fabric
+invoke
 halo
 pyyaml
 matplotlib
