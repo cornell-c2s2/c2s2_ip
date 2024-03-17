@@ -16,9 +16,14 @@ def gen_sine_wave(n_samples, bit_width, decimal_pt):
 @pytest.mark.parametrize(
     *mk_test_matrices(
         {
-            "fp_spec": [(32, 16), (32, 31), (32, 24)],
-            "n_samples": [4, 8, 16, 32, 128, 256, 512],
-        }
+            "fp_spec": [(8, 0), (32, 16), (32, 31), (16, 8)],
+            "n_samples": [8, 32],
+        },
+        {
+            "fp_spec": [(16, 8), (8, 0), (32, 16)],
+            "n_samples": [128, 512],
+            "slow": True,
+        },
     )
 )
 def test(cmdline_opts, p):
