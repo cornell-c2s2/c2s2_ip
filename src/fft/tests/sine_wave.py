@@ -1,4 +1,4 @@
-from src.fft.cooley_tukey.helpers.sine_wave import SineWave
+from src.fft.helpers.sine_wave import SineWave
 from pymtl3.stdlib.test_utils import run_test_vector_sim
 import pytest
 from tools.utils import mk_test_matrices, fixed_bits

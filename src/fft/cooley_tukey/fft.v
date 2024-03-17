@@ -2,8 +2,8 @@
 `ifndef FIXED_POINT_FFT
 `define FIXED_POINT_FFT
 
-`include "fft/cooley_tukey/helpers/sine_wave.v"
-`include "fft/cooley_tukey/helpers/bit_reverse.v"
+`include "fft/helpers/sine_wave.v"
+`include "fft/helpers/bit_reverse.v"
 `include "fft/cooley_tukey/stage.v"
 module fft_cooley_tukey_FFT #(
   parameter int BIT_WIDTH  = 32,
@@ -43,7 +43,7 @@ module fft_cooley_tukey_FFT #(
     end
   endgenerate
 
-  fft_cooley_tukey_helpers_SineWave #(
+  fft_helpers_SineWave #(
     .N(N_SAMPLES),
     .W(BIT_WIDTH),
     .D(DECIMAL_PT)
@@ -51,7 +51,7 @@ module fft_cooley_tukey_FFT #(
     .out(sine_wave_out)
   );
 
-  fft_cooley_tukey_helpers_BitReverse #(
+  fft_helpers_BitReverse #(
     .N_SAMPLES(N_SAMPLES),
     .BIT_WIDTH(BIT_WIDTH)
   ) bit_reverse (

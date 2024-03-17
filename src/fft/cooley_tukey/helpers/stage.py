@@ -4,7 +4,7 @@ from pymtl3.passes.backends.verilog import *
 from os import path
 from src.serdes.deserializer import Deserializer
 from src.serdes.serializer import Serializer
-from src.fft.cooley_tukey.helpers.sine_wave import SineWave
+from src.fft.helpers.sine_wave import SineWave
 
 
 # FFT Stage

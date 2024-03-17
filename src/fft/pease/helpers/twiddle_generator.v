@@ -1,5 +1,5 @@
-`ifndef TWIDDLE_GENERATOR
-`define TWIDDLE_GENERATOR
+`ifndef fft_pease_helpers_TWIDDLE_GENERATOR
+`define fft_pease_helpers_TWIDDLE_GENERATOR
 
 /// Twiddle Generator module for a stage in a pease FFT
 module fft_pease_helpers_TwiddleGenerator #(

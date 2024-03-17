@@ -2,8 +2,8 @@
 `ifndef FIXED_POINT_FFT
 `define FIXED_POINT_FFT
 
-`include "fft/cooley_tukey/helpers/sine_wave.v"
-`include "fft/cooley_tukey/helpers/bit_reverse.v"
+`include "fft/helpers/sine_wave.v"
+`include "fft/helpers/bit_reverse.v"
 `include "fixed_point/combinational/butterflyAlt.v"
 `include "fft/pease/helpers/stride_permutation.v"
 `include "fft/pease/helpers/twiddle_generator.v"
@@ -108,7 +108,7 @@ module fft_pease_FFT_main #(
   logic [2 * BIT_WIDTH - 1:0] out_butterfly[N_SAMPLES];
 
   logic [    BIT_WIDTH - 1:0] reversed_msg [N_SAMPLES];
-  fft_cooley_tukey_helpers_BitReverse #(
+  fft_helpers_BitReverse #(
     .N_SAMPLES(N_SAMPLES),
     .BIT_WIDTH(BIT_WIDTH)
   ) bit_reverse (
@@ -151,7 +151,7 @@ module fft_pease_FFT_main #(
     end
   endgenerate
 
-  fft_cooley_tukey_helpers_SineWave #(
+  fft_helpers_SineWave #(
     .N(N_SAMPLES),
     .W(BIT_WIDTH),
     .D(DECIMAL_PT)

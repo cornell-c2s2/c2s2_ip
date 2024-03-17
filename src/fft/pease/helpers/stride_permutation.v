@@ -1,5 +1,5 @@
-`ifndef STRIDE_PERMUTATION
-`define STRIDE_PERMUTATION
+`ifndef fft_pease_helpers_STRIDE_PERMUTATION
+`define fft_pease_helpers_STRIDE_PERMUTATION
 
 /// Takes a bus of width `N_SAMPLES` and performs a stride permutation on it.
 /// Described on page 33 of https://link.springer.com/chapter/10.1007/978-1-4757-2767-8_2

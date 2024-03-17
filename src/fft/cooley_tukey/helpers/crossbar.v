@@ -1,5 +1,5 @@
-`ifndef fft_helpers_CROSSBAR
-`define fft_helpers_CROSSBAR
+`ifndef fft_cooley_tukey_helpers_CROSSBAR
+`define fft_cooley_tukey_helpers_CROSSBAR
 `default_nettype none
 
 /// FFT Crossbar

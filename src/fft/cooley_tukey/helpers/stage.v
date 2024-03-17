@@ -1,6 +1,6 @@
 
-`ifndef fft_STAGE
-`define fft_STAGE
+`ifndef fft_cooley_tukey_helpers_STAGE
+`define fft_cooley_tukey_helpers_STAGE
 
 `include "fft/cooley_tukey/helpers/twiddle_generator.v"
 `include "fft/cooley_tukey/helpers/crossbar.v"
@@ -12,7 +12,7 @@
 /// @param DECIMAL_PT The number of decimal bits in each fixed point number
 /// @param N_SAMPLES  The number of samples in the FFT
 /// @param STAGE_FFT  The stage of the FFT to calculate
-module fft_cooley_tukey_Stage #(
+module fft_cooley_tukey_helpers_Stage #(
   parameter int BIT_WIDTH  = 32,
   parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES  = 8,
