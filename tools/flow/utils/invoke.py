@@ -24,6 +24,11 @@ def link(src, dst):
     run(f"ln -sf {src} {dst}")
 
 
+def cp(src, dst):
+    log.debug(f"Copying {src} to {dst}")
+    run(f"cp -rf {src} {dst}")
+
+
 # Custom directory where caravel is installed
 def caravel_dir() -> str:
     return path.join("/scratch", "caravel", get_user())

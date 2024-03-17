@@ -1,5 +1,5 @@
 # Push a file through caravel synthesis (openlane)
-from utils.invoke import caravel_dir, caravel_installed, run, link
+from utils.invoke import caravel_dir, caravel_installed, run, link, cp
 from utils.cmdline import SubCommand, multi_type, positive_int
 import logging as log
 from utils.misc import load_config, merge_dict, root_dir, split_path
@@ -308,8 +308,8 @@ class Synth(SubCommand):
             with open(design["VERILOG_FILE"], "w") as f:
                 f.write(verilog)
 
-            # Link
-            link(
+            # Copy files to caravel
+            cp(
                 design["VERILOG_FILE"],
                 path.join(remote_rtl_dir, f"{prefixed_design_name}.sv"),
             )
@@ -335,7 +335,7 @@ class Synth(SubCommand):
                     f,
                 )
 
-            link(
+            cp(
                 config_json,
                 path.join(openlane_project_dir, "config.json"),
             )
