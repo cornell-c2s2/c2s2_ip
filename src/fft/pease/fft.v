@@ -76,11 +76,11 @@ module fft_pease_FFT_main #(
   parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES  = 8
 ) (
-  input  logic [BIT_WIDTH - 1:0] recv_msg[N_SAMPLES-1:0],
+  input  logic [BIT_WIDTH - 1:0] recv_msg[N_SAMPLES],
   input  logic                   recv_val,
   output logic                   recv_rdy,
 
-  output logic [BIT_WIDTH - 1:0] send_msg[N_SAMPLES-1:0],
+  output logic [BIT_WIDTH - 1:0] send_msg[N_SAMPLES],
   output logic                   send_val,
   input  logic                   send_rdy,
 
@@ -103,11 +103,11 @@ module fft_pease_FFT_main #(
   logic [     BstageBits-1:0] bstage;
   logic [     BstageBits-1:0] next_bstage;
 
-  logic [2 * BIT_WIDTH - 1:0] out_stride   [N_SAMPLES - 1:0];
-  logic [2 * BIT_WIDTH - 1:0] in_butterfly [N_SAMPLES - 1:0];
-  logic [2 * BIT_WIDTH - 1:0] out_butterfly[N_SAMPLES - 1:0];
+  logic [2 * BIT_WIDTH - 1:0] out_stride   [N_SAMPLES];
+  logic [2 * BIT_WIDTH - 1:0] in_butterfly [N_SAMPLES];
+  logic [2 * BIT_WIDTH - 1:0] out_butterfly[N_SAMPLES];
 
-  logic [    BIT_WIDTH - 1:0] reversed_msg [N_SAMPLES - 1:0];
+  logic [    BIT_WIDTH - 1:0] reversed_msg [N_SAMPLES];
   fft_cooley_tukey_helpers_BitReverse #(
     .N_SAMPLES(N_SAMPLES),
     .BIT_WIDTH(BIT_WIDTH)
@@ -124,11 +124,11 @@ module fft_pease_FFT_main #(
     .send(out_stride)
   );
 
-  logic [BIT_WIDTH - 1:0] sine_wave_out[      0:N_SAMPLES - 1];
-  logic [BIT_WIDTH - 1:0] wr_pre       [$clog2(N_SAMPLES)-1:0] [N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] wc_pre       [$clog2(N_SAMPLES)-1:0] [N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] wr           [$clog2(N_SAMPLES)-1:0] [N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] wc           [$clog2(N_SAMPLES)-1:0] [N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] sine_wave_out[          N_SAMPLES];
+  logic [BIT_WIDTH - 1:0] wr_pre       [$clog2(N_SAMPLES)+1] [N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] wc_pre       [$clog2(N_SAMPLES)+1] [N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] wr           [$clog2(N_SAMPLES)+1] [N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] wc           [$clog2(N_SAMPLES)+1] [N_SAMPLES/2];
 
   generate
     for (genvar i = 0; i < $clog2(N_SAMPLES); i++) begin
@@ -156,18 +156,18 @@ module fft_pease_FFT_main #(
     .W(BIT_WIDTH),
     .D(DECIMAL_PT)
   ) sine_wave (
-    .sine_wave_out(sine_wave_out)
+    .out(sine_wave_out)
   );
 
 
-  logic [BIT_WIDTH - 1:0] ar[N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] ac[N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] br[N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] bc[N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] cr[N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] cc[N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] dr[N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] dc[N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] ar[N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] ac[N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] br[N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] bc[N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] cr[N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] cc[N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] dr[N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] dc[N_SAMPLES/2];
 
   generate
     for (genvar i = 0; i < N_SAMPLES / 2; i++) begin
