@@ -82,7 +82,7 @@ def design_files(build: str, designs: list[dict], args) -> list[dict]:
     vtb_file_regex = re.compile(
         f"^(?P<design_name>{design_names_regex}).*_tb\\.v\\.cases$"
     )
-    verilog_files: dict[str, str] = {}
+    verilog_files: dict[str, list[(str, float)]] = {}
     vtb_files: dict[str, list[str]] = {}
 
     for root, _, files in os.walk(build):
@@ -92,18 +92,30 @@ def design_files(build: str, designs: list[dict], args) -> list[dict]:
             match = verilog_file_regex.match(file)
             if match is not None:
                 design_name = match.group("design_name")
-                if design_name in verilog_files:
-                    log.warn(
-                        f"Found multiple verilog files for {design_name}: {verilog_files[design_name]} and {path.join(root, file)}. Skipping the latter..."
-                    )
-                else:
-                    verilog_files[design_name] = path.join(root, file)
+                if design_name not in verilog_files:
+                    verilog_files[design_name] = []
+
+                verilog_files[design_name].append(
+                    (path.join(root, file), path.getmtime(path.join(root, file)))
+                )
             match = vtb_file_regex.match(file)
             if match is not None:
                 design_name = match.group("design_name")
                 if design_name not in vtb_files:
                     vtb_files[design_name] = []
                 vtb_files[design_name].append(path.join(root, file))
+
+    # Loop through the verilog files and find the most recent one
+    for design_name, files in verilog_files.items():
+        if len(files) > 1:
+            most_recent = max(files, key=lambda x: x[1])[0]
+            log.warn(
+                f"Found multiple verilog files for {design_name}:\n\t%s\nUsing the last modified file %s"
+                % ("\n\t".join(f[0] for f in files), most_recent)
+            )
+        else:
+            most_recent = files[0][0]
+        verilog_files[design_name] = most_recent
 
     log.debug("Collected verilog files %s", verilog_files)
     log.debug("Collected vtb files %s", vtb_files)
