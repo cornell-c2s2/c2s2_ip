@@ -1,23 +1,9 @@
 from fixedpt import CFixed
 import math
 from src.fixed_point.sim import butterfly
-from src.fft.sim import sine_wave
+from src.fft.sim import sine_wave, bit_reverse
 
 # Exact simulation of the cooley tukey fft
-
-
-# Implements bit reverse
-def bit_reverse(rev_in: list, n_samples: int):
-    out = [0] * n_samples
-
-    n = math.ceil(math.log2(n_samples))
-
-    for m in range(0, n_samples):
-        m_rev = format(m, f"0{n}b")[::-1]
-        reversed_index = int(m_rev, 2)
-        out[reversed_index] = rev_in[m]
-
-    return out
 
 
 # Implements the FFT Xbar

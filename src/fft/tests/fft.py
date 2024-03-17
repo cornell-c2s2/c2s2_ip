@@ -3,7 +3,8 @@ import random
 from pymtl3 import mk_bits, Component, Bits
 from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
-from src.fft.sim import fft
+from src.fft.cooley_tukey.sim import fft as cooley_tukey_fft
+from src.fft.pease.sim import fft as pease_fft
 from src.fft.cooley_tukey.fft import FFTWrapper
 import math
 from fixedpt import CFixed, Fixed

@@ -1,31 +1,29 @@
 import pytest
-from pymtl3 import *
+from pymtl3 import Bits32, mk_bits
 from pymtl3.stdlib.test_utils import run_test_vector_sim
 from src.fft.pease.helpers.stride_permutation import StridePermutation
+from src.fft.pease.sim import stride_permutation
 from tools.utils import mk_test_matrices
 
 
 # Make the names of the input ports
-def mk_header(n):
+def mk_header(nsamples):
     return (
         (
-            " ".join([f"recv[{i}]" for i in range(n)])
+            " ".join([f"recv[{i}]" for i in range(nsamples)])
             + " "
-            + " ".join([f"send[{i}]*" for i in range(n)])
+            + " ".join([f"send[{i}]*" for i in range(nsamples)])
         ),
     )
 
 
 # Creates a test case for a 2*l length stride permutation
-def stride_perm(l, n):
-    b = mk_bits(n)
-    data = [b(i) for i in range(n)]
-    expected = [
-        *[b(i * 2) for i in range(n // 2)],
-        *[b(i * 2 + 1) for i in range(n // 2)],
-    ]
+def stride_perm(nsamples, nbits):
+    b = mk_bits(nbits)
+    data = [b(i) for i in range(nsamples)]
+    expected = stride_permutation(nsamples, b)
 
-    return [mk_header(n), [*data, *expected]]
+    return [mk_header(nsamples), [*data, *expected]]
 
 
 def test_simple():
@@ -42,10 +40,12 @@ def test_simple():
     )
 
 
-@pytest.mark.parametrize(*mk_test_matrices({"l": [2, 4, 6, 32], "n": [32, 16]}))
+@pytest.mark.parametrize(
+    *mk_test_matrices({"nsamples": [2, 4, 6, 32], "nbits": [32, 16]})
+)
 def test_stride_perm(p):
     run_test_vector_sim(
-        StridePermutation(p.l, p.n),
-        stride_perm(p.l, p.n),
+        StridePermutation(p.nsamples, p.nbits),
+        stride_perm(p.nsamples, p.nbits),
         cmdline_opts={},
     )
