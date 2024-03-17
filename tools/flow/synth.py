@@ -167,48 +167,6 @@ def design_files(build: str, designs: list[dict], args) -> list[dict]:
     return 0
 
 
-<<<<<<< HEAD
-def synth_results(connection, build_dir, design_name: str, args):
-    # ----------------------------------------------------------------
-    # Copy the results back
-    # ----------------------------------------------------------------
-
-    log.info("Saving synthesis results for %s to %s", design_name, build_dir)
-    # First, zip the results
-    connection.run(
-        f"cd {path.join(caravel_dir(), 'openlane', design_name, 'runs')} && zip -r results.zip {design_name}",
-        hide=args.verbose < 2,
-    )
-
-    # Then, copy the results back
-    connection.get(
-        path.join(
-            caravel_dir(),
-            "openlane",
-            design_name,
-            "runs",
-            "results.zip",
-        ),
-        path.join(build_dir, f"{design_name}.zip"),
-    )
-
-    # Delete the results on the server
-    connection.run(
-        f"rm {path.join(caravel_dir(), 'openlane', design_name, 'runs', 'results.zip')}"
-    )
-
-    # Unzip the results
-    subprocess.run(
-        ["unzip", "-o", path.join(build_dir, f"{design_name}.zip"), "-d", build_dir],
-        stdout=subprocess.DEVNULL if args.verbose < 2 else None,
-    )
-
-    # Delete the zip file
-    os.remove(path.join(build_dir, f"{design_name}.zip"))
-
-
-=======
->>>>>>> main
 def synthesize(design, path_prefix, args):
     log.info("Running synthesis on %s", design["DESIGN_NAME"])
     prefixed_design_name = f"{path_prefix}_{design['DESIGN_NAME']}"
@@ -224,24 +182,8 @@ def synthesize(design, path_prefix, args):
             # Log the stdout and stderr
             log.error(synth_result.stdout)
             log.error(synth_result.stderr)
-<<<<<<< HEAD
-        synth_results(
-            connection, path.join(root_dir(), args.dir), prefixed_design_name, args
-        )
-        connection.close()
         return 1
 
-    # Copy the results back
-    synth_results(
-        connection, path.join(root_dir(), args.dir), prefixed_design_name, args
-    )
-
-    connection.close()
-
-=======
-        return 1
-
->>>>>>> main
     return 0
 
 
@@ -302,11 +244,7 @@ class Synth(SubCommand):
             help="Number of threads to use for synthesis. Use 'auto' to use a threadcount equal to the number of CPU cores.",
         )
 
-<<<<<<< HEAD
-    def run(connection, args):
-=======
     def run(args):
->>>>>>> main
         """Run synthesis on a design."""
         if not caravel_installed():
             log.error("Caravel not yet installed, run `caravel install` first.")
@@ -338,11 +276,7 @@ class Synth(SubCommand):
         # Collect the design files
         # ----------------------------------------------------------------
         # create a temporary build directory for saving files
-<<<<<<< HEAD
-        build_dir = tempfile.TemporaryDirectory(prefix="build", dir=root_dir())
-=======
         build = build_dir()
->>>>>>> main
 
         err_code = design_files(build, designs, args)
         if err_code:
@@ -415,33 +349,16 @@ class Synth(SubCommand):
                 config_json,
                 path.join(openlane_project_dir, "config.json"),
             )
-<<<<<<< HEAD
-            if "FP_PIN_ORDER_CFG" in design:
-                connection.put(
-                    path.join(design_dir, design["FP_PIN_ORDER_CFG"]),
-                    path.join(openlane_project_dir, "pin_order.cfg"),
-                )
-=======
             cp(
                 path.join(design_dir, design["FP_PIN_ORDER_CFG"]),
                 path.join(openlane_project_dir, "pin_order.cfg"),
             )
->>>>>>> main
 
             # TODO: Copy the test files
 
         spinner.succeed("Finished copying files to caravel")
 
         # ----------------------------------------------------------------
-<<<<<<< HEAD
-        # Cleanup build directory
-        # ----------------------------------------------------------------
-
-        build_dir.cleanup()
-
-        # ----------------------------------------------------------------
-=======
->>>>>>> main
         # Run synthesis
         # ----------------------------------------------------------------
 
@@ -463,9 +380,6 @@ class Synth(SubCommand):
             if any(results):
                 spinner.fail("Synthesis failed")
                 log.error(
-<<<<<<< HEAD
-                    f"Synthesis failed for the following designs:{chr(10).join([design['DESIGN_NAME'] for design, result in zip(designs, results) if result])}"
-=======
                     "Synthesis failed for the following designs:\n\t%s",
                     "\n\t".join(
                         [
@@ -478,7 +392,6 @@ class Synth(SubCommand):
                             if result
                         ]
                     ),
->>>>>>> main
                 )
                 return 1
 
