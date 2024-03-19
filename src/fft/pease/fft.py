@@ -13,11 +13,11 @@ class FFT(VerilogPlaceholder, Component):
 
     def construct(s, BIT_WIDTH, DECIMAL_PT, N_SAMPLES):
         # Interface
-        s.recv_msg = InPort(BIT_WIDTH)
+        s.recv_msg = [InPort(BIT_WIDTH) for _ in range(N_SAMPLES)]
         s.recv_val = InPort()
         s.recv_rdy = OutPort()
 
-        s.send_msg = OutPort(BIT_WIDTH)
+        s.send_msg = [OutPort(BIT_WIDTH) for _ in range(N_SAMPLES)]
         s.send_val = OutPort()
         s.send_rdy = InPort()
 
@@ -26,22 +26,3 @@ class FFT(VerilogPlaceholder, Component):
             VerilogPlaceholderPass.src_file,
             path.join(path.dirname(__file__), "fft.v"),
         )
-
-
-class FFTWrapper(Component):
-    def construct(s, BIT_WIDTH, DECIMAL_PT, N_SAMPLES):
-        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
-        s.send = stream.ifcs.SendIfcRTL(mk_bits(BIT_WIDTH))
-
-        s.dut = FFT(BIT_WIDTH, DECIMAL_PT, N_SAMPLES)
-
-        s.recv.msg //= s.dut.recv_msg
-        s.recv.val //= s.dut.recv_val
-        s.dut.recv_rdy //= s.recv.rdy
-
-        s.dut.send_msg //= s.send.msg
-        s.dut.send_val //= s.send.val
-        s.send.rdy //= s.dut.send_rdy
-
-    def line_trace(s):
-        return f"{s.dut.line_trace()}"

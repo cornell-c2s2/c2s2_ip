@@ -5,17 +5,58 @@ from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
 from src.fft.cooley_tukey.sim import fft as cooley_tukey_fft
 from src.fft.pease.sim import fft as pease_fft
-from src.fft.cooley_tukey.fft import FFTWrapper
+from src.fft.cooley_tukey.fft import FFT as HardFFTCooleyTukey
+from src.fft.pease.fft import FFT as HardFFTPease
 import math
 from fixedpt import CFixed, Fixed
 from tools.utils import fixed_bits, mk_test_matrices, cmp_exact, mk_cmp_approx
 from abc import ABC, abstractmethod
 import numpy as np
+from src.serdes.deserializer import Deserializer
+from src.serdes.serializer import Serializer
+
+
+class FFTWrapper(Component):
+    def construct(s, BIT_WIDTH, DECIMAL_PT, N_SAMPLES, model):
+        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
+        s.send = stream.ifcs.SendIfcRTL(mk_bits(BIT_WIDTH))
+
+        # Hook up a deserializer
+        s.deserializer = Deserializer(BIT_WIDTH, N_SAMPLES)
+        s.recv.msg //= s.deserializer.recv_msg
+        s.recv.val //= s.deserializer.recv_val
+        s.deserializer.recv_rdy //= s.recv.rdy
+
+        # Hook up a serializer
+        s.serializer = Serializer(BIT_WIDTH, N_SAMPLES)
+        s.serializer.send_msg //= s.send.msg
+        s.serializer.send_val //= s.send.val
+        s.send.rdy //= s.serializer.send_rdy
+
+        # Hook up the FFT
+        s.dut = model(BIT_WIDTH, DECIMAL_PT, N_SAMPLES)
+
+        # Hook up the deserializer to the FFT
+        for i in range(N_SAMPLES):
+            s.deserializer.send_msg[i] //= s.dut.recv_msg[i]
+
+        s.deserializer.send_val //= s.dut.recv_val
+        s.dut.recv_rdy //= s.deserializer.send_rdy
+
+        # Hook up the FFT to the serializer
+        for i in range(N_SAMPLES):
+            s.dut.send_msg[i] //= s.serializer.recv_msg[i]
+
+        s.dut.send_val //= s.serializer.recv_val
+        s.serializer.recv_rdy //= s.dut.send_rdy
+
+    def line_trace(s):
+        return f"{s.deserializer.line_trace()} > {s.dut.line_trace()} > {s.serializer.line_trace()}"
 
 
 # Test harness module
 class TestHarness(Component):
-    def construct(s, BIT_WIDTH, DECIMAL_PT, N_SAMPLES, cmp):
+    def construct(s, BIT_WIDTH, DECIMAL_PT, N_SAMPLES, cmp, model):
         # Instantiate models
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
@@ -23,7 +64,7 @@ class TestHarness(Component):
             mk_bits(BIT_WIDTH),
             cmp_fn=cmp,
         )
-        s.dut = FFTWrapper(BIT_WIDTH, DECIMAL_PT, N_SAMPLES)
+        s.dut = FFTWrapper(BIT_WIDTH, DECIMAL_PT, N_SAMPLES, model)
 
         # Connect
 
@@ -68,11 +109,17 @@ class FFTNumpy(FFTInterface):
         return [CFixed(x, self.bit_width, self.decimal_pt) for x in d]
 
 
-# Version of the FFT simulation that uses the exact same algorithm as the Verilog implementation. This is used to verify the Verilog implementation.
-class FFTExact(FFTInterface):
+# Versions of the FFT simulation that uses the exact same algorithm as the Verilog implementation. This is used to verify the Verilog implementation.
+class FFTCooleyTukey(FFTInterface):
     def transform(self, data: list[CFixed]) -> list[CFixed]:
         # Use the exact software simulation instead
-        return fft(data, self.bit_width, self.decimal_pt, self.n_samples)
+        return cooley_tukey_fft(data, self.bit_width, self.decimal_pt, self.n_samples)
+
+
+class FFTPease(FFTInterface):
+    def transform(self, data: list[CFixed]) -> list[CFixed]:
+        # Use the exact software simulation instead
+        return pease_fft(data, self.bit_width, self.decimal_pt, self.n_samples)
 
 
 def check_fft(
@@ -83,6 +130,7 @@ def check_fft(
     src_delay: int,
     sink_delay: int,
     comparison_fn: callable,
+    model: Component,
     inputs: list[list[Fixed]],
     outputs: list[list[Fixed]],
 ) -> None:
@@ -97,6 +145,7 @@ def check_fft(
         src_delay (int): Source delay.
         sink_delay (int): Sink delay.
         comparison_fn (callable): Comparison function.
+        model (Component): Hardware FFT model to test.
         inputs (list[list[Fixed]]): List of inputs (only contains the real part of the complex input).
         outputs (list[list[Fixed]]): List of expected outputs (only contains the real part of the complex output).
 
@@ -107,7 +156,7 @@ def check_fft(
     assert all(len(x) == n_samples for x in inputs)
     assert all(len(x) == n_samples for x in outputs)
 
-    model = TestHarness(bit_width, decimal_pt, n_samples, comparison_fn)
+    model = TestHarness(bit_width, decimal_pt, n_samples, comparison_fn, model)
 
     # Convert inputs and outputs into a single list of bits
     inputs = [fixed_bits(x) for sample in inputs for x in sample]
@@ -150,6 +199,7 @@ def check_fft(
                         ]
                     ],
                     "cmp_fn": cmp_exact,
+                    "model": [HardFFTPease, HardFFTCooleyTukey],
                 },
                 {  # 8 point alternating
                     "bit_width": 16,
@@ -179,6 +229,7 @@ def check_fft(
                         ]
                     ],
                     "cmp_fn": cmp_exact,
+                    "model": [HardFFTPease, HardFFTCooleyTukey],
                 },
             ]
         ]
@@ -194,6 +245,7 @@ def test_manual(cmdline_opts, p):
         src_delay=0,
         sink_delay=0,
         comparison_fn=p.cmp_fn,
+        model=p.model,
         inputs=p.inputs,
         outputs=p.outputs,
     )
@@ -204,10 +256,12 @@ def test_manual(cmdline_opts, p):
         {
             "fp_spec": [(16, 8), (32, 16)],
             "n_samples": [8, 32],
+            "model": [HardFFTPease, HardFFTCooleyTukey],
         },
         {
             "fp_spec": [(16, 8), (32, 16)],
             "n_samples": [64, 128],
+            "model": [HardFFTPease, HardFFTCooleyTukey],
             "slow": True,
         },
     )
@@ -273,6 +327,7 @@ def test_single_freqs(
         src_delay=0,
         sink_delay=0,
         comparison_fn=cmp_exact,
+        model=p.model,
         inputs=inputs,
         outputs=outputs,
     )
@@ -282,18 +337,26 @@ def test_single_freqs(
     *mk_test_matrices(
         {
             "fp_spec": [(32, 16), (32, 20), (64, 16)],
-            "model_spec": [
-                (
-                    FFTNumpy,  # Model (must implement FFTInterface)
-                    mk_cmp_approx(
-                        0.05
-                    ),  # Comparison function (expecting an accuracy of ~5% here)
-                ),
-                (
-                    FFTExact,  # Model (must implement FFTInterface)
-                    cmp_exact,
-                ),
-            ],
+            "model_spec": sum(
+                [
+                    [
+                        (
+                            hard,  # Hardware model
+                            FFTNumpy,  # Model (must implement FFTInterface)
+                            mk_cmp_approx(
+                                0.05
+                            ),  # Comparison function (expecting an accuracy of ~5% here)
+                        ),
+                        (
+                            hard,
+                            soft,  # Model (must implement FFTInterface)
+                            cmp_exact,
+                        ),
+                    ]
+                    for (hard, soft) in [HardFFTCooleyTukey, HardFFTPease]
+                ],
+                [],
+            ),
             "n_samples": [8, 32, 128],
             "input_mag": [1, 10],  # Maximum magnitude of the input signal
             "input_num": [1, 10],  # Number of random inputs to generate

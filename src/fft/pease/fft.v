@@ -8,70 +8,7 @@
 `include "fft/pease/helpers/stride_permutation.v"
 `include "fft/pease/helpers/twiddle_generator.v"
 
-`include "serdes/deserializer.v"
-`include "serdes/serializer.v"
-
 module fft_pease_FFT #(
-  parameter int BIT_WIDTH  = 32,
-  parameter int DECIMAL_PT = 16,
-  parameter int N_SAMPLES  = 8
-) (
-  input  logic [BIT_WIDTH - 1:0] recv_msg,
-  input  logic                   recv_val,
-  output logic                   recv_rdy,
-
-  output logic [BIT_WIDTH - 1:0] send_msg,
-  output logic                   send_val,
-  input  logic                   send_rdy,
-
-  input logic reset,
-  input logic clk
-);
-
-  logic fft_recv_rdy, fft_recv_val;
-  logic [BIT_WIDTH - 1:0] fft_recv_msg[N_SAMPLES - 1:0];
-
-  logic fft_send_rdy, fft_send_val;
-  logic [BIT_WIDTH - 1:0] fft_send_msg[N_SAMPLES - 1:0];
-
-  serdes_Deserializer #(
-    .BIT_WIDTH(BIT_WIDTH),
-    .N_SAMPLES(N_SAMPLES)
-  ) deser (
-    .send_val(fft_recv_val),
-    .send_rdy(fft_recv_rdy),
-    .send_msg(fft_recv_msg),
-    .*
-  );
-
-  fft_pease_FFT_main #(
-    .BIT_WIDTH (BIT_WIDTH),
-    .N_SAMPLES (N_SAMPLES),
-    .DECIMAL_PT(DECIMAL_PT)
-  ) fft (
-    .recv_msg(fft_recv_msg),
-    .recv_val(fft_recv_val),
-    .recv_rdy(fft_recv_rdy),
-
-    .send_msg(fft_send_msg),
-    .send_val(fft_send_val),
-    .send_rdy(fft_send_rdy),
-    .*
-  );
-
-  serdes_Serializer #(
-    .BIT_WIDTH(BIT_WIDTH),
-    .N_SAMPLES(N_SAMPLES)
-  ) ser (
-    .recv_val(fft_send_val),
-    .recv_rdy(fft_send_rdy),
-    .recv_msg(fft_send_msg),
-    .*
-  );
-
-endmodule
-
-module fft_pease_FFT_main #(
   parameter int BIT_WIDTH  = 32,
   parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES  = 8

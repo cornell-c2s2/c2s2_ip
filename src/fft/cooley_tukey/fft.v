@@ -4,7 +4,7 @@
 
 `include "fft/helpers/sine_wave.v"
 `include "fft/helpers/bit_reverse.v"
-`include "fft/cooley_tukey/stage.v"
+`include "fft/cooley_tukey/helpers/stage.v"
 module fft_cooley_tukey_FFT #(
   parameter int BIT_WIDTH  = 32,
   parameter int DECIMAL_PT = 16,
@@ -61,7 +61,7 @@ module fft_cooley_tukey_FFT #(
 
   generate
     for (genvar i = 0; i < $clog2(N_SAMPLES); i++) begin
-      fft_cooley_tukey_Stage #(
+      fft_cooley_tukey_helpers_Stage #(
         .BIT_WIDTH (BIT_WIDTH),
         .DECIMAL_PT(DECIMAL_PT),
         .N_SAMPLES (N_SAMPLES),
