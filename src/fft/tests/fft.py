@@ -353,7 +353,13 @@ def test_single_freqs(
                             cmp_exact,
                         ),
                     ]
-                    for (hard, soft) in [HardFFTCooleyTukey, HardFFTPease]
+                    for (hard, soft) in [
+                        (
+                            HardFFTCooleyTukey,
+                            FFTCooleyTukey,
+                        ),
+                        (HardFFTPease, FFTPease),
+                    ]
                 ],
                 [],
             ),
@@ -373,7 +379,8 @@ def test_model(cmdline_opts, p):
     # Test the FFT implementation with a specified model
 
     # Create the model
-    model: FFTInterface = p.model_spec[0](p.fp_spec[0], p.fp_spec[1], p.n_samples)
+    hard, soft, cmp = p.model_spec
+    model: FFTInterface = soft(p.fp_spec[0], p.fp_spec[1], p.n_samples)
 
     # Generate random inputs
     inputs = [
@@ -391,7 +398,7 @@ def test_model(cmdline_opts, p):
     outputs = [[x.real for x in sample] for sample in outputs]
 
     def test(x: Bits, y: Bits):
-        return p.model_spec[1](x, y)
+        return cmp(x, y)
 
     # Run the test
     check_fft(
@@ -402,6 +409,7 @@ def test_model(cmdline_opts, p):
         src_delay=0,
         sink_delay=0,
         comparison_fn=test,
+        model=hard,
         inputs=inputs,
         outputs=outputs,
     )
