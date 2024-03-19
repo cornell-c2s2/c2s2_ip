@@ -1,5 +1,6 @@
 from fixedpt import CFixed
 from src.fft.sim import sine_wave, bit_reverse
+from src.fixed_point.sim import butterfly 
 import math
 
 
@@ -9,7 +10,6 @@ def stride_permutation(n_samples: int, cbar_in: list[any]) -> list[any]:
         *[cbar_in(i * 2) for i in range(n_samples // 2)],
         *[cbar_in(i * 2 + 1) for i in range(n_samples // 2)],
     ]
-
 
 # Twiddle factor generator
 def twiddle_generator(
@@ -34,11 +34,19 @@ def twiddle_generator(
 
     return twiddles
 
-
 def fft(
     fft_in: list[CFixed], bit_width: int, decimal_pt: int, n_samples: int
 ) -> list[CFixed]:
     # Bit reverse the input
     data = bit_reverse(fft_in, n_samples)
-
     n_stages = int(math.log2(n_samples))
+    for i in range(n_stages):
+        twiddles = twiddle_generator(bit_width, decimal_pt, n_samples, i)
+        new_data = []
+        for j in range(n_samples/2):
+            new_data.append(butterfly(data[j*2], data[j*2+1], twiddles[j]))
+        data = stride_permutation(n_samples, new_data)
+    return data
+        
+
+    
