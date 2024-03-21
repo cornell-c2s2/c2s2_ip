@@ -62,8 +62,6 @@ module fft_pease_FFT #(
   );
 
   logic [BIT_WIDTH - 1:0] sine_wave_out[          N_SAMPLES];
-  logic [BIT_WIDTH - 1:0] wr_pre       [$clog2(N_SAMPLES)+1] [N_SAMPLES/2];
-  logic [BIT_WIDTH - 1:0] wc_pre       [$clog2(N_SAMPLES)+1] [N_SAMPLES/2];
   logic [BIT_WIDTH - 1:0] wr           [$clog2(N_SAMPLES)+1] [N_SAMPLES/2];
   logic [BIT_WIDTH - 1:0] wc           [$clog2(N_SAMPLES)+1] [N_SAMPLES/2];
 
@@ -79,12 +77,6 @@ module fft_pease_FFT #(
         .twiddle_real(wr[i]),
         .twiddle_imaginary(wc[i])
       );
-
-      // for (genvar b = 0; b < N_SAMPLES / 2; b++) begin
-      //   assign wr[i][b] = wr_pre[i][b];
-      //   assign wc[i][b] = wc_pre[i][b];
-      //   //end
-      // end
     end
   endgenerate
 
@@ -176,19 +168,13 @@ module fft_pease_FFT #(
       always_ff @(posedge clk) begin
         if (reset) begin
           in_butterfly[i] <= 0;
-          //send_msg[i] <= 0;
         end else begin
           if (state == IDLE || state == DONE && recv_val) begin
             in_butterfly[i][BIT_WIDTH-1:0] <= reversed_msg[i];
             in_butterfly[i][2*BIT_WIDTH-1:BIT_WIDTH] <= 0;
           end else begin
             if (state == COMP) begin
-              //if (state == COMP && bstage != max_bstage) begin
               in_butterfly[i] <= out_stride[i];
-              // if (bstage == max_bstage) begin
-              //   send_msg[i] <= out_stride[i][BIT_WIDTH-1:0];
-              // end else begin
-              // end
             end else begin
             end
           end
