@@ -21,7 +21,7 @@ def mk_header(nsamples):
 def stride_perm(nsamples, nbits):
     b = mk_bits(nbits)
     data = [b(i) for i in range(nsamples)]
-    expected = stride_permutation(nsamples, b)
+    expected = stride_permutation(nsamples, data)
 
     return [mk_header(nsamples), [*data, *expected]]
 

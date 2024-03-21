@@ -6,7 +6,7 @@ import math
 import random
 from tools.utils import mk_test_matrices, cfixed_bits, fixed_bits
 from fixedpt import Fixed, CFixed
-from src.fft.sim import crossbar
+from src.fft.cooley_tukey.sim import crossbar
 
 
 # the two bools are recv_val and send_rdy

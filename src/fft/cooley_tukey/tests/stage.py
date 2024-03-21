@@ -5,9 +5,9 @@ from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3 import mk_bits, Component
 from tools.utils import mk_test_matrices, cfixed_bits, cmp_exact, mk_cmp_approx
-from src.fft.cooley_tukey.stage import StageWrapper
+from src.fft.cooley_tukey.helpers.stage import StageWrapper
 from fixedpt import Fixed, CFixed
-from src.fft.sim import fft_stage
+from src.fft.cooley_tukey.sim import fft_stage
 
 
 # -------------------------------------------------------------------------
