@@ -14,10 +14,11 @@ from abc import ABC, abstractmethod
 import numpy as np
 from src.serdes.deserializer import Deserializer
 from src.serdes.serializer import Serializer
+from pymtl3.passes.backends.verilog import VerilogTranslationPass
 
 
 class FFTWrapper(Component):
-    def construct(s, BIT_WIDTH, DECIMAL_PT, N_SAMPLES, model):
+    def construct(s, BIT_WIDTH: int, DECIMAL_PT: int, N_SAMPLES: int, model: str):
         s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
         s.send = stream.ifcs.SendIfcRTL(mk_bits(BIT_WIDTH))
 
@@ -34,7 +35,11 @@ class FFTWrapper(Component):
         s.send.rdy //= s.serializer.send_rdy
 
         # Hook up the FFT
-        s.dut = model(BIT_WIDTH, DECIMAL_PT, N_SAMPLES)
+        models = {
+            "CooleyTukey": HardFFTCooleyTukey,
+            "Pease": HardFFTPease,
+        }
+        s.dut = models[model](BIT_WIDTH, DECIMAL_PT, N_SAMPLES)
 
         # Hook up the deserializer to the FFT
         for i in range(N_SAMPLES):
@@ -49,6 +54,11 @@ class FFTWrapper(Component):
 
         s.dut.send_val //= s.serializer.recv_val
         s.serializer.recv_rdy //= s.dut.send_rdy
+
+        s.set_metadata(
+            VerilogTranslationPass.explicit_module_name,
+            f"{model}FFTWrapper__BIT_WIDTH_{BIT_WIDTH}__DECIMAL_PT_{DECIMAL_PT}__N_SAMPLES_{N_SAMPLES}",
+        )
 
     def line_trace(s):
         return f"{s.deserializer.line_trace()} > {s.dut.line_trace()} > {s.serializer.line_trace()}"
@@ -177,7 +187,7 @@ def check_fft(
         interval_delay=sink_delay,
     )
 
-    run_sim(model, cmdline_opts, duts=["dut.dut"], print_line_trace=False)
+    run_sim(model, cmdline_opts, duts=["dut"], print_line_trace=False)
 
 
 @pytest.mark.parametrize(
@@ -199,7 +209,7 @@ def check_fft(
                         ]
                     ],
                     "cmp_fn": cmp_exact,
-                    "model": [HardFFTPease, HardFFTCooleyTukey],
+                    "model": ["Pease", "CooleyTukey"],
                 },
                 {  # 8 point alternating
                     "bit_width": 16,
@@ -229,7 +239,7 @@ def check_fft(
                         ]
                     ],
                     "cmp_fn": cmp_exact,
-                    "model": [HardFFTPease, HardFFTCooleyTukey],
+                    "model": ["Pease", "CooleyTukey"],
                 },
             ]
         ]
@@ -255,13 +265,13 @@ def test_manual(cmdline_opts, p):
     *mk_test_matrices(
         {
             "fp_spec": [(16, 8), (32, 16)],
-            "n_samples": [8, 32],
-            "model": [HardFFTPease, HardFFTCooleyTukey],
+            "n_samples": [8, 16, 32],
+            "model": ["Pease", "CooleyTukey"],
         },
         {
             "fp_spec": [(16, 8), (32, 16)],
             "n_samples": [64, 128],
-            "model": [HardFFTPease, HardFFTCooleyTukey],
+            "model": ["Pease", "CooleyTukey"],
             "slow": True,
         },
     )
@@ -336,7 +346,7 @@ def test_single_freqs(
 @pytest.mark.parametrize(
     *mk_test_matrices(
         {
-            "fp_spec": [(32, 16), (32, 20), (64, 16)],
+            "fp_spec": [(32, 16), (16, 8)],
             "model_spec": sum(
                 [
                     [
@@ -355,15 +365,15 @@ def test_single_freqs(
                     ]
                     for (hard, soft) in [
                         (
-                            HardFFTCooleyTukey,
+                            "CooleyTukey",
                             FFTCooleyTukey,
                         ),
-                        (HardFFTPease, FFTPease),
+                        ("Pease", FFTPease),
                     ]
                 ],
                 [],
             ),
-            "n_samples": [8, 32, 128],
+            "n_samples": [8, 16, 32, 64],
             "input_mag": [1, 10],  # Maximum magnitude of the input signal
             "input_num": [1, 10],  # Number of random inputs to generate
             "seed": list(range(2)),  # Random seed

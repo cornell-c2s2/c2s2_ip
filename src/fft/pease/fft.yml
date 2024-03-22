@@ -1,14 +1,34 @@
 # Labels defined here will be used for all config designs
-DESIGN_NAME: FFT # Top module name
+DESIGN_NAME: PeaseFFTWrapper # Top module name
 TEST_FILES: # pytest files
-  - tests/fft.py
+  - ../tests/fft.py
 DESIGN_IS_CORE: 0
-FP_PIN_ORDER_CFG: fft_pins.cfg
+FP_PIN_ORDER_CFG: ../fft_pins.cfg
 CLOCK_PORT: clk
-FP_ASPECT_RATIO: 1 # Aspect ratio of the core (we set it to 2 here because there are 128 pins on each side but only 64 on the bottom)
+FP_SIZING: absolute
 CLOCK_PERIOD: 20
 PL_TARGET_DENSITY: 0.8
-SYNTH_PARAMETERS: 
-  BIT_WIDTH : 16
-  DECIMAL_PT : 8
-  N_SAMPLES : 8
+DESIGNS:
+  - SYNTH_PARAMETERS:
+      BIT_WIDTH: 16
+      DECIMAL_PT: 8
+    DESIGNS:
+      - SYNTH_PARAMETERS:
+          N_SAMPLES: 8
+        DIE_AREA: 0 0 400 400
+      - SYNTH_PARAMETERS:
+          N_SAMPLES: 16
+        DIE_AREA: 0 0 800 800
+      - SYNTH_PARAMETERS:
+          N_SAMPLES: 32
+        DIE_AREA: 0 0 1600 1600
+  - SYNTH_PARAMETERS:
+      BIT_WIDTH: 32
+      DECIMAL_PT: 16
+    DESIGNS:
+      - SYNTH_PARAMETERS:
+          N_SAMPLES: 8
+        DIE_AREA: 0 0 800 800
+      - SYNTH_PARAMETERS:
+          N_SAMPLES: 16
+        DIE_AREA: 0 0 1600 1600

@@ -173,7 +173,7 @@ def test_random_3mult(cmdline_opts, execution_number, sequence_length, n, d):
     random.seed(random.random() + execution_number)
     n, d = rand_fxp_spec(n, d)
     dat = [(rand_cfixed(n, d), rand_cfixed(n, d)) for i in range(sequence_length)]
-    solns = [cmul(n, d, i[0], i[1]) for i in dat]
+    solns = [complex_multiply(i[0], i[1]) for i in dat]
     print(
         "Testing",
         [(i[0].bin(dot=True), i[1].bin(dot=True)) for i in dat],

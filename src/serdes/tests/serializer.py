@@ -17,7 +17,7 @@ class TestHarness(Component):
     def construct(s, BIT_WIDTH, N_SAMPLES):
         # Instantiate models
 
-        s.src = stream.SourceRTL(mk_list_bitstruct(BIT_WIDTH, N_SAMPLES))
+        s.src = stream.SourceRTL(mk_list_bitstruct(mk_bits(BIT_WIDTH), N_SAMPLES))
         s.sink = stream.SinkRTL(mk_bits(BIT_WIDTH))
         s.dut = SerializerWrapper(BIT_WIDTH, N_SAMPLES)
 
@@ -85,7 +85,7 @@ def test_serializer(p, cmdline_opts):
 
     msgs = create_transactions(nbits, nsamples, nmsgs)
 
-    mk_msg = mk_list_bitstruct(nbits, nsamples)
+    mk_msg = mk_list_bitstruct(mk_bits(nbits), nsamples)
 
     th.set_param(
         "top.src.construct",

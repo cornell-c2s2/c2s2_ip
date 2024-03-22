@@ -4,7 +4,7 @@
 
 `include "fft/helpers/sine_wave.v"
 `include "fft/helpers/bit_reverse.v"
-`include "fixed_point/combinational/butterflyAlt.v"
+`include "fixed_point/combinational/butterfly.v"
 `include "fft/pease/helpers/stride_permutation.v"
 `include "fft/pease/helpers/twiddle_generator.v"
 
@@ -61,9 +61,9 @@ module fft_pease_FFT #(
     .send(out_stride)
   );
 
-  logic [BIT_WIDTH - 1:0] sine_wave_out[          N_SAMPLES];
-  logic [BIT_WIDTH - 1:0] wr           [$clog2(N_SAMPLES)+1] [N_SAMPLES/2];
-  logic [BIT_WIDTH - 1:0] wc           [$clog2(N_SAMPLES)+1] [N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] sine_wave_out[        N_SAMPLES];
+  logic [BIT_WIDTH - 1:0] wr           [$clog2(N_SAMPLES)] [N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] wc           [$clog2(N_SAMPLES)] [N_SAMPLES/2];
 
   generate
     for (genvar i = 0; i < $clog2(N_SAMPLES); i++) begin
