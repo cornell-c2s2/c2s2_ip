@@ -353,15 +353,9 @@ def test_single_freqs(
                         (
                             hard,  # Hardware model
                             FFTNumpy,  # Model (must implement FFTInterface)
-                            mk_cmp_approx(
-                                0.05
-                            ),  # Comparison function (expecting an accuracy of ~5% here)
+                            "approx",
                         ),
-                        (
-                            hard,
-                            soft,  # Model (must implement FFTInterface)
-                            cmp_exact,
-                        ),
+                        (hard, soft, "exact"),  # Model (must implement FFTInterface)
                     ]
                     for (hard, soft) in [
                         (
@@ -408,7 +402,12 @@ def test_model(cmdline_opts, p):
     outputs = [[x.real for x in sample] for sample in outputs]
 
     def test(x: Bits, y: Bits):
-        return cmp(x, y)
+        if cmp == "approx":
+            x = x.int()
+            y = y.int()
+            return abs(x - y) / (2 ** p.fp_spec[1]) < 0.1 * p.input_mag
+        else:
+            return cmp_exact(x, y)
 
     # Run the test
     check_fft(

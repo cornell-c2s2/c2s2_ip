@@ -12,27 +12,27 @@ DESIGNS:
       BIT_WIDTH: 16
       DECIMAL_PT: 8
     DESIGNS:
-      - SYNTH_PARAMETERS:
-          N_SAMPLES: 8
-        DIE_AREA: 0 0 350 350
-        PL_TARGET_DENSITY: 0.8
+      # - SYNTH_PARAMETERS:
+      #     N_SAMPLES: 8
+      #   DIE_AREA: 0 0 350 350
+      #   PL_TARGET_DENSITY: 0.8
       - SYNTH_PARAMETERS:
           N_SAMPLES: 16
-        DIE_AREA: 0 0 450 450
+        DIE_AREA: 0 0 550 500
         PL_TARGET_DENSITY: 0.8
       - SYNTH_PARAMETERS:
           N_SAMPLES: 32
         DIE_AREA: 0 0 1000 1000
-        PL_TARGET_DENSITY: 0.6
+        PL_TARGET_DENSITY: 0.48
   - SYNTH_PARAMETERS:
       BIT_WIDTH: 32
       DECIMAL_PT: 16
     DESIGNS:
       - SYNTH_PARAMETERS:
           N_SAMPLES: 8
-        DIE_AREA: 0 0 550 500
-        PL_TARGET_DENSITY: 0.85
+        DIE_AREA: 0 0 600 600
+        PL_TARGET_DENSITY: 0.8
       - SYNTH_PARAMETERS:
           N_SAMPLES: 16
-        DIE_AREA: 0 0 1000 1000
-        PL_TARGET_DENSITY: 0.7
+        DIE_AREA: 0 0 1500 1500
+        PL_TARGET_DENSITY: 0.5
