@@ -124,8 +124,6 @@ module wishbone_Wishbone #(
   endgenerate
 
 
-  logic [c_addr_nbits:0] istream_num_free_entries[p_num_istream];
-
   genvar n;
   generate
     for (n = 0; n < p_num_istream; n = n + 1) begin : g_istream_queue_gen
@@ -134,11 +132,11 @@ module wishbone_Wishbone #(
         .reset(reset),
         .enq_val(istream_enq_val[n]),
         .enq_rdy(istream_enq_rdy[n]),
-        .enq_msg(wbs_dat_i),
+        .enq_msg(istream_enq_msg[n]),
         .deq_val(istream_val[n]),
         .deq_rdy(istream_rdy[n]),
         .deq_msg(istream_data[n]),
-        .num_free_entries(istream_num_free_entries[n])
+        .num_free_entries()
       );
     end
   endgenerate
@@ -150,8 +148,6 @@ module wishbone_Wishbone #(
   logic [p_num_ostream-1:0] ostream_deq_val;
   logic [p_num_ostream-1:0] ostream_deq_rdy;
   logic [31:0] ostream_deq_msg[p_num_ostream];
-
-  logic [$clog2(p_num_msgs)-1:0] ostream_num_free_entries[p_num_ostream];
 
   genvar j;
   generate
@@ -172,7 +168,7 @@ module wishbone_Wishbone #(
         .deq_val(ostream_deq_val[m]),
         .deq_rdy(ostream_deq_rdy[m]),
         .deq_msg(ostream_deq_msg[m]),
-        .num_free_entries(ostream_num_free_entries[m])
+        .num_free_entries()
       );
     end
   endgenerate
