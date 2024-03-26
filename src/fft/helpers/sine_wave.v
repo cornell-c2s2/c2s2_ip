@@ -12,7 +12,7 @@ module fft_helpers_SineWave #(
   output logic [W - 1:0] out[N]
 );
   // arccos(-1) = pi
-  parameter real PI = $acos(-1);
+  localparam real PI = $acos(-1);
 
   // Checks on parameters to make sure behavior is well defined.
   generate
