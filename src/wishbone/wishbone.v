@@ -75,24 +75,37 @@ module wishbone_Wishbone #(
   );
 
   logic is_check_istream;
-  assign is_check_istream = (wbs_adr_i >= ISTREAM_BASE) && (wbs_adr_i < OSTREAM_BASE) && (wbs_adr_i[2:0] == 3'b0) && transaction_val && !wbs_we_i;
+  assign is_check_istream = (wbs_adr_i >= ISTREAM_BASE)
+    && (wbs_adr_i < OSTREAM_BASE)
+    && (wbs_adr_i[2:0] == 3'b0)
+    && transaction_val && !wbs_we_i;
   logic [istream_addr_nbits-1:0] istream_check_ind;
-  assign istream_check_ind = adr_shift[istream_addr_nbits-1:0];
 
   logic is_write_istream;
-  assign is_write_istream = (wbs_adr_i >= ISTREAM_BASE) && (wbs_adr_i < OSTREAM_BASE) && (wbs_adr_i[2:0] == 3'd4) && transaction_val && wbs_we_i;
+  assign is_write_istream = (wbs_adr_i >= ISTREAM_BASE)
+    && (wbs_adr_i < OSTREAM_BASE)
+    && (wbs_adr_i[2:0] == 3'd4)
+    && transaction_val && wbs_we_i;
   logic [istream_addr_nbits-1:0] istream_write_ind;
-  assign istream_write_ind = adr_shift[istream_addr_nbits-1:0];
 
   logic is_check_ostream;
-  assign is_check_ostream = (wbs_adr_i >= OSTREAM_BASE) && (wbs_adr_i[2:0] == 3'b0) && transaction_val && !wbs_we_i;
+  assign is_check_ostream = (wbs_adr_i >= OSTREAM_BASE)
+    && (wbs_adr_i[2:0] == 3'b0)
+    && transaction_val
+    && !wbs_we_i;
   logic [ostream_addr_nbits-1:0] ostream_check_ind;
-  assign ostream_check_ind = adr_sub_shift[ostream_addr_nbits-1:0];
 
   logic is_read_ostream;
-  assign is_read_ostream = (wbs_adr_i >= OSTREAM_BASE) && (wbs_adr_i[2:0] == 3'd4) && transaction_val && !wbs_we_i;
+  assign is_read_ostream = (wbs_adr_i >= OSTREAM_BASE)
+    && (wbs_adr_i[2:0] == 3'd4)
+    && transaction_val
+    && !wbs_we_i;
   logic [ostream_addr_nbits-1:0] ostream_read_ind;
-  assign ostream_read_ind = adr_sub_shift[ostream_addr_nbits-1:0];
+
+  assign istream_check_ind = adr_shift[istream_addr_nbits-1:0];
+  assign istream_write_ind = adr_shift[istream_addr_nbits-1:0];
+  assign ostream_check_ind = adr_sub_shift[ostream_addr_nbits-1:0];
+  assign ostream_read_ind  = adr_sub_shift[ostream_addr_nbits-1:0];
 
   /////////////////
   // istream queue
@@ -169,8 +182,8 @@ module wishbone_Wishbone #(
   // set outputs
   /////////////
   always_comb begin
-    if (is_check_istream) wbs_dat_o = istream_enq_rdy[istream_check_ind] & {31'b0, 1'b1};
-    else if (is_check_ostream) wbs_dat_o = ostream_deq_val[ostream_check_ind] & {31'b0, 1'b1};
+    if (is_check_istream) wbs_dat_o = {31'b0, istream_enq_rdy[istream_check_ind]};
+    else if (is_check_ostream) wbs_dat_o = {31'b0, ostream_deq_val[ostream_check_ind]};
     else if (is_read_ostream) wbs_dat_o = ostream_deq_msg[ostream_read_ind];
     else wbs_dat_o = 32'b0;
   end
