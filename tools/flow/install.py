@@ -1,6 +1,6 @@
 # install caravel
 from utils.cmdline import SubCommand
-from utils.remote import caravel_dir, caravel_installed
+from utils.invoke import caravel_dir, caravel_installed, run
 import logging as log
 
 
@@ -19,22 +19,20 @@ class Install(SubCommand):
             help="Overwrite existing caravel installation",
         )
 
-    def run(connection, args):
+    def run(args):
         """Install caravel in a custom location."""
 
         # Check if caravel is installed
-        if not args.force and caravel_installed(connection):
+        if not args.force and caravel_installed():
             log.error(
                 "Caravel is already installed. Run `caravel install --force` to reinstall."
             )
-            connection.close()
             return 1
 
         log.info("Installing caravel in %s", caravel_dir())
 
-        connection.run(f"rm -rf {caravel_dir()}")
-        connection.run(f"mkdir -p {caravel_dir()}")
-        connection.run(
+        run(f"rm -rf {caravel_dir()} && mkdir -p {caravel_dir()}")
+        run(
             f"""
 cd {caravel_dir()} && \
     git clone --depth 1 --branch mpw-9g https://github.com/efabless/caravel_user_project.git . && \

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from utils.remote import connect
 from tools.flow.utils.logging import setup_logging
 from os import path
 import logging as log
@@ -31,14 +30,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     setup_logging(args)
-    connection = connect()
     for subcommand in subcommands:
         if subcommand.name() == args.command:
-            err_code = subcommand.run(connection, args)
+            err_code = subcommand.run(args)
             if err_code:
                 log.error(
                     "Subcommand %s failed with error code %d", args.command, err_code
                 )
             break
-
-    connection.close()
