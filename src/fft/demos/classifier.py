@@ -36,17 +36,15 @@ def classify(magnitudes: list[list[float]], bins: list[float]) -> list[bool]:
     # Magnitude threshold
     threshold = 0.2
 
-    increment = 10
-
     count = 0
     classifications = []
-    for sample in magnitudes:
+    for i, sample in enumerate(magnitudes):
         # Check if there is a bin with a magnitude above the threshold
         for i, mag in enumerate(sample):
             if bins[i] < low or bins[i] > high:
                 continue
             if mag > threshold:
-                count += increment
+                count = 44800
                 break
 
         if count > 0:
@@ -60,6 +58,7 @@ if __name__ == "__main__":
     sample_rate = 44800
 
     audio_files = [
+        # "SSR4F_MixPre-1390_01.WAV",
         "LHR1F_MixPre-1312_01.WAV",
         "SSR1F_MixPre-1363.WAV",
         "SSF1F_MixPre-2237_01.WAV",
