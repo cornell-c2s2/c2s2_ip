@@ -5,10 +5,10 @@
 
 module crossbarVRTL
     #(
-        parameter BIT_WIDTH = 32, 
-        parameter N_INPUTS = 2,
-        parameter N_OUTPUTS = 2,
-        parameter CONTROL_BIT_WIDTH = 42
+        parameter int BIT_WIDTH = 32, 
+        parameter int N_INPUTS = 2,
+        parameter int N_OUTPUTS = 2,
+        parameter int CONTROL_BIT_WIDTH = 42
     )
     (
         input  logic [BIT_WIDTH - 1:0] recv_msg [0:N_INPUTS - 1] ,
@@ -46,7 +46,8 @@ module crossbarVRTL
 
     assign input_sel = stored_control[CONTROL_BIT_WIDTH - 1: CONTROL_BIT_WIDTH-$clog2(N_INPUTS)];
 
-    assign output_sel = stored_control[CONTROL_BIT_WIDTH - $clog2(N_INPUTS) - 1 : CONTROL_BIT_WIDTH-$clog2(N_INPUTS)-$clog2(N_OUTPUTS)];
+    assign output_sel = stored_control[CONTROL_BIT_WIDTH - $clog2(N_INPUTS) - 1 : 
+				       CONTROL_BIT_WIDTH-$clog2(N_INPUTS)-$clog2(N_OUTPUTS)];
 
     always @(*) begin
         send_msg[output_sel] = recv_msg[input_sel];

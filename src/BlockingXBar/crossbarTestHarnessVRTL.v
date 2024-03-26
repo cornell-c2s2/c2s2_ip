@@ -1,11 +1,11 @@
-`include "crossbarVRTL.v"
+`include "crossbar.v"
 
-module crossbarTestHarnessVRTL
+module crossbarTestHarness
     #(
-        parameter BIT_WIDTH = 32, 
-        parameter N_INPUTS = 2,
-        parameter N_OUTPUTS = 2,
-        parameter CONTROL_BIT_WIDTH = 42
+        parameter int BIT_WIDTH = 32, 
+        parameter int N_INPUTS = 2,
+        parameter int N_OUTPUTS = 2,
+        parameter int CONTROL_BIT_WIDTH = 42
     )
 
     (
