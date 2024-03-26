@@ -11,7 +11,7 @@ from src.fixed_point.utils import (
 class ComplexMultiplier(VerilogPlaceholder, Component):
     # Constructor
 
-    def construct(s, n, d):
+    def construct(s, n, d, num_mults=3):
         # Interface
         s.ar = InPort(mk_bits(n))
         s.ac = InPort(mk_bits(n))
@@ -34,8 +34,8 @@ class ComplexMultiplier(VerilogPlaceholder, Component):
 
 
 class ComplexMultiplierWrapper(Component):
-    def construct(s, n, d):
-        s.dut = ComplexMultiplier(n, d)
+    def construct(s, n, d, num_mults=3):
+        s.dut = ComplexMultiplier(n, d, num_mults)
         s.recv = stream.ifcs.RecvIfcRTL(mk_complex_multiplier_input(n))
         s.recv.msg.ar //= s.dut.ar
         s.recv.msg.ac //= s.dut.ac

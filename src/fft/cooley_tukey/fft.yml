@@ -1,0 +1,19 @@
+# Labels defined here will be used for all config designs
+DESIGN_NAME: FFT # Top module name
+TEST_FILES: # pytest files
+  - tests/fft.py
+DESIGN_IS_CORE: 0
+FP_PIN_ORDER_CFG: fft_pins.cfg
+CLOCK_PORT: clk
+FP_ASPECT_RATIO: 1 # Aspect ratio of the core (we set it to 2 here because there are 128 pins on each side but only 64 on the bottom)
+FP_SIZING: "absolute"
+DIE_AREA: "0 0 3200 3200"
+SYNTH_PARAMETERS: 
+  BIT_WIDTH : 32
+  DECIMAL_PT : 16
+  N_SAMPLES : 32
+CLOCK_PERIOD: 10
+DESIGNS:
+  - PL_TARGET_DENSITY: 0.52
+
+    

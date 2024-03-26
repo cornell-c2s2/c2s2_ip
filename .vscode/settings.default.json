@@ -47,5 +47,10 @@
   "python.analysis.extraPaths": [
     "/classes/c2s2/easybuild/software/C2S2PythonPackages/2024.02-foss-2023b/lib/python3.11/site-packages",
     "~/.local/lib/python3.11/site-packages/"
-  ]
+  ],
+  "files.watcherExclude": {
+    ".hypothesis/**": true,
+    "build*/**": true,
+    "caravel/**": true
+  }
 }

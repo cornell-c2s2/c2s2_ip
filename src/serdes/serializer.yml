@@ -1,0 +1,12 @@
+# Labels defined here will be used for all config designs
+DESIGN_NAME: Serializer # Top module name
+TEST_FILES: # pytest files
+  - tests/serializer.py
+FP_PIN_ORDER_CFG: serializer_pins.cfg # Pin order configuration file
+DESIGN_IS_CORE: 0
+CLOCK_PORT: clk
+FP_ASPECT_RATIO: 2 # Aspect ratio of the core (we set it to 2 here because there are 128 pins on each side but only 64 on the bottom)
+PL_TARGET_DENSITY: 0.55
+SYNTH_PARAMETERS: 
+  BIT_WIDTH: 32
+  N_SAMPLES: 8

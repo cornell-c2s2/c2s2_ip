@@ -1,4 +1,4 @@
-from src.fft.helpers.crossbar import Crossbar
+from src.fft.cooley_tukey.helpers.crossbar import Crossbar
 from pymtl3.stdlib.test_utils import run_test_vector_sim
 from pymtl3 import mk_bits, Bits1
 import pytest
@@ -6,7 +6,7 @@ import math
 import random
 from tools.utils import mk_test_matrices, cfixed_bits, fixed_bits
 from fixedpt import Fixed, CFixed
-from src.fft.sim import crossbar
+from src.fft.cooley_tukey.sim import crossbar
 
 
 # the two bools are recv_val and send_rdy

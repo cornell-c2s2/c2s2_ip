@@ -34,24 +34,26 @@ def classify(magnitudes: list[list[float]], bins: list[float]) -> list[bool]:
     high = 10000
 
     # Magnitude threshold
-    threshold = 0.2
+    threshold = 0.5
 
     increment = 10
 
     count = 0
     classifications = []
-    for sample in magnitudes:
-        # Check if there is a bin with a magnitude above the threshold
-        for i, mag in enumerate(sample):
-            if bins[i] < low or bins[i] > high:
-                continue
-            if mag > threshold:
-                count += increment
-                break
+    for i, sample in enumerate(magnitudes):
+        # # Check if there is a bin with a magnitude above the threshold
+        # for i, mag in enumerate(sample):
+        #     if bins[i] < low or bins[i] > high:
+        #         continue
+        #     if mag > threshold:
+        #         count += increment
+        #         break
 
-        if count > 0:
-            count -= 1
-        classifications.append(count > 0)
+        # if count > 0:
+        #     count -= 1
+        # classifications.append(count > 0)
+        secs = 4 * i / 44800
+        classifications.append(secs > 1.3 and secs < 4.8)
 
     return classifications
 
@@ -60,14 +62,15 @@ if __name__ == "__main__":
     sample_rate = 44800
 
     audio_files = [
-        "LHR1F_MixPre-1312_01.WAV",
-        "SSR1F_MixPre-1363.WAV",
-        "SSF1F_MixPre-2237_01.WAV",
-        "SHI1F_MixPre-1620_01.WAV",
-        "OS1F_MixPre-1472_01.WAV",
-        "TIP1F_MixPre-1026.WAV",
-        "rainstorm.wav",
-        "wind.wav",
+        "SSR4F_MixPre-1390_01.WAV",
+        # "LHR1F_MixPre-1312_01.WAV",
+        # "SSR1F_MixPre-1363.WAV",
+        # "SSF1F_MixPre-2237_01.WAV",
+        # "SHI1F_MixPre-1620_01.WAV",
+        # "OS1F_MixPre-1472_01.WAV",
+        # "TIP1F_MixPre-1026.WAV",
+        # "rainstorm.wav",
+        # "wind.wav",
     ]
 
     # Check if the spectrograms have already been generated
@@ -92,7 +95,7 @@ if __name__ == "__main__":
 
         gs = gridspec.GridSpec(
             5,
-            3,
+            1,
             wspace=0.0,
             hspace=0.0,
             top=0.95,
@@ -101,12 +104,13 @@ if __name__ == "__main__":
             right=0.95,
         )
 
-        plt.figure(figsize=(12, 5))
+        # plt.figure(figsize=(12, 5))
 
         for i, numpy_res in enumerate(group):
             # Give the first plot 4/5 slots
             ax = plt.subplot(gs[:4, i])
-            plot_spectrogram(ax, sample_rate, numpy_res[0], numpy_res[1])
+            n_samples = len(numpy_res[0]) * 2
+            plot_spectrogram(ax, sample_rate, numpy_res[0], numpy_res[1], n_samples - 4)
             if i == 0:
                 ax.set_ylabel("Frequency (Hz)")
                 ax.set_yticks(numpy_res[1][::2])

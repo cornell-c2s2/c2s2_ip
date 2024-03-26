@@ -1,0 +1,14 @@
+# Labels defined here will be used for all config designs
+DESIGN_NAME: ComplexMultiplier # Top module name
+TEST_FILES: # pytest files
+  - tests/complex_multiplier.py
+DESIGN_IS_CORE: 0
+FP_PIN_ORDER_CFG: complex_multiplier_pins.cfg
+CLOCK_PORT: clk # Default for no clk design
+FP_ASPECT_RATIO: 1 # Aspect ratio of the core (we set it to 2 here because there are 128 pins on each side but only 64 on the bottom)
+CLOCK_PERIOD: 25
+PL_TARGET_DENSITY: 0.85
+SYNTH_PARAMETERS: 
+  n : 32
+  d : 16
+    

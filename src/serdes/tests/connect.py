@@ -10,7 +10,7 @@ from pymtl3.stdlib.test_utils import run_sim
 from src.serdes.deserializer import DeserializerWrapper
 from src.serdes.serializer import SerializerWrapper
 from src.serdes.tests.utils import create_transactions, rand_spec
-from tools.utils import mk_test_case_table, mk_test_matrices
+from tools.utils import mk_test_matrices
 
 # -------------------------------------------------------------------------
 # TestHarness

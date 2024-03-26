@@ -22,7 +22,7 @@ class TestHarness(Component):
 
         s.dut = DeserializerWrapper(BIT_WIDTH, N_SAMPLES)
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
-        s.sink = stream.SinkRTL(mk_list_bitstruct(BIT_WIDTH, N_SAMPLES))
+        s.sink = stream.SinkRTL(mk_list_bitstruct(mk_bits(BIT_WIDTH), N_SAMPLES))
 
         # Connect
         s.src.send //= s.dut.recv
@@ -84,7 +84,7 @@ def test_deserializer(p, cmdline_opts):
 
     msgs = create_transactions(nbits, nsamples, p.nmsgs)
 
-    mk_ret = mk_list_bitstruct(nbits, nsamples)
+    mk_ret = mk_list_bitstruct(mk_bits(nbits), nsamples)
 
     th.set_param(
         "top.src.construct",

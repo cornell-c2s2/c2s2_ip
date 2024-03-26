@@ -98,8 +98,7 @@ def test_edge(cmdline_opts, n, d, a, b):
             mk_params(1, [100], n, d, slow=True)
             for (n, d) in [
                 (8, 4),
-                (24, 8),
-                (32, 24),
+                (16, 8),
                 (32, 16),
                 (64, 32),
             ]

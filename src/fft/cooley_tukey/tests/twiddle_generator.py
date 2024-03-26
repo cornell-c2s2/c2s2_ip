@@ -1,9 +1,10 @@
-from src.fft.helpers.twiddle_generator import TwiddleGenerator
+from src.fft.cooley_tukey.helpers.twiddle_generator import TwiddleGenerator
 from pymtl3.stdlib.test_utils import run_test_vector_sim
 import pytest
 import math
 from tools.utils import mk_test_matrices, cfixed_bits, fixed_bits
-from src.fft.sim import sine_wave, twiddle_generator
+from src.fft.sim import sine_wave
+from src.fft.cooley_tukey.sim import twiddle_generator
 
 
 def gen_twiddle(BIT_WIDTH, DECIMAL_PT, SIZE_FFT, STAGE_FFT):

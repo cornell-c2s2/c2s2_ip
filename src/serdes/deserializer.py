@@ -29,7 +29,9 @@ class Deserializer(VerilogPlaceholder, Component):
 class DeserializerWrapper(Component):
     def construct(s, BIT_WIDTH, N_SAMPLES):
         s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
-        s.send = stream.ifcs.SendIfcRTL(mk_list_bitstruct(BIT_WIDTH, N_SAMPLES))
+        s.send = stream.ifcs.SendIfcRTL(
+            mk_list_bitstruct(mk_bits(BIT_WIDTH), N_SAMPLES)
+        )
 
         s.dut = Deserializer(BIT_WIDTH, N_SAMPLES)
 

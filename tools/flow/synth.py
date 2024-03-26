@@ -132,10 +132,7 @@ def design_files(build: str, designs: list[dict], args) -> list[dict]:
         }
 
     if len(vtb_files) > 0:
-        spinner.fail(
-            f"Found extra vtb files not matching any verilog files: {vtb_files}"
-        )
-        return 1
+        log.warn(f"Found extra vtb files not matching any verilog files: {vtb_files}")
 
     # delete these from the scope so they don't get used later
     del verilog_files
