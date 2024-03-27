@@ -13,6 +13,7 @@
 `define CMN_TRACE_NCHARS 512
 `define CMN_TRACE_NBITS 512*8
 
+/* verilator lint_off UNUSED */
 module cmn_Trace (
   input logic clk,
   input logic reset
@@ -247,6 +248,6 @@ endmodule
 
 `define CMN_TRACE_END \
   endtask
+/* verilator lint_on UNUSED  */
 
 `endif  /* CMN_TRACE_V */
-
