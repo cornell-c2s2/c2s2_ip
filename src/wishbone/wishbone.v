@@ -53,25 +53,11 @@ module wishbone_Wishbone #(
   logic transaction_val;
   assign transaction_val = wbs_stb_i && wbs_cyc_i;
 
-  logic [31:0] adr_shift;
-  cmn_RightLogicalShifter #(32, 2) istream_addr_shifter (
-    .in(wbs_adr_i),
-    .shamt(2'd3),
-    .out(adr_shift)
-  );
-
   logic [31:0] adr_sub;
   cmn_Subtractor #(32) ostream_addr_sub (
     .in0(wbs_adr_i),
     .in1(OSTREAM_BASE),
     .out(adr_sub)
-  );
-
-  logic [31:0] adr_sub_shift;
-  cmn_RightLogicalShifter #(32, 2) ostream_addr_shifter (
-    .in(adr_sub),
-    .shamt(2'd3),
-    .out(adr_sub_shift)
   );
 
   logic is_check_istream;
@@ -102,10 +88,10 @@ module wishbone_Wishbone #(
     && !wbs_we_i;
   logic [ostream_addr_nbits-1:0] ostream_read_ind;
 
-  assign istream_check_ind = adr_shift[istream_addr_nbits-1:0];
-  assign istream_write_ind = adr_shift[istream_addr_nbits-1:0];
-  assign ostream_check_ind = adr_sub_shift[ostream_addr_nbits-1:0];
-  assign ostream_read_ind  = adr_sub_shift[ostream_addr_nbits-1:0];
+  assign istream_check_ind = wbs_adr_i[istream_addr_nbits-1+3:3];
+  assign istream_write_ind = wbs_adr_i[istream_addr_nbits-1+3:3];
+  assign ostream_check_ind = adr_sub[ostream_addr_nbits-1+3:3];
+  assign ostream_read_ind  = adr_sub[ostream_addr_nbits-1+3:3];
 
   /////////////////
   // istream queue
