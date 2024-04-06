@@ -25,6 +25,13 @@ def root_dir() -> str:
     return path.abspath(path.join(path.dirname(__file__), "..", "..", ".."))
 
 
+def build_dir() -> str:
+    """
+    Get the build directory of the project
+    """
+    return path.abspath(path.join(root_dir(), "build"))
+
+
 # From https://stackoverflow.com/questions/7204805/deep-merge-dictionaries-of-dictionaries-in-python
 def merge_dict(dict1: dict, dict2: dict) -> dict:
     def merge_dict_inner(dict1: dict, dict2: dict):

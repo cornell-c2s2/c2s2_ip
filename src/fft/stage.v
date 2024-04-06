@@ -18,29 +18,29 @@ module fft_Stage #(
   parameter int N_SAMPLES  = 8,
   parameter int STAGE_FFT  = 0
 ) (
-  input  logic [BIT_WIDTH - 1:0] recv_msg_real[N_SAMPLES - 1:0],
-  input  logic [BIT_WIDTH - 1:0] recv_msg_imag[N_SAMPLES - 1:0],
+  input  logic [BIT_WIDTH - 1:0] recv_msg_real[N_SAMPLES],
+  input  logic [BIT_WIDTH - 1:0] recv_msg_imag[N_SAMPLES],
   input  logic                   recv_val,
   output logic                   recv_rdy,
 
-  output logic [BIT_WIDTH - 1:0] send_msg_real[N_SAMPLES - 1:0],
-  output logic [BIT_WIDTH - 1:0] send_msg_imag[N_SAMPLES - 1:0],
+  output logic [BIT_WIDTH - 1:0] send_msg_real[N_SAMPLES],
+  output logic [BIT_WIDTH - 1:0] send_msg_imag[N_SAMPLES],
   output logic                   send_val,
   input  logic                   send_rdy,
 
-  input logic [BIT_WIDTH - 1:0] sine_wave_out[0:N_SAMPLES - 1],
+  input logic [BIT_WIDTH - 1:0] sine_wave_out[N_SAMPLES],
 
   input logic reset,
   input logic clk
 );
 
-  logic                   val_in [N_SAMPLES - 1:0];
-  logic                   rdy_in [N_SAMPLES - 1:0];
+  logic                 val_in [N_SAMPLES];
+  logic                 rdy_in [N_SAMPLES];
 
-  logic                   val_out[N_SAMPLES - 1:0];
-  logic                   rdy_out[N_SAMPLES - 1:0];
+  logic                 val_out[N_SAMPLES];
+  logic                 rdy_out[N_SAMPLES];
 
-  logic [N_SAMPLES - 1:0] imm;
+  logic [N_SAMPLES-1:0] imm;
   generate
     for (genvar i = 0; i < N_SAMPLES; i++) begin
       assign val_in[i] = recv_val;
@@ -50,21 +50,21 @@ module fft_Stage #(
   endgenerate
 
 
-  logic [BIT_WIDTH - 1:0] butterfly_in_real      [  N_SAMPLES - 1:0];
-  logic [BIT_WIDTH - 1:0] butterfly_out_real     [  N_SAMPLES - 1:0];
-  logic [BIT_WIDTH - 1:0] butterfly_in_imaginary [  N_SAMPLES - 1:0];
-  logic [BIT_WIDTH - 1:0] butterfly_out_imaginary[  N_SAMPLES - 1:0];
+  logic [BIT_WIDTH - 1:0] butterfly_in_real      [  N_SAMPLES];
+  logic [BIT_WIDTH - 1:0] butterfly_out_real     [  N_SAMPLES];
+  logic [BIT_WIDTH - 1:0] butterfly_in_imaginary [  N_SAMPLES];
+  logic [BIT_WIDTH - 1:0] butterfly_out_imaginary[  N_SAMPLES];
 
-  logic                   val_interior_in        [  N_SAMPLES - 1:0];
-  logic                   rdy_interior_in        [  N_SAMPLES - 1:0];
-  logic                   val_interior_out       [  N_SAMPLES - 1:0];
-  logic                   rdy_interior_out       [  N_SAMPLES - 1:0];
+  logic                   val_interior_in        [  N_SAMPLES];
+  logic                   rdy_interior_in        [  N_SAMPLES];
+  logic                   val_interior_out       [  N_SAMPLES];
+  logic                   rdy_interior_out       [  N_SAMPLES];
 
-  logic [BIT_WIDTH - 1:0] twiddle_real           [N_SAMPLES/2 - 1:0];
-  logic [BIT_WIDTH - 1:0] twiddle_imaginary      [N_SAMPLES/2 - 1:0];
+  logic [BIT_WIDTH - 1:0] twiddle_real           [N_SAMPLES/2];
+  logic [BIT_WIDTH - 1:0] twiddle_imaginary      [N_SAMPLES/2];
 
-  logic                   val_interior_mini      [N_SAMPLES/2 - 1:0];
-  logic                   rdy_interior_mini      [N_SAMPLES/2 - 1:0];
+  logic                   val_interior_mini      [N_SAMPLES/2];
+  logic                   rdy_interior_mini      [N_SAMPLES/2];
 
   fft_helpers_Crossbar #(
     .BIT_WIDTH(BIT_WIDTH),
@@ -76,8 +76,8 @@ module fft_Stage #(
     .recv_imaginary(recv_msg_imag),
     .recv_val(val_in),
     .recv_rdy(rdy_in),
-    .send_real(butterfly_in_real[N_SAMPLES-1:0]),
-    .send_imaginary(butterfly_in_imaginary[N_SAMPLES-1:0]),
+    .send_real(butterfly_in_real),
+    .send_imaginary(butterfly_in_imaginary),
     .send_val(val_interior_in),
     .send_rdy(rdy_interior_in)
   );

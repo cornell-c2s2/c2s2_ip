@@ -41,3 +41,6 @@ env.bak/
 venv.bak/
 
 .hypothesis/
+
+caravel
+core.*

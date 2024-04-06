@@ -7,7 +7,7 @@ module serdes_Serializer #(
   parameter int BIT_WIDTH = 32,
   parameter int N_SAMPLES = 8
 ) (
-  input logic [BIT_WIDTH - 1:0] recv_msg[N_SAMPLES - 1:0],
+  input logic [BIT_WIDTH - 1:0] recv_msg[N_SAMPLES],
   input logic recv_val,
   output logic recv_rdy,
 
