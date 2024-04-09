@@ -27,6 +27,7 @@ module wishbone_Wishbone #(
   input logic wbs_stb_i,
   input logic wbs_cyc_i,
   input logic wbs_we_i,
+  input logic [3:0] wbs_sel_i,
   input logic [31:0] wbs_dat_i,
   input logic [31:0] wbs_adr_i,
   output logic wbs_ack_o,
@@ -90,8 +91,6 @@ module wishbone_Wishbone #(
   assign istream_write_ind = wbs_adr_i[istream_addr_nbits-1+3:3];
   assign ostream_check_ind = adr_sub[ostream_addr_nbits-1+3:3];
   assign ostream_read_ind  = adr_sub[ostream_addr_nbits-1+3:3];
-
-  logic unused = &{1'b0, adr_shift[31:istream_addr_nbits], adr_sub_shift[31:ostream_addr_nbits], 1'b0};
 
   /////////////////
   // istream queue
@@ -174,10 +173,8 @@ module wishbone_Wishbone #(
   assign wbs_ack_o = 1'b1;
 
 
-  //----------------------------------------------------------------------
-  // Input Registers (sequential logic)
-  //----------------------------------------------------------------------
-
+  // Unused Net
+  logic unused = &{1'b0, wbs_sel_i, adr_sub, 1'b0};
 endmodule
 
 `endif  /* REG_ARRAY_V */
