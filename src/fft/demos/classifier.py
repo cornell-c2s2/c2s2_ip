@@ -36,24 +36,20 @@ def classify(magnitudes: list[list[float]], bins: list[float]) -> list[bool]:
     # Magnitude threshold
     threshold = 0.5
 
-    increment = 10
-
     count = 0
     classifications = []
     for i, sample in enumerate(magnitudes):
-        # # Check if there is a bin with a magnitude above the threshold
-        # for i, mag in enumerate(sample):
-        #     if bins[i] < low or bins[i] > high:
-        #         continue
-        #     if mag > threshold:
-        #         count += increment
-        #         break
+        # Check if there is a bin with a magnitude above the threshold
+        for i, mag in enumerate(sample):
+            if bins[i] < low or bins[i] > high:
+                continue
+            if mag > threshold:
+                count = 44800
+                break
 
-        # if count > 0:
-        #     count -= 1
-        # classifications.append(count > 0)
-        secs = 4 * i / 44800
-        classifications.append(secs > 1.3 and secs < 4.8)
+        if count > 0:
+            count -= 1
+        classifications.append(count > 0)
 
     return classifications
 
@@ -62,15 +58,15 @@ if __name__ == "__main__":
     sample_rate = 44800
 
     audio_files = [
-        "SSR4F_MixPre-1390_01.WAV",
-        # "LHR1F_MixPre-1312_01.WAV",
-        # "SSR1F_MixPre-1363.WAV",
-        # "SSF1F_MixPre-2237_01.WAV",
-        # "SHI1F_MixPre-1620_01.WAV",
-        # "OS1F_MixPre-1472_01.WAV",
-        # "TIP1F_MixPre-1026.WAV",
-        # "rainstorm.wav",
-        # "wind.wav",
+        # "SSR4F_MixPre-1390_01.WAV",
+        "LHR1F_MixPre-1312_01.WAV",
+        "SSR1F_MixPre-1363.WAV",
+        "SSF1F_MixPre-2237_01.WAV",
+        "SHI1F_MixPre-1620_01.WAV",
+        "OS1F_MixPre-1472_01.WAV",
+        "TIP1F_MixPre-1026.WAV",
+        "rainstorm.wav",
+        "wind.wav",
     ]
 
     # Check if the spectrograms have already been generated
