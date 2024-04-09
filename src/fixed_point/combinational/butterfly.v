@@ -1,22 +1,35 @@
-//================================================
-// Iterative Butterfly Unit
-// -----------------------------------------------
-// This module performs the butterfly operation
-// which is equivalent to the following matrix
-// multiplication:
-// | 1  w |   | a |   | c |
-// | 1 -w | * | b | = | d |
-// where w is the ith root of unity e^(-2*pi*i/n)
-// and n/d is the fixed point specification`
-// This module is used in the FFT module, and
-// contains an area optimization parameter to
-// save area by not including the complex
-// multiplier in certain cases.
-//================================================
 `default_nettype none
 `ifndef fixed_point_combinational_Butterfly
 `define fixed_point_combinational_Butterfly
 `include "fixed_point/combinational/complex_multiplier.v"
+
+/* Parameterized Combinational butterfly Unit.
+ *
+ * This modules is a non-buffered version of the butterfly unit and allows
+ * multiple butterfly inputs. All computations are combinationsal
+ * 
+ * Params:
+ * - n: bit width 
+ * - d: number of decimal bits
+ * - b: how many butterflies inputs and outputs this multi-butterfly contains
+ * 
+ * Inputs:
+ *  - ar[], ac[]: real and complex parts of the first number for each butterfly
+ *  - br[], bc[]: real and complex parts of the second number for each butterfly
+ *  - wr[], wc[]: real and complex parts of the twiddle factor for each butterfly
+ *
+ * Outputs:
+ *  - cr[], cc[]: real and complex parts of the result for each butterfly
+ * 
+ * Tests: NOT FULLY TESTED
+ *  - tests/fixed_point/combinational/butterfly.py [PASSED]
+ *
+ * Used In:
+ *  - Pease FFT Module: fft/pease/fft.v
+ *  
+ * Author: Barry Lyu.
+ * Date: Feb 14th 2024
+ */
 
 module fixed_point_combinational_Butterfly #(
   parameter int n = 32,
