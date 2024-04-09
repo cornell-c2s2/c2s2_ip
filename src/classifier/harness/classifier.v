@@ -4,10 +4,7 @@
 module classifier_HarnessClassifier #(
   parameter int BIT_WIDTH = 32,
   parameter int DECIMAL_PT = 16,
-  parameter int N_SAMPLES = 8,
-  parameter int CUTOFF_FREQ = 65536000,  // 1000 in 16.16 : 1000*2^16
-  parameter int CUTOFF_MAG = 1310720,  // 20 in 16.16 : 20*2^16
-  parameter int SAMPLING_FREQUENCY = 44000
+  parameter int N_SAMPLES = 8
 ) (
   input logic clk,
   input logic reset,
@@ -16,6 +13,18 @@ module classifier_HarnessClassifier #(
   output logic recv_rdy,
   input logic [N_SAMPLES*BIT_WIDTH-1:0] recv_msg,
 
+  output logic                   cutoff_freq_rdy,
+  input  logic                   cutoff_freq_val,
+  input  logic [BIT_WIDTH - 1:0] cutoff_freq_msg,
+
+  output logic                   cutoff_mag_rdy,
+  input  logic                   cutoff_mag_val,
+  input  logic [BIT_WIDTH - 1:0] cutoff_mag_msg,
+
+  output logic                   sampling_freq_rdy,
+  input  logic                   sampling_freq_val,
+  input  logic [BIT_WIDTH - 1:0] sampling_freq_msg,
+
   output logic send_val,
   input  logic send_rdy,
   output logic send_msg
@@ -23,13 +32,23 @@ module classifier_HarnessClassifier #(
 
   logic [BIT_WIDTH-1:0] imm_recv_msg[N_SAMPLES-1:0];
 
-  classifier_Classifier #(BIT_WIDTH, DECIMAL_PT, N_SAMPLES, CUTOFF_FREQ, CUTOFF_MAG, SAMPLING_FREQUENCY) Classifier (
+  classifier_Classifier #(BIT_WIDTH, DECIMAL_PT, N_SAMPLES) Classifier (
     .clk  (clk),
     .reset(reset),
 
     .recv_val(recv_val),
     .recv_rdy(recv_rdy),
     .recv_msg(imm_recv_msg),
+
+    .cutoff_freq_rdy  (cutoff_freq_rdy),
+    .cutoff_freq_val  (cutoff_freq_val),
+    .cutoff_freq_msg  (cutoff_freq_msg),
+    .cutoff_mag_rdy   (cutoff_mag_rdy),
+    .cutoff_mag_val   (cutoff_mag_val),
+    .cutoff_mag_msg   (cutoff_mag_msg),
+    .sampling_freq_rdy(sampling_freq_rdy),
+    .sampling_freq_val(sampling_freq_val),
+    .sampling_freq_msg(sampling_freq_msg),
 
     .send_val(send_val),
     .send_rdy(send_rdy),

@@ -8,11 +8,11 @@
 module comparison_Comparison #(
   parameter int BIT_WIDTH  = 32,
   parameter int DECIMAL_PT = 16,
-  parameter int N_SAMPLES  = 8,
-  parameter int CUTOFF_MAG = 20
+  parameter int N_SAMPLES  = 8
 ) (
   input                          clk,
   input                          reset,
+  input  logic [BIT_WIDTH - 1:0] cutoff_mag,
   input  logic [BIT_WIDTH - 1:0] filtered_valid[N_SAMPLES - 1:0],
   input  logic [BIT_WIDTH - 1:0] mag_in        [N_SAMPLES - 1:0],
   output logic                   compare_out,
@@ -28,7 +28,7 @@ module comparison_Comparison #(
       i <= 0;
     end else if (!done) begin
       if (i < N_SAMPLES - 1) begin
-        if (filtered_valid[i] && (mag_in[i] > CUTOFF_MAG)) begin
+        if (filtered_valid[i] && (mag_in[i] > cutoff_mag)) begin
           compare_out <= 1;
           done <= 1;
           i <= i + 1;
