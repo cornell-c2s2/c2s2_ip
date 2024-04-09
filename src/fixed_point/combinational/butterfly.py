@@ -1,9 +1,6 @@
 from pymtl3 import *
-from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from pymtl3.passes.backends.verilog import *
 from os import path
-from tools.utils import mk_list_bitstruct
-from src.fixed_point.utils import mk_butterfly_input, mk_butterfly_output
 
 
 class Butterfly(VerilogPlaceholder, Component):
@@ -32,4 +29,3 @@ class Butterfly(VerilogPlaceholder, Component):
 
         # Name of the top level module to be imported
         s.set_metadata(VerilogPlaceholderPass.top_module, "Butterfly")
-
