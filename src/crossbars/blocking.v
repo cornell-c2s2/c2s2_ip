@@ -29,11 +29,13 @@ module crossbars_Blocking #(
   logic [$clog2(N_INPUTS)  - 1:0] input_sel;
   logic [$clog2(N_OUTPUTS) - 1:0] output_sel;
 
-  always @(posedge clk) begin
+  always_ff @(posedge clk) begin
     if (reset) begin
       stored_control <= 0;
     end else if (control_val) begin
       stored_control <= control;
+    end else begin
+      stored_control <= stored_control;
     end
   end
 
@@ -52,19 +54,24 @@ module crossbars_Blocking #(
   )];
 
   always_comb begin
-    send_msg[output_sel] = recv_msg[input_sel];
-    send_val[output_sel] = recv_val[input_sel];
-    recv_rdy[input_sel]  = send_rdy[output_sel];
-
-    for (integer i = 0; i < N_OUTPUTS; i = i + 1) begin
+    for (int i = 0; i < N_OUTPUTS; i = i + 1) begin
+      /* verilator lint_off WIDTH */
       if ((i != output_sel)) begin
+        /* verilator lint_on WIDTH */
         send_msg[i] = 0;
         send_val[i] = 0;
+      end else begin
+        send_msg[i] = recv_msg[input_sel];
+        send_val[i] = recv_val[input_sel];
       end
     end
-    for (integer i = 0; i < N_INPUTS; i = i + 1) begin
+    for (int i = 0; i < N_INPUTS; i = i + 1) begin
+      /* verilator lint_off WIDTH */
       if ((i != input_sel)) begin
+        /* verilator lint_on WIDTH */
         recv_rdy[i] = 0;
+      end else begin
+        recv_rdy[i] = send_rdy[output_sel];
       end
     end
   end
