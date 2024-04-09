@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import os
 from os import path
 import numpy as np
-from src.fft.sim import fft as fft_sim
+from src.fft.pease.sim import fft as fft_sim
 from fixedpt import CFixed
 
 
@@ -49,14 +49,21 @@ def plot_spectrogram(
     sample_rate: InterruptedError,
     data: list[list[float]],
     bins: list[float],
+    n_overlap,
 ):
+    n_samples = len(data[0]) * 2
     results = np.array(data).T
     ax.imshow(
         results,
         cmap="plasma",
         aspect="auto",
         origin="lower",
-        extent=(0, len(data) / sample_rate, bins[0], bins[-1]),
+        extent=(
+            0,
+            (n_samples - n_overlap) * len(data) / sample_rate,
+            bins[0],
+            bins[-1],
+        ),
     )
 
     # ax.set_xlabel("Time (s)")
