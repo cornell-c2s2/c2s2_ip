@@ -12,26 +12,32 @@ module fixed_point_combinational_Multiplier #(
   output logic [n-1:0] c
 );
 
-  logic [2*n-1:0] prod;
-  logic [2*n-1:0] a_ext, b_ext;
+  logic [d+n-1:0] prod;
+  logic [d+n-1:0] a_ext, b_ext;
 
   generate
     if (sign) begin
-      assign a_ext = {{n{a[n-1]}}, a};
-      assign b_ext = {{n{b[n-1]}}, b};
-      assign prod  = (a_ext * b_ext) >>> d;
+      assign a_ext = {{d{a[n-1]}}, a};
+      assign b_ext = {{d{b[n-1]}}, b};
+      assign prod  = (a_ext * b_ext);
     end else begin
-      assign prod = (a * b) >> d;
+      assign prod = (a * b);
     end
   endgenerate
 
-  assign c = prod[n-1:0];
+  assign c = prod[n+d-1:d];
 
-  /* verilator lint_off UNUSED */
-  logic unused;
-  /* verilator lint_on UNUSED */
+
   // The upper n bits of prod are discarded.
-  assign unused = &{1'b0, prod[2*n-1:n], 1'b0};
+  generate
+    if (d > 0) begin
+      /* verilator lint_off UNUSED */
+      logic unused;
+      /* verilator lint_on UNUSED */
+      assign unused = &{1'b0, prod[d-1:0], 1'b0};
+    end
+  endgenerate
+
 endmodule
 
 `endif

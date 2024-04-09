@@ -75,10 +75,14 @@ def mk_packed(*args):
 
 
 # Creates a bitstruct with one field representing its list.
-def mk_list_bitstruct(nbits, nsamples):
+# The type of the list is determined by the `typ` argument
+# For example, a list of Bits32 would be created by calling `mk_list_bitstruct(Bits32, n)`
+def mk_list_bitstruct(typ, nsamples):
+    print(typ, nsamples)
+
     @bitstruct
     class ListStruct:
-        list: [mk_bits(nbits) for _ in range(nsamples)]
+        list: [typ for _ in range(nsamples)]
 
     return ListStruct
 
@@ -143,7 +147,7 @@ def mk_test_matrix(values, slow=False):
         if callable(v):
             return v.__name__
         if isinstance(v, list):
-            return f"[{','.join([smartstr(x) for x in v])}]"
+            return f"[...]"
         if isinstance(v, tuple):
             return f"({','.join([smartstr(x) for x in v])})"
         return str(v)

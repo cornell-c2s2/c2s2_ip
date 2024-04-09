@@ -34,7 +34,7 @@ def classify(magnitudes: list[list[float]], bins: list[float]) -> list[bool]:
     high = 10000
 
     # Magnitude threshold
-    threshold = 0.2
+    threshold = 0.5
 
     count = 0
     classifications = []
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
         gs = gridspec.GridSpec(
             5,
-            3,
+            1,
             wspace=0.0,
             hspace=0.0,
             top=0.95,
@@ -100,12 +100,13 @@ if __name__ == "__main__":
             right=0.95,
         )
 
-        plt.figure(figsize=(12, 5))
+        # plt.figure(figsize=(12, 5))
 
         for i, numpy_res in enumerate(group):
             # Give the first plot 4/5 slots
             ax = plt.subplot(gs[:4, i])
-            plot_spectrogram(ax, sample_rate, numpy_res[0], numpy_res[1])
+            n_samples = len(numpy_res[0]) * 2
+            plot_spectrogram(ax, sample_rate, numpy_res[0], numpy_res[1], n_samples - 4)
             if i == 0:
                 ax.set_ylabel("Frequency (Hz)")
                 ax.set_yticks(numpy_res[1][::2])
