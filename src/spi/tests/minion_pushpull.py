@@ -1,6 +1,6 @@
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
-from src.spi.minion import SPIMinion
+from src.spi.helpers.minion_pushpull import SPIMinion
 
 
 def test_basic(cmdline_opts):
