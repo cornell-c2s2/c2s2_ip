@@ -12,7 +12,7 @@ module fft_helpers_SineWave #(
   output logic [W - 1:0] out[N]
 );
   // arccos(-1) = pi
-  parameter real PI = $acos(-1);
+  localparam real PI = $acos(-1);
 
   // Checks on parameters to make sure behavior is well defined.
   generate
@@ -20,7 +20,7 @@ module fft_helpers_SineWave #(
       $error("D must be less than 32");
     end
     for (genvar i = 0; i < N; i++) begin
-      parameter real sinvalue = $sin(2 * PI * i / N);
+      localparam real sinvalue = $sin(2 * PI * i / N);
       /* verilator lint_off UNUSED */
       int fixedptvalue = int'(sinvalue * 2.0 ** D);
       /* lint_on */
