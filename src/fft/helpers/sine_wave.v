@@ -20,7 +20,7 @@ module fft_helpers_SineWave #(
       $error("D must be less than 32");
     end
     for (genvar i = 0; i < N; i++) begin
-      parameter real sinvalue = $sin(2 * PI * i / N);
+      localparam real sinvalue = $sin(2 * PI * i / N);
       /* verilator lint_off UNUSED */
       int fixedptvalue = int'(sinvalue * 2.0 ** D);
       /* lint_on */

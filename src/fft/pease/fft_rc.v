@@ -57,7 +57,7 @@ module fft_pease_FFT #(
     .out(reversed_msg_r)
   );
 
-  ft_helpers_BitReverse #(
+  fft_helpers_BitReverse #(
     .N_SAMPLES(N_SAMPLES),
     .BIT_WIDTH(BIT_WIDTH)
   ) bit_reverse_c (

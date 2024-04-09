@@ -10,6 +10,7 @@ import random
 from tools.utils import mk_packed, mk_list_bitstruct, cfixed_bits
 from src.fixed_point.utils import rand_fxp_spec, mk_butterfly_input, mk_butterfly_output
 
+
 def mk_params(execution_number, sequence_lengths, n, d, bin1, slow=False):
     if isinstance(n, int):
         n = (n, n)
@@ -35,6 +36,7 @@ def mk_params(execution_number, sequence_lengths, n, d, bin1, slow=False):
                 )
     return res
 
+
 # return a random fixed point value
 def rand_cfixed(n, d):
     return CFixed(
@@ -43,17 +45,32 @@ def rand_cfixed(n, d):
         d,
         raw=True,
     )
-    
-def gen_random_test_case(n,d, num):
+
+
+def gen_random_test_case(n, d, num):
     test_case = [("ar[0] ac[0] br[0] bc[0] wr[0] wc[0] cr[0]* cc[0]* dr[0]* dc[0]* ")]
     for _ in range(num):
         a = rand_cfixed(n, d)
         b = rand_cfixed(n, d)
         w = rand_cfixed(n, d)
         c, dd = butterfly(a, b, w)
-        test_case.append([a.real.get(), a.imag.get(), b.real.get(), b.imag.get(), w.real.get(), w.imag.get(), c.real.get(), c.imag.get(), dd.real.get(), dd.imag.get()])
+        test_case.append(
+            [
+                a.real.get(),
+                a.imag.get(),
+                b.real.get(),
+                b.imag.get(),
+                w.real.get(),
+                w.imag.get(),
+                c.real.get(),
+                c.imag.get(),
+                dd.real.get(),
+                dd.imag.get(),
+            ]
+        )
     return test_case
-   
+
+
 @pytest.mark.parametrize(
     "n, d, a, b, w,",
     [
@@ -73,30 +90,42 @@ def test_edge(cmdline_opts, n, d, a, b, w):
     c, dd = butterfly(a, b, w)
 
     model = Butterfly(n, d, 1)
-    
-    test_case = [("ar[0] ac[0] br[0] bc[0] wr[0] wc[0] cr[0]* cc[0]* dr[0]* dc[0]* ")]
-    test_case.append([a.real.get(), a.imag.get(), b.real.get(), b.imag.get(), w.real.get(), w.imag.get(), c.real.get(), c.imag.get(), dd.real.get(), dd.imag.get()])
 
-    run_test_vector_sim(model,test_case,cmdline_opts)
+    test_case = [("ar[0] ac[0] br[0] bc[0] wr[0] wc[0] cr[0]* cc[0]* dr[0]* dc[0]* ")]
+    test_case.append(
+        [
+            a.real.get(),
+            a.imag.get(),
+            b.real.get(),
+            b.imag.get(),
+            w.real.get(),
+            w.imag.get(),
+            c.real.get(),
+            c.imag.get(),
+            dd.real.get(),
+            dd.imag.get(),
+        ]
+    )
+
+    run_test_vector_sim(model, test_case, cmdline_opts)
 
 
 @pytest.mark.parametrize(
     "sequence_length, n, d",
     [
-        (1,16,8),
-        (50,16,8),
-        (1,32,16),
-        (50,32,16),
-        (1,64,32),
-        (50,64,32),
+        (1, 16, 8),
+        (50, 16, 8),
+        (1, 32, 16),
+        (50, 32, 16),
+        (1, 64, 32),
+        (50, 64, 32),
     ],
 )
 def test_random(
     cmdline_opts, sequence_length, n, d
 ):  # test individual and sequential multiplications to assure stream system works
-    
+
     test_case = gen_random_test_case(n, d, sequence_length)
     model = Butterfly(n, d, 1)
-    
+
     run_test_vector_sim(model, test_case, cmdline_opts)
-    
