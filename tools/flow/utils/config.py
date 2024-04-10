@@ -6,7 +6,7 @@ CONFIG_FILE = path.join(path.dirname(__file__), "config.json")
 
 def get_config() -> dict:
     """
-    Get the configuration fil
+    Get the configuration file
     """
     if not path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, "w") as config_file:

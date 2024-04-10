@@ -27,9 +27,9 @@ module arbiter_router_Arbiter #(
   input logic reset,
 
   // Receive Interface - need recv signals for each component connected to arbitrator
-  input  logic             istream_val[0:ninputs-1],
-  output logic             istream_rdy[0:ninputs-1],
-  input  logic [nbits-1:0] istream_msg[0:ninputs-1],
+  input  logic             istream_val[ninputs],
+  output logic             istream_rdy[ninputs],
+  input  logic [nbits-1:0] istream_msg[ninputs],
 
   // Send Interface
   output logic                        ostream_val,

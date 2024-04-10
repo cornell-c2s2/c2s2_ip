@@ -12,8 +12,8 @@ from src.fixed_point.utils import (
     mk_multiplier_output,
 )
 import random
-from tools.utils import mk_packed
 from src.fixed_point.utils import mk_params, rand_fxp_spec
+from src.fixed_point.sim import multiply
 
 
 # Test harness for streaming data
@@ -60,7 +60,7 @@ def test_edge(cmdline_opts, n, d, a, b):
 
     model.set_param(
         "top.sink.construct",
-        msgs=[mk_multiplier_output(n)((a * b).resize(None, n, d).get())],
+        msgs=[mk_multiplier_output(n)(multiply(a, b).get())],
         initial_delay=0,
         interval_delay=0,
     )
@@ -99,7 +99,7 @@ def test_random(cmdline_opts, execution_number, sequence_length, n, d):
     dat = [
         {"a": rand_fixed(n, d), "b": rand_fixed(n, d)} for i in range(sequence_length)
     ]
-    solns = [(i["a"] * i["b"]).resize(None, n, d) for i in dat]
+    solns = [multiply(i["a"], i["b"]) for i in dat]
 
     model = TestHarness(n, d)
 

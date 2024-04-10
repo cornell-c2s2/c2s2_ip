@@ -95,7 +95,7 @@ def test_deserializer(p, cmdline_opts):
 
     th.set_param(
         "top.sink.construct",
-        msgs=[mk_ret(msg[::-1]) for msg in msgs],
+        msgs=[mk_ret(msg) for msg in msgs],
         initial_delay=p.sink_delay,
         interval_delay=p.sink_delay,
     )
