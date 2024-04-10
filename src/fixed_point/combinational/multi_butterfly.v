@@ -39,7 +39,6 @@
  * Author: Barry Lyu.
  * Date: Feb 14th 2024
  */
-
 module fixed_point_combinational_MultiButterfly #(
   parameter int n = 32,
   parameter int d = 16,

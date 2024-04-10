@@ -105,7 +105,6 @@ module fft_pease_FFT #(
     .recv(out_butterfly),
     .send(out_stride)
   );
-
   // Sine wave generator for twiddle factors
   logic [BIT_WIDTH - 1:0] sine_wave_out[N_SAMPLES];
 

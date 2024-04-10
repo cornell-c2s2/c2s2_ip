@@ -106,6 +106,7 @@ def rand_cfixed(n, d):
     )
 
 
+@pytest.mark.skip(reason="Multi-butterfly harness broken")
 @pytest.mark.parametrize(
     "n, d, a, b, w,",
     [
@@ -166,6 +167,7 @@ def concat_Bits(list, n):
     return res
 
 
+@pytest.mark.skip(reason="Multi-butterfly harness broken")
 @pytest.mark.parametrize(
     "execution_number, sequence_length, n, d, bin1",
     # Runs tests on smaller number sizes

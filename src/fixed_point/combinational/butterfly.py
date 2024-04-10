@@ -5,7 +5,6 @@ from os import path
 from tools.utils import mk_list_bitstruct
 from src.fixed_point.utils import mk_butterfly_input, mk_butterfly_output
 
-
 class Butterfly(VerilogPlaceholder, Component):
     # Constructor
 
