@@ -10,16 +10,16 @@ module tapeins_sp24_tapein1_Interconnect (
   output logic miso,
   input  logic sclk
 );
-  logic [19:0] spi_recv_msg;
+  logic [17:0] spi_recv_msg;
   logic        spi_recv_rdy;
   logic        spi_recv_val;
-  logic [19:0] spi_send_msg;
+  logic [17:0] spi_send_msg;
   logic        spi_send_rdy;
   logic        spi_send_val;
 
   // SPI MINION
   spi_Minion #(
-    .nbits(20)
+    .nbits(18)
   ) minion (
     .clk(clk),
     .reset(reset),
@@ -39,12 +39,12 @@ module tapeins_sp24_tapein1_Interconnect (
   );
 
   // ROUTER
-  logic [19:0] router_msg [4];
+  logic [17:0] router_msg [4];
   logic        router_rdy [4];
   logic        router_val [4];
 
   arbiter_router_Router #(
-    .nbits(20),
+    .nbits(18),
     .noutputs(4)
   ) router (
     .clk(clk),
@@ -56,23 +56,25 @@ module tapeins_sp24_tapein1_Interconnect (
     .ostream_msg(router_msg),
     .ostream_rdy(router_rdy)
   );
+  
   // ARBITER
-  logic [19:0] router_msg [4];
-  logic        router_rdy [4];
-  logic        router_val [4];
+  logic [17:0] arbiter_msg [2];
+  logic        arbiter_rdy [2];
+  logic        arbiter_val [2];
 
-  arbiter_router_Router #(
-    .nbits(20),
-    .noutputs(4)
-  ) router (
+  arbiter_router_Arbiter #(
+    .nbits(18),
+    .ninputs(2),
+    .addr_nbits(2)
+  ) arbiter (
     .clk(clk),
     .reset(reset),
-    .istream_val(spi_send_val),
-    .istream_msg(spi_send_msg),
-    .istream_rdy(spi_send_rdy),
-    .ostream_val(router_val),
-    .ostream_msg(router_msg),
-    .ostream_rdy(router_rdy)
+    .istream_val(arbiter_val),
+    .istream_msg(arbiter_msg),
+    .istream_rdy(arbiter_rdy),
+    .ostream_val(spi_send_val),
+    .ostream_msg(spi_send_msg),
+    .ostream_rdy(spi_send_rdy)
   );
 
   // INPUT XBAR
@@ -87,6 +89,11 @@ module tapeins_sp24_tapein1_Interconnect (
   logic [15:0] input_xbar_send_msg[2];
   logic        input_xbar_send_rdy[2];
   logic        input_xbar_send_val[2];
+  // output 0 is SPI at address 0
+  assign input_xbar_send_msg[0] = arbiter_msg[0][15:0];
+  assign input_xbar_send_val[0] = arbiter_val[0];
+  assign input_xbar_send_rdy[0] = arbiter_rdy[0];
+  
   // configuration message for the crossbar
   // 1 bit wide because there are 2 possible configs
   logic        input_control_msg;
@@ -127,6 +134,10 @@ module tapeins_sp24_tapein1_Interconnect (
   logic [15:0] output_xbar_send_msg[1];
   logic        output_xbar_send_rdy[1];
   logic        output_xbar_send_val[1];
+  // output 0 is SPI at address 1
+  assign output_xbar_send_msg[0] = arbiter_msg[1][15:0];
+  assign output_xbar_send_val[0] = arbiter_val[1];
+  assign output_xbar_send_rdy[0] = arbiter_rdy[1];
   // configuration message for the crossbar
   // 2 bits wide because there are 4 possible configs
   logic        output_control_msg;
