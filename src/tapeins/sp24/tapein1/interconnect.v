@@ -1,6 +1,7 @@
 `include "spi/minion.v"
 `include "arbiter_router/router.v"
 `include "crossbars/blocking.v"
+`include "fft/pease/fft.v"
 
 module tapeins_sp24_tapein1_Interconnect (
   input  logic clk,
@@ -81,6 +82,7 @@ module tapeins_sp24_tapein1_Interconnect (
   logic [15:0] input_xbar_recv_msg[1];
   logic        input_xbar_recv_rdy[1];
   logic        input_xbar_recv_val[1];
+
   // input 0 is SPI at address 0
   assign input_xbar_recv_msg[0] = router_msg[0][15:0];
   assign input_xbar_recv_val[0] = router_val[0];
@@ -89,6 +91,7 @@ module tapeins_sp24_tapein1_Interconnect (
   logic [15:0] input_xbar_send_msg[2];
   logic        input_xbar_send_rdy[2];
   logic        input_xbar_send_val[2];
+
   // output 0 is SPI at address 0
   assign input_xbar_send_msg[0] = arbiter_msg[0][15:0];
   assign input_xbar_send_val[0] = arbiter_val[0];
@@ -120,12 +123,33 @@ module tapeins_sp24_tapein1_Interconnect (
     .control(input_control_msg),
     .control_rdy(input_control_rdy),
     .control_rdy(input_control_val)
-  )
+  );
   
+  // PEASE FFT
+  logic fft_send_msg;
+  logic fft_send_val;
+  logic fft_send_rdy;
+
+  fft_pease_FFT #(
+    .BIT_WIDTH(32),
+    .DECIMAL_PT(16),
+    .N_SAMPLES(8)
+  ) fft (
+    .reset(reset),
+    .clk(clk),
+    .recv_msg(input_xbar_send_msg),
+    .recv_val(input_xbar_send_val),
+    .recv_rdy(input_xbar_send_rdy),
+    .send_msg(fft_send_msg),
+    .send_val(fft_send_val),
+    .send_rdy(fft_send_rdy)
+);
+
   // OUTPUT XBAR
   logic [15:0] output_xbar_recv_msg[2];
   logic        output_xbar_recv_rdy[2];
   logic        output_xbar_recv_val[2];
+
   // input 0 is SPI at address 1
   assign output_xbar_recv_msg[0] = router_msg[1][15:0];
   assign output_xbar_recv_val[0] = router_val[1];
@@ -134,15 +158,18 @@ module tapeins_sp24_tapein1_Interconnect (
   logic [15:0] output_xbar_send_msg[1];
   logic        output_xbar_send_rdy[1];
   logic        output_xbar_send_val[1];
+
   // output 0 is SPI at address 1
   assign output_xbar_send_msg[0] = arbiter_msg[1][15:0];
   assign output_xbar_send_val[0] = arbiter_val[1];
   assign output_xbar_send_rdy[0] = arbiter_rdy[1];
+
   // configuration message for the crossbar
   // 2 bits wide because there are 4 possible configs
   logic        output_control_msg;
   logic        output_control_rdy;
   logic        output_control_val;
+
   // hooked up to address 3
   assign output_control_msg = router_msg[3][0];
   assign output_control_rdy = router_rdy[3];
@@ -164,6 +191,6 @@ module tapeins_sp24_tapein1_Interconnect (
     .control(control_msg),
     .control_rdy(control_rdy),
     .control_rdy(control_val)
-  )
+  );
 
 endmodule
