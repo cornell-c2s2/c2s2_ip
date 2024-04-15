@@ -44,12 +44,12 @@ module spi_helpers_minion_Adapter #(
     .clk(clk),
     .num_free_entries(),
     .reset(reset),
-    .recv_msg(recv_msg),
-    .recv_rdy(recv_rdy),
-    .recv_val(recv_val),
-    .send_msg(cm_q_send_msg),
-    .send_rdy(cm_q_send_rdy),
-    .send_val(cm_q_send_val)
+    .enq_msg(recv_msg),
+    .enq_rdy(recv_rdy),
+    .enq_val(recv_val),
+    .deq_msg(cm_q_send_msg),
+    .deq_rdy(cm_q_send_rdy),
+    .deq_val(cm_q_send_val)
   );
 
   logic [$clog2(num_entries):0] mc_q_num_free;
@@ -60,12 +60,12 @@ module spi_helpers_minion_Adapter #(
     .clk(clk),
     .num_free_entries(mc_q_num_free),
     .reset(reset),
-    .recv_msg(push_msg_data),
-    .recv_rdy(mc_q_recv_rdy),
-    .recv_val(mc_q_recv_val),
-    .send_msg(send_msg),
-    .send_rdy(send_rdy),
-    .send_val(send_val)
+    .enq_msg(push_msg_data),
+    .enq_rdy(mc_q_recv_rdy),
+    .enq_val(mc_q_recv_val),
+    .deq_msg(send_msg),
+    .deq_rdy(send_rdy),
+    .deq_val(send_val)
   );
 
   assign parity = (^send_msg) & send_val;
