@@ -12,8 +12,8 @@
 `include "cmn/queues.v"
 
 module spi_helpers_minion_Adapter #(
-  parameter nbits = 8,
-  parameter num_entries = 1
+  parameter int nbits = 8,
+  parameter int num_entries = 1
 ) (
   input  logic             clk,
   input  logic             reset,
@@ -34,15 +34,16 @@ module spi_helpers_minion_Adapter #(
   output logic             parity
 );
 
-  logic             open_entries;
+  logic                         open_entries;
 
-  logic [nbits-3:0] cm_q_send_msg;
-  logic             cm_q_send_rdy;
-  logic             cm_q_send_val;
+  logic [            nbits-3:0] cm_q_send_msg;
+  logic                         cm_q_send_rdy;
+  logic                         cm_q_send_val;
+  logic [$clog2(num_entries):0] unused;
 
   cmn_Queue #(4'b0, nbits - 2, num_entries) cm_q (
     .clk(clk),
-    .num_free_entries(),
+    .num_free_entries(unused),
     .reset(reset),
     .enq_msg(recv_msg),
     .enq_rdy(recv_rdy),
