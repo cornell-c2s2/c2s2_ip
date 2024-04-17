@@ -80,19 +80,19 @@ module user_project_wrapper #(
   output [2:0] user_irq
 );
 
-    tapeins_sp24_tapein1_Interconnect tapein (
-        `ifdef USE_POWER_PINS
-            .vccd1(vccd1),	// User area 1 1.8V supply
-            .vssd1(vssd1),	// User area 1 digital ground
-        `endif
-        .clk(wb_clk_i),
-        .reset(wb_rst_i),
-        .adapter_parity(io_out[5]),
-        .minion_parity(io_out[6]),
-        .cs(io_in[7]),
-        .mosi(io_in[8]),
-        .sclk(io_in[9]),
-        .miso(io_out[10]),
-    )
+  tapeins_sp24_tapein1_Interconnect tapein (
+`ifdef USE_POWER_PINS
+    .vccd1(vccd1),  // User area 1 1.8V supply
+    .vssd1(vssd1),  // User area 1 digital ground
+`endif
+    .clk(wb_clk_i),
+    .reset(wb_rst_i),
+    .adapter_parity(io_out[5]),
+    .minion_parity(io_out[6]),
+    .cs(io_in[7]),
+    .mosi(io_in[8]),
+    .sclk(io_in[9]),
+    .miso(io_out[10]),
+  );
 
 endmodule  // user_project_wrapper
