@@ -209,11 +209,9 @@ module tapeins_sp24_tapein1_Interconnect (
   assign arbiter_msg[1] = output_xbar_send_msg[0];
   assign arbiter_val[1] = output_xbar_send_val[0];
   assign output_xbar_send_rdy[0] = arbiter_rdy[1];
-  // output 0 is SPI at address 1 (for now)
+  // output 1 is unused (for now)
   // TODO: Change this to wishbone
-  assign arbiter_msg[1] = output_xbar_send_msg[1];
-  assign arbiter_val[1] = output_xbar_send_val[1];
-  assign output_xbar_send_rdy[1] = arbiter_rdy[1];
+  logic unused = &{1'b0, output_xbar_send_msg[1], output_xbar_send_val[1], arbiter_rdy[1], 1'b0};
 
   // configuration message for the crossbar
   // 2 bits wide because there are 4 possible configs
