@@ -71,8 +71,7 @@ module tapeins_sp24_tapein1_Interconnect (
 
   arbiter_router_Arbiter #(
     .nbits(16),
-    .ninputs(2),
-    .addr_nbits(2)
+    .ninputs(2)
   ) arbiter (
     .clk(clk),
     .reset(reset),
@@ -80,9 +79,12 @@ module tapeins_sp24_tapein1_Interconnect (
     .istream_msg(arbiter_msg),
     .istream_rdy(arbiter_rdy),
     .ostream_val(spi_recv_val),
-    .ostream_msg(spi_recv_msg),
+    .ostream_msg(spi_recv_msg[16:0]),
     .ostream_rdy(spi_recv_rdy)
   );
+
+  // There is an extra address bit that is never used
+  assign spi_recv_msg[17] = 1'b0;
 
   // INPUT XBAR
   logic [15:0] input_xbar_recv_msg[2];
@@ -107,6 +109,9 @@ module tapeins_sp24_tapein1_Interconnect (
   assign arbiter_msg[0] = input_xbar_send_msg[0];
   assign arbiter_val[0] = input_xbar_send_val[0];
   assign input_xbar_send_rdy[0] = arbiter_rdy[0];
+
+  // output 1 is unused (for now)
+  logic unused_input_xbar = &{1'b0, input_xbar_send_msg[1], input_xbar_send_val[1], arbiter_rdy[0], 1'b0};
 
   // configuration message for the crossbar
   // 1 bit wide because there are 2 possible configs
@@ -211,7 +216,7 @@ module tapeins_sp24_tapein1_Interconnect (
   assign output_xbar_send_rdy[0] = arbiter_rdy[1];
   // output 1 is unused (for now)
   // TODO: Change this to wishbone
-  logic unused = &{1'b0, output_xbar_send_msg[1], output_xbar_send_val[1], arbiter_rdy[1], 1'b0};
+  logic unused_output_xbar = &{1'b0, output_xbar_send_msg[1], output_xbar_send_val[1], arbiter_rdy[1], 1'b0};
 
   // configuration message for the crossbar
   // 2 bits wide because there are 4 possible configs
