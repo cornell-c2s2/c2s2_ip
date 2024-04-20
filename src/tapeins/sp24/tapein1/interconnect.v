@@ -70,7 +70,7 @@ module tapeins_sp24_tapein1_Interconnect (
   logic        arbiter_val[2];
 
   arbiter_router_Arbiter #(
-    .nbits(16),
+    .nbits  (16),
     .ninputs(2)
   ) arbiter (
     .clk(clk),
@@ -116,8 +116,8 @@ module tapeins_sp24_tapein1_Interconnect (
   // configuration message for the crossbar
   // 1 bit wide because there are 2 possible configs
   logic [1:0] input_control_msg;
-  logic       input_control_rdy;
-  logic       input_control_val;
+  logic input_control_rdy;
+  logic input_control_val;
   // hooked up to address 2
   assign input_control_msg = router_msg[2][1:0];
   assign input_control_val = router_val[2];
@@ -217,6 +217,7 @@ module tapeins_sp24_tapein1_Interconnect (
   // output 1 is unused (for now)
   // TODO: Change this to wishbone
   logic unused_output_xbar = &{1'b0, output_xbar_send_msg[1], output_xbar_send_val[1], arbiter_rdy[1], 1'b0};
+  assign output_xbar_send_rdy[1] = 1'b0;
 
   // configuration message for the crossbar
   // 2 bits wide because there are 4 possible configs
