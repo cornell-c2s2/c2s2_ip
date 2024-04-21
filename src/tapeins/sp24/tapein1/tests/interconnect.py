@@ -86,7 +86,7 @@ def test_interconnect(cmdline_opts, interval_delay=3):
 
     model.set_param(
         "top.cs_src.construct",
-        msgs=[0b0],
+        msgs=[0],
         initial_delay=5,
         interval_delay=interval_delay,
     )

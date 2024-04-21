@@ -1,0 +1,542 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.5, pytest-8.0.1, pluggy-1.4.0 -- /classes/c2s2/easybuild/software/Python/3.11.5-GCCcore-13.2.0/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase(PosixPath('/home/fl327/c2s2/c2s2_ip/.hypothesis/examples'))
+rootdir: /home/fl327/c2s2/c2s2_ip
+configfile: pytest.ini
+plugins: hypothesis-6.98.9, pymtl3-3.1.16, anyio-4.3.0, xdist-3.5.0, custom-exit-code-0.3.0
+collecting ... collected 1 item
+
+src/tapeins/sp24/tapein1/tests/interconnect.py::test_interconnect FAILED [100%]
+
+=================================== FAILURES ===================================
+______________________________ test_interconnect _______________________________
+
+cmdline_opts = {'dump_textwave': False, 'dump_vcd': '', 'dump_vtb': '', 'max_cycles': None, ...}
+interval_delay = 3
+
+    def test_interconnect(cmdline_opts, interval_delay=3):
+        model = InterconnectWrapper()
+    
+        # Run the model
+        model.set_param(
+            "top.src.construct",
+            msgs=[0b101010101010101010, 0b010101010101010101],
+            initial_delay=20,
+            interval_delay=interval_delay,
+        )
+    
+        model.set_param(
+            "top.sink.construct",
+            msgs=[0x4000, 0x320],
+            initial_delay=20,
+            interval_delay=interval_delay,
+        )
+    
+        model.set_param(
+            "top.pkt_size_src.construct",
+            msgs=[18],
+            initial_delay=3,
+            interval_delay=interval_delay,
+        )
+    
+        model.set_param(
+            "top.freq_src.construct",
+            msgs=[0],
+            initial_delay=4,
+            interval_delay=interval_delay,
+        )
+    
+        model.set_param(
+            "top.cs_src.construct",
+            msgs=[],
+            initial_delay=5,
+            interval_delay=interval_delay,
+        )
+    
+>       run_sim(model, cmdline_opts)
+
+/home/fl327/c2s2/c2s2_ip/src/tapeins/sp24/tapein1/tests/interconnect.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = s
+cmdline_opts = {'dump_textwave': False, 'dump_vcd': '', 'dump_vtb': '', 'max_cycles': None, ...}
+print_line_trace = True, duts = None
+
+    def run_sim( model, cmdline_opts=None, print_line_trace=True, duts=None ):
+    
+      cmdline_opts = cmdline_opts or {'dump_textwave'      : False,
+                                      'dump_vcd'           : False,
+                                      'test_verilog'       : False,
+                                      'test_yosys_verilog' : False,
+                                      'max_cycles'         : None,
+                                      'dump_vtb'           : ''}
+    
+      max_cycles = cmdline_opts['max_cycles'] or 10000
+    
+      # Setup the model
+    
+      model = config_model_with_cmdline_opts( model, cmdline_opts, duts )
+    
+      try:
+        # Create a simulator
+        model.apply( DefaultPassGroup(linetrace=print_line_trace) )
+        # Reset model
+        model.sim_reset()
+    
+        # Run simulation
+        while not model.done() and model.sim_cycle_count() < max_cycles:
+>         model.sim_tick()
+
+/classes/c2s2/easybuild/software/C2S2PythonPackages/2024.02-foss-2023b/lib/python3.11/site-packages/pymtl3/stdlib/test_utils/test_helpers.py:233: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def iterative():
+      for blk in schedule:
+>       blk()
+
+/classes/c2s2/easybuild/software/C2S2PythonPackages/2024.02-foss-2023b/lib/python3.11/site-packages/pymtl3/passes/sim/SimpleTickPass.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    @update_ff
+    def up_sink():
+      # Raise exception at the start of next cycle so that the errored
+      # line trace gets printed out
+      if s.error_msg:
+>       raise PyMTLTestSinkError( s.error_msg )
+E       pymtl3.stdlib.stream.SinkRTL.PyMTLTestSinkError: Test sink s.sink received WRONG message!
+E       Expected : 800
+E       Received : 04000
+
+/classes/c2s2/easybuild/software/C2S2PythonPackages/2024.02-foss-2023b/lib/python3.11/site-packages/pymtl3/stdlib/stream/SinkRTL.py:55: PyMTLTestSinkError
+------------------------------ Captured log setup ------------------------------
+INFO     root:conftest.py:94 ====================src/tapeins/sp24/tapein1/tests/interconnect.py::test_interconnect====================
+----------------------------- Captured stdout call -----------------------------
+
+  1r       >  clk=0, reset=1, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=00, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=1, sclk=0, > .    
+  2r       >  clk=0, reset=1, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=00, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=1, sclk=0, > .    
+  3:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=00, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+  4:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=00, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+  5:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=00, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+  6:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=00, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+  7:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=1, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+  8:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=1, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+  9:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 10:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 11:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 12:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 13:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 14:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 15:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 16:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 17:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 18:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 19:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 20:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 21:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 22:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 23:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 24: 2aaaa >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=2aaaa, recv.rdy=1, recv.val=1, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 25: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=2aaaa, recv.rdy=0, recv.val=0, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 26: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=2aaaa, recv.rdy=0, recv.val=0, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 27: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=2aaaa, recv.rdy=0, recv.val=0, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 28: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 29: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 30: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 31: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=1, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=1, mosi=1, reset=0, sclk=1, >      
+ 32: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=1, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=1, mosi=0, reset=0, sclk=0, >      
+ 33: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00001, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 34: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00001, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 35: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00002, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 36: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00002, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 37: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00004, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 38: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00004, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 39: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00008, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 40: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00008, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 41: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00010, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 42: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00010, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 43: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00020, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 44: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00020, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 45: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00040, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 46: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00040, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 47: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00080, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 48: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00080, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 49: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00100, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 50: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00100, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 51: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00200, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 52: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00200, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 53: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00400, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 54: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00400, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 55: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00800, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 56: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=00800, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 57: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=01000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 58: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=01000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 59: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=02000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 60: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=02000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 61: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=04000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 62: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=04000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+s 63: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=1, send.msg=04000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 64: 15555 >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=1, recv.val=1, send.msg=04000, send.rdy=1, send.val=1, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > 04000
+ 65: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=04000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 66: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=1, miso=0, mosi=0, reset=0, sclk=0, > .    
+ 67: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, > .    
+ 68: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 69: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 70: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 71: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=1, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=1, mosi=0, reset=0, sclk=1, >      
+ 72: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=1, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=1, mosi=1, reset=0, sclk=0, >      
+ 73: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00001, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 74: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00001, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 75: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00002, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 76: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00002, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 77: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00004, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 78: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00004, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 79: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00008, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 80: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00008, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 81: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00010, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 82: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00010, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 83: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00020, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 84: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00020, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 85: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00040, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 86: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00040, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 87: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00080, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 88: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00080, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 89: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00100, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 90: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00100, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 91: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00200, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 92: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00200, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 93: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00400, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 94: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00400, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 95: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00800, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+ 96: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=00800, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+ 97: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=01000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+ 98: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=01000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+ 99: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=02000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=1, >      
+100: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=02000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=0, >      
+101: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=04000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=1, spi_ifc.sclk=1, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=1, reset=0, sclk=1, >      
+102: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=04000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+103: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=04000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
+104:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=1, recv.val=0, send.msg=04000, send.rdy=1, send.val=1, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > 04000
+105:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=1, recv.val=0, send.msg=04000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+============================== 1 failed in 1.75s ===============================
+pi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
+spi_send_val: 0
+spi_recv_rdy: 1
+spi_send_msg: 000000000000000000
