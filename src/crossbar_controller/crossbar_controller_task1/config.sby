@@ -1,13 +1,18 @@
 [options]
+
 mode bmc
 depth 100
 
 [engines]
+
 smtbmc
 
 [script]
-noneread -formal crossbar_controller.v
+
+read -formal crossbar_controller.v
+
 prep -top crossbar_controller
 
 [files]
-reg.v
+
+crossbar_controller.v

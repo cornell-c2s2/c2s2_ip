@@ -1,0 +1,22 @@
+[tasks]
+task1
+
+[options]
+
+task1:
+mode bmc
+depth 100
+
+[engines]
+
+task1: smtbmc
+
+[script]
+
+read -formal crossbar_controller.v
+
+prep -top crossbar_controller
+
+[files]
+
+crossbar_controller.v

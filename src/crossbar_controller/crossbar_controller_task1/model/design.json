@@ -1,0 +1,66 @@
+{
+  "$schema": "https://raw.githubusercontent.com/YosysHQ/yosys/master/misc/jny.schema.json",
+  "generator": "Yosys 0.33+67 (git sha1 076c5ceb7, clang 10.0.0-4ubuntu1 -fPIC -Os)",
+  "version": "0.0.1",
+  "invocation": "write_jny -no-connections ../model/design.json ",
+  "features": ["attributes", "properties"],
+  "modules": [
+      {
+        "name": "crossbar_controller",
+        "cell_sorts": [
+          {
+            "type": "$mux",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [6, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [6, 0]
+                },
+                {
+                  "name": "S",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [6, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$procmux$11",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "crossbar_controller.v:26.12-26.19|crossbar_controller.v:26.9-31.29"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$5",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "crossbar_controller.v:28.17-28.24|crossbar_controller.v:28.14-31.29"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                }
+            ]
+          }
+        ],
+        "attributes": {
+            "hdlname": "\\crossbar_controller",
+            "top": "00000000000000000000000000000001",
+            "src": "crossbar_controller.v:1.1-34.12"
+        }
+      }
+  ]
+}
