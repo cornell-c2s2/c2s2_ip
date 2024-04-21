@@ -22,7 +22,54 @@
 ; yosys-smt2-output defaultout 6
 ; yosys-smt2-wire defaultout 6
 (define-fun |crossbar_controller_n defaultout| ((state |crossbar_controller_s|)) (_ BitVec 6) (|crossbar_controller#4| state))
-(define-fun |crossbar_controller_a| ((state |crossbar_controller_s|)) Bool true)
+; yosys-smt2-anyseq crossbar_controller#5 1 $auto$setundef.cc:533:execute$67
+; yosys-smt2-witness {"offset": 0, "path": ["\\_witness_", "\\anyseq_auto_setundef_cc_533_execute_67"], "smtname": 5, "smtoffset": 0, "type": "seq", "width": 1}
+(declare-fun |crossbar_controller#5| (|crossbar_controller_s|) (_ BitVec 1)) ; \_witness_.anyseq_auto_setundef_cc_533_execute_67
+; yosys-smt2-wire _witness_.anyseq_auto_setundef_cc_533_execute_67 1
+(define-fun |crossbar_controller_n _witness_.anyseq_auto_setundef_cc_533_execute_67| ((state |crossbar_controller_s|)) Bool (= ((_ extract 0 0) (|crossbar_controller#5| state)) #b1))
+; yosys-smt2-anyseq crossbar_controller#6 1 $auto$setundef.cc:533:execute$65
+; yosys-smt2-witness {"offset": 0, "path": ["\\_witness_", "\\anyseq_auto_setundef_cc_533_execute_65"], "smtname": 6, "smtoffset": 0, "type": "seq", "width": 1}
+(declare-fun |crossbar_controller#6| (|crossbar_controller_s|) (_ BitVec 1)) ; \_witness_.anyseq_auto_setundef_cc_533_execute_65
+; yosys-smt2-wire _witness_.anyseq_auto_setundef_cc_533_execute_65 1
+(define-fun |crossbar_controller_n _witness_.anyseq_auto_setundef_cc_533_execute_65| ((state |crossbar_controller_s|)) Bool (= ((_ extract 0 0) (|crossbar_controller#6| state)) #b1))
+; yosys-smt2-anyseq crossbar_controller#7 1 $auto$setundef.cc:533:execute$63
+; yosys-smt2-witness {"offset": 0, "path": ["\\_witness_", "\\anyseq_auto_setundef_cc_533_execute_63"], "smtname": 7, "smtoffset": 0, "type": "seq", "width": 1}
+(declare-fun |crossbar_controller#7| (|crossbar_controller_s|) (_ BitVec 1)) ; \_witness_.anyseq_auto_setundef_cc_533_execute_63
+; yosys-smt2-wire _witness_.anyseq_auto_setundef_cc_533_execute_63 1
+(define-fun |crossbar_controller_n _witness_.anyseq_auto_setundef_cc_533_execute_63| ((state |crossbar_controller_s|)) Bool (= ((_ extract 0 0) (|crossbar_controller#7| state)) #b1))
+; yosys-smt2-anyseq crossbar_controller#8 1 $auto$setundef.cc:533:execute$61
+; yosys-smt2-witness {"offset": 0, "path": ["\\_witness_", "\\anyseq_auto_setundef_cc_533_execute_61"], "smtname": 8, "smtoffset": 0, "type": "seq", "width": 1}
+(declare-fun |crossbar_controller#8| (|crossbar_controller_s|) (_ BitVec 1)) ; \_witness_.anyseq_auto_setundef_cc_533_execute_61
+; yosys-smt2-wire _witness_.anyseq_auto_setundef_cc_533_execute_61 1
+(define-fun |crossbar_controller_n _witness_.anyseq_auto_setundef_cc_533_execute_61| ((state |crossbar_controller_s|)) Bool (= ((_ extract 0 0) (|crossbar_controller#8| state)) #b1))
+; yosys-smt2-anyseq crossbar_controller#9 1 $auto$setundef.cc:533:execute$59
+; yosys-smt2-witness {"offset": 0, "path": ["\\_witness_", "\\anyseq_auto_setundef_cc_533_execute_59"], "smtname": 9, "smtoffset": 0, "type": "seq", "width": 1}
+(declare-fun |crossbar_controller#9| (|crossbar_controller_s|) (_ BitVec 1)) ; \_witness_.anyseq_auto_setundef_cc_533_execute_59
+; yosys-smt2-wire _witness_.anyseq_auto_setundef_cc_533_execute_59 1
+(define-fun |crossbar_controller_n _witness_.anyseq_auto_setundef_cc_533_execute_59| ((state |crossbar_controller_s|)) Bool (= ((_ extract 0 0) (|crossbar_controller#9| state)) #b1))
+(define-fun |crossbar_controller#10| ((state |crossbar_controller_s|)) Bool (= (|crossbar_controller#4| state) (|crossbar_controller#2| state))) ; $eq$crossbar_controller.v:43$16_Y
+(define-fun |crossbar_controller#11| ((state |crossbar_controller_s|)) (_ BitVec 1) (ite (|crossbar_controller#1| state) (|crossbar_controller#6| state) (ite (|crossbar_controller#10| state) #b1 #b0))) ; $procmux$45_Y
+(define-fun |crossbar_controller#12| ((state |crossbar_controller_s|)) (_ BitVec 1) (ite (|crossbar_controller#0| state) (|crossbar_controller#5| state) (|crossbar_controller#11| state))) ; $0$formal$crossbar_controller.v:42$3_CHECK[0:0]$12
+(define-fun |crossbar_controller#13| ((state |crossbar_controller_s|)) (_ BitVec 1) (ite (|crossbar_controller#1| state) #b0 #b1)) ; $procmux$39_Y
+(define-fun |crossbar_controller#14| ((state |crossbar_controller_s|)) (_ BitVec 1) (ite (|crossbar_controller#0| state) #b0 (|crossbar_controller#13| state))) ; $0$formal$crossbar_controller.v:42$3_EN[0:0]$13
+; yosys-smt2-assert 0 $assert$crossbar_controller.v:42$19 crossbar_controller.v:42.19-43.32
+(define-fun |crossbar_controller_a 0| ((state |crossbar_controller_s|)) Bool (or (= ((_ extract 0 0) (|crossbar_controller#12| state)) #b1) (not (= ((_ extract 0 0) (|crossbar_controller#14| state)) #b1)))) ; $assert$crossbar_controller.v:42$19
+(define-fun |crossbar_controller#15| ((state |crossbar_controller_s|)) Bool (= (|crossbar_controller#4| state) #b010010)) ; $eq$crossbar_controller.v:39$14_Y
+(define-fun |crossbar_controller#16| ((state |crossbar_controller_s|)) (_ BitVec 1) (ite (|crossbar_controller#1| state) (ite (|crossbar_controller#15| state) #b1 #b0) (|crossbar_controller#8| state))) ; $procmux$33_Y
+(define-fun |crossbar_controller#17| ((state |crossbar_controller_s|)) (_ BitVec 1) (ite (|crossbar_controller#0| state) (|crossbar_controller#7| state) (|crossbar_controller#16| state))) ; $0$formal$crossbar_controller.v:40$2_CHECK[0:0]$10
+(define-fun |crossbar_controller#18| ((state |crossbar_controller_s|)) (_ BitVec 1) (ite (|crossbar_controller#1| state) #b1 #b0)) ; $procmux$27_Y
+(define-fun |crossbar_controller#19| ((state |crossbar_controller_s|)) (_ BitVec 1) (ite (|crossbar_controller#0| state) #b0 (|crossbar_controller#18| state))) ; $0$formal$crossbar_controller.v:40$2_EN[0:0]$11
+; yosys-smt2-assert 1 $assert$crossbar_controller.v:40$18 crossbar_controller.v:40.26-41.39
+(define-fun |crossbar_controller_a 1| ((state |crossbar_controller_s|)) Bool (or (= ((_ extract 0 0) (|crossbar_controller#17| state)) #b1) (not (= ((_ extract 0 0) (|crossbar_controller#19| state)) #b1)))) ; $assert$crossbar_controller.v:40$18
+(define-fun |crossbar_controller#20| ((state |crossbar_controller_s|)) (_ BitVec 1) (ite (|crossbar_controller#0| state) (ite (|crossbar_controller#15| state) #b1 #b0) (|crossbar_controller#9| state))) ; $0$formal$crossbar_controller.v:38$1_CHECK[0:0]$8
+(define-fun |crossbar_controller#21| ((state |crossbar_controller_s|)) (_ BitVec 1) (ite (|crossbar_controller#0| state) #b1 #b0)) ; $0$formal$crossbar_controller.v:38$1_EN[0:0]$9
+; yosys-smt2-assert 2 $assert$crossbar_controller.v:38$17 crossbar_controller.v:38.17-39.39
+(define-fun |crossbar_controller_a 2| ((state |crossbar_controller_s|)) Bool (or (= ((_ extract 0 0) (|crossbar_controller#20| state)) #b1) (not (= ((_ extract 0 0) (|crossbar_controller#21| state)) #b1)))) ; $assert$crossbar_controller.v:38$17
+(define-fun |crossbar_controller_a| ((state |crossbar_controller_s|)) Bool (and
+  (|crossbar_controller_a 0| state)
+  (|crossbar_controller_a 1| state)
+  (|crossbar_controller_a 2| state)
+))
 (define-fun |crossbar_controller_u| ((state |crossbar_controller_s|)) Bool true)
 (define-fun |crossbar_controller_i| ((state |crossbar_controller_s|)) Bool true)
 (define-fun |crossbar_controller_h| ((state |crossbar_controller_s|)) Bool true)
