@@ -102,27 +102,25 @@ module tapeins_sp24_tapein1_Interconnect (
   //   logic        input_xbar_recv_rdy[2];
   //   logic        input_xbar_recv_val[2];
 
-  //   // input 0 is SPI at address 0
-  //   assign input_xbar_recv_msg[0] = router_msg[0][15:0];
-  //   assign input_xbar_recv_val[0] = router_val[0];
-  //   assign router_rdy[0] = input_xbar_recv_rdy[0];
-  //   // input 1 is SPI at address 0 (for now)
-  //   // TODO: change this to wishbone
-  //   assign input_xbar_recv_msg[1] = router_msg[0][15:0];
-  //   assign input_xbar_recv_val[1] = router_val[0];
-  //   assign router_rdy[0] = input_xbar_recv_rdy[1];
+  // input 0 is SPI at address 0
+  assign input_xbar_recv_msg[0] = router_msg[0][15:0];
+  assign input_xbar_recv_val[0] = router_val[0];
+  assign router_rdy[0] = input_xbar_recv_rdy[0];
+
+  // input 0 is unused (for now)
+  // TODO: change this to wishbone
+  logic unused_input_xbar = &{1'b0, input_xbar_recv_rdy[1], 1'b0};
+  assign input_xbar_recv_msg[1] = 16'b0;
+  assign input_xbar_recv_val[1] = 1'b0;
 
   //   logic [15:0] input_xbar_send_msg[2];
   //   logic        input_xbar_send_rdy[2];
   //   logic        input_xbar_send_val[2];
 
-  //   // output 0 is SPI at address 0
-  //   assign arbiter_msg[0] = input_xbar_send_msg[0];
-  //   assign arbiter_val[0] = input_xbar_send_val[0];
-  //   assign input_xbar_send_rdy[0] = arbiter_rdy[0];
-
-  //   // output 1 is unused (for now)
-  //   logic unused_input_xbar = &{1'b0, input_xbar_send_msg[1], input_xbar_send_val[1], arbiter_rdy[0], 1'b0};
+  // output 0 is SPI at address 0
+  assign arbiter_msg[0] = input_xbar_send_msg[0];
+  assign arbiter_val[0] = input_xbar_send_val[0];
+  assign input_xbar_send_rdy[0] = arbiter_rdy[0];
 
   //   // configuration message for the crossbar
   //   // 1 bit wide because there are 2 possible configs
