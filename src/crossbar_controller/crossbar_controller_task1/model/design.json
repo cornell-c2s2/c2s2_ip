@@ -34,123 +34,210 @@
             ],
             "cells": [
                 {
-                  "name": "$procmux$21",
+                  "name": "$procmux$31",
                   "attributes": {
                     "full_case": "00000000000000000000000000000001",
-                    "src": "crossbar_controller.v:38.9-38.10|crossbar_controller.v:38.5-44.8"
+                    "src": "crossbar_controller.v:31.9-31.31|crossbar_controller.v:31.5-39.8"
                   },
                   "parameters": {
                     "WIDTH": "00000000000000000000000000000001"
                   }
                 },
                 {
-                  "name": "$procmux$24",
+                  "name": "$procmux$34",
                   "attributes": {
                     "full_case": "00000000000000000000000000000001",
-                    "src": "crossbar_controller.v:38.9-38.10|crossbar_controller.v:38.5-44.8"
+                    "src": "crossbar_controller.v:31.9-31.31|crossbar_controller.v:31.5-39.8"
                   },
                   "parameters": {
                     "WIDTH": "00000000000000000000000000000001"
                   }
                 },
                 {
-                  "name": "$procmux$27",
+                  "name": "$procmux$37",
                   "attributes": {
                     "full_case": "00000000000000000000000000000001",
-                    "src": "crossbar_controller.v:40.18-40.19|crossbar_controller.v:40.14-44.8"
+                    "src": "crossbar_controller.v:34.14-34.36|crossbar_controller.v:34.10-39.8"
                   },
                   "parameters": {
                     "WIDTH": "00000000000000000000000000000001"
                   }
                 },
                 {
-                  "name": "$procmux$30",
+                  "name": "$procmux$40",
                   "attributes": {
                     "full_case": "00000000000000000000000000000001",
-                    "src": "crossbar_controller.v:38.9-38.10|crossbar_controller.v:38.5-44.8"
+                    "src": "crossbar_controller.v:31.9-31.31|crossbar_controller.v:31.5-39.8"
                   },
                   "parameters": {
                     "WIDTH": "00000000000000000000000000000001"
                   }
                 },
                 {
-                  "name": "$procmux$33",
+                  "name": "$procmux$43",
                   "attributes": {
                     "full_case": "00000000000000000000000000000001",
-                    "src": "crossbar_controller.v:40.18-40.19|crossbar_controller.v:40.14-44.8"
+                    "src": "crossbar_controller.v:34.14-34.36|crossbar_controller.v:34.10-39.8"
                   },
                   "parameters": {
                     "WIDTH": "00000000000000000000000000000001"
                   }
                 },
                 {
-                  "name": "$procmux$36",
+                  "name": "$procmux$46",
                   "attributes": {
                     "full_case": "00000000000000000000000000000001",
-                    "src": "crossbar_controller.v:38.9-38.10|crossbar_controller.v:38.5-44.8"
+                    "src": "crossbar_controller.v:31.9-31.31|crossbar_controller.v:31.5-39.8"
                   },
                   "parameters": {
                     "WIDTH": "00000000000000000000000000000001"
                   }
                 },
                 {
-                  "name": "$procmux$39",
+                  "name": "$procmux$49",
                   "attributes": {
                     "full_case": "00000000000000000000000000000001",
-                    "src": "crossbar_controller.v:40.18-40.19|crossbar_controller.v:40.14-44.8"
+                    "src": "crossbar_controller.v:34.14-34.36|crossbar_controller.v:34.10-39.8"
                   },
                   "parameters": {
                     "WIDTH": "00000000000000000000000000000001"
                   }
                 },
                 {
-                  "name": "$procmux$42",
+                  "name": "$procmux$52",
                   "attributes": {
                     "full_case": "00000000000000000000000000000001",
-                    "src": "crossbar_controller.v:38.9-38.10|crossbar_controller.v:38.5-44.8"
+                    "src": "crossbar_controller.v:31.9-31.31|crossbar_controller.v:31.5-39.8"
                   },
                   "parameters": {
                     "WIDTH": "00000000000000000000000000000001"
                   }
                 },
                 {
-                  "name": "$procmux$45",
+                  "name": "$procmux$55",
                   "attributes": {
                     "full_case": "00000000000000000000000000000001",
-                    "src": "crossbar_controller.v:40.18-40.19|crossbar_controller.v:40.14-44.8"
+                    "src": "crossbar_controller.v:34.14-34.36|crossbar_controller.v:34.10-39.8"
                   },
                   "parameters": {
                     "WIDTH": "00000000000000000000000000000001"
                   }
                 },
                 {
-                  "name": "$procmux$48",
+                  "name": "$procmux$58",
                   "attributes": {
                     "full_case": "00000000000000000000000000000001",
-                    "src": "crossbar_controller.v:38.9-38.10|crossbar_controller.v:38.5-44.8"
+                    "src": "crossbar_controller.v:31.9-31.31|crossbar_controller.v:31.5-39.8"
                   },
                   "parameters": {
                     "WIDTH": "00000000000000000000000000000001"
                   }
                 },
                 {
-                  "name": "$procmux$51",
+                  "name": "$procmux$61",
                   "attributes": {
                     "full_case": "00000000000000000000000000000001",
-                    "src": "crossbar_controller.v:32.14-32.23|crossbar_controller.v:32.10-33.26"
+                    "src": "crossbar_controller.v:25.14-25.36|crossbar_controller.v:25.10-26.26"
                   },
                   "parameters": {
                     "WIDTH": "00000000000000000000000000000110"
                   }
                 },
                 {
-                  "name": "$procmux$57",
+                  "name": "$procmux$67",
                   "attributes": {
                     "full_case": "00000000000000000000000000000001",
-                    "src": "crossbar_controller.v:31.9-31.18|crossbar_controller.v:31.5-33.26"
+                    "src": "crossbar_controller.v:24.9-24.31|crossbar_controller.v:24.5-26.26"
                   },
                   "parameters": {
                     "WIDTH": "00000000000000000000000000000110"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$logic_and",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$logic_and$crossbar_controller.v:24$7",
+                  "attributes": {
+                    "src": "crossbar_controller.v:24.9-24.31"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$crossbar_controller.v:25$10",
+                  "attributes": {
+                    "src": "crossbar_controller.v:25.14-25.36"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$not",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$eq$crossbar_controller.v:24$6",
+                  "attributes": {
+                    "src": "crossbar_controller.v:24.22-24.31"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$crossbar_controller.v:25$9",
+                  "attributes": {
+                    "src": "crossbar_controller.v:25.27-25.36"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
                   }
                 }
             ]
@@ -166,7 +253,7 @@
                 {
                   "name": "B",
                   "direction": "io",
-                  "range": [5, 0]
+                  "range": [4, 0]
                 },
                 {
                   "name": "Y",
@@ -176,9 +263,22 @@
             ],
             "cells": [
                 {
-                  "name": "$eq$crossbar_controller.v:39$14",
+                  "name": "$eq$crossbar_controller.v:32$21",
                   "attributes": {
-                    "src": "crossbar_controller.v:39.15-39.38"
+                    "src": "crossbar_controller.v:32.15-32.38"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000100",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$crossbar_controller.v:35$25",
+                  "attributes": {
+                    "src": "crossbar_controller.v:35.15-35.38"
                   },
                   "parameters": {
                     "A_SIGNED": "00000000000000000000000000000000",
@@ -189,9 +289,9 @@
                   }
                 },
                 {
-                  "name": "$eq$crossbar_controller.v:43$16",
+                  "name": "$eq$crossbar_controller.v:38$26",
                   "attributes": {
-                    "src": "crossbar_controller.v:43.15-43.31"
+                    "src": "crossbar_controller.v:38.15-38.31"
                   },
                   "parameters": {
                     "A_SIGNED": "00000000000000000000000000000000",
@@ -219,27 +319,27 @@
             ],
             "cells": [
                 {
-                  "name": "$assert$crossbar_controller.v:38$17",
+                  "name": "$assert$crossbar_controller.v:31$27",
                   "attributes": {
-                    "src": "crossbar_controller.v:38.17-39.39"
+                    "src": "crossbar_controller.v:31.38-32.39"
                   },
                   "parameters": {
 
                   }
                 },
                 {
-                  "name": "$assert$crossbar_controller.v:40$18",
+                  "name": "$assert$crossbar_controller.v:34$28",
                   "attributes": {
-                    "src": "crossbar_controller.v:40.26-41.39"
+                    "src": "crossbar_controller.v:34.43-35.39"
                   },
                   "parameters": {
 
                   }
                 },
                 {
-                  "name": "$assert$crossbar_controller.v:42$19",
+                  "name": "$assert$crossbar_controller.v:37$29",
                   "attributes": {
-                    "src": "crossbar_controller.v:42.19-43.32"
+                    "src": "crossbar_controller.v:37.15-38.32"
                   },
                   "parameters": {
 
@@ -252,7 +352,7 @@
             "keep": "00000000000000000000000000000001",
             "hdlname": "\\crossbar_controller",
             "top": "00000000000000000000000000000001",
-            "src": "crossbar_controller.v:1.1-47.10"
+            "src": "crossbar_controller.v:1.1-42.10"
         }
       }
   ]

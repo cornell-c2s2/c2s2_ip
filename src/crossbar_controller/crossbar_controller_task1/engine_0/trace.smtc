@@ -1,6 +1,0 @@
-initial
-
-state 0
-assume (= [in] #b001001)
-assume (= [s] true)
-assume (= [w] true)

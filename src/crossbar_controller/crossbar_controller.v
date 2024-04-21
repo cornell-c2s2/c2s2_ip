@@ -18,28 +18,23 @@ module crossbar_controller (
     SPI pin high --> 010
     GDS pin high --> 001
      */
-  /*
-    wire [2:0] tempin;
-    wire [2:0] tempout;
 
-    assign tempin = {~(W[1] | S[1]), S[1], W[1]};
-    assign tempout = {~(W[0] | S[0]), S[0], W[0]};
-    assign defaultout = {tempin, tempout};
-    */
 
   always_comb begin
-    if (w == 1'b1) defaultout = 6'b001001;
-    else if (s == 1'b1) defaultout = 6'b010010;
+    if (w == 1'b1 && s == 1'b0) defaultout = 6'b001001;
+    else if (s == 1'b1 && w == 1'b0) defaultout = 6'b010010;
     else defaultout = in;
   end
 
 `ifdef FORMAL
   always_comb begin
-    if (w) begin
+    if (w == 1'b1 && s == 1'b0) begin
+      assert (defaultout == 6'b001001);
+    end
+    else if (s == 1'b1 && w == 1'b0) begin
       assert (defaultout == 6'b010010);
-    end else if (s) begin
-      assert (defaultout == 6'b010010);
-    end else begin
+    end
+    else begin
       assert (defaultout == in);
     end
   end
