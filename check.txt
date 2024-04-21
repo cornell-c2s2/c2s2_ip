@@ -49,7 +49,7 @@ interval_delay = 3
     
         model.set_param(
             "top.cs_src.construct",
-            msgs=[],
+            msgs=[0],
             initial_delay=5,
             interval_delay=interval_delay,
         )
@@ -121,7 +121,7 @@ INFO     root:conftest.py:94 ====================src/tapeins/sp24/tapein1/tests/
   6:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=00, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
   7:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=1, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
   8:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=1, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
-  9:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
+  9:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=1, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
  10:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
  11:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
  12:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=00000, recv.rdy=1, recv.val=0, send.msg=00000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
@@ -407,11 +407,8 @@ s 63: #     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc
 103: .     >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=0, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=0, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=0, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=0, recv.val=0, send.msg=04000, send.rdy=1, send.val=0, spi_ifc.cs=[Bits1(0x0)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=0, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, >      
 104:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=1, recv.val=0, send.msg=04000, send.rdy=1, send.val=1, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > 04000
 105:       >  clk=0, reset=0, cs_addr_ifc.msg=0, cs_addr_ifc.rdy=1, cs_addr_ifc.val=0, freq_ifc.msg=0, freq_ifc.rdy=1, freq_ifc.val=0, packet_size_ifc.msg=12, packet_size_ifc.rdy=1, packet_size_ifc.val=0, recv.msg=15555, recv.rdy=1, recv.val=0, send.msg=04000, send.rdy=0, send.val=0, spi_ifc.cs=[Bits1(0x1)], spi_ifc.miso=0, spi_ifc.mosi=0, spi_ifc.sclk=0, >  adapter_parity=0, clk=0, cs=1, minion_parity=0, miso=0, mosi=0, reset=0, sclk=0, > .    
-============================== 1 failed in 1.75s ===============================
+============================== 1 failed in 4.99s ===============================
 pi_send_val: 0
-spi_recv_rdy: 1
-spi_send_msg: 000000000000000000
-spi_send_val: 0
 spi_recv_rdy: 1
 spi_send_msg: 000000000000000000
 spi_send_val: 0
