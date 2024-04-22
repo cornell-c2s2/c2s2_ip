@@ -239,19 +239,19 @@ def sine_wave_below_mag():
             get_fft_real(sine_wave[2]), classifier(np.fft.fft(sine_wave[2]), 10000, 200),
             get_fft_real(sine_wave[3]), classifier(np.fft.fft(sine_wave[3]), 10000, 200)]
 
-# def random_sines():
-#     np.random.seed(42)
-#     length = 16
-#     sample_freq = 44000
-#     t = np.arange(0, length * (1/sample_freq), (1/sample_freq))
-#     rand_frequencies = [np.random.uniform(0, 20000) for _ in range(8)]
-#     rand_amplitudes = [np.random.uniform(0, 2000) for _ in range(8)]
-#     sine_wave = [a*np.sin(2 * np.pi * f * t) for a in rand_amplitudes for f in rand_frequencies]
-#     returning = []
-#     for i in range(64):
-#         returning.append(get_fft_real(sine_wave[i]))
-#         returning.append(classifier(np.fft.fft(sine_wave[i]), 10000, 200))
-#     return returning
+def random_sines():
+    np.random.seed(42)
+    length = 16
+    sample_freq = 44000
+    t = np.arange(0, length * (1/sample_freq), (1/sample_freq))
+    rand_frequencies = [np.random.uniform(0, 20000) for _ in range(8)]
+    rand_amplitudes = [np.random.uniform(0, 2000) for _ in range(8)]
+    sine_wave = [a*np.sin(2 * np.pi * f * t) for a in rand_amplitudes for f in rand_frequencies]
+    returning = [655360000,   1310720, 44000]
+    for i in range(8):
+        returning.append(get_fft_real(sine_wave[i]))
+        returning.append(classifier(np.fft.fft(sine_wave[i]), 10000, 200))
+    return returning
 
 
 test_case_table = mk_test_case_table(
@@ -270,7 +270,7 @@ test_case_table = mk_test_case_table(
         ["input_delay_big",        above_freq_mag,       8,        4,         32,       16,        16,       False],
         ["output_delay_small",     above_freq_mag,       4,        1,         32,       16,        16,       False],
         ["output_delay_small",     above_freq_mag,       4,        8,         32,       16,        16,       False],
-        #["random_sines",           random_sines,         4,        4,         32,       16,        16,      False],
+        ["random_sines",           random_sines,         4,        4,         32,       16,        16,       False],
     ]
 )
 
