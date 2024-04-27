@@ -12,13 +12,13 @@ from src.spi.master import SPIMaster
 
 class InterconnectWrapper(Component):
     def construct(s):
-        s.master = SPIMaster(nbits=18, ncs=1)
+        s.master = SPIMaster(nbits=22, ncs=1)
         s.interconnect = Interconnect()
 
         s.logBitsN = clog2(18) + 1
 
-        s.src = stream.SourceRTL(mk_bits(18))
-        s.sink = stream.SinkRTL(mk_bits(18))
+        s.src = stream.SourceRTL(mk_bits(22))
+        s.sink = stream.SinkRTL(mk_bits(22))
 
         s.pkt_size_src = stream.SourceRTL(mk_bits(s.logBitsN))
         s.freq_src = stream.SourceRTL(mk_bits(3))
@@ -58,15 +58,15 @@ def test_interconnect(cmdline_opts, interval_delay=3):
     # Run the model
     model.set_param(
         "top.src.construct",
-        msgs=[0b101010101010101010, 0b010101010101010101],
-        initial_delay=20,
+        msgs=[mk_bits(22)(0b1011111111111111111111)],
+        initial_delay=100,
         interval_delay=interval_delay,
     )
 
     model.set_param(
         "top.sink.construct",
-        msgs=[0x4000, 0x320],
-        initial_delay=20,
+        msgs=[0x4000, 0x3200],
+        initial_delay=10000,
         interval_delay=interval_delay,
     )
 
