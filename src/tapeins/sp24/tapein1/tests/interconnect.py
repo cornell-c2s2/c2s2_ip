@@ -12,13 +12,13 @@ from src.spi.master import SPIMaster
 
 class InterconnectWrapper(Component):
     def construct(s):
-        s.master = SPIMaster(nbits=22, ncs=1)
+        s.master = SPIMaster(nbits=20, ncs=1)
         s.interconnect = Interconnect()
 
-        s.logBitsN = clog2(18) + 1
+        s.logBitsN = clog2(20) + 1
 
-        s.src = stream.SourceRTL(mk_bits(22))
-        s.sink = stream.SinkRTL(mk_bits(22))
+        s.src = stream.SourceRTL(mk_bits(20))
+        s.sink = stream.SinkRTL(mk_bits(20))
 
         s.pkt_size_src = stream.SourceRTL(mk_bits(s.logBitsN))
         s.freq_src = stream.SourceRTL(mk_bits(3))
@@ -52,34 +52,34 @@ class InterconnectWrapper(Component):
         )
 
 
-def test_interconnect(cmdline_opts, interval_delay=3):
+def test_interconnect(cmdline_opts, interval_delay=(20 * 8) + 4):
     model = InterconnectWrapper()
 
     # Run the model
     model.set_param(
         "top.src.construct",
-        msgs=[mk_bits(22)(0b1011111111111111111111)],
+        msgs=[0xCAAAA, 0x40000, 0x40000],
         initial_delay=100,
         interval_delay=interval_delay,
     )
 
     model.set_param(
         "top.sink.construct",
-        msgs=[0x4000, 0x3200],
-        initial_delay=10000,
+        msgs=[0x4000, 0xAAAA, 0x3333],
+        initial_delay=1000,
         interval_delay=interval_delay,
     )
 
     model.set_param(
         "top.pkt_size_src.construct",
-        msgs=[18],
+        msgs=[20],
         initial_delay=3,
         interval_delay=interval_delay,
     )
 
     model.set_param(
         "top.freq_src.construct",
-        msgs=[0],
+        msgs=[2],
         initial_delay=4,
         interval_delay=interval_delay,
     )

@@ -1,11 +1,11 @@
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
-from src.spi.helpers.minion_pushpull import SPIMinion
+from src.spi.helpers.minion_pushpull import SPIMinionPushPull
 
 
 def test_basic(cmdline_opts):
 
-    dut = SPIMinion(8)
+    dut = SPIMinionPushPull(8)
     dut = config_model_with_cmdline_opts(dut, cmdline_opts, duts=[])
     dut.apply(DefaultPassGroup(linetrace=True))
 

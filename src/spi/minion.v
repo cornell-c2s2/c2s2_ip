@@ -1,6 +1,9 @@
 `include "spi/helpers/minion_adapter.v"
 `include "spi/helpers/minion_pushpull.v"
 
+/*
+NOTE: Minion requires 4 cycles of delay between messages.
+*/
 module spi_Minion #(
   BIT_WIDTH = 32,
   N_SAMPLES = 8
@@ -45,7 +48,7 @@ module spi_Minion #(
     .parity(minion_parity)
   );
 
-  spi_helpers_minion_Adapter #(
+  spi_helpers_Minion_Adapter #(
     .nbits(BIT_WIDTH + 2),
     .num_entries(N_SAMPLES)
   ) adapter1 (

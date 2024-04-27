@@ -11,7 +11,7 @@
 
 `include "cmn/queues.v"
 
-module spi_helpers_minion_Adapter #(
+module spi_helpers_Minion_Adapter #(
   parameter int nbits = 8,
   parameter int num_entries = 1
 ) (
@@ -22,8 +22,8 @@ module spi_helpers_minion_Adapter #(
   output logic             pull_msg_spc,
   output logic [nbits-3:0] pull_msg_data,
   input  logic             push_en,
-  input  logic             push_msg_val_wrt,
-  input  logic             push_msg_val_rd,
+  input  logic             push_msg_val_wrt,  // write mode
+  input  logic             push_msg_val_rd,   // read mode
   input  logic [nbits-3:0] push_msg_data,
   input  logic [nbits-3:0] recv_msg,
   output logic             recv_rdy,
