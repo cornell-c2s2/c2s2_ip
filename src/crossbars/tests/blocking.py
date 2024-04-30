@@ -10,7 +10,7 @@ from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
 from pymtl3.stdlib import stream
 from src.crossbars.blocking import Blocking
 
-class TestHarness(VerilogPlaceholder, Component):
+class TestHarness(Component):
 
     def construct(s, BIT_WIDTH: int, N_INPUTS: int, N_OUTPUTS: int, CONTROL_BIT_WIDTH: int):
         # Instantiate models
@@ -29,13 +29,19 @@ class TestHarness(VerilogPlaceholder, Component):
         s.control.send //= s.dut.control
 
     def done(s):
+        sink_done = False
+        src_done = False
+        
         for sink in s.sinks:
-            if not sink.done():
-                return False
+            if sink.done():
+                sink_done = True
+                break 
         for src in s.srcs:
-            if not src.done():
-                return False
-        return True
+            if src.done():
+                src_done = True
+                break  
+        
+        return sink_done and src_done
 
     def line_trace(s):
         srcs_str = "|".join([src.line_trace() for src in s.srcs])
@@ -68,9 +74,9 @@ def test( test_params, cmdline_opts ):
 
   msgs = test_params.msgs()
 
-  print(msgs[0])
-  print(msgs[1])
-  print(msgs[2])
+  print(msgs[0::3])
+  print(msgs[1::3])
+  print(msgs[2::3])
   
   th.set_param("top.control.construct",
     msgs=msgs[0],
