@@ -7,7 +7,7 @@ module crossbars_Blocking #(
   parameter int BIT_WIDTH = 32,
   parameter int N_INPUTS = 2,
   parameter int N_OUTPUTS = 2,
-  localparam int CONTROL_BIT_WIDTH = $clog2(N_INPUTS * N_OUTPUTS)
+  parameter int CONTROL_BIT_WIDTH = $clog2(N_INPUTS * N_OUTPUTS)
 ) (
   input  logic [BIT_WIDTH - 1:0] recv_msg[N_INPUTS],
   input  logic                   recv_val[N_INPUTS],
@@ -20,7 +20,7 @@ module crossbars_Blocking #(
   input logic reset,
   input logic clk,
 
-  input  logic [CONTROL_BIT_WIDTH - 1:0] control,
+  input  logic [CONTROL_BIT_WIDTH - 1:0] control_msg,
   input  logic                           control_val,
   output logic                           control_rdy
 );
@@ -33,7 +33,7 @@ module crossbars_Blocking #(
     if (reset) begin
       stored_control <= 0;
     end else if (control_val) begin
-      stored_control <= control;
+      stored_control <= control_msg;
     end else begin
       stored_control <= stored_control;
     end
