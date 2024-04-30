@@ -7,7 +7,7 @@ from halo import Halo
 import librosa
 import multiprocessing as mp
 import argparse
-
+import math
 
 def run_spectrogram(sample_rate, file):
     n_samples = 32
@@ -30,26 +30,90 @@ def run_spectrogram(sample_rate, file):
 
 def classify(magnitudes: list[list[float]], bins: list[float]) -> list[bool]:
     # Cutoff values for frequency
-    low = 2000
-    high = 10000
+    low = 2700
+    high = 9000
 
     # Magnitude threshold
-    threshold = 0.2
+    threshold = 0.01
 
     count = 0
     classifications = []
-    for i, sample in enumerate(magnitudes):
+
+    on_cycle = 0 # Consecutive cycles with magnitude above threshold
+    off_cycle = 0 # Consecutive cycles with magnitude below threshold
+
+    curr_sound = False # Whether or not we are on a sound
+
+    convVert = 0
+    convUpHalf = 0
+    convLowHalf = 0
+
+    for j, sample in enumerate(magnitudes):
+        
+        counter = 0
+
+        max_mag = 0
+
         # Check if there is a bin with a magnitude above the threshold
         for i, mag in enumerate(sample):
-            if bins[i] < low or bins[i] > high:
-                continue
-            if mag > threshold:
-                count = 44800
-                break
+            # Vertical convolution
+            if (bins[i] > low):
+                convVert += mag
+            
+            # Convolution for Upper Half (between 11350 - 20000)
+            if (bins[i] > 11350 and bins[i] < 20000): # consider dividing into thirds, multiplying middle by 2 and rest by 1
+                convUpHalf += mag * 2
+                convLowHalf -= mag * 2
+                
+            # Convolution for Lower Half (between 2700 - 11350)
+            if (bins[i] > 2700 and bins[i] < 11350): 
+                convLowHalf += mag * 2
+                convUpHalf -= mag * 2
 
-        if count > 0:
+            if mag > threshold:
+                if bins[i] < low or bins[i] > high:
+                    if (mag > max_mag):
+                        max_mag = mag * 0.1
+                    # Reduce magnitude outside the interval
+                else:
+                    if (mag * 20 > max_mag):
+                        max_mag = mag * 20
+                        
+                    # Amplify magnitude within the interval
+                    
+                counter += 1
+        if (counter == 0):
+            classifications.append([0] * 7)
+            continue
+        if (max_mag > 0.5):
+            on_cycle += 1
+            off_cycle = 0
+
+        elif (max_mag < 0.3):
+            if (curr_sound == False): # Resetting Convolutions
+                convVert = 0
+                convUpHalf = 0
+                convLowHalf = 0
+            on_cycle = 0
+            off_cycle += 1
+        
+        # When there are 300 cycles with a magnitude > 0.5, then curr_sound is true indicating we are on a sound
+        if (on_cycle > 300):
+            curr_sound = True
+        
+        # When 2000 cycles pass with magnitude < 0.3, then we get out of any sound we may be in
+        elif (off_cycle > 2000):
+            curr_sound = False
+        
+        if (curr_sound == True):
+            if (convLowHalf > convVert):
+                count = 10
+        else:
+            count = 0
+        if (count > 0):
             count -= 1
-        classifications.append(count > 0)
+
+        classifications.append([max_mag, convVert, convUpHalf, convLowHalf, math.log2(max_mag), count, on_cycle])
 
     return classifications
 
@@ -58,15 +122,14 @@ if __name__ == "__main__":
     sample_rate = 44800
 
     audio_files = [
-        # "SSR4F_MixPre-1390_01.WAV",
-        "LHR1F_MixPre-1312_01.WAV",
-        "SSR1F_MixPre-1363.WAV",
-        "SSF1F_MixPre-2237_01.WAV",
-        "SHI1F_MixPre-1620_01.WAV",
-        "OS1F_MixPre-1472_01.WAV",
-        "TIP1F_MixPre-1026.WAV",
-        "rainstorm.wav",
-        "wind.wav",
+        "716U_U19_06_08_17_46_21.179-U19_06_08_17_47_26.568.wav", #Mostly empty sound except for beginning
+        "409U_U19_06_08_12_11_41.016-U19_06_08_12_12_46.416.wav", #Shaking
+        "557U_U19_06_08_14_52_58.187-U19_06_08_14_54_3.533.wav",  #Pulsing sound in bg
+        "124U_U19_06_08_07_00_40.257-U19_06_08_07_01_45.848.wav", #Weird shaking with a couple bird calls
+        "857U_U19_06_08_20_20_21.794-U19_06_08_20_21_27.370.wav", #Other bird call very audible, some scratching
+        "033U_U19_06_08_05_21_11.070-U19_06_08_05_22_16.661.wav", #Bird making noise
+        "SSR4F_MixPre-1390_01.wav", #Bird call
+        "022U_U19_06_08_05_09_9.463-U19_06_08_05_10_15.070.wav", #Spaced out other bird call
     ]
 
     # Check if the spectrograms have already been generated
@@ -89,8 +152,12 @@ if __name__ == "__main__":
     for gi, group in enumerate(results):
         plt.clf()
 
+        extra = 1
+        if isinstance(group[0][2][0], list):
+            extra = len(group[0][2][0])
+
         gs = gridspec.GridSpec(
-            5,
+            4 + extra,
             3,
             wspace=0.0,
             hspace=0.0,
@@ -110,25 +177,40 @@ if __name__ == "__main__":
                 ax.set_ylabel("Frequency (Hz)")
                 ax.set_yticks(numpy_res[1][::2])
 
-            # Create a line plot in the bottom
-            ax = plt.subplot(gs[4, i])
-
             xspace = np.linspace(
                 0, 4 * len(numpy_res[0]) / sample_rate, len(numpy_res[0])
             )
-            ax.plot(
-                xspace,
-                numpy_res[2],
-                "k",
-            )
 
-            ax.set_xlim(0, max(xspace))
-            ax.set_ylim(0, 1.5)
+            if isinstance(numpy_res[2][0], list):
+                # Create a line plot in the bottom
+                for j in range(len(numpy_res[2][0])):
+                    tax = plt.subplot(gs[4+j, i])
+                
+                    tax.plot(
+                        xspace,
+                        [x[j] for x in numpy_res[2]],
+                        label=str(j)
+                    )
 
-            if i == 0:
-                ax.set_xlabel("Time (s)")
-            ax.set_yticks([])
+                    tax.set_xlim(0, max(xspace))
 
-        plt.savefig(path.join(path.dirname(__file__), f"classifier_{gi}.png"), dpi=300)
+                    if i == 0 and j == len(numpy_res[2][0]) - 1:
+                        tax.set_xlabel("Time (s)")
+            else:
+                # Create a line plot in the bottom
+                ax = plt.subplot(gs[4, i])
+                ax.plot(
+                    xspace,
+                    numpy_res[2],
+                    "k",
+                )
+                ax.set_ylim(0, 1.5)
+                ax.set_yticks([])
+                ax.set_xlim(0, max(xspace))
+
+                if i == 0:
+                    ax.set_xlabel("Time (s)")
+
+        plt.savefig(path.join(path.dirname(__file__), f"classifier_{gi}.png"), dpi=1000)
 
     spinner.succeed("Plots generated")
