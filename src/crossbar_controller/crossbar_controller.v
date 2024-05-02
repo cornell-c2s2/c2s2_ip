@@ -1,30 +1,54 @@
-module crossbar_controller (
-  in,
-  w,
-  s,
-  defaultout
+module crossbar_controller #(
+  parameter int NCONFIGBITS = 4
+)
+(
+  input logic [(NCONFIGBITS-1): 0] confignet,
+  input logic gpio1,
+  input logic gpio2,
+  output logic [(NCONFIGBITS-1) : 0] xbarcontrol
 );
-  input [5:0] in;
-  input w;
-  input s;
-
-  output [5:0] defaultout;
-  reg defaultout;
 
   /*
-    Outputs 6b control bus of 2 1-hot 3b strings, 1 for input and 1 for output.
-    For each 3b wire:
-    default, both pins low --> 100
-    SPI pin high --> 010
-    GDS pin high --> 001
-     */
+  if gpio1 is high, SPI = input, if gpio2 is high, SPI = output
 
+  i have it set to:
+    spi = 00
+    router = 10
+  */
+  /*
+  input [3:0] confignet;
+  input gpio1;
+  input gpio2;
+  output [3:0] xbarcontrol;
+  */
+  wire [1:0] gpioconfig;
+  assign gpioconfig = {gpio1, gpio2};
 
   always_comb begin
-    if (w == 1'b1 && s == 1'b0) defaultout = 6'b001001;
-    else if (s == 1'b1 && w == 1'b0) defaultout = 6'b010010;
-    else defaultout = in;
+    case(gpioconfig)
+      2'b11: begin
+        xbarcontrol[3:2] = 2'b00;
+        xbarcontrol[1:0] = 2'b00;
+      end
+      2'b10: begin
+        xbarcontrol[3:2] = 2'b00;
+        xbarcontrol[1:0] = confignet[1:0];
+      end
+      2'b01: begin
+        xbarcontrol[3:2] = confignet[1:0];
+        xbarcontrol[1:0] = 2'b00;
+      end
+      2'b00: begin
+        xbarcontrol = confignet;
+      end
+      default: begin
+        xbarcontrol = confignet;
+      end
+    endcase
   end
+
+
+/*
 
 `ifdef FORMAL
   always_comb begin
@@ -38,5 +62,5 @@ module crossbar_controller (
       assert (defaultout == in);
     end
   end
-`endif
+`endif*/
 endmodule
