@@ -24,9 +24,9 @@ def design_files(build: str, designs: list[dict], args) -> list[dict]:
 
     spinner = Spinner(args, f"Running pytest in {build} to generate verilog files")
 
-    design_dir = path.dirname(args.design)
+    design_dir = path.abspath(path.dirname(args.design))
     # get the pytest files
-    pytest_files = set(sum([design["TEST_FILES"] for design in designs], []))
+    pytest_files = set(sum([design.get("TEST_FILES", []) for design in designs], []))
     if len(pytest_files) == 0:
         pytest_files = [design_dir]
         log.info("No pytest files specified, running pytest on %s", design_dir)
@@ -63,10 +63,11 @@ def design_files(build: str, designs: list[dict], args) -> list[dict]:
 
     for design in designs:
         synth_params = [
-            f"{k}_{v}" for k, v in design.pop("SYNTH_PARAMETERS", {}).items()
+            f"{k}_{v}" for k, v in design.get("SYNTH_PARAMETERS", {}).items()
         ]
         # get possible design names (permutations of parameters)
         top_module = design["DESIGN_NAME"]
+        design["ORIGINAL_DESIGN_NAME"] = top_module
         design["DESIGN_NAME"] = set()
         for params in itertools.permutations(synth_params):
             design["DESIGN_NAME"].add("__".join([top_module, *params]))
@@ -153,11 +154,37 @@ def design_files(build: str, designs: list[dict], args) -> list[dict]:
                 design["TEST_FILES"] = files[name]["vtb"]
                 design_name = name
         if design_name is None:
-            spinner.fail(
-                f"No verilog file found matching any of {design['DESIGN_NAME']}",
-            )
-            return 1
-        design["DESIGN_NAME"] = design_name
+            # If VERILOG_FILE exists, default to using this.
+            if "VERILOG_FILE" in design:
+                # Just take the original design name
+                design_name = design["ORIGINAL_DESIGN_NAME"]
+                verilog_file = path.join(design_dir, design["VERILOG_FILE"])
+                log.warn(
+                    "No pytest files found for any of %s, defaulting to verilog file %s",
+                    design["DESIGN_NAME"],
+                    verilog_file,
+                )
+                # Don't pop synth parameters but change it to the right format
+                design["SYNTH_PARAMETERS"] = " ".join(
+                    f"{k}={v}" for k, v in design.get("SYNTH_PARAMETERS", {}).items()
+                )
+                # Run verilator on the verilog file
+                design["VERILOG_FILE"] = path.join(build, f"{design_name}.v")
+                run(
+                    f"cd {root_dir()} && verilator -E -P {verilog_file} -Isrc > {design['VERILOG_FILE']}"
+                )
+                design["DESIGN_NAME"] = design_name
+                design.pop("ORIGINAL_DESIGN_NAME")
+            else:
+                spinner.fail(
+                    f"No verilog file found matching any of {design['DESIGN_NAME']}",
+                )
+                return 1
+        else:
+            # Success, remove synth parameters
+            design.pop("ORIGINAL_DESIGN_NAME")
+            design.pop("SYNTH_PARAMETERS")
+            design["DESIGN_NAME"] = design_name
 
     spinner.succeed("Finished collecting design files")
 
@@ -256,7 +283,13 @@ class Synth(SubCommand):
 
         # Move all keys other than a select few into the params dict
         special_keys = set(
-            ["DESIGN_NAME", "TEST_FILES", "FP_PIN_ORDER_CFG", "SYNTH_PARAMETERS"]
+            [
+                "DESIGN_NAME",
+                "TEST_FILES",
+                "FP_PIN_ORDER_CFG",
+                "SYNTH_PARAMETERS",
+                "VERILOG_FILE",
+            ]
         )
         designs = [
             {

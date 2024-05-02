@@ -1,0 +1,10 @@
+# Labels defined here will be used for all config designs
+DESIGN_NAME: Interconnect # Top module name
+VERILOG_FILE: "interconnect.v"
+DESIGN_IS_CORE: 0
+FP_PIN_ORDER_CFG: interconnect_pins.cfg
+CLOCK_PORT: clk
+FP_SIZING: absolute
+CLOCK_PERIOD: 25
+PL_TARGET_DENSITY: 0.45
+DIE_AREA: 0 0 2800 1760
