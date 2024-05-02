@@ -35,7 +35,7 @@ module crossbar_controller #(
         xbarcontrol[1:0] = confignet[1:0];
       end
       2'b01: begin
-        xbarcontrol[3:2] = confignet[1:0];
+        xbarcontrol[3:2] = confignet[3:2];
         xbarcontrol[1:0] = 2'b00;
       end
       2'b00: begin
@@ -48,19 +48,25 @@ module crossbar_controller #(
   end
 
 
-/*
+
 
 `ifdef FORMAL
   always_comb begin
-    if (w == 1'b1 && s == 1'b0) begin
-      assert (defaultout == 6'b001001);
+    if (gpio1 == 1'b1 && gpio2 == 1'b1) begin
+      assert (xbarcontrol == 4'b0000);
     end
-    else if (s == 1'b1 && w == 1'b0) begin
-      assert (defaultout == 6'b010010);
+    else if (gpio1 == 1'b1 && gpio2 == 1'b0) begin
+      assert (xbarcontrol[3:2] == 2'b00 && xbarcontrol[1:0] == confignet[1:0]);
+    end
+    else if (gpio1 == 1'b0 && gpio2 == 1'b1) begin
+      assert (xbarcontrol[3:2] ==  confignet[3:2] && xbarcontrol[1:0] == 2'b00);
+    end
+    else if (gpio1 == 1'b0 && gpio2 == 1'b0) begin
+      assert (xbarcontrol[3:2] ==  confignet[3:2] && xbarcontrol[1:0] == confignet[1:0]);
     end
     else begin
-      assert (defaultout == in);
+      assert (xbarcontrol == confignet);
     end
   end
-`endif*/
+`endif
 endmodule
