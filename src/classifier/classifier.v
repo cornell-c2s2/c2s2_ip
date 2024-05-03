@@ -141,6 +141,9 @@ module kevin_classifier #(
   always_ff @(posedge clk) begin
     if (reset) begin
       classifier_state <= IDLE;
+      on_cycle <= 0;
+      off_cycle <= 0;
+      count <= 0;
     end else begin
       case (classifier_state)
         IDLE: begin 
@@ -177,10 +180,10 @@ module kevin_classifier #(
         convVert <= 0;
         convUpHalf <= 0;
         convLowHalf <= 0;
-        on_cycle <= 0;
-        off_cycle <= 0;
         curr_sound <= 0;
-        count <= 0;
+        on_cycle <= on_cycle;
+        off_cycle <= off_cycle;
+        count <= count;
       end
 
       CALC: begin
