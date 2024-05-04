@@ -46,15 +46,32 @@ module tapeins_sp24_tapein1_Interconnect (
 
   );
 
-  assign spi_recv_val = spi_send_val;
-  assign spi_send_rdy = spi_recv_rdy;
-  assign spi_recv_msg = spi_send_msg;
+  logic cache_val;
 
-  always_comb begin
-    $display("spi_send_val: %b", spi_send_val);
-    $display("spi_recv_rdy: %b", spi_recv_rdy);
-    $display("spi_send_msg: %b", spi_send_msg);
+  logic [17:0] cached_msg;
+
+  assign spi_recv_msg = cached_msg;
+  assign spi_recv_val = cache_val;
+  assign spi_send_rdy = !cache_val;
+
+  always_ff @(posedge clk) begin
+    if (reset) begin
+      cache_val <= 1'b0;
+    end else begin
+      if (!cache_val && spi_send_val) begin
+        cache_val  <= 1'b1;
+        cached_msg <= spi_send_msg;
+      end else if (cache_val && spi_recv_rdy) begin
+        cache_val <= 1'b0;
+      end
+    end
   end
+
+  // always_comb begin
+  //   $display("%h | %h | %h | %h", spi_recv_msg, spi_send_msg, spi_send_val && spi_send_rdy,
+  //            spi_recv_val && spi_recv_rdy);
+  // end
+
 
   //   // ROUTER
   //   logic [17:0] router_msg[4];
