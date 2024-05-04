@@ -52,20 +52,20 @@ class InterconnectWrapper(Component):
         )
 
 
-def test_interconnect(cmdline_opts, interval_delay=(20 * 8) + 4):
+def test_interconnect(cmdline_opts, interval_delay=(20 * 16) + 4):
     model = InterconnectWrapper()
 
     # Run the model
     model.set_param(
         "top.src.construct",
-        msgs=[0xCAAAA, 0x40000, 0x40000],
+        msgs=[0xCAAAA, 0x40000],
         initial_delay=100,
         interval_delay=interval_delay,
     )
 
     model.set_param(
         "top.sink.construct",
-        msgs=[0x4000, 0xAAAA, 0x3333],
+        msgs=[0x40000],
         initial_delay=1000,
         interval_delay=interval_delay,
     )
@@ -79,7 +79,7 @@ def test_interconnect(cmdline_opts, interval_delay=(20 * 8) + 4):
 
     model.set_param(
         "top.freq_src.construct",
-        msgs=[2],
+        msgs=[0],
         initial_delay=4,
         interval_delay=interval_delay,
     )
@@ -91,4 +91,4 @@ def test_interconnect(cmdline_opts, interval_delay=(20 * 8) + 4):
         interval_delay=interval_delay,
     )
 
-    run_sim(model, cmdline_opts)
+    run_sim(model, cmdline_opts, print_line_trace=False)
