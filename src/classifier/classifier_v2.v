@@ -168,16 +168,20 @@ module classifier_Classifier #(
     end
   end
 
+  // pass through sound
+  logic curr_sound;
+  assign curr_sound = (has_sound || on_cycle_count_is_max) && !off_cycle_count_is_max;
+
   // count decrementer
   logic count_is_zero;
   cmn_BasicCounter #(
     .p_count_nbits      (16),
-    .p_count_clear_value(10),  // TODO: Make this configurable
+    .p_count_clear_value(9),   // TODO: Make this configurable
     .p_count_max_value  (10)   // TODO: Make this configurable
   ) off_cycle_counter (
     .clk          (clk),
     .reset        (reset),
-    .clear        (mag_detected),   // set to 10 if has_sound
+    .clear        (has_sound),      // set to 10 if has_sound
     .increment    (1'b0),
     .decrement    (1'b1),           // always decrement
     .count        (),
@@ -186,7 +190,7 @@ module classifier_Classifier #(
   );
 
   // TODO: Handle val/rdy stuff
-  assign send_msg = !count_is_zero;
+  assign send_msg = curr_sound || !count_is_zero;
 
 
 endmodule
