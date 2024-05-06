@@ -9,7 +9,7 @@ import multiprocessing as mp
 import argparse
 import math
 
-def run_spectrogram(sample_rate, file):
+def run_spectrogram(sample_rate, file, cutoff_idx_low, cutoff_idx_high, cutoff_mag):
     n_samples = 32
     data, sample_rate = librosa.load(
         path.join(path.dirname(__file__), "audio", file), sr=sample_rate, mono=True
@@ -23,18 +23,12 @@ def run_spectrogram(sample_rate, file):
         n_samples - 4,
     )
 
-    classified = classify(data, bins)
+    classified = classify(data, cutoff_idx_low, cutoff_idx_high, cutoff_mag)
 
-    return data, bins, classified
+    return data, classified
 
 
-def classify(magnitudes: list[list[float]], bins: list[float]) -> list[bool]:
-    # Cutoff values for frequency
-    low = 2700
-    high = 9000
-
-    # Magnitude threshold
-    threshold = 0.01
+def classify(magnitudes: list[list[float]], low: int, high: int, threshold: float) -> list[bool]:
 
     count = 0
     classifications = []
@@ -57,21 +51,21 @@ def classify(magnitudes: list[list[float]], bins: list[float]) -> list[bool]:
         # Check if there is a bin with a magnitude above the threshold
         for i, mag in enumerate(sample):
             # Vertical convolution
-            if (bins[i] > low):
+            if (i > low):
                 convVert += mag
             
             # Convolution for Upper Half (between 11350 - 20000)
-            if (bins[i] > 11350 and bins[i] < 20000): # consider dividing into thirds, multiplying middle by 2 and rest by 1
+            if (i > len(sample)//2): # consider dividing into thirds, multiplying middle by 2 and rest by 1
                 convUpHalf += mag * 2
                 convLowHalf -= mag * 2
                 
             # Convolution for Lower Half (between 2700 - 11350)
-            if (bins[i] > 2700 and bins[i] < 11350): 
+            if (i < len(sample)//2): 
                 convLowHalf += mag * 2
                 convUpHalf -= mag * 2
 
             if mag > threshold:
-                if bins[i] < low or bins[i] > high:
+                if i < low or i > high:
                     if (mag > max_mag):
                         max_mag = mag * 0.1
                     # Reduce magnitude outside the interval

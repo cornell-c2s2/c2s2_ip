@@ -2,27 +2,22 @@ from pymtl3 import *
 from pymtl3.stdlib import stream
 from pymtl3.passes.backends.verilog import *
 from os import path
-from src.serdes.deserializer import Deserializer
-from src.serdes.serializer import Serializer
 
-# Pymtl3 harness for the `Classifier` module.
 class Classifier(VerilogPlaceholder, Component):
     # Constructor
 
-    def construct(s, BIT_WIDTH=32, N_SAMPLES = 8):
+    def construct(s, BIT_WIDTH, N_SAMPLES):
         # Interface
+        s.recv_msg = [InPort(BIT_WIDTH) for _ in range(N_SAMPLES)]
+        s.recv_val = InPort()
+        s.recv_rdy = OutPort()
 
-        s.recv = stream.ifcs.RecvIfcRTL( mk_bits(BIT_WIDTH*N_SAMPLES) )
-        s.cutoff_idx_low = stream.ifcs.RecvIfcRTL( mk_bits(BIT_WIDTH) )
-        s.cutoff_idx_high = stream.ifcs.RecvIfcRTL( mk_bits(BIT_WIDTH) )
-        s.cutoff_mag = stream.ifcs.RecvIfcRTL( mk_bits(BIT_WIDTH) )
-        s.send = stream.ifcs.SendIfcRTL(mk_bits(1))
+        s.send_msg = OutPort()
+        s.send_val = OutPort()
+        s.send_rdy = InPort()
 
-        # Name of the top level module to be imported
-        s.set_metadata(VerilogPlaceholderPass.top_module, "HarnessClassifier")
-        # Source file path
-        # The ../ is necessary here because pytest is run from the build directory
+        s.set_metadata(VerilogPlaceholderPass.top_module, "Classifier")
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.join(path.dirname(__file__), "harness/classifier.v"),
+            path.join(path.dirname(__file__), "classifier_v2.v"),
         )
