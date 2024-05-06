@@ -113,7 +113,8 @@ def classify(magnitudes: list[list[float]], bins: list[float]) -> list[bool]:
         if (count > 0):
             count -= 1
 
-        classifications.append([max_mag, convVert, convUpHalf, convLowHalf, math.log2(max_mag), count, on_cycle])
+        # classifications.append([max_mag, convVert, convUpHalf, convLowHalf, math.log2(max_mag), count, on_cycle])
+        classifications.append(count)
 
     return classifications
 

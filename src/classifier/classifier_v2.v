@@ -5,7 +5,6 @@
 
 module classifier_Classifier #(
   parameter int BIT_WIDTH = 32,
-  parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES = 32
 ) (
   input logic clk,

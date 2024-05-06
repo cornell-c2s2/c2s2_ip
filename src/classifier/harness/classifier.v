@@ -3,7 +3,6 @@
 
 module classifier_HarnessClassifier #(
   parameter int BIT_WIDTH = 32,
-  parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES = 8
 ) (
   input logic clk,
@@ -32,7 +31,7 @@ module classifier_HarnessClassifier #(
 
   logic [BIT_WIDTH-1:0] imm_recv_msg[N_SAMPLES-1:0];
 
-  classifier_Classifier #(BIT_WIDTH, DECIMAL_PT, N_SAMPLES) Classifier (
+  classifier_Classifier #(BIT_WIDTH, N_SAMPLES) Classifier (
     .clk  (clk),
     .reset(reset),
 

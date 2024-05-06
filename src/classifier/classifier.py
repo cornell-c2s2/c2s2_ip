@@ -9,7 +9,7 @@ from src.serdes.serializer import Serializer
 class Classifier(VerilogPlaceholder, Component):
     # Constructor
 
-    def construct(s, BIT_WIDTH=32, DECIMAL_PT = 16, N_SAMPLES = 8):
+    def construct(s, BIT_WIDTH=32, N_SAMPLES = 8):
         # Interface
 
         s.recv = stream.ifcs.RecvIfcRTL( mk_bits(BIT_WIDTH*N_SAMPLES) )
