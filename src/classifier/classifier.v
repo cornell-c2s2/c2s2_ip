@@ -141,9 +141,6 @@ module kevin_classifier #(
   always_ff @(posedge clk) begin
     if (reset) begin
       classifier_state <= IDLE;
-      on_cycle <= 0;
-      off_cycle <= 0;
-      count <= 0;
     end else begin
       case (classifier_state)
         IDLE: begin 
@@ -173,101 +170,110 @@ module kevin_classifier #(
 
   always_ff @(posedge clk) begin
 
-    case (classifier_state)
+    if (reset) begin
+      on_cycle <= 0;
+      off_cycle <= 0;
+      count <= 0;
+    end
+    else begin
+      case (classifier_state)
 
-      IDLE: begin
-        max_mag <= 0;
-        convVert <= 0;
-        convUpHalf <= 0;
-        convLowHalf <= 0;
-        curr_sound <= 0;
-        on_cycle <= on_cycle;
-        off_cycle <= off_cycle;
-        count <= count;
-      end
+        IDLE: begin
+          max_mag <= 0;
+          convVert <= 0;
+          convUpHalf <= 0;
+          convLowHalf <= 0;
+          curr_sound <= 0;
+          on_cycle <= on_cycle;
+          off_cycle <= off_cycle;
+          count <= count;
+        end
 
-      CALC: begin
+        CALC: begin
 
-        max_mag <= 0;
-        convVert <= 0;
-        convUpHalf <= 0;
-        convLowHalf <= 0;
+          max_mag <= 0;
+          convVert <= 0;
+          convUpHalf <= 0;
+          convLowHalf <= 0;
 
-        for (i = 0; i < NUM_SAMPLES; i = i + 1) begin
+          for (i = 0; i < NUM_SAMPLES; i = i + 1) begin
 
-          // Vertical convolution
-          if (bin[i] > low && bin[i] < high) begin
-            convVert <= convVert + magnitude[i];
-          end
+            // Vertical convolution
+            if (bin[i] > low && bin[i] < high) begin
+              convVert <= convVert + magnitude[i];
+            end
 
-          // Upper Half Convolution (TODO: not sure what upper half is)
-          if (bin[i] > UPPER_HALF_START && bin[i] < UPPER_HALF_END) begin
-            convUpHalf  <= convUpHalf + magnitude[i] >> 2;
-            convLowHalf <= convLowHalf - magnitude[i] >> 2;
-          end
+            // Upper Half Convolution (TODO: not sure what upper half is)
+            if (bin[i] > UPPER_HALF_START && bin[i] < UPPER_HALF_END) begin
+              convUpHalf  <= convUpHalf + magnitude[i] >> 2;
+              convLowHalf <= convLowHalf - magnitude[i] >> 2;
+            end
 
-          // Lower Half Convolution (TODO: not sure what lower half is)
-          if (bin[i] > LOWER_HALF_START && bin[i] < LOWER_HALF_END) begin
-            convLowHalf <= convLowHalf + magnitude[i] >> 2;
-            convUpHalf  <= convUpHalf - magnitude[i] >> 2;
-          end
+            // Lower Half Convolution (TODO: not sure what lower half is)
+            if (bin[i] > LOWER_HALF_START && bin[i] < LOWER_HALF_END) begin
+              convLowHalf <= convLowHalf + magnitude[i] >> 2;
+              convUpHalf  <= convUpHalf - magnitude[i] >> 2;
+            end
 
-          if (magnitude[i] > threshold) begin
-            if (bin[i] < low || bin[i] > high) begin
-              if (magnitude[i] > max_mag) begin
-                max_mag <= magnitude[i] / 10; // TODO: could modify to powers of 2
-              end
-            end else begin
-              if (magnitude[i] * 20 > max_mag) begin
-                max_mag <= magnitude[i] * 20; // TODO: could modify to powers of 2
+            if (magnitude[i] > threshold) begin
+              if (bin[i] < low || bin[i] > high) begin
+                if (magnitude[i] > max_mag) begin
+                  max_mag <= magnitude[i] / 10; // TODO: could modify to powers of 2
+                end
+              end else begin
+                if (magnitude[i] * 20 > max_mag) begin
+                  max_mag <= magnitude[i] * 20; // TODO: could modify to powers of 2
+                end
               end
             end
+          
           end
+
+          if (max_mag > 0.5) begin  // TODO: 0.5 in fixed point
+            on_cycle  <= on_cycle + 1;
+            off_cycle <= 0;
+          end 
+          else if (max_mag < 0.3) begin  // TODO: 0.3 in fixed point
+                                            // TODO: reset convolutions
+            on_cycle  <= 0;
+            off_cycle <= off_cycle + 1;
+          end
+
+          // TODO: not sure how to use on cycle across different data
+          if (on_cycle > 300) begin
+            curr_sound <= 1;
+          end 
+          else if (off_cycle > 2000) begin
+            curr_sound <= 0;
+          end
+
+          // TODO: does 10 mean on? 
+          if (curr_sound == 1 && convLowHalf > convVert) begin
+              count <= 10
+          end
+          else begin
+              count <= 0;
+          end
+
+          // TODO: not sure what this means
+          if (count > 0) begin
+              count <= count - 1;
+          end
+
         end
 
-        if (max_mag > 0.5) begin  // TODO: 0.5 in fixed point
-          on_cycle  <= on_cycle + 1;
-          off_cycle <= 0;
-        end else if (max_mag < 0.3) begin  // TODO: 0.3 in fixed point
-                                           // TODO: reset convolutions
-          on_cycle  <= 0;
-          off_cycle <= off_cycle + 1;
+        DONE: begin
+          max_mag <= max_mag;
+          convVert <= convVert;
+          convUpHalf <= convUpHalf;
+          convLowHalf <= convLowHalf;
+          on_cycle <= on_cycle;
+          off_cycle <= off_cycle;
+          curr_sound <= curr_sound;
+          count <= count;
         end
 
-        // TODO: not sure how to use on cycle across different data
-        if (on_cycle > 300) begin
-          curr_sound <= 1;
-        end else if (off_cycle > 2000) begin
-          curr_sound <= 0;
-        end
-
-        // TODO: does 10 mean on? 
-        if (curr_sound == 1 && convLowHalf > convVert) begin
-            count <= 10
-        end
-        else begin
-            count <= 0;
-        end
-
-        // TODO: not sure what this means
-        if (count > 0) begin
-            count <= count - 1;
-        end
-
-      end
-
-      DONE: begin
-        max_mag <= max_mag;
-        convVert <= convVert;
-        convUpHalf <= convUpHalf;
-        convLowHalf <= convLowHalf;
-        on_cycle <= on_cycle;
-        off_cycle <= off_cycle;
-        curr_sound <= curr_sound;
-        count <= count;
-      end
-
-    endcase
+      endcase
   end
 
   assign send_msg = curr_sound;

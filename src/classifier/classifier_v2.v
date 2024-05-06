@@ -1,9 +1,11 @@
 `include "cmn/regs.v"
 `include "classifier/helpers/sum.v"
 `include "cmn/counters.v"
+`include "classifier/helpers/classifier_regs.v"
 
 module classifier_Classifier #(
   parameter int BIT_WIDTH = 32,
+  parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES = 32
 ) (
   input logic clk,
@@ -30,6 +32,21 @@ module classifier_Classifier #(
   output logic send_msg
 
 );
+
+  logic [BIT_WIDTH-1:0] magnitude [N_SAMPLES-1:0];
+
+  arr_EnResetReg #(
+    .BIT_WIDTH  (BIT_WIDTH),
+    .RESET_VALUE({BIT_WIDTH{1'b0}}),
+    .N_ELEMENTS (N_SAMPLES)
+  ) classifier_in (
+    .clk  (clk),
+    .reset(reset),
+    .d    (recv_msg),
+    .q    (magnitude),
+    .en   (recv_val)
+  );
+  assign recv_rdy = 1;
 
   // we use id in the sample rather than frequency
   // to avoid extra calculations
@@ -178,7 +195,7 @@ module classifier_Classifier #(
     .p_count_nbits      (16),
     .p_count_clear_value(9),   // TODO: Make this configurable
     .p_count_max_value  (10)   // TODO: Make this configurable
-  ) off_cycle_counter (
+  ) count_decrementer (
     .clk          (clk),
     .reset        (reset),
     .clear        (has_sound),      // set to 10 if has_sound
@@ -191,6 +208,7 @@ module classifier_Classifier #(
 
   // TODO: Handle val/rdy stuff
   assign send_msg = curr_sound || !count_is_zero;
+  assign send_val = recv_val;
 
 
 endmodule
