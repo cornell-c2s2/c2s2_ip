@@ -12,6 +12,18 @@ class Classifier(VerilogPlaceholder, Component):
         s.recv_val = InPort()
         s.recv_rdy = OutPort()
 
+        s.cutoff_idx_low_msg = InPort(BIT_WIDTH)
+        s.cutoff_idx_low_val = InPort()
+        s.cutoff_idx_low_rdy = OutPort()
+
+        s.cutoff_idx_high_msg = InPort(BIT_WIDTH)
+        s.cutoff_idx_high_val = InPort()
+        s.cutoff_idx_high_rdy = OutPort()
+
+        s.cutoff_mag_msg = InPort(BIT_WIDTH)
+        s.cutoff_mag_val = InPort()
+        s.cutoff_mag_rdy = OutPort()
+
         s.send_msg = OutPort()
         s.send_val = OutPort()
         s.send_rdy = InPort()
