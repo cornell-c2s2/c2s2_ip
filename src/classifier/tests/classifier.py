@@ -195,7 +195,7 @@ def test_audio(cmdline_opts, p):
 
     sample_rate = 44800
 
-    audio_file = "SSR4F_MixPre-1390_01.wav"
+    audio_file = "SSR4F_MixPre-1390_01.WAV"
 
     # TODO: Configure this later
     cutoff_idx_low = 5
