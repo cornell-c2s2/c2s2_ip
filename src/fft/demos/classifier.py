@@ -10,10 +10,15 @@ import argparse
 import math
 
 def run_spectrogram(sample_rate, file, cutoff_idx_low, cutoff_idx_high, cutoff_mag):
+
+    print("RUN_SPECTOGRAM")
+
     n_samples = 32
     data, sample_rate = librosa.load(
         path.join(path.dirname(__file__), "audio", file), sr=sample_rate, mono=True
     )
+
+    print("SPECTOGRAM")
 
     data, bins = spectrogram(
         numpy_fft,
@@ -22,6 +27,8 @@ def run_spectrogram(sample_rate, file, cutoff_idx_low, cutoff_idx_high, cutoff_m
         n_samples,
         n_samples - 4,
     )
+
+    print("CLASSIFY")
 
     classified = classify(data, cutoff_idx_low, cutoff_idx_high, cutoff_mag)
 
