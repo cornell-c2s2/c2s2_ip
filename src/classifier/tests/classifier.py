@@ -200,14 +200,14 @@ def test_audio(cmdline_opts, p):
     # TODO: Configure this later
     cutoff_idx_low = 5
     cutoff_idx_high = 10
-    cutoff_mag = Fixed(0.01, p.fp_spec[1], p.fp_spec[0])
+    cutoff_mag = Fixed(0.01, 1, p.fp_spec[0], p.fp_spec[1])
 
     # Generate random inputs
     inputs, outputs = run_spectrogram(
         sample_rate, audio_file, cutoff_idx_low, cutoff_idx_high, cutoff_mag
     )
     inputs = [
-        [Fixed(x, 0, p.fp_spec[0], p.fp_spec[1]) for x in sample] for sample in inputs
+        [Fixed(x, 1, p.fp_spec[0], p.fp_spec[1]) for x in sample] for sample in inputs
     ]
 
     print("Generated Data")
