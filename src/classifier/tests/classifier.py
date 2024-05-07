@@ -8,6 +8,7 @@ from pymtl3.stdlib import stream
 from pymtl3.stdlib.test_utils import mk_test_case_table, run_sim
 from tools.utils import mk_packed
 from src.classifier.classifier import Classifier
+
 # from src.classifier.classifier import ClassifierWrapper
 import numpy as np
 from fixedpt import CFixed, Fixed
@@ -17,13 +18,14 @@ from src.serdes.serializer import Serializer
 from tools.utils import fixed_bits, mk_test_matrices
 from src.fft.demos.classifier import classify, run_spectrogram
 
+
 # -------------------------------------------------------------------------
 # Classifier Wrapper
 # -------------------------------------------------------------------------
 class ClassifierWrapper(VerilogPlaceholder, Component):
     # Constructor
 
-    def construct(s, BIT_WIDTH=32, N_SAMPLES = 8):
+    def construct(s, BIT_WIDTH=32, N_SAMPLES=8):
 
         s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
         s.send = stream.ifcs.SendIfcRTL(mk_bits(1))
@@ -51,13 +53,14 @@ class ClassifierWrapper(VerilogPlaceholder, Component):
     def line_trace(s):
         return f"{s.deserializer.line_trace()} > {s.dut.line_trace()}"
 
+
 # -------------------------------------------------------------------------
 # TestHarness
 # -------------------------------------------------------------------------
 class TestHarness(Component):
-    def construct(s, classifier, BIT_WIDTH=32, N_SAMPLES = 8):
+    def construct(s, classifier, BIT_WIDTH=32, N_SAMPLES=8):
         # Instantiate models
-        
+
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.cutoff_idx_low = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.cutoff_idx_high = stream.SourceRTL(mk_bits(BIT_WIDTH))
@@ -76,6 +79,7 @@ class TestHarness(Component):
     def done(s):
         return s.src.done() and s.sink.done()
 
+
 # ----------------------------------------------------------------------
 # Helper Functions
 # ----------------------------------------------------------------------
@@ -85,6 +89,7 @@ class TestHarness(Component):
 # Tests
 # -------------------------------------------------------------------------
 
+
 def check_classifier(
     bit_width: int,
     n_samples: int,
@@ -93,8 +98,8 @@ def check_classifier(
     sink_delay: int,
     config_delay: int,
     inputs: list[list[Fixed]],
-    cutoff_idx_low: int, 
-    cutoff_idx_high: int, 
+    cutoff_idx_low: int,
+    cutoff_idx_high: int,
     cutoff_mag: Fixed,
     outputs: list[bool],
 ) -> None:
@@ -170,7 +175,6 @@ def check_classifier(
         }
     )
 )
-
 def test_audio(cmdline_opts, p):
 
     sample_rate = 44800
@@ -183,9 +187,15 @@ def test_audio(cmdline_opts, p):
     cutoff_mag = Fixed(0.01, p.fp_spec[1], p.fp_spec[0])
 
     # Generate random inputs
-    inputs, outputs = run_spectrogram(sample_rate, audio_file, cutoff_idx_low, cutoff_idx_high, cutoff_mag)
-    inputs = [[Fixed(x, p.fp_spec[0], p.fp_spec[1]) for x in sample] for sample in inputs]
-    
+    inputs, outputs = run_spectrogram(
+        sample_rate, audio_file, cutoff_idx_low, cutoff_idx_high, cutoff_mag
+    )
+    inputs = [
+        [Fixed(x, 0, p.fp_spec[0], p.fp_spec[1]) for x in sample] for sample in inputs
+    ]
+
+    print("Generated Data")
+
     check_classifier(
         p.fp_spec[0],
         p.n_samples,
@@ -194,8 +204,8 @@ def test_audio(cmdline_opts, p):
         sink_delay=3,
         config_delay=1,
         inputs=inputs,
-        cutoff_idx_low=cutoff_idx_low, 
-        cutoff_idx_high=cutoff_idx_high, 
+        cutoff_idx_low=cutoff_idx_low,
+        cutoff_idx_high=cutoff_idx_high,
         cutoff_mag=cutoff_mag,
         outputs=outputs,
     )
