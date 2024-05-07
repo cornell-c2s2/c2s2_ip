@@ -28,7 +28,23 @@ class ClassifierWrapper(VerilogPlaceholder, Component):
     def construct(s, BIT_WIDTH=32, N_SAMPLES=8):
 
         s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
+        s.cutoff_idx_low = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
+        s.cutoff_idx_high = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
+        s.cutoff_mag = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
         s.send = stream.ifcs.SendIfcRTL(mk_bits(1))
+
+        # Hook up configs
+        s.cutoff_idx_low.msg //= s.dut.cutoff_idx_low_msg
+        s.cutoff_idx_low.val //= s.dut.cutoff_idx_low_val
+        s.dut.cutoff_idx_low_rdy //= s.cutoff_idx_low.rdy
+
+        s.cutoff_idx_high.msg //= s.dut.cutoff_idx_high_msg
+        s.cutoff_idx_high.val //= s.dut.cutoff_idx_high_val
+        s.dut.cutoff_idx_high_rdy //= s.cutoff_idx_high.rdy
+
+        s.cutoff_mag.msg //= s.dut.cutoff_mag_msg
+        s.cutoff_mag.val //= s.dut.cutoff_mag_val
+        s.dut.cutoff_mag_rdy //= s.cutoff_mag.rdy
 
         # Hook up a deserializer
         s.deserializer = Deserializer(BIT_WIDTH, N_SAMPLES)
@@ -46,9 +62,9 @@ class ClassifierWrapper(VerilogPlaceholder, Component):
         s.dut.recv_rdy //= s.deserializer.send_rdy
 
         # Output
-        s.dut.send_msg //= s.recv
-        s.dut.send_val //= s.recv_val
-        s.recv_rdy //= s.dut.send_rdy
+        s.dut.send_msg //= s.recv.msg
+        s.dut.send_val //= s.recv.val
+        s.recv.rdy //= s.dut.send_rdy
 
     def line_trace(s):
         return f"{s.deserializer.line_trace()} > {s.dut.line_trace()}"
@@ -58,7 +74,7 @@ class ClassifierWrapper(VerilogPlaceholder, Component):
 # TestHarness
 # -------------------------------------------------------------------------
 class TestHarness(Component):
-    def construct(s, classifier, BIT_WIDTH=32, N_SAMPLES=8):
+    def construct(s, BIT_WIDTH=32, N_SAMPLES=8):
         # Instantiate models
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
@@ -66,15 +82,15 @@ class TestHarness(Component):
         s.cutoff_idx_high = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.cutoff_mag = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.sink = stream.SinkRTL(mk_bits(1))
-        s.classifier = ClassifierWrapper(BIT_WIDTH, N_SAMPLES)
+        s.dut = ClassifierWrapper(BIT_WIDTH, N_SAMPLES)
 
         # Connect
 
-        s.cutoff_idx_low.send //= s.classifier.cutoff_idx_low
-        s.cutoff_idx_high.send //= s.classifier.cutoff_idx_high
-        s.cutoff_mag.send //= s.classifier.cutoff_mag
-        s.src.send //= s.classifier.recv
-        s.classifier.send //= s.sink.recv
+        s.cutoff_idx_low.send //= s.dut.cutoff_idx_low
+        s.cutoff_idx_high.send //= s.dut.cutoff_idx_high
+        s.cutoff_mag.send //= s.dut.cutoff_mag
+        s.src.send //= s.dut.recv
+        s.dut.send //= s.sink.recv
 
     def done(s):
         return s.src.done() and s.sink.done()
@@ -138,22 +154,22 @@ def check_classifier(
     model.set_param(
         "top.cutoff_idx_low.construct",
         msgs=cutoff_idx_low,
-        initial_delay=test_params.config_delay,
-        interval_delay=test_params.config_delay,
+        initial_delay=config_delay,
+        interval_delay=config_delay,
     )
 
     model.set_param(
         "top.cutoff_idx_high.construct",
         msgs=cutoff_idx_high,
-        initial_delay=test_params.config_delay,
-        interval_delay=test_params.config_delay,
+        initial_delay=config_delay,
+        interval_delay=config_delay,
     )
 
     model.set_param(
         "top.cutoff_mag.construct",
         msgs=cutoff_mag,
-        initial_delay=test_params.config_delay,
-        interval_delay=test_params.config_delay,
+        initial_delay=config_delay,
+        interval_delay=config_delay,
     )
 
     model.set_param(
