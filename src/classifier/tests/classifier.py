@@ -210,8 +210,6 @@ def test_audio(cmdline_opts, p):
         [Fixed(x, 1, p.fp_spec[0], p.fp_spec[1]) for x in sample] for sample in inputs
     ]
 
-    print("Generated Data")
-
     check_classifier(
         p.fp_spec[0],
         p.n_samples,
