@@ -4,13 +4,15 @@ from pymtl3 import *
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from pymtl3.passes.backends.verilog import *
 from os import path
-from tools.utils import mk_list_bitstruct
+import math
 
 
 class BlockingCrossbar(VerilogPlaceholder, Component):
     # Constructor
-    def construct(s, BIT_WIDTH, N_INPUTS, N_OUTPUTS, CONTROL_BIT_WIDTH):
+    def construct(s, BIT_WIDTH, N_INPUTS, N_OUTPUTS):
         s.set_metadata(VerilogTranslationPass.explicit_module_name, "crossbar")
+
+        CONTROL_BIT_WIDTH = int(math.log2(N_INPUTS) + math.log2(N_OUTPUTS))
 
         # Interface
         s.recv_msg = [InPort(mk_bits(BIT_WIDTH)) for _ in range(N_INPUTS)]
@@ -32,11 +34,12 @@ class BlockingCrossbar(VerilogPlaceholder, Component):
 
 # Val/Rdy wrapper for the BlockingCrossbar
 class BlockingCrossbarWrapper(Component):
-    def construct(s, BIT_WIDTH, N_INPUTS, N_OUTPUTS, CONTROL_BIT_WIDTH):
-        s.dut = BlockingCrossbar(BIT_WIDTH, N_INPUTS, N_OUTPUTS, CONTROL_BIT_WIDTH)
+    def construct(s, BIT_WIDTH, N_INPUTS, N_OUTPUTS):
+        s.dut = BlockingCrossbar(BIT_WIDTH, N_INPUTS, N_OUTPUTS)
 
-        s.recv = [RecvIfcRTL(BIT_WIDTH) for _ in range(N_INPUTS)]
-        s.send = [SendIfcRTL(BIT_WIDTH) for _ in range(N_OUTPUTS)]
+        s.recv = [RecvIfcRTL(mk_bits(BIT_WIDTH)) for _ in range(N_INPUTS)]
+        s.send = [SendIfcRTL(mk_bits(BIT_WIDTH)) for _ in range(N_OUTPUTS)]
+        CONTROL_BIT_WIDTH = int(math.log2(N_INPUTS) + math.log2(N_OUTPUTS))
         s.control = RecvIfcRTL(mk_bits(CONTROL_BIT_WIDTH))
 
         s.control.msg //= s.dut.control
@@ -49,6 +52,6 @@ class BlockingCrossbarWrapper(Component):
             s.recv[i].val //= s.dut.recv_val[i]
 
         for i in range(N_OUTPUTS):
-            s.send.msg.list[i] //= s.dut.send_msg[i]
+            s.send[i].msg //= s.dut.send_msg[i]
             s.send[i].rdy //= s.dut.send_rdy[i]
             s.dut.send_val[i] //= s.send[i].val
