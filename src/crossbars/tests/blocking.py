@@ -47,7 +47,10 @@ class TestHarness(Component):
 # Some basic test cases
 @pytest.mark.parametrize(
     "bit_width, n_inputs, n_outputs, config, inputs",
-    [(4, 2, 2, (0, 0), [[1, 1], [0, 0], [1, 0]])],  # 2x2 crossbar
+    [
+        (4, 2, 2, (0, 0), [[1, 1], [0, 0], [1, 0]]),  # 2x2 crossbar
+        (4, 2, 2, (1, 0), [[1, 1], [0, 0], [1, 0]]),  # 2x2 crossbar
+    ],
 )
 def test_basic(
     bit_width,
