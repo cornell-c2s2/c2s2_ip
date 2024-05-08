@@ -5,6 +5,7 @@
 
 module classifier_Classifier #(
   parameter int BIT_WIDTH = 32,
+  parameter int DECIMAL_PT = 16,
   parameter int N_SAMPLES = 32
 ) (
   input logic clk,
@@ -89,6 +90,18 @@ module classifier_Classifier #(
   );
   assign cutoff_mag_rdy = 1;
 
+  // Vertical convolution
+  logic [BIT_WIDTH-1:0] convVert;
+  classifier_helpers_Sum #(
+    .BIT_WIDTH(BIT_WIDTH),
+    .N_SAMPLES(N_SAMPLES)
+  ) sumVert (
+    .clk  (clk),
+    .reset(reset),
+    .arr  (magnitude[N_SAMPLES-1:0]),
+    .sum  (convVert)
+  );
+
   // Lower half convolution
   logic [BIT_WIDTH-1:0] convLowHalf;
   classifier_helpers_Sum #(
@@ -114,23 +127,72 @@ module classifier_Classifier #(
   );
 
   // Maximum magnitude of the input array
-  // the nth element of max_mag is the maximum magnitude of the first n elements of the input array
-  logic [BIT_WIDTH-1:0] max_mags[N_SAMPLES-1:0];
+  logic [BIT_WIDTH-1:0] max_mag;
 
-  generate
-    assign max_mags[0] = magnitude[0];
-    for (genvar i = 1; i < N_SAMPLES; i++) begin
-      // if we are below cutoff low or above cutoff high, we don't care about the magnitude
-      // so we set it to 0
-      logic [BIT_WIDTH-1:0] mag;
-      assign mag = (i < cutoff_idx_low || i > cutoff_idx_high) ? 0 : magnitude[i];
-      assign max_mags[i] = max_mags[i-1] > mag ? max_mags[i-1] : mag;
+  always @(posedge clk) begin 
+    if (reset) begin
+      max_mag <= 0;
     end
-  endgenerate
+    else begin
+      for (integer i = 0; i < N_SAMPLES; i = i + 1) begin
+        if (magnitude[i] > cutoff_mag) begin
+          if (i < cutoff_idx_low || i > cutoff_idx_high) begin
+            if (magnitude[i] > max_mag) begin
+              max_mag <= magnitude[i] >> 3; // Reduce magnitude by factor of 0.125
+            end
+          end
+          else begin
+            if (magnitude[i] > max_mag) begin
+              max_mag <= magnitude[i] << 4; // Increase magnitude by factor of 16
+            end
+          end
+        end
+      end
+    end
+  end
 
-  // is max magnitude above threshold?
-  logic mag_detected;
-  assign mag_detected = max_mags[N_SAMPLES-1] > cutoff_mag;
+  // generate
+  //   for (genvar i = 1; i < N_SAMPLES; i++) begin
+  //     // if we are below cutoff low or above cutoff high, we don't care about the magnitude
+  //     // so we set it to a small number
+  //     if (magnitude[i] > cutoff_mag) begin
+  //       if ((i < cutoff_idx_low || i > cutoff_idx_high) && (magnitude[i] > max_mag)) begin
+  //         assign max_mag = magnitude[i] >> 3; // mag * 0.125
+  //       end
+  //       else begin
+  //         assign max_mag = magnitude[i] << 4; // mag * 16
+  //       end
+  //     end
+  //     else begin
+  //       assign max_mag = max_mag;
+  //     end
+  //   end
+  // endgenerate
+
+
+  // // Maximum magnitude of the input array
+  // // the nth element of max_mag is the maximum magnitude of the first n elements of the input array
+  // logic [BIT_WIDTH-1:0] max_mags[N_SAMPLES-1:0];
+
+  // generate
+  //   assign max_mags[0] = magnitude[0];
+  //   for (genvar i = 1; i < N_SAMPLES; i++) begin
+  //     // if we are below cutoff low or above cutoff high, we don't care about the magnitude
+  //     // so we set it to 0
+  //     logic [BIT_WIDTH-1:0] mag;
+  //     assign mag = (i < cutoff_idx_low || i > cutoff_idx_high) ? 0 : magnitude[i];
+  //     assign max_mags[i] = max_mags[i-1] > mag ? max_mags[i-1] : mag;
+  //   end
+  // endgenerate
+
+
+  // TODO: make this configurable (it's 0.5 by putting a 1 in the DECIMAL MSB)
+  logic max_mag_above_point_five;
+  assign max_mag_above_point_five = max_mag > (1 << (DECIMAL_PT-1)); 
+
+  // TODO: make this configurable (it's 0.25 by putting a 1 in the DECIMAL MSB)
+  logic max_mag_below_point_three;
+  assign max_mag_below_point_three = max_mag > (1 << (DECIMAL_PT-2)); 
 
   // incrementers for on_cycle and off_cycle
   logic on_cycle_count_is_max;
@@ -141,14 +203,13 @@ module classifier_Classifier #(
   ) on_cycle_counter (
     .clk          (clk),
     .reset        (reset),
-    .clear        (!mag_detected),
-    .increment    (mag_detected),          // increment on cycle if magnitude is above threshold
+    .clear        (max_mag_below_point_three),
+    .increment    (max_mag_above_point_five),          // increment on cycle if magnitude is above threshold
     .decrement    (1'b0),
     .count        (),
     .count_is_zero(),
     .count_is_max (on_cycle_count_is_max)
   );
-
 
   logic off_cycle_count_is_max;
   cmn_BasicCounter #(
@@ -158,55 +219,69 @@ module classifier_Classifier #(
   ) off_cycle_counter (
     .clk          (clk),
     .reset        (reset),
-    .clear        (mag_detected),
-    .increment    (!mag_detected),
+    .clear        (max_mag_above_point_five),
+    .increment    (max_mag_below_point_three),
     .decrement    (1'b0),                   // decrement off cycle if magnitude is above threshold
     .count        (),
     .count_is_zero(),
     .count_is_max (off_cycle_count_is_max)
   );
 
-  logic has_sound;
-
+  // pass through sound
+  logic curr_sound;
   always_ff @(posedge clk) begin
     if (reset) begin
-      has_sound <= 1'b0;
+      curr_sound <= 1'b0;
     end else begin
       if (on_cycle_count_is_max) begin
         // if on_cycle > 300, start recording sound
-        has_sound <= 1'b1;
+        curr_sound <= 1'b1;
       end else if (off_cycle_count_is_max) begin
         // if off_cycle > 2000, stop recording sound
-        has_sound <= 1'b0;
+        curr_sound <= 1'b0;
       end else begin
-        has_sound <= has_sound;
+        curr_sound <= curr_sound;
       end
     end
   end
 
-  // pass through sound
-  logic curr_sound;
-  assign curr_sound = (has_sound || on_cycle_count_is_max) && !off_cycle_count_is_max;
+  // // count decrementer
+  // logic count_is_zero;
+  // cmn_BasicCounter #(
+  //   .p_count_nbits      (16),
+  //   .p_count_clear_value(9),   // TODO: Make this configurable
+  //   .p_count_max_value  (10)   // TODO: Make this configurable
+  // ) count_decrementer (
+  //   .clk          (clk),
+  //   .reset        (reset),
+  //   .clear        (curr_sound && (convLowHalf > convVert)),      // set to 10 if has_sound
+  //   .increment    (1'b0),
+  //   .decrement    (!count_is_zero),           // decrement when count is greater than 0
+  //   .count        (),
+  //   .count_is_zero(count_is_zero),
+  //   .count_is_max ()
+  // );
 
-  // count decrementer
-  logic count_is_zero;
-  cmn_BasicCounter #(
-    .p_count_nbits      (16),
-    .p_count_clear_value(9),   // TODO: Make this configurable
-    .p_count_max_value  (10)   // TODO: Make this configurable
-  ) count_decrementer (
-    .clk          (clk),
-    .reset        (reset),
-    .clear        (has_sound),      // set to 10 if has_sound
-    .increment    (1'b0),
-    .decrement    (1'b1),           // always decrement
-    .count        (),
-    .count_is_zero(count_is_zero),
-    .count_is_max ()
-  );
+  logic [BIT_WIDTH-1:0] count;
+
+  always_ff @(posedge clk) begin
+    if (reset) begin
+      count <= 0;
+    end
+    else if (curr_sound && (convLowHalf > convVert)) begin
+      count <= 9;
+    end
+    else begin
+      count <= 0;
+    end
+
+    if (count > 0) begin
+      count <= count - 1;
+    end
+  end
 
   // TODO: Handle val/rdy stuff
-  assign send_msg = curr_sound || !count_is_zero;
+  assign send_msg = (count > 0);
   assign send_val = recv_val;
 
 

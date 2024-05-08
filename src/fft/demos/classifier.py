@@ -74,11 +74,11 @@ def classify(magnitudes: list[list[float]], low: int, high: int, threshold: floa
             if mag > threshold:
                 if i < low or i > high:
                     if (mag > max_mag):
-                        max_mag = mag * 0.1
+                        max_mag = mag * 0.125
                     # Reduce magnitude outside the interval
                 else:
                     if (mag * 20 > max_mag):
-                        max_mag = mag * 20
+                        max_mag = mag * 16
                         
                     # Amplify magnitude within the interval
                     
@@ -91,7 +91,8 @@ def classify(magnitudes: list[list[float]], low: int, high: int, threshold: floa
             off_cycle = 0
 
         elif (max_mag < 0.3):
-            if (curr_sound == False): # Resetting Convolutions
+            # TODO: need to add this to verilog
+            if (curr_sound == False): # Resetting Convolutions 
                 convVert = 0
                 convUpHalf = 0
                 convLowHalf = 0
@@ -115,7 +116,7 @@ def classify(magnitudes: list[list[float]], low: int, high: int, threshold: floa
             count -= 1
 
         # classifications.append([max_mag, convVert, convUpHalf, convLowHalf, math.log2(max_mag), count, on_cycle])
-        classifications.append(count)
+        classifications.append(count>0)
 
     return classifications
 
