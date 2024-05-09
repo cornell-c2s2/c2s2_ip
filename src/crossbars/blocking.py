@@ -4,7 +4,6 @@ from pymtl3 import *
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from pymtl3.passes.backends.verilog import *
 from os import path
-from tools.utils import mk_list_bitstruct
 
 
 class BlockingCrossbar(VerilogPlaceholder, Component):
@@ -22,11 +21,13 @@ class BlockingCrossbar(VerilogPlaceholder, Component):
         s.control = InPort(mk_bits(CONTROL_BIT_WIDTH))
         s.control_val = InPort(1)
         s.control_rdy = OutPort(1)
+        s.input_spi = InPort(1)
+        s.output_spi = InPort(1)
 
-        s.set_metadata(VerilogPlaceholderPass.top_module, "Blocking")
+        s.set_metadata(VerilogPlaceholderPass.top_module, "blocking_with_spi")
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.join(path.dirname(__file__), "blocking.v"),
+            path.join(path.dirname(__file__), "blocking_with_spi.v"),
         )
 
 
@@ -42,6 +43,9 @@ class BlockingCrossbarWrapper(Component):
         s.control.msg //= s.dut.control
         s.control.val //= s.dut.control_val
         s.dut.control_rdy //= s.control.rdy
+
+        s.input_spi //= s.dut.input_spi
+        s.output_spi //= s.dut.output_spi
 
         for i in range(N_INPUTS):
             s.dut.recv_msg[i] //= s.recv[i].msg

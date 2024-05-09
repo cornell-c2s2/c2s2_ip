@@ -16,14 +16,18 @@ class TestHarness(Component):
     def construct(s, BIT_WIDTH, N_INPUTS, N_OUTPUTS):
         # Instantiate models
         CONTROL_BIT_WIDTH = int(math.log2(N_INPUTS) + math.log2(N_OUTPUTS))
+        SPI_BIT_WIDTH = int(1)
 
         s.control = stream.SourceRTL(mk_bits(CONTROL_BIT_WIDTH))
 
         s.srcs = [stream.SourceRTL(mk_bits(BIT_WIDTH)) for _ in range(N_INPUTS)]
+        s.input_spi = stream.SourceRTL(mk_bits(SPI_BIT_WIDTH))
+        s.output_spi = stream.SourceRTL(mk_bits(SPI_BIT_WIDTH))
         s.sinks = [stream.SinkRTL(mk_bits(BIT_WIDTH)) for _ in range(N_OUTPUTS)]
+        
+
         s.dut = BlockingCrossbarWrapper(BIT_WIDTH, N_INPUTS, N_OUTPUTS)
-        s.input_spi = stream.SourceRTL(mk_bits(1))
-        s.output_spi = stream.SourceRTL(mk_bits(1))
+        
 
         # Connect
         for i in range(N_INPUTS):
