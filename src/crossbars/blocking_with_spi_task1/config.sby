@@ -1,0 +1,17 @@
+[options]
+
+mode bmc
+depth 100
+
+[engines]
+
+smtbmc
+
+[script]
+
+read_verilog -sv blocking_with_spi.sv
+prep -top blocking_with_spi
+
+[files]
+
+blocking_with_spi.sv

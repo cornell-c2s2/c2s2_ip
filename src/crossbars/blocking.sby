@@ -1,0 +1,22 @@
+[tasks]
+task1
+
+[options]
+
+task1:
+mode bmc
+depth 100
+
+[engines]
+
+task1: smtbmc
+
+[script]
+
+read -formal blocking.v
+
+prep -top blocking
+
+[files]
+
+blocking.v

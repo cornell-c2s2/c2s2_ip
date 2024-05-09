@@ -1,0 +1,9 @@
+# running in blocking_task1/src/
+
+read -formal blocking.v
+
+prep -top blocking
+
+hierarchy -smtcheck
+write_jny -no-connections ../model/design.json
+write_rtlil ../model/design.il

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+<testsuite timestamp="2024-05-07T17:34:31" hostname="c2s2-dev.ece.cornell.edu" package="blocking" id="0" name="task1" tests="1" errors="1" failures="0" time="0" skipped="0">
+<properties>
+<property name="os" value="Linux"/>
+<property name="expect" value="PASS"/>
+<property name="status" value="ERROR"/>
+</properties>
+<testcase classname="task1" name="task1" time="0">
+<error type="ERROR"/>
+</testcase>
+<system-out>SBY 17:34:30 [blocking_task1] Removing directory '/home/eyl47/c2s2_2024/c2s2_ip/src/crossbars/blocking_task1'.
+SBY 17:34:30 [blocking_task1] Copy '/home/eyl47/c2s2_2024/c2s2_ip/src/crossbars/blocking.v' to '/home/eyl47/c2s2_2024/c2s2_ip/src/crossbars/blocking_task1/src/blocking.v'.
+SBY 17:34:30 [blocking_task1] engine_0: smtbmc
+SBY 17:34:30 [blocking_task1] base: starting process &quot;cd blocking_task1/src; yosys -ql ../model/design.log ../model/design.ys&quot;
+SBY 17:34:31 [blocking_task1] base: blocking.v:12: ERROR: syntax error, unexpected '[', expecting ',' or '=' or ')'
+SBY 17:34:31 [blocking_task1] base: finished (returncode=1)
+SBY 17:34:31 [blocking_task1] base: task failed. ERROR.
+SBY 17:34:31 [blocking_task1] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 17:34:31 [blocking_task1] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 17:34:31 [blocking_task1] summary: engine_0 (smtbmc) did not return a status
+SBY 17:34:31 [blocking_task1] summary: engine_0 did not produce any traces
+SBY 17:34:31 [blocking_task1] DONE (ERROR, rc=16)
+</system-out>
+<system-err>
+</system-err>
+</testsuite>
+</testsuites>

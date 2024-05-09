@@ -1,0 +1,12 @@
+SBY 21:56:20 [blocking_with_spi_task1] Removing directory '/home/eyl47/c2s2_2024/c2s2_ip/src/crossbars/blocking_with_spi_task1'.
+SBY 21:56:20 [blocking_with_spi_task1] Copy '/home/eyl47/c2s2_2024/c2s2_ip/src/crossbars/blocking_with_spi.sv' to '/home/eyl47/c2s2_2024/c2s2_ip/src/crossbars/blocking_with_spi_task1/src/blocking_with_spi.sv'.
+SBY 21:56:20 [blocking_with_spi_task1] engine_0: smtbmc
+SBY 21:56:20 [blocking_with_spi_task1] base: starting process "cd blocking_with_spi_task1/src; yosys -ql ../model/design.log ../model/design.ys"
+SBY 21:56:20 [blocking_with_spi_task1] base: blocking_with_spi.sv:12: ERROR: syntax error, unexpected '[', expecting ',' or '=' or ')'
+SBY 21:56:20 [blocking_with_spi_task1] base: finished (returncode=1)
+SBY 21:56:20 [blocking_with_spi_task1] base: task failed. ERROR.
+SBY 21:56:20 [blocking_with_spi_task1] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 21:56:20 [blocking_with_spi_task1] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 21:56:20 [blocking_with_spi_task1] summary: engine_0 (smtbmc) did not return a status
+SBY 21:56:20 [blocking_with_spi_task1] summary: engine_0 did not produce any traces
+SBY 21:56:20 [blocking_with_spi_task1] DONE (ERROR, rc=16)

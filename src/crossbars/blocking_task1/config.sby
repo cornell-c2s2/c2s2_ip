@@ -1,0 +1,18 @@
+[options]
+
+mode bmc
+depth 100
+
+[engines]
+
+smtbmc
+
+[script]
+
+read -formal blocking.v
+
+prep -top blocking
+
+[files]
+
+blocking.v
