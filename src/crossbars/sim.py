@@ -13,17 +13,10 @@ def create_crossbar(nbits: int, nin: int, nout: int) -> tuple[callable, callable
 
     def configure(_in_sel: int, _out_sel: int, input_spi: int, output_spi: int):
         nonlocal in_sel, out_sel
-        if (input_spi and not output_spi):
+        in_sel = _in_sel
+        out_sel = _out_sel
+        if (input_spi):
             in_sel = 0
-            out_sel = _out_sel
-        if (not input_spi and output_spi):
-            in_sel = _in_sel
+        if (output_spi):
             out_sel = 0
-        if (input_spi and output_spi):
-            in_sel = 0
-            out_sel = 0
-        else:
-            in_sel = _in_sel
-            out_sel = _out_sel
-
     return crossbar, configure

@@ -26,7 +26,6 @@ class BlockingCrossbar(VerilogPlaceholder, Component):
         s.control_rdy = OutPort(1)
         s.input_spi = InPort(1)
         s.output_spi = InPort(1)
-
         s.set_metadata(VerilogPlaceholderPass.top_module, "blocking_with_spi")
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
@@ -44,9 +43,19 @@ class BlockingCrossbarWrapper(Component):
         CONTROL_BIT_WIDTH = int(math.log2(N_INPUTS) + math.log2(N_OUTPUTS))
         s.control = RecvIfcRTL(mk_bits(CONTROL_BIT_WIDTH))
 
+        s.input_spi = RecvIfcRTL(mk_bits(1))
+        s.output_spi = RecvIfcRTL(mk_bits(1))
+
+
         s.control.msg //= s.dut.control
         s.control.val //= s.dut.control_val
         s.dut.control_rdy //= s.control.rdy
+
+        s.input_spi.msg //= s.dut.input_spi
+        s.input_spi.rdy //= 1
+
+        s.output_spi.msg //= s.dut.output_spi
+        s.output_spi.rdy //= 1
 
         for i in range(N_INPUTS):
             s.dut.recv_msg[i] //= s.recv[i].msg

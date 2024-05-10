@@ -76,15 +76,22 @@ module crossbars_blocking_with_spi #(
         )];
       end
   end
-  //assign input_sel = stored_control[CONTROL_BIT_WIDTH-1:CONTROL_BIT_WIDTH-$clog2(N_INPUTS)];
 
-  /*assign output_sel = stored_control[CONTROL_BIT_WIDTH-$clog2(
-      N_INPUTS
-  )-1 : CONTROL_BIT_WIDTH-$clog2(
-      N_INPUTS
-  )-$clog2(
-      N_OUTPUTS
-  )];*/
+  // demetri's impl
+  // always_comb begin
+  //   input_sel = stored_control[CONTROL_BIT_WIDTH-1:CONTROL_BIT_WIDTH-$clog2(N_INPUTS)];
+
+  //   output_sel = stored_control[CONTROL_BIT_WIDTH-$clog2(
+  //       N_INPUTS
+  //   )-1 : CONTROL_BIT_WIDTH-$clog2(
+  //       N_INPUTS
+  //   )-$clog2(
+  //       N_OUTPUTS
+  //   )];
+
+  //   if (input_spi) input_sel = 0;
+  //   if (output_spi) output_sel = 0;
+  // end
 
   always_comb begin
     for (int i = 0; i < N_OUTPUTS; i = i + 1) begin

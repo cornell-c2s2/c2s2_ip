@@ -16,15 +16,14 @@ class TestHarness(Component):
     def construct(s, BIT_WIDTH, N_INPUTS, N_OUTPUTS):
         # Instantiate models
         CONTROL_BIT_WIDTH = int(math.log2(N_INPUTS) + math.log2(N_OUTPUTS))
-        SPI_BIT_WIDTH = int(1)
 
         s.control = stream.SourceRTL(mk_bits(CONTROL_BIT_WIDTH))
 
         s.srcs = [stream.SourceRTL(mk_bits(BIT_WIDTH)) for _ in range(N_INPUTS)]
-        s.input_spi = stream.SourceRTL(mk_bits(SPI_BIT_WIDTH))
-        s.output_spi = stream.SourceRTL(mk_bits(SPI_BIT_WIDTH))
         s.sinks = [stream.SinkRTL(mk_bits(BIT_WIDTH)) for _ in range(N_OUTPUTS)]
         
+        s.input_spi = stream.SourceRTL(mk_bits(1))
+        s.output_spi = stream.SourceRTL(mk_bits(1))
 
         s.dut = BlockingCrossbarWrapper(BIT_WIDTH, N_INPUTS, N_OUTPUTS)
         
@@ -36,6 +35,9 @@ class TestHarness(Component):
             s.dut.send[i] //= s.sinks[i].recv
         
         s.control.send //= s.dut.control
+        s.input_spi.send //= s.dut.input_spi
+        s.output_spi.send //= s.dut.output_spi
+
 
 
 
@@ -55,18 +57,19 @@ class TestHarness(Component):
 @pytest.mark.parametrize(
     "bit_width, n_inputs, n_outputs, config, input_spi, output_spi, inputs",
     [
-        (4, 2, 2, (1, 1), 0, 0, [[1, 1], [0, 0], [1, 0]]),  # 2x2 crossbar
+        (4, 2, 2, (1, 1), 0, 1, [[1, 0], [0, 0], [1, 0]]),  # 2x2 crossbar
         (4, 2, 2, (1, 0), 0, 0, [[1, 1], [1, 0], [1, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 1), 0, 1, [[1, 1], [0, 0], [1, 1]]),  # 2x2 crossbar
+        (4, 2, 2, (1, 1), 0, 1, [[0, 1], [0, 0], [1, 1]]),  # 2x2 crossbar
         (4, 2, 2, (0, 1), 1, 0, [[1, 1], [0, 1], [1, 0]]),  # 2x2 crossbar
         (4, 2, 2, (1, 1), 1, 1, [[0, 1], [0, 1], [1, 0]]),  # 2x2 crossbar
         (4, 2, 2, (1, 1), 0, 1, [[1, 1], [0, 1], [0, 0]]),  # 2x2 crossbar
         (4, 2, 2, (1, 0), 1, 0, [[0, 1], [0, 1], [1, 0]]),  # 2x2 crossbar
         (4, 2, 2, (0, 1), 1, 1, [[0, 1], [1, 1], [1, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 1), 1, 0, [[0, 1], [0, 1], [1, 1]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 1), 1, 0, [[1, 1], [1, 1], [0, 0]]),  # 2x2 crossbar
+        (4, 2, 2, (1, 1), 1, 0, [[0, 0], [0, 1], [1, 1]]),  # 2x2 crossbar
+        (4, 2, 2, (0, 0), 1, 0, [[1, 1], [1, 1], [0, 0]]),  # 2x2 crossbar
         (4, 2, 2, (1, 1), 0, 1, [[0, 1], [0, 1], [0, 0]]),  # 2x2 crossbar
-
+        (4, 2, 2, (1, 1), 0, 0, [[0, 1], [0, 1], [0, 0]]),  # 2x2 crossbar
+        (4, 2, 2, (1, 0), 0, 0, [[1, 1], [0, 1], [1, 0]]),  # 2x2 crossbar
     ],
 )
 def test_basic(
