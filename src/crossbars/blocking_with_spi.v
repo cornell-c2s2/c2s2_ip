@@ -3,7 +3,7 @@
 
 //Crossbar in Verilog
 
-module blocking_with_spi #(
+module crossbars_blocking_with_spi #(
   parameter int BIT_WIDTH = 32,
   parameter int N_INPUTS = 2,
   parameter int N_OUTPUTS = 2,

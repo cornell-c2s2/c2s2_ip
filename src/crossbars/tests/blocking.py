@@ -28,7 +28,6 @@ class TestHarness(Component):
 
         s.dut = BlockingCrossbarWrapper(BIT_WIDTH, N_INPUTS, N_OUTPUTS)
         
-
         # Connect
         for i in range(N_INPUTS):
             s.srcs[i].send //= s.dut.recv[i]
@@ -38,8 +37,6 @@ class TestHarness(Component):
         
         s.control.send //= s.dut.control
 
-        s.input_spi.send //= s.dut.input_spi
-        s.output_spi.send //= s.dut.output_spi
 
 
     def done(s):
@@ -58,8 +55,11 @@ class TestHarness(Component):
 @pytest.mark.parametrize(
     "bit_width, n_inputs, n_outputs, config, input_spi, output_spi, inputs",
     [
+        (4, 2, 2, (1, 1), 1, 1, [[1, 1], [0, 0], [1, 0]]),  # 2x2 crossbar
+        (4, 2, 2, (1, 0), 1, 0, [[1, 1], [0, 0], [1, 0]]),  # 2x2 crossbar
+        (4, 2, 2, (0, 1), 0, 1, [[1, 1], [0, 0], [1, 0]]),  # 2x2 crossbar
         (4, 2, 2, (0, 0), 0, 0, [[1, 1], [0, 0], [1, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 0), 0, 0, [[1, 1], [0, 0], [1, 0]]),  # 2x2 crossbar
+        (4, 2, 2, (1, 1), 1, 1, [[1, 1], [0, 0], [1, 0]]),  # 2x2 crossbar
     ],
 )
 def test_basic(
@@ -113,5 +113,19 @@ def test_basic(
             initial_delay=10,
             interval_delay=3,
         )
+    
+    model.set_param(
+        "top.input_spi.construct",
+        msgs=[input_spi],
+        initial_delay=10,
+        interval_delay=3,
+    )
+
+    model.set_param(
+        "top.output_spi.construct",
+        msgs=[output_spi],
+        initial_delay=10,
+        interval_delay=3,
+    )
 
     run_sim(model, cmdline_opts, duts=["dut"])

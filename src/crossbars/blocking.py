@@ -4,12 +4,15 @@ from pymtl3 import *
 from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from pymtl3.passes.backends.verilog import *
 from os import path
+import math
 
 
 class BlockingCrossbar(VerilogPlaceholder, Component):
     # Constructor
-    def construct(s, BIT_WIDTH, N_INPUTS, N_OUTPUTS, CONTROL_BIT_WIDTH):
+    def construct(s, BIT_WIDTH, N_INPUTS, N_OUTPUTS):
         s.set_metadata(VerilogTranslationPass.explicit_module_name, "crossbar")
+
+        CONTROL_BIT_WIDTH = int(math.log2(N_INPUTS) + math.log2(N_OUTPUTS))
 
         # Interface
         s.recv_msg = [InPort(mk_bits(BIT_WIDTH)) for _ in range(N_INPUTS)]
@@ -22,7 +25,7 @@ class BlockingCrossbar(VerilogPlaceholder, Component):
         s.control_val = InPort(1)
         s.control_rdy = OutPort(1)
         s.input_spi = InPort(1)
-        s.output_spi = InPort(1)
+        s.output_spi = OutPort(1)
 
         s.set_metadata(VerilogPlaceholderPass.top_module, "blocking_with_spi")
         s.set_metadata(
@@ -33,19 +36,17 @@ class BlockingCrossbar(VerilogPlaceholder, Component):
 
 # Val/Rdy wrapper for the BlockingCrossbar
 class BlockingCrossbarWrapper(Component):
-    def construct(s, BIT_WIDTH, N_INPUTS, N_OUTPUTS, CONTROL_BIT_WIDTH):
-        s.dut = BlockingCrossbar(BIT_WIDTH, N_INPUTS, N_OUTPUTS, CONTROL_BIT_WIDTH)
+    def construct(s, BIT_WIDTH, N_INPUTS, N_OUTPUTS):
+        s.dut = BlockingCrossbar(BIT_WIDTH, N_INPUTS, N_OUTPUTS)
 
-        s.recv = [RecvIfcRTL(BIT_WIDTH) for _ in range(N_INPUTS)]
-        s.send = [SendIfcRTL(BIT_WIDTH) for _ in range(N_OUTPUTS)]
+        s.recv = [RecvIfcRTL(mk_bits(BIT_WIDTH)) for _ in range(N_INPUTS)]
+        s.send = [SendIfcRTL(mk_bits(BIT_WIDTH)) for _ in range(N_OUTPUTS)]
+        CONTROL_BIT_WIDTH = int(math.log2(N_INPUTS) + math.log2(N_OUTPUTS))
         s.control = RecvIfcRTL(mk_bits(CONTROL_BIT_WIDTH))
 
         s.control.msg //= s.dut.control
         s.control.val //= s.dut.control_val
         s.dut.control_rdy //= s.control.rdy
-
-        s.input_spi //= s.dut.input_spi
-        s.output_spi //= s.dut.output_spi
 
         for i in range(N_INPUTS):
             s.dut.recv_msg[i] //= s.recv[i].msg
@@ -53,6 +54,6 @@ class BlockingCrossbarWrapper(Component):
             s.recv[i].val //= s.dut.recv_val[i]
 
         for i in range(N_OUTPUTS):
-            s.send.msg.list[i] //= s.dut.send_msg[i]
+            s.send[i].msg //= s.dut.send_msg[i]
             s.send[i].rdy //= s.dut.send_rdy[i]
             s.dut.send_val[i] //= s.send[i].val
