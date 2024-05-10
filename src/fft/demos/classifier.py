@@ -11,23 +11,17 @@ import math
 
 def run_spectrogram(sample_rate, n_samples, file, cutoff_idx_low, cutoff_idx_high, cutoff_mag):
 
-    print("RUN_SPECTOGRAM")
-
     data, sample_rate = librosa.load(
         path.join(path.dirname(__file__), "audio", file), sr=sample_rate, mono=True
     )
-
-    print("SPECTOGRAM")
 
     data, bins = spectrogram(
         numpy_fft,
         data,
         sample_rate,
         n_samples,
-        n_samples - 4,
+        n_samples-1,
     )
-
-    print("CLASSIFY")
 
     classified = classify(data, cutoff_idx_low, cutoff_idx_high, cutoff_mag)
 
@@ -83,7 +77,7 @@ def classify(magnitudes: list[list[float]], low: int, high: int, threshold: floa
                     
                 counter += 1
         if (counter == 0):
-            classifications.append([0] * 7)
+            classifications.append([0] * 8)
             continue
         if (max_mag > 0.5):
             on_cycle += 1

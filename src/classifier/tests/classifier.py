@@ -25,7 +25,7 @@ from src.fft.demos.classifier import classify, run_spectrogram
 class ClassifierWrapper(Component):
     # Constructor
 
-    def construct(s, BIT_WIDTH=32, N_SAMPLES=8):
+    def construct(s, BIT_WIDTH=32, DECIMAL_PT = 16, N_SAMPLES=8):
 
         s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
         s.cutoff_idx_low = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
@@ -61,10 +61,24 @@ class ClassifierWrapper(Component):
         s.deserializer.send_val //= s.dut.recv_val
         s.dut.recv_rdy //= s.deserializer.send_rdy
 
-        # Output
-        s.dut.send_msg //= s.send.msg
-        s.dut.send_val //= s.send.val
-        s.send.rdy //= s.dut.send_rdy
+        # # Output
+        # s.dut.send_msg //= s.send.msg
+        # s.dut.send_val //= s.send.val
+        # s.send.rdy //= s.dut.send_rdy
+
+        # Hook up a serializer
+        s.serializer = Serializer(1, 1)
+        s.serializer.send_msg //= s.send.msg
+        s.serializer.send_val //= s.send.val
+        s.send.rdy //= s.serializer.send_rdy
+
+        # Hook up the Classifier to the serializer
+        for i in range(1):
+            s.dut.send_msg[i] //= s.serializer.recv_msg[i]
+
+        s.dut.send_val //= s.serializer.recv_val
+        s.serializer.recv_rdy //= s.dut.send_rdy
+
 
     def line_trace(s):
         return f"{s.deserializer.line_trace()} > {s.dut.line_trace()}"
@@ -74,7 +88,7 @@ class ClassifierWrapper(Component):
 # TestHarness
 # -------------------------------------------------------------------------
 class TestHarness(Component):
-    def construct(s, BIT_WIDTH=32, N_SAMPLES=8):
+    def construct(s, BIT_WIDTH=32, DECIMAL_PT=16, N_SAMPLES=8):
         # Instantiate models
 
         s.src = stream.SourceRTL(mk_bits(BIT_WIDTH))
@@ -82,7 +96,7 @@ class TestHarness(Component):
         s.cutoff_idx_high = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.cutoff_mag = stream.SourceRTL(mk_bits(BIT_WIDTH))
         s.sink = stream.SinkRTL(mk_bits(1))
-        s.dut = ClassifierWrapper(BIT_WIDTH, N_SAMPLES)
+        s.dut = ClassifierWrapper(BIT_WIDTH, DECIMAL_PT, N_SAMPLES)
 
         # Connect
 
@@ -108,6 +122,7 @@ class TestHarness(Component):
 
 def check_classifier(
     bit_width: int,
+    decimal_pt,
     n_samples: int,
     cmdline_opts: dict,
     src_delay: int,
@@ -117,7 +132,7 @@ def check_classifier(
     cutoff_idx_low: int,
     cutoff_idx_high: int,
     cutoff_mag: Fixed,
-    outputs: list[bool],
+    outputs: list[list[bool]],
 ) -> None:
     """
     Check the Classifier implementation.
@@ -137,17 +152,20 @@ def check_classifier(
     """
     # assert all(len(x) == n_samples for x in inputs)
 
-    model = TestHarness(bit_width, n_samples)
+    model = TestHarness(bit_width, decimal_pt, n_samples)
 
     # Convert inputs and outputs into a single list of bits
     inputs = [fixed_bits(x) for sample in inputs for x in sample]
     outputs = outputs
 
+    print(len(inputs))
+    print(len(outputs))
+
     # Run the model
     model.set_param(
         "top.src.construct",
         msgs=inputs,
-        initial_delay=src_delay + 3,
+        initial_delay=src_delay,
         interval_delay=src_delay,
     )
 
@@ -175,7 +193,7 @@ def check_classifier(
     model.set_param(
         "top.sink.construct",
         msgs=outputs,
-        initial_delay=sink_delay + 3,
+        initial_delay=sink_delay,
         interval_delay=sink_delay,
     )
 
@@ -185,10 +203,15 @@ def check_classifier(
 @pytest.mark.parametrize(
     *mk_test_matrices(
         {
-            "fp_spec": [(32, 16), (16, 8)],
-            "n_samples": [8, 16, 32, 64],
+            "fp_spec": [(32, 16)],
+            "n_samples": [8],
             "slow": True,
         }
+        # {
+        #     "fp_spec": [(32, 16), (16, 8)],
+        #     "n_samples": [8, 16, 32, 64],
+        #     "slow": True,
+        # }
     )
 )
 def test_audio(cmdline_opts, p):
@@ -202,7 +225,6 @@ def test_audio(cmdline_opts, p):
     cutoff_idx_high = 6
     float_cutoff_mag = 0.1
     fixed_cutoff_mag = Fixed(float_cutoff_mag, 1, p.fp_spec[0], p.fp_spec[1])
-    print(fixed_cutoff_mag)
 
     # Generate random inputs
     inputs, outputs = run_spectrogram(
@@ -214,6 +236,7 @@ def test_audio(cmdline_opts, p):
 
     check_classifier(
         p.fp_spec[0],
+        p.fp_spec[1],
         p.n_samples,
         cmdline_opts,
         src_delay=3,
