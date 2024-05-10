@@ -33,6 +33,10 @@ module classifier_Classifier #(
 
 );
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Input registers
+  /////////////////////////////////////////////////////////////////////////////
+
   logic [BIT_WIDTH-1:0] magnitude [N_SAMPLES-1:0];
 
   arr_EnResetReg #(
@@ -90,6 +94,10 @@ module classifier_Classifier #(
   );
   assign cutoff_mag_rdy = 1;
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Convolutions
+  /////////////////////////////////////////////////////////////////////////////
+
   // Vertical convolution
   logic [BIT_WIDTH-1:0] convVert;
   classifier_helpers_Sum #(
@@ -126,6 +134,10 @@ module classifier_Classifier #(
     .sum  (convHighHalf)
   );
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Find Maximum Magnitude
+  /////////////////////////////////////////////////////////////////////////////
+
   // Maximum magnitude of the input array
   logic [BIT_WIDTH-1:0] max_mag;
 
@@ -136,13 +148,13 @@ module classifier_Classifier #(
     else begin
       for (integer i = 0; i < N_SAMPLES; i = i + 1) begin
         if (magnitude[i] > cutoff_mag) begin
-          if (i < cutoff_idx_low || i > cutoff_idx_high) begin
+          if (i < cutoff_idx_low || i > cutoff_idx_high) begin // reduce magnitude outside interval
             if (magnitude[i] > max_mag) begin
               max_mag <= magnitude[i] >> 3; // Reduce magnitude by factor of 0.125
             end
           end
           else begin
-            if (magnitude[i] > max_mag) begin
+            if (magnitude[i] > max_mag) begin // amplify magnitude within interval
               max_mag <= magnitude[i] << 4; // Increase magnitude by factor of 16
             end
           end
@@ -185,6 +197,11 @@ module classifier_Classifier #(
   //   end
   // endgenerate
 
+  // assign max_mag = max_mags[N_SAMPLES-1];
+
+  /////////////////////////////////////////////////////////////////////////////
+  // ON_CYCLE and OFF_CYCLE Counters
+  /////////////////////////////////////////////////////////////////////////////
 
   // TODO: make this configurable (it's 0.5 by putting a 1 in the DECIMAL MSB)
   logic max_mag_above_point_five;
@@ -227,6 +244,10 @@ module classifier_Classifier #(
     .count_is_max (off_cycle_count_is_max)
   );
 
+  /////////////////////////////////////////////////////////////////////////////
+  // CURR_SOUND Logic
+  /////////////////////////////////////////////////////////////////////////////
+
   // pass through sound
   logic curr_sound;
   always_ff @(posedge clk) begin
@@ -262,6 +283,9 @@ module classifier_Classifier #(
   //   .count_is_max ()
   // );
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Count Decrementer
+  /////////////////////////////////////////////////////////////////////////////
   logic [BIT_WIDTH-1:0] count;
 
   always_ff @(posedge clk) begin

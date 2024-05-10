@@ -198,14 +198,15 @@ def test_audio(cmdline_opts, p):
     audio_file = "SSR4F_MixPre-1390_01.wav"
 
     # TODO: Configure this later
-    cutoff_idx_low = 5
-    cutoff_idx_high = 10
-    float_cutoff_mag = 0.01
+    cutoff_idx_low = 2
+    cutoff_idx_high = 6
+    float_cutoff_mag = 0.1
     fixed_cutoff_mag = Fixed(float_cutoff_mag, 1, p.fp_spec[0], p.fp_spec[1])
+    print(fixed_cutoff_mag)
 
     # Generate random inputs
     inputs, outputs = run_spectrogram(
-        sample_rate, audio_file, cutoff_idx_low, cutoff_idx_high, float_cutoff_mag
+        sample_rate, p.n_samples, audio_file, cutoff_idx_low, cutoff_idx_high, float_cutoff_mag
     )
     inputs = [
         [Fixed(x, 1, p.fp_spec[0], p.fp_spec[1]) for x in sample] for sample in inputs

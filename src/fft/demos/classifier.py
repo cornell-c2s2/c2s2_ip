@@ -9,11 +9,10 @@ import multiprocessing as mp
 import argparse
 import math
 
-def run_spectrogram(sample_rate, file, cutoff_idx_low, cutoff_idx_high, cutoff_mag):
+def run_spectrogram(sample_rate, n_samples, file, cutoff_idx_low, cutoff_idx_high, cutoff_mag):
 
     print("RUN_SPECTOGRAM")
 
-    n_samples = 32
     data, sample_rate = librosa.load(
         path.join(path.dirname(__file__), "audio", file), sr=sample_rate, mono=True
     )
