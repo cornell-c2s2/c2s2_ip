@@ -111,7 +111,7 @@ module classifier_Classifier #(
   );
 
   // Lower half convolution
-  logic [BIT_WIDTH-1:0] convLowHalf;
+  logic [BIT_WIDTH-1:0] convLowHalf_tmp;
   classifier_helpers_Sum #(
     .BIT_WIDTH(BIT_WIDTH),
     .N_SAMPLES(N_SAMPLES / 2)
@@ -119,11 +119,14 @@ module classifier_Classifier #(
     .clk  (clk),
     .reset(reset),
     .arr  (magnitude[N_SAMPLES/2-1:0]),
-    .sum  (convLowHalf)
+    .sum  (convLowHalf_tmp)
   );
+  // multiply by two (like in python model)
+  logic [BIT_WIDTH-1:0] convLowHalf;
+  assign convLowHalf = convLowHalf_tmp << 1;
 
   // Upper half convolution
-  logic [BIT_WIDTH-1:0] convHighHalf;
+  logic [BIT_WIDTH-1:0] convHighHalf_tmp;
   classifier_helpers_Sum #(
     .BIT_WIDTH(BIT_WIDTH),
     .N_SAMPLES(N_SAMPLES / 2)
@@ -131,8 +134,11 @@ module classifier_Classifier #(
     .clk  (clk),
     .reset(reset),
     .arr  (magnitude[N_SAMPLES-1:N_SAMPLES/2]),
-    .sum  (convHighHalf)
+    .sum  (convHighHalf_tmp)
   );
+  // multiply by two (like in python model)
+  logic [BIT_WIDTH-1:0] convHighHalf;
+  assign convHighHalf = convHighHalf_tmp << 1;
 
   /////////////////////////////////////////////////////////////////////////////
   // Find Maximum Magnitude
@@ -209,7 +215,7 @@ module classifier_Classifier #(
 
   // TODO: make this configurable (it's 0.25 by putting a 1 in the DECIMAL MSB)
   logic max_mag_below_point_three;
-  assign max_mag_below_point_three = max_mag > (1 << (DECIMAL_PT-2)); 
+  assign max_mag_below_point_three = max_mag < (1 << (DECIMAL_PT-2)); 
 
   // incrementers for on_cycle and off_cycle
   logic on_cycle_count_is_max;

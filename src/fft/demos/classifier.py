@@ -77,7 +77,7 @@ def classify(magnitudes: list[list[float]], low: int, high: int, threshold: floa
                     
                 counter += 1
         if (counter == 0):
-            classifications.append([0] * 8)
+            classifications.append(0)
             continue
         if (max_mag > 0.5):
             on_cycle += 1
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     # Generate all the spectrograms in parallel
     with mp.Pool(16) as pool:
         results = pool.starmap(
-            run_spectrogram, [(sample_rate, file) for file in audio_files]
+            run_spectrogram, [(sample_rate, 8, file, 2, 6, 0.1) for file in audio_files]
         )
 
     spinner.succeed("Spectrograms generated")
