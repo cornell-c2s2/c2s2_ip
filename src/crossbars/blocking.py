@@ -25,7 +25,7 @@ class BlockingCrossbar(VerilogPlaceholder, Component):
         s.control_val = InPort(1)
         s.control_rdy = OutPort(1)
         s.input_spi = InPort(1)
-        s.output_spi = OutPort(1)
+        s.output_spi = InPort(1)
 
         s.set_metadata(VerilogPlaceholderPass.top_module, "blocking_with_spi")
         s.set_metadata(
