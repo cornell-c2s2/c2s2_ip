@@ -14,21 +14,19 @@ from pymtl3.stdlib.test_utils import (
     config_model_with_cmdline_opts,
 )
 
-max_trsns = 100
+
+# pad the str to 3 digits
+def pad(n: int) -> str:
+    return " " * (3 - len(str(n))) + str(n)
 
 
-def run_interconnect(in_msgs, out_msgs, cmdline_opts):
-    dut = Interconnect()
-    dut = config_model_with_cmdline_opts(dut, cmdline_opts, duts=[])
-    dut.apply(DefaultPassGroup(linetrace=False))
-    dut.sim_reset()
-
+def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
     in_msgs = [mk_bits(18)(x) for x in in_msgs]
     out_msgs = [mk_bits(18)(x) for x in out_msgs]
 
     in_idx = 0
     out_idx = 0
-    trsns = 0
+    trsns = curr_trsns
 
     spc = 0
 
@@ -40,25 +38,33 @@ def run_interconnect(in_msgs, out_msgs, cmdline_opts):
 
         if in_idx < len(in_msgs) and spc == 1:
             retmsg = spi_write(dut, write_read_msg(in_msgs[in_idx]))
-            print("Trsn ", trsns, " SENT: ", in_msgs[in_idx])
+            print("Trsn ", pad(trsns), " SENT: ", in_msgs[in_idx])
             in_idx += 1
             spc = retmsg[18]
-            print("Raw ", trsns, " RECV: ", retmsg)
             if retmsg[19] == 1:
+                print("Trsn ", pad(trsns), " RECV: ", retmsg[0:18])
                 assert retmsg[0:18] == out_msgs[out_idx]
                 out_idx += 1
-                print("Trsn ", trsns, " RECV: ", retmsg[0:18])
 
         else:
             retmsg = spi_write(dut, read_msg())
             spc = retmsg[18]
-            print("Raw ", trsns, " RECV: ", retmsg)
             if retmsg[19] == 1:
+                print("Trsn ", pad(trsns), " RECV: ", retmsg[0:18])
                 assert retmsg[0:18] == out_msgs[out_idx]
                 out_idx += 1
-                print("Trsn ", trsns, " RECV: ", retmsg[0:18])
 
         trsns += 1
+
+    return trsns
+
+
+def make_interconnect(cmdline_opts):
+    dut = Interconnect()
+    dut = config_model_with_cmdline_opts(dut, cmdline_opts, duts=[])
+    dut.apply(DefaultPassGroup(linetrace=False))
+    dut.sim_reset()
+    return dut
 
 
 class InXbarCfg(int):
@@ -81,6 +87,15 @@ def output_xbar_config_msg(output: OutXbarCfg):
     return 0x30000 | output
 
 
+def loopback_inXbar_msg(msgs):
+    return [input_xbar_config_msg(InXbarCfg.SPI_SPI)] + msgs, msgs
+
+
+def loopback_outXbar_msg(msgs):
+    new_msgs = [(0x10000 | int(x)) for x in msgs]
+    return [output_xbar_config_msg(OutXbarCfg.SPI_SPI)] + new_msgs, new_msgs
+
+
 @pytest.mark.parametrize(
     "msgs",
     [
@@ -93,12 +108,9 @@ def output_xbar_config_msg(output: OutXbarCfg):
     ],
 )
 def test_loopback_inXbar(msgs, cmdline_opts):
-    # make sure all messages are 16 bits
-    for msg in msgs:
-        assert msg < 0x10000 and msg >= 0
-    in_msgs = [input_xbar_config_msg(InXbarCfg.SPI_SPI)] + msgs
-    out_msgs = msgs
-    run_interconnect(in_msgs, out_msgs, cmdline_opts)
+    in_msgs, out_msgs = loopback_inXbar_msg(msgs)
+    dut = make_interconnect(cmdline_opts)
+    run_interconnect(dut, in_msgs, out_msgs)
 
 
 @pytest.mark.parametrize(
@@ -113,16 +125,12 @@ def test_loopback_inXbar(msgs, cmdline_opts):
     ],
 )
 def test_loopback_outXbar(msgs, cmdline_opts):
-    for msg in msgs:
-        assert msg < 0x10000 and msg >= 0
-    in_msgs = [
-        output_xbar_config_msg(OutXbarCfg.SPI_SPI),
-    ] + msgs
-    out_msgs = msgs
-    run_interconnect(in_msgs, out_msgs, cmdline_opts)
+    in_msgs, out_msgs = loopback_outXbar_msg(msgs)
+    dut = make_interconnect(cmdline_opts)
+    run_interconnect(dut, in_msgs, out_msgs)
 
 
-def run_fft(inputs: list[Fixed], outputs: list[Fixed], cmdline_opts):
+def fft_msg(inputs: list[Fixed], outputs: list[Fixed]):
 
     inputs = [fixed_bits(x) for sample in inputs for x in sample]
     outputs = [fixed_bits(x) for sample in outputs for x in sample]
@@ -134,7 +142,7 @@ def run_fft(inputs: list[Fixed], outputs: list[Fixed], cmdline_opts):
 
     out_msgs = [(0x10000 | int(x)) for x in outputs]
 
-    run_interconnect(in_msgs, out_msgs, cmdline_opts)
+    return in_msgs, out_msgs
 
 
 def fixN(n):
@@ -148,5 +156,20 @@ def fixN(n):
     ],
 )
 def test_fft_manual(input, output, cmdline_opts):
-    print(fixN(1))
-    run_fft(input, output, cmdline_opts)
+    in_msgs, out_msgs = fft_msg(input, output)
+    dut = make_interconnect(cmdline_opts)
+    run_interconnect(dut, in_msgs, out_msgs)
+
+
+def test_compose(cmdline_opts):
+    xbar_in_in_msgs, xbar_in_out_msgs = loopback_inXbar_msg([0x5555, 0xAAAA])
+    fft_in_msgs, fft_out_msgs = fft_msg(
+        [[fixN(1) for _ in range(32)]],
+        [[fixN(32)] + [fixN(0) for _ in range(31)]],
+    )
+    xbar_out_in_msgs, xbar_out_out_msgs = loopback_outXbar_msg([0xAAAA, 0x5555])
+
+    dut = make_interconnect(cmdline_opts)
+    num_t1 = run_interconnect(dut, xbar_in_in_msgs, xbar_in_out_msgs)
+    num_t2 = run_interconnect(dut, fft_in_msgs, fft_out_msgs, curr_trsns=num_t1)
+    run_interconnect(dut, xbar_out_in_msgs, xbar_out_out_msgs, curr_trsns=num_t2)
