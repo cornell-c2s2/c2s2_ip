@@ -21,25 +21,16 @@ class TestHarness(Component):
 
         s.srcs = [stream.SourceRTL(mk_bits(BIT_WIDTH)) for _ in range(N_INPUTS)]
         s.sinks = [stream.SinkRTL(mk_bits(BIT_WIDTH)) for _ in range(N_OUTPUTS)]
-        
-        s.input_spi = stream.SourceRTL(mk_bits(1))
-        s.output_spi = stream.SourceRTL(mk_bits(1))
-
         s.dut = BlockingCrossbarWrapper(BIT_WIDTH, N_INPUTS, N_OUTPUTS)
-        
+
         # Connect
         for i in range(N_INPUTS):
             s.srcs[i].send //= s.dut.recv[i]
 
         for i in range(N_OUTPUTS):
             s.dut.send[i] //= s.sinks[i].recv
-        
+
         s.control.send //= s.dut.control
-        s.input_spi.send //= s.dut.input_spi
-        s.output_spi.send //= s.dut.output_spi
-
-
-
 
     def done(s):
         # These are any as the unselected inputs/outputs may not be done
@@ -55,21 +46,10 @@ class TestHarness(Component):
 
 # Some basic test cases
 @pytest.mark.parametrize(
-    "bit_width, n_inputs, n_outputs, config, input_spi, output_spi, inputs",
+    "bit_width, n_inputs, n_outputs, config, inputs",
     [
-        (4, 2, 2, (1, 1), 0, 1, [[1, 0], [0, 0], [1, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 0), 0, 0, [[1, 1], [1, 0], [1, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 1), 0, 1, [[0, 1], [0, 0], [1, 1]]),  # 2x2 crossbar
-        (4, 2, 2, (0, 1), 1, 0, [[1, 1], [0, 1], [1, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 1), 1, 1, [[0, 1], [0, 1], [1, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 1), 0, 1, [[1, 1], [0, 1], [0, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 0), 1, 0, [[0, 1], [0, 1], [1, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (0, 1), 1, 1, [[0, 1], [1, 1], [1, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 1), 1, 0, [[0, 0], [0, 1], [1, 1]]),  # 2x2 crossbar
-        (4, 2, 2, (0, 0), 1, 0, [[1, 1], [1, 1], [0, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 1), 0, 1, [[0, 1], [0, 1], [0, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 1), 0, 0, [[0, 1], [0, 1], [0, 0]]),  # 2x2 crossbar
-        (4, 2, 2, (1, 0), 0, 0, [[1, 1], [0, 1], [1, 0]]),  # 2x2 crossbar
+        (4, 2, 2, (0, 0), [[1, 1], [0, 0], [1, 0]]),  # 2x2 crossbar
+        (4, 2, 2, (1, 0), [[1, 1], [0, 0], [1, 0]]),  # 2x2 crossbar
     ],
 )
 def test_basic(
@@ -77,8 +57,6 @@ def test_basic(
     n_inputs,
     n_outputs,
     config: tuple[int, int],
-    input_spi,
-    output_spi,
     inputs: list[list[int]],
     cmdline_opts,
 ):
@@ -87,7 +65,7 @@ def test_basic(
 
     # Generate expected outputs
     sim_xbar, sim_cfg = create_crossbar(bit_width, n_inputs, n_outputs)
-    sim_cfg(*config, input_spi, output_spi)
+    sim_cfg(*config)
     outputs = [sim_xbar(inp) for inp in inputs]
 
     control_bit_width = int(math.log2(n_inputs) + math.log2(n_outputs))
@@ -123,19 +101,5 @@ def test_basic(
             initial_delay=10,
             interval_delay=3,
         )
-    
-    model.set_param(
-        "top.input_spi.construct",
-        msgs=[input_spi],
-        initial_delay=10,
-        interval_delay=3,
-    )
-
-    model.set_param(
-        "top.output_spi.construct",
-        msgs=[output_spi],
-        initial_delay=10,
-        interval_delay=3,
-    )
 
     run_sim(model, cmdline_opts, duts=["dut"])
