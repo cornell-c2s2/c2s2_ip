@@ -43,6 +43,7 @@ def run_interconnect(in_msgs, out_msgs, cmdline_opts):
             print("Trsn ", trsns, " SENT: ", in_msgs[in_idx])
             in_idx += 1
             spc = retmsg[18]
+            print("Raw ", trsns, " RECV: ", retmsg)
             if retmsg[19] == 1:
                 assert retmsg[0:18] == out_msgs[out_idx]
                 out_idx += 1
@@ -51,6 +52,7 @@ def run_interconnect(in_msgs, out_msgs, cmdline_opts):
         else:
             retmsg = spi_write(dut, read_msg())
             spc = retmsg[18]
+            print("Raw ", trsns, " RECV: ", retmsg)
             if retmsg[19] == 1:
                 assert retmsg[0:18] == out_msgs[out_idx]
                 out_idx += 1
