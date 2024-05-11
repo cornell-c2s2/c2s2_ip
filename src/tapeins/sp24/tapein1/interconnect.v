@@ -245,6 +245,11 @@ module tapeins_sp24_tapein1_Interconnect (
     .recv_msg(fft_send_msg)
   );
 
+  // always_ff @(posedge clk) begin
+  //   $display("%h %h %h %h", output_xbar_recv_val[0], output_xbar_recv_val[1],
+  //            output_xbar_send_val[0], output_xbar_send_val[1]);
+  // end
+
 
   // PEASE FFT
   fft_pease_FFT #(
@@ -282,7 +287,7 @@ module tapeins_sp24_tapein1_Interconnect (
   assign output_xbar_send_rdy[0] = arbiter_rdy[1];
   // output 1 is unused (for now)
   // TODO: Change this to wishbone
-  logic unused_output_xbar = &{1'b0, output_xbar_send_msg[1], output_xbar_send_val[1], arbiter_rdy[1], 1'b0};
+  logic unused_output_xbar = &{1'b0, output_xbar_send_msg[1], output_xbar_send_val[1], 1'b0};
   assign output_xbar_send_rdy[1] = 1'b0;
 
   // configuration message for the crossbar
