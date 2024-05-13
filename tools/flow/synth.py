@@ -69,8 +69,11 @@ def design_files(build: str, designs: list[dict], args) -> list[dict]:
         top_module = design["DESIGN_NAME"]
         design["ORIGINAL_DESIGN_NAME"] = top_module
         design["DESIGN_NAME"] = set()
-        for params in itertools.permutations(synth_params):
-            design["DESIGN_NAME"].add("__".join([top_module, *params]))
+        if len(synth_params) == 0:
+            design["DESIGN_NAME"].add(f"{top_module}_noparam")
+        else:
+            for params in itertools.permutations(synth_params):
+                design["DESIGN_NAME"].add("__".join([top_module, *params]))
 
     unique_design_names = set.union(*[d["DESIGN_NAME"] for d in designs])
     log.debug("Searching for designs matching %s", unique_design_names)
@@ -183,7 +186,8 @@ def design_files(build: str, designs: list[dict], args) -> list[dict]:
         else:
             # Success, remove synth parameters
             design.pop("ORIGINAL_DESIGN_NAME")
-            design.pop("SYNTH_PARAMETERS")
+            if "SYNTH_PARAMETERS" in design:
+                design.pop("SYNTH_PARAMETERS")
             design["DESIGN_NAME"] = design_name
 
     spinner.succeed("Finished collecting design files")
@@ -208,6 +212,258 @@ def synthesize(design, path_prefix, args):
             log.error(synth_result.stderr)
         return 1
 
+    return 0
+
+
+# Synthesize user project wrapper given an existing macro for a design.
+# Also generates gate-level tests from test case files.
+def synthesize_core(design, path_prefix, args):
+    prefixed_design_name = f"{path_prefix}_{design['DESIGN_NAME']}"
+
+    # First, clean up the existing user_project_wrapper
+    spinner = Spinner(args, f"Copying files to user_project_wrapper")
+
+    remote_rtl_dir = path.join(caravel_dir(), "verilog", "rtl")
+    remote_openlane_dir = path.join(caravel_dir(), "openlane", "user_project_wrapper")
+    build = build_dir()
+
+    # Port mapping for the user_project_wrapper in verilog format
+    port_mapping = ",\n\t\t".join(f".{k}({v})" for k, v in design["GPIO_MAP"].items())
+
+    # Create user_project_wrapper.v in the build directory to copy over
+    with open(path.join(build, "user_project_wrapper.v"), "w") as f:
+        f.write(
+            f"""
+// SPDX-FileCopyrightText: 2020 Efabless Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
+
+`default_nettype none
+/*
+ *-------------------------------------------------------------
+ *
+ * user_project_wrapper
+ *
+ * This wrapper enumerates all of the pins available to the
+ * user for the user project.
+ *
+ * An example user project is provided in this wrapper.  The
+ * example should be removed and replaced with the actual
+ * user project.
+ *
+ *-------------------------------------------------------------
+ */
+
+module user_project_wrapper (
+`ifdef USE_POWER_PINS
+  inout vdda1,  // User area 1 3.3V supply
+  inout vdda2,  // User area 2 3.3V supply
+  inout vssa1,  // User area 1 analog ground
+  inout vssa2,  // User area 2 analog ground
+  inout vccd1,  // User area 1 1.8V supply
+  inout vccd2,  // User area 2 1.8v supply
+  inout vssd1,  // User area 1 digital ground
+  inout vssd2,  // User area 2 digital ground
+`endif
+
+  // Wishbone Slave ports (WB MI A)
+  input wb_clk_i,
+  input wb_rst_i,
+  input wbs_stb_i,
+  input wbs_cyc_i,
+  input wbs_we_i,
+  input [3:0] wbs_sel_i,
+  input [31:0] wbs_dat_i,
+  input [31:0] wbs_adr_i,
+  output wbs_ack_o,
+  output [31:0] wbs_dat_o,
+
+  // Logic Analyzer Signals
+  input  [127:0] la_data_in,
+  output [127:0] la_data_out,
+  input  [127:0] la_oenb,
+
+  // IOs
+  input  [`MPRJ_IO_PADS-1:0] io_in,
+  output [`MPRJ_IO_PADS-1:0] io_out,
+  output [`MPRJ_IO_PADS-1:0] io_oeb,
+
+  // Analog (direct connection to GPIO pad---use with caution)
+  // Note that analog I/O is not available on the 7 lowest-numbered
+  // GPIO pads, and so the analog_io indexing is offset from the
+  // GPIO indexing by 7 (also upper 2 GPIOs do not have analog_io).
+  inout [`MPRJ_IO_PADS-10:0] analog_io,
+
+  // Independent clock (on independent integer divider)
+  input user_clock2,
+
+  // User maskable interrupt signals
+  output [2:0] user_irq
+);
+
+  {prefixed_design_name} mprj (
+`ifdef USE_POWER_PINS
+    .VPWR(vccd1),  // User area 1 1.8V supply
+    .VGND(vssd1),  // User area 1 digital ground
+`endif
+    {port_mapping}
+  );
+
+endmodule  // user_project_wrapper
+"""
+        )
+
+    # Copy the user_project_wrapper files to caravel
+    cp(
+        path.join(build, "user_project_wrapper.v"),
+        path.join(remote_rtl_dir, "user_project_wrapper.v"),
+    )
+
+    # create macro.cfg and copy to caravel
+    with open(path.join(build, "macro.cfg"), "w") as f:
+        f.write(f"mprj {design['MPRJ_POS']}")
+
+    cp(
+        path.join(build, "macro.cfg"),
+        path.join(remote_openlane_dir, "macro.cfg"),
+    )
+
+    openlane_config = {
+        "DESIGN_NAME": "user_project_wrapper",
+        "VERILOG_FILES": [
+            "dir::../../verilog/rtl/defines.v",
+            "dir::../../verilog/rtl/user_project_wrapper.v",
+        ],
+        "ROUTING_CORES": 1,
+        "CLOCK_PERIOD": design["PARAMS"]["CLOCK_PERIOD"],
+        "CLOCK_PORT": "wb_clk_i",
+        "CLOCK_NET": "mprj.clk",
+        "FP_PDN_MACRO_HOOKS": "mprj vccd1 vssd1 vccd1 vssd1",
+        "MACRO_PLACEMENT_CFG": "dir::macro.cfg",
+        "MAGIC_DEF_LABELS": 0,
+        "VERILOG_FILES_BLACKBOX": [f"dir::../../verilog/gl/{prefixed_design_name}.v"],
+        "EXTRA_LEFS": f"dir::../../lef/{prefixed_design_name}.lef",
+        "EXTRA_GDS_FILES": f"dir::../../gds/{prefixed_design_name}.gds",
+        "EXTRA_LIBS": f"dir::../../lib/{prefixed_design_name}.lib",
+        "EXTRA_SPEFS": [
+            prefixed_design_name,
+            f"dir::../../spef/multicorner/{prefixed_design_name}.min.spef",
+            f"dir::../../spef/multicorner/{prefixed_design_name}.nom.spef",
+            f"dir::../../spef/multicorner/{prefixed_design_name}.max.spef",
+        ],
+        "BASE_SDC_FILE": "dir::base_user_project_wrapper.sdc",
+        "IO_SYNC": 0,
+        "MAX_TRANSITION_CONSTRAINT": 1.5,
+        "RUN_LINTER": 0,
+        "QUIT_ON_SYNTH_CHECKS": 0,
+        "FP_PDN_CHECK_NODES": 0,
+        "SYNTH_ELABORATE_ONLY": 1,
+        "PL_RANDOM_GLB_PLACEMENT": 1,
+        "PL_RESIZER_DESIGN_OPTIMIZATIONS": 0,
+        "PL_RESIZER_TIMING_OPTIMIZATIONS": 0,
+        "GLB_RESIZER_DESIGN_OPTIMIZATIONS": 0,
+        "GLB_RESIZER_TIMING_OPTIMIZATIONS": 0,
+        "PL_RESIZER_BUFFER_INPUT_PORTS": 0,
+        "FP_PDN_ENABLE_RAILS": 0,
+        "GRT_REPAIR_ANTENNAS": 0,
+        "RUN_FILL_INSERTION": 0,
+        "RUN_TAP_DECAP_INSERTION": 0,
+        "FP_PDN_VPITCH": 180,
+        "FP_PDN_HPITCH": 180,
+        "RUN_CTS": 0,
+        "FP_PDN_VOFFSET": 5,
+        "FP_PDN_HOFFSET": 5,
+        "MAGIC_ZEROIZE_ORIGIN": 0,
+        "FP_SIZING": "absolute",
+        "RUN_CVC": 0,
+        "UNIT": 2.4,
+        "FP_IO_VEXTEND": "expr::2 * $UNIT",
+        "FP_IO_HEXTEND": "expr::2 * $UNIT",
+        "FP_IO_VLENGTH": "expr::$UNIT",
+        "FP_IO_HLENGTH": "expr::$UNIT",
+        "FP_IO_VTHICKNESS_MULT": 4,
+        "FP_IO_HTHICKNESS_MULT": 4,
+        "FP_PDN_CORE_RING": 1,
+        "FP_PDN_CORE_RING_VWIDTH": 3.1,
+        "FP_PDN_CORE_RING_HWIDTH": 3.1,
+        "FP_PDN_CORE_RING_VOFFSET": 12.45,
+        "FP_PDN_CORE_RING_HOFFSET": 12.45,
+        "FP_PDN_CORE_RING_VSPACING": 1.7,
+        "FP_PDN_CORE_RING_HSPACING": 1.7,
+        "FP_PDN_VWIDTH": 3.1,
+        "FP_PDN_HWIDTH": 3.1,
+        "FP_PDN_VSPACING": "expr::(5 * $FP_PDN_CORE_RING_VWIDTH)",
+        "FP_PDN_HSPACING": "expr::(5 * $FP_PDN_CORE_RING_HWIDTH)",
+        "VDD_NETS": ["vccd1", "vccd2", "vdda1", "vdda2"],
+        "GND_NETS": ["vssd1", "vssd2", "vssa1", "vssa2"],
+        "SYNTH_USE_PG_PINS_DEFINES": "USE_POWER_PINS",
+        "pdk::sky130*": {
+            "RT_MAX_LAYER": "met4",
+            "DIE_AREA": "0 0 2920 3520",
+            "FP_DEF_TEMPLATE": "dir::fixed_dont_change/user_project_wrapper.def",
+            "scl::sky130_fd_sc_hd": {"CLOCK_PERIOD": 25},
+            "scl::sky130_fd_sc_hdll": {"CLOCK_PERIOD": 10},
+            "scl::sky130_fd_sc_hs": {"CLOCK_PERIOD": 8},
+            "scl::sky130_fd_sc_ls": {"CLOCK_PERIOD": 10, "SYNTH_MAX_FANOUT": 5},
+            "scl::sky130_fd_sc_ms": {"CLOCK_PERIOD": 10},
+        },
+        "pdk::gf180mcuC": {
+            "STD_CELL_LIBRARY": "gf180mcu_fd_sc_mcu7t5v0",
+            "FP_PDN_CHECK_NODES": 0,
+            "FP_PDN_ENABLE_RAILS": 0,
+            "RT_MAX_LAYER": "Metal4",
+            "DIE_AREA": "0 0 3000 3000",
+            "FP_DEF_TEMPLATE": "dir::fixed_dont_change/user_project_wrapper_gf180mcu.def",
+            "PL_OPENPHYSYN_OPTIMIZATIONS": 0,
+            "DIODE_INSERTION_STRATEGY": 0,
+            "MAGIC_WRITE_FULL_LEF": 0,
+        },
+    }
+
+    # Write the openlane config.json
+    config_json = path.join(build, f"user_project_wrapper_config.json")
+    with open(config_json, "w") as f:
+        json.dump(openlane_config, f, indent=2)
+
+    cp(
+        config_json,
+        path.join(remote_openlane_dir, "config.json"),
+    )
+
+    spinner.succeed("Finished copying files to user_project_wrapper")
+    spinner = Spinner(
+        args, f"Synthesizing user_project_wrapper with design {prefixed_design_name}"
+    )
+
+    # Run synthesis
+    synth_result = run(
+        f"cd {caravel_dir()} && make user_project_wrapper",
+        warn=True,
+        hide=args.verbose == 0,
+    )
+
+    if synth_result.exited != 0:
+        log.error("Synthesis failed for user_project_wrapper")
+        if args.verbose == 0:
+            # Log the stdout and stderr
+            log.error(synth_result.stdout)
+            log.error(synth_result.stderr)
+        return 1
+
+    # TODO: Add gl tests
+
+    spinner.succeed("Finished synthesizing user project wrapper")
     return 0
 
 
@@ -289,8 +545,12 @@ class Synth(SubCommand):
                 "FP_PIN_ORDER_CFG",
                 "SYNTH_PARAMETERS",
                 "VERILOG_FILE",
+                "DESIGN_IS_CORE",
+                "GPIO_MAP",
+                "MPRJ_POS",
             ]
         )
+        # Move everything other than certain special keys into the PARAMS area
         designs = [
             {
                 **{k: v for k, v in design.items() if k in special_keys},
@@ -298,6 +558,24 @@ class Synth(SubCommand):
             }
             for design in designs
         ]
+
+        # If any designs are CORE, we can only synthesize one user_project_wrapper at a time so we should make sure there is only one design total.
+
+        if any(design.get("DESIGN_IS_CORE", 1) == 1 for design in designs):
+            if len(designs) > 1:
+                log.error(
+                    "Found multiple core designs, can only synthesize one user_project_wrapper at a time"
+                )
+                return 1
+
+            if "GPIO_MAP" not in designs[0]:
+                log.error("Core design found but no gpio mapping (GPIO_MAP) specified.")
+                return 1
+            if "MPRJ_POS" not in designs[0]:
+                log.error(
+                    "Core design found but no mprj macro position (MPRJ_POS) specified."
+                )
+                return 1
 
         log.info("Synthesizing %s designs", len(designs))
         log.debug(json.dumps(designs, indent=2))
@@ -369,10 +647,12 @@ class Synth(SubCommand):
                         "VERILOG_FILES": [
                             f"dir::../../verilog/rtl/{prefixed_design_name}.v"
                         ],
+                        "DESIGN_IS_CORE": 0,
                         "FP_PIN_ORDER_CFG": "dir::pin_order.cfg",
                         **design["PARAMS"],
                     },
                     f,
+                    indent=2,
                 )
 
             cp(
@@ -401,7 +681,7 @@ class Synth(SubCommand):
         else:
             threads = args.nthreads
 
-        spinner = Spinner(args, f"Running synthesis with {threads} threads")
+        spinner = Spinner(args, f"Running macro synthesis with {threads} threads")
 
         with multiprocessing.Pool(threads) as pool:
             results = pool.starmap(
@@ -425,6 +705,10 @@ class Synth(SubCommand):
                 )
                 return 1
 
-        spinner.succeed("Finished synthesis")
+        spinner.succeed("Finished macro synthesis")
+
+        # If there is a core design, run synthesis on the user_project_wrapper
+        if designs[0].get("DESIGN_IS_CORE", 1) == 1:
+            synthesize_core(designs[0], path_prefix, args)
 
         return 0
