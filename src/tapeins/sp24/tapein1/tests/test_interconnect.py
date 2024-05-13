@@ -10,6 +10,7 @@ from src.fft.tests.fft import FFTInterface, FFTPease
 import random
 
 from pymtl3 import *
+from pymtl3.stdlib.stream.ifcs import valrdy_to_str
 from pymtl3.stdlib.test_utils import (
     mk_test_case_table,
     run_sim,
@@ -44,11 +45,11 @@ def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
 
     in_idx = 0
     out_idx = 0
-    trsns = curr_trsns
+    trsns = curr_trsns + 1
 
     spc = 0
 
-    print("\nBEGIN TEST\n=============================")
+    print("")
 
     while out_idx < len(out_msgs):
         if trsns > max_trsns:
@@ -56,25 +57,34 @@ def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
 
         if in_idx < len(in_msgs) and spc == 1:
             retmsg = spi_write(dut, write_read_msg(in_msgs[in_idx]))
-            print("Trsn ", pad(trsns), " SENT: ", in_msgs[in_idx])
-            in_idx += 1
             spc = retmsg[18]
+            print(
+                "Trsn" + pad(trsns) + ":",
+                valrdy_to_str(in_msgs[in_idx], 1, 1, 6),
+                ">",
+                valrdy_to_str(retmsg[0:18], retmsg[19], 1, 6),
+            )
             if retmsg[19] == 1:
-                print("Trsn ", pad(trsns), " RECV: ", retmsg[0:18])
                 assert retmsg[0:18] == out_msgs[out_idx]
                 out_idx += 1
+            in_idx += 1
 
         else:
             retmsg = spi_write(dut, read_msg())
+            print(
+                "Trsn" + pad(trsns) + ":",
+                valrdy_to_str(0, in_idx < len(in_msgs), spc, 6),
+                ">",
+                valrdy_to_str(retmsg[0:18], retmsg[19], 1, 6),
+            )
             spc = retmsg[18]
             if retmsg[19] == 1:
-                print("Trsn ", pad(trsns), " RECV: ", retmsg[0:18])
                 assert retmsg[0:18] == out_msgs[out_idx]
                 out_idx += 1
 
         trsns += 1
 
-    return trsns
+    return trsns - 1
 
 
 # Makes a new interconnect dut
@@ -227,6 +237,6 @@ def test_compose(cmdline_opts):
     xbar_out_in_msgs, xbar_out_out_msgs = loopback_outXbar_msg([0xAAAA, 0x5555])
 
     dut = make_interconnect(cmdline_opts)
-    num_t1 = run_interconnect(dut, xbar_in_in_msgs, xbar_in_out_msgs)
+    num_t1 = run_interconnect(dut, xbar_in_in_msgs, xbar_in_out_msgs, max_trsns=100)
     num_t2 = run_interconnect(dut, fft_in_msgs, fft_out_msgs, curr_trsns=num_t1)
     run_interconnect(dut, xbar_out_in_msgs, xbar_out_out_msgs, curr_trsns=num_t2)
