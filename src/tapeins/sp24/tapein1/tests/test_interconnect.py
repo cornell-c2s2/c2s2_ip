@@ -3,9 +3,11 @@ from src.tapeins.sp24.tapein1.tests.spi_driver_sim import spi_write
 from src.tapeins.sp24.tapein1.interconnect import Interconnect
 from src.tapeins.sp24.tapein1.tests.spi_stream_protocol import *
 from fixedpt import Fixed, CFixed
-from tools.utils import fixed_bits
+from tools.utils import fixed_bits, mk_test_matrices
 
-# from src.fft.tests.fft import *
+from src.fft.tests.fft import FFTInterface, FFTPease
+
+import random
 
 from pymtl3 import *
 from pymtl3.stdlib.test_utils import (
@@ -15,12 +17,28 @@ from pymtl3.stdlib.test_utils import (
 )
 
 
-# pad the str to 3 digits
+# Helper function for interconnect printouts
 def pad(n: int) -> str:
     return " " * (3 - len(str(n))) + str(n)
 
 
 def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
+    """
+    Run src/sink testing on the interconnect RTL model, src/sink msgs are
+    converted to SPI protocol transactions. Testing is done at the transaction
+    level.
+
+    This function can be called multiple times on the same interconnect dut to
+    run a composite test which consists of multiple input/output stages.
+    E.g. Loopback -> FFT -> Loopback
+
+    Args:
+    dut: The interconnect model
+    in_msgs: A list of input messages
+    out_msgs: A list of expected output messages
+    max_trsns: The maximum number of transactions to run
+    curr_trsns: The current transaction number
+    """
     in_msgs = [mk_bits(18)(x) for x in in_msgs]
     out_msgs = [mk_bits(18)(x) for x in out_msgs]
 
@@ -59,6 +77,7 @@ def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
     return trsns
 
 
+# Makes a new interconnect dut
 def make_interconnect(cmdline_opts):
     dut = Interconnect()
     dut = config_model_with_cmdline_opts(dut, cmdline_opts, duts=[])
@@ -77,20 +96,24 @@ class OutXbarCfg(int):
     FFT_SPI = 0b10  # FFT
 
 
+# Generates xbar config messages
 def input_xbar_config_msg(input: InXbarCfg):
     assert input < 4 and input >= 0
     return 0x20000 | input
 
 
+# Generates xbar config messages
 def output_xbar_config_msg(output: OutXbarCfg):
     assert output < 4 and output >= 0
     return 0x30000 | output
 
 
+# Generates input/output msgs for inXbar loopback
 def loopback_inXbar_msg(msgs):
     return [input_xbar_config_msg(InXbarCfg.SPI_SPI)] + msgs, msgs
 
 
+# Generates input/output msgs for outXbar loopback
 def loopback_outXbar_msg(msgs):
     new_msgs = [(0x10000 | int(x)) for x in msgs]
     return [output_xbar_config_msg(OutXbarCfg.SPI_SPI)] + new_msgs, new_msgs
@@ -130,6 +153,7 @@ def test_loopback_outXbar(msgs, cmdline_opts):
     run_interconnect(dut, in_msgs, out_msgs)
 
 
+# Generates input/output msgs for FFT from fixedpt inputs/outputs
 def fft_msg(inputs: list[Fixed], outputs: list[Fixed]):
 
     inputs = [fixed_bits(x) for sample in inputs for x in sample]
@@ -145,6 +169,7 @@ def fft_msg(inputs: list[Fixed], outputs: list[Fixed]):
     return in_msgs, out_msgs
 
 
+# Shortcut for creating fixedpt numbers
 def fixN(n):
     return Fixed(n, True, 16, 8)
 
@@ -161,6 +186,38 @@ def test_fft_manual(input, output, cmdline_opts):
     run_interconnect(dut, in_msgs, out_msgs)
 
 
+# Randomized test for the FFT
+@pytest.mark.parametrize(
+    *mk_test_matrices(
+        {
+            "input_mag": [1, 10],  # Maximum magnitude of the input signal
+            "input_num": [1, 10],  # Number of random inputs to generate
+            "seed": list(range(2)),  # Random seed
+        }
+    )
+)
+def test_fft_random(cmdline_opts, p):
+    random.seed(random.random() + p.seed)
+    inputs = [
+        [
+            CFixed((random.uniform(-p.input_mag, p.input_mag), 0), 16, 8)
+            for i in range(32)
+        ]
+        for _ in range(p.input_num)
+    ]
+
+    model: FFTInterface = FFTPease(16, 8, 32)
+    outputs = [model.transform(x) for x in inputs]
+
+    inputs = [[x.real for x in sample] for sample in inputs]
+    outputs = [[x.real for x in sample] for sample in outputs]
+
+    in_msgs, out_msgs = fft_msg(inputs, outputs)
+    dut = make_interconnect(cmdline_opts)
+    run_interconnect(dut, in_msgs, out_msgs, max_trsns=1000)
+
+
+# Composite test that combines loopback and FFT.
 def test_compose(cmdline_opts):
     xbar_in_in_msgs, xbar_in_out_msgs = loopback_inXbar_msg([0x5555, 0xAAAA])
     fft_in_msgs, fft_out_msgs = fft_msg(
