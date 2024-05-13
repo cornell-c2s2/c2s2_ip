@@ -155,7 +155,7 @@ def mk_test_matrix(values, slow=False):
     params = [
         pytest.param(
             tp(**dict(p)),
-            id=",".join([f"{p[i][0]}={smartstr(p[i][1])}" for i in range(len(keys))]),
+            id=".".join([f"{p[i][0]}_{smartstr(p[i][1])}" for i in range(len(keys))]),
             marks=pytest.mark.slow if slow else [],
         )
         for p in params
