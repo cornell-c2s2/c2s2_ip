@@ -15,6 +15,10 @@ class Interconnect(VerilogPlaceholder, Component):
         s.minion_parity = OutPort(1)
         s.adapter_parity = OutPort(1)
 
+        # unused ports
+        s.io_oeb = OutPort(23)
+        s.io_out = OutPort(5)
+
         s.set_metadata(VerilogPlaceholderPass.top_module, "Interconnect")
 
         s.set_metadata(

@@ -15,7 +15,11 @@ module tapeins_sp24_tapein1_Interconnect (
   output logic miso,
   input  logic sclk,
   output logic minion_parity,
-  output logic adapter_parity
+  output logic adapter_parity,
+  // These outputs are necessary to set the valid
+  // io_oeb and io_out values for the gpios.
+  output logic [22:0] io_oeb,
+  output logic [4:0] io_out
 );
   logic [17:0] spi_recv_msg;
   logic        spi_recv_rdy;
@@ -23,6 +27,11 @@ module tapeins_sp24_tapein1_Interconnect (
   logic [17:0] spi_send_msg;
   logic        spi_send_rdy;
   logic        spi_send_val;
+
+  // io_oeb can always be zero as we are using inputs with nopull
+  assign io_oeb = 0;
+  // gpios 0-4 require output values to be set.
+  assign io_out = 0;
 
   // SPI MINION
   spi_Minion #(
