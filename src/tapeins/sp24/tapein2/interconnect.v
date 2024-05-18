@@ -7,6 +7,7 @@
 `include "arbiter_router/router.v"
 `include "crossbars/blocking_overrideable.v"
 `include "classifier/classifier.v"
+`include "wishbone/wishbone.v"
 
 module tapeins_sp24_tapein1_Interconnect (
   input logic clk,
@@ -17,6 +18,15 @@ module tapeins_sp24_tapein1_Interconnect (
   input logic sclk,
   output logic minion_parity,
   output logic adapter_parity,
+  // Wishbone Slave ports (WB MI A)
+  input logic wbs_stb_i,
+  input logic wbs_cyc_i,
+  input logic wbs_we_i,
+  input logic [3:0] wbs_sel_i,
+  input logic [31:0] wbs_dat_i,
+  input logic [31:0] wbs_adr_i,
+  output logic wbs_ack_o,
+  output logic [31:0] wbs_dat_o,
   // Override each of the xbar inputs/outputs to spi
   input logic xbar_input_overrides[3],
   input logic xbar_output_overrides[3],
@@ -319,6 +329,79 @@ module tapeins_sp24_tapein1_Interconnect (
     .send_msg(output_xbar_send_msg[1])
   );
 
+  // WISHBONE HARNESS
+
+  logic [31:0] wishbone_ostream_data[3];
+  logic        wishbone_ostream_val [3];
+  logic        wishbone_ostream_rdy [3];
+
+  logic [31:0] wishbone_istream_data[3];
+  logic        wishbone_istream_val [3];
+  logic        wishbone_istream_rdy [3];
+
+  wishbone_Wishbone #(
+    .p_num_msgs(3),
+    .p_num_istream(3),
+    .p_num_ostream(3)
+  ) wishbone (
+    .clk(clk),
+    .reset(reset),
+    .wbs_stb_i(wbs_stb_i),
+    .wbs_cyc_i(wbs_cyc_i),
+    .wbs_we_i(wbs_we_i),
+    .wbs_sel_i(wbs_sel_i),
+    .wbs_dat_i(wbs_dat_i),
+    .wbs_adr_i(wbs_adr_i),
+    .wbs_ack_o(wbs_ack_o),
+    .wbs_dat_o(wbs_dat_o),
+    .istream_rdy(wishbone_istream_rdy),
+    .istream_val(wishbone_istream_val),
+    .ostream_rdy(wishbone_ostream_rdy),
+    .ostream_val(wishbone_ostream_val),
+    .ostream_data(wishbone_ostream_data),
+    .istream_data(wishbone_istream_data)
+  );
+
+  // 3 WB inputs:
+  // 0: input xbar inject
+  assign input_xbar_recv_msg[2] = wishbone_istream_data[0][DATA_BITS-1:0];
+  assign input_xbar_recv_val[2] = wishbone_istream_val[0];
+  assign wishbone_istream_rdy[0] = input_xbar_recv_rdy[2];
+  // 1: classifier xbar inject
+  assign classifier_xbar_recv_msg[2] = wishbone_istream_data[1][DATA_BITS-1:0];
+  assign classifier_xbar_recv_val[2] = wishbone_istream_val[1];
+  assign wishbone_istream_rdy[1] = classifier_xbar_recv_rdy[2];
+  // 2: output xbar inject
+  assign output_xbar_recv_msg[2] = wishbone_istream_data[2][0];
+  assign output_xbar_recv_val[2] = wishbone_istream_val[2];
+  assign wishbone_istream_rdy[2] = output_xbar_recv_rdy[2];
+
+  wire unused_wishbone_istream_bits = &{
+    1'b0,
+    wishbone_istream_data[0][31:DATA_BITS],
+    wishbone_istream_data[1][31:DATA_BITS],
+    wishbone_istream_data[2][31:1],
+    1'b0
+  };
+
+  // 3 WB outputs:
+  // 0: input xbar output
+  // sign extend the 16 bit data to 32 bits
+  assign wishbone_ostream_data[0] = {
+    {(32 - DATA_BITS) {input_xbar_send_msg[2][DATA_BITS-1]}}, input_xbar_send_msg[2]
+  };
+  assign wishbone_ostream_val[0] = input_xbar_send_val[2];
+  assign input_xbar_send_rdy[2] = wishbone_ostream_rdy[0];
+  // 1: classifier xbar output
+  assign wishbone_ostream_data[1] = {
+    {(32 - DATA_BITS) {classifier_xbar_send_msg[2][DATA_BITS-1]}}, classifier_xbar_send_msg[2]
+  };
+  assign wishbone_ostream_val[1] = classifier_xbar_send_val[2];
+  assign classifier_xbar_send_rdy[2] = wishbone_ostream_rdy[1];
+  // 2: output xbar output
+  // zero extend the classifier output to 32 bits
+  assign wishbone_ostream_data[2] = {31'b0, output_xbar_send_msg[2]};
+
   // 9 inputs:
   // 0: input xbar inject
   assign input_xbar_recv_msg[0] = router_msg[0][DATA_BITS-1:0];
@@ -405,9 +488,8 @@ module tapeins_sp24_tapein1_Interconnect (
   assign arbiter_val[3] = 1'b0;
 
   // 4: output xbar output
-  assign arbiter_msg[4][0] = output_xbar_send_msg[0];
-  // pad the rest of the message with zeros
-  assign arbiter_msg[4][DATA_BITS-1:1] = 15'b0;
+  // zero extend the classifier output to 16 bits
+  assign arbiter_msg[4] = {15'b0, output_xbar_send_msg[0]};
   assign arbiter_val[4] = output_xbar_send_val[0];
   assign output_xbar_send_rdy[0] = arbiter_rdy[4];
   // 5-8: unused
