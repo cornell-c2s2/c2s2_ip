@@ -46,7 +46,6 @@ class BlockingCrossbarWrapper(Component):
         s.input_spi = RecvIfcRTL(mk_bits(1))
         s.output_spi = RecvIfcRTL(mk_bits(1))
 
-
         s.control.msg //= s.dut.control
         s.control.val //= s.dut.control_val
         s.dut.control_rdy //= s.control.rdy

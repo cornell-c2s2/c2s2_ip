@@ -21,25 +21,22 @@ class TestHarness(Component):
 
         s.srcs = [stream.SourceRTL(mk_bits(BIT_WIDTH)) for _ in range(N_INPUTS)]
         s.sinks = [stream.SinkRTL(mk_bits(BIT_WIDTH)) for _ in range(N_OUTPUTS)]
-        
+
         s.input_spi = stream.SourceRTL(mk_bits(1))
         s.output_spi = stream.SourceRTL(mk_bits(1))
 
         s.dut = BlockingCrossbarWrapper(BIT_WIDTH, N_INPUTS, N_OUTPUTS)
-        
+
         # Connect
         for i in range(N_INPUTS):
             s.srcs[i].send //= s.dut.recv[i]
 
         for i in range(N_OUTPUTS):
             s.dut.send[i] //= s.sinks[i].recv
-        
+
         s.control.send //= s.dut.control
         s.input_spi.send //= s.dut.input_spi
         s.output_spi.send //= s.dut.output_spi
-
-
-
 
     def done(s):
         # These are any as the unselected inputs/outputs may not be done
@@ -123,7 +120,7 @@ def test_basic(
             initial_delay=10,
             interval_delay=3,
         )
-    
+
     model.set_param(
         "top.input_spi.construct",
         msgs=[input_spi],
