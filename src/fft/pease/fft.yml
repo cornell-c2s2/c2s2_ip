@@ -1,0 +1,38 @@
+# Labels defined here will be used for all config designs
+DESIGN_NAME: PeaseFFTWrapper # Top module name
+TEST_FILES: # pytest files
+  - ../tests/fft.py
+DESIGN_IS_CORE: 0
+FP_PIN_ORDER_CFG: ../fft_pins.cfg
+CLOCK_PORT: clk
+FP_SIZING: absolute
+CLOCK_PERIOD: 20
+DESIGNS:
+  - SYNTH_PARAMETERS:
+      BIT_WIDTH: 16
+      DECIMAL_PT: 8
+    DESIGNS:
+      # - SYNTH_PARAMETERS:
+      #     N_SAMPLES: 8
+      #   DIE_AREA: 0 0 350 350
+      #   PL_TARGET_DENSITY: 0.8
+      - SYNTH_PARAMETERS:
+          N_SAMPLES: 16
+        DIE_AREA: 0 0 550 500
+        PL_TARGET_DENSITY: 0.8
+      - SYNTH_PARAMETERS:
+          N_SAMPLES: 32
+        DIE_AREA: 0 0 1000 1000
+        PL_TARGET_DENSITY: 0.48
+  - SYNTH_PARAMETERS:
+      BIT_WIDTH: 32
+      DECIMAL_PT: 16
+    DESIGNS:
+      - SYNTH_PARAMETERS:
+          N_SAMPLES: 8
+        DIE_AREA: 0 0 600 600
+        PL_TARGET_DENSITY: 0.8
+      - SYNTH_PARAMETERS:
+          N_SAMPLES: 16
+        DIE_AREA: 0 0 1500 1500
+        PL_TARGET_DENSITY: 0.5
