@@ -324,10 +324,129 @@ endmodule  // user_project_wrapper
 """
         )
 
+    # Figure out whether inputs are io_in or io_out
+    # This is done by looking at the port connections in thhe port mapping
+    # and checking if a port in the index is `io_in` or `io_out`
+    # Logic as follows:
+    #  - If io_in for the gpio is used, default to USER_STD_INPUT_NOPULL
+    #  - If io_out for the gpio is used, default to USER_STD_OUTPUT
+    #  - If both io_in and io_out are used, default to USER_STD_BIDIRECTIONAL
+    #  - If the port is manually specified in GPIO_CFG, use that value
+    #  - Otherwise, default to MGMT_STD_OUTPUT
+
+    # Counts whether this index was used in io_in or io_out
+    gpio_in_used = set()
+    gpio_out_used = set()
+    for value in design["GPIO_MAP"].values():
+        input_match = re.match(r"^io_in\[(\d+)\]$", value)
+        output_match = re.match(r"^io_out\[(\d+)\]$", value)
+        if input_match:
+            gpio_in_used.add(int(input_match.group(1)))
+        if output_match:
+            gpio_out_used.add(int(output_match.group(1)))
+
+    # GPIOs 0-4 are reserved for management SoC, throw an error if we try to configure them
+    for gpio in range(0, 4):
+        if gpio in design["GPIO_CFG"]:
+            log.error(
+                f"GPIO {gpio} is reserved for management SoC, cannot be configured by the user"
+            )
+            return 1
+
+    gpio_cfg = [0] * (38 - 5)
+
+    for gpio in range(5, 38):
+        if gpio in design["GPIO_CFG"]:
+            gpio_cfg[gpio - 5] = design["GPIO_CFG"][gpio]
+        elif gpio in gpio_in_used and gpio in gpio_out_used:
+            gpio_cfg[gpio - 5] = "USER_STD_BIDIRECTIONAL"
+        elif gpio in gpio_in_used:
+            gpio_cfg[gpio - 5] = "USER_STD_INPUT_NOPULL"
+        elif gpio in gpio_out_used:
+            gpio_cfg[gpio - 5] = "USER_STD_OUTPUT"
+        else:
+            gpio_cfg[gpio - 5] = "MGMT_STD_OUTPUT"
+
+    gpio_cfg = "\n".join(
+        [
+            f"`define USER_CONFIG_GPIO_{gpio+5}_INIT `GPIO_MODE_{cfg}"
+            for gpio, cfg in enumerate(gpio_cfg)
+        ]
+    )
+
+    # Create user_defines.v to configure GPIO directions
+    with open(path.join(build, "user_defines.v"), "w") as f:
+        f.write(
+            f"""
+// SPDX-FileCopyrightText: 2022 Efabless Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
+
+`default_nettype none
+
+`ifndef __USER_DEFINES_H
+// User GPIO initial configuration parameters
+`define __USER_DEFINES_H
+
+// deliberately erroneous placeholder value; user required to config GPIO's to other
+`define GPIO_MODE_INVALID 13'hXXXX
+
+// Authoritive source of these MODE defs is: caravel/verilog/rtl/user_defines.v
+// Useful GPIO mode values.  These match the names used in defs.h.
+//
+`define GPIO_MODE_MGMT_STD_INPUT_NOPULL 13'h0403
+`define GPIO_MODE_MGMT_STD_INPUT_PULLDOWN 13'h0c01
+`define GPIO_MODE_MGMT_STD_INPUT_PULLUP 13'h0801
+`define GPIO_MODE_MGMT_STD_OUTPUT 13'h1809
+`define GPIO_MODE_MGMT_STD_BIDIRECTIONAL 13'h1801
+`define GPIO_MODE_MGMT_STD_ANALOG 13'h000b
+
+`define GPIO_MODE_USER_STD_INPUT_NOPULL 13'h0402
+`define GPIO_MODE_USER_STD_INPUT_PULLDOWN 13'h0c00
+`define GPIO_MODE_USER_STD_INPUT_PULLUP 13'h0800
+`define GPIO_MODE_USER_STD_OUTPUT 13'h1808
+`define GPIO_MODE_USER_STD_BIDIRECTIONAL 13'h1800
+`define GPIO_MODE_USER_STD_OUT_MONITORED 13'h1802
+`define GPIO_MODE_USER_STD_ANALOG 13'h000a
+
+// The power-on configuration for GPIO 0 to 4 is fixed and cannot be
+// modified (allowing the SPI and debug to always be accessible unless
+// overridden by a flash program).
+
+// The values below can be any of the standard types defined above,
+// or they can be any 13-bit value if the user wants a non-standard
+// startup state for the GPIO.  By default, every GPIO from 5 to 37
+// is set to power up as an input controlled by the management SoC.
+// Users may want to redefine these so that the user project powers
+// up in a state that can be used immediately without depending on
+// the management SoC to run a startup program to configure the GPIOs.
+
+{gpio_cfg}
+
+`endif  // __USER_DEFINES_H
+"""
+        )
+
     # Copy the user_project_wrapper files to caravel
     cp(
         path.join(build, "user_project_wrapper.v"),
         path.join(remote_rtl_dir, "user_project_wrapper.v"),
+    )
+
+    cp(
+        path.join(build, "user_defines.v"),
+        path.join(remote_rtl_dir, "user_defines.v"),
     )
 
     # create macro.cfg and copy to caravel
@@ -547,6 +666,7 @@ class Synth(SubCommand):
                 "VERILOG_FILE",
                 "DESIGN_IS_CORE",
                 "GPIO_MAP",
+                "GPIO_CFG",
                 "MPRJ_POS",
             ]
         )
