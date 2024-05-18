@@ -6,6 +6,7 @@
 `include "serdes/serializer.v"
 `include "arbiter_router/arbiter.v"
 `include "arbiter_router/router.v"
+`include "crossbars/blocking_with_spi.v"
 
 module tapeins_sp24_tapein1_Interconnect (
   input logic clk,
@@ -16,6 +17,9 @@ module tapeins_sp24_tapein1_Interconnect (
   input logic sclk,
   output logic minion_parity,
   output logic adapter_parity,
+  // Override each of the xbar inputs/outputs to spi
+  input logic xbar_input_overrides[3],
+  input logic xbar_output_overrides[3],
   // These outputs are necessary to set the valid
   // io_oeb and io_out values for the gpios.
   output logic [22:0] io_oeb,
@@ -105,7 +109,7 @@ module tapeins_sp24_tapein1_Interconnect (
   logic        input_xbar_recv_rdy[3];
   logic        input_xbar_recv_val[3];
 
-  crossbars_Blocking #(
+  crossbars_BlockingOverrideable #(
     .BIT_WIDTH(DATA_BITS),
     .N_INPUTS (3),
     .N_OUTPUTS(3)
@@ -120,7 +124,9 @@ module tapeins_sp24_tapein1_Interconnect (
     .send_rdy(input_xbar_send_rdy),
     .control(input_control_msg),
     .control_rdy(input_control_rdy),
-    .control_val(input_control_val)
+    .control_val(input_control_val),
+    .input_override(xbar_input_overrides[0]),
+    .output_override(xbar_output_overrides[0])
   );
 
   // CLASSIFIER XBAR
@@ -128,7 +134,7 @@ module tapeins_sp24_tapein1_Interconnect (
   logic        classifier_recv_val[3];
   logic        classifier_recv_rdy[3];
 
-  crossbars_Blocking #(
+  crossbars_BlockingOverrideable #(
     .BIT_WIDTH(DATA_BITS),
     .N_INPUTS (3),
     .N_OUTPUTS(3)
@@ -143,11 +149,13 @@ module tapeins_sp24_tapein1_Interconnect (
     .send_rdy(classifier_send_rdy),
     .control(classifier_control_msg),
     .control_rdy(classifier_control_rdy),
-    .control_val(classifier_control_val)
+    .control_val(classifier_control_val),
+    .input_override(xbar_input_overrides[1]),
+    .output_override(xbar_output_overrides[1])
   );
 
   // 1 bit output XBAR with classifier output
-  crossbars_Blocking #(
+  crossbars_BlockingOverrideable #(
     .BIT_WIDTH(1),
     .N_INPUTS (3),
     .N_OUTPUTS(3)
@@ -162,7 +170,9 @@ module tapeins_sp24_tapein1_Interconnect (
     .send_rdy(output_xbar_send_rdy),
     .control(output_control_msg),
     .control_rdy(output_control_rdy),
-    .control_val(output_control_val)
+    .control_val(output_control_val),
+    .input_override(xbar_input_overrides[2]),
+    .output_override(xbar_output_overrides[2])
   );
 
   // Deserializer for the FFT, hooked up to output 1 of the input crossbar
@@ -221,11 +231,6 @@ module tapeins_sp24_tapein1_Interconnect (
     .send_rdy(classifier_recv_rdy),
     .send_msg(classifier_recv_msg)
   );
-
-  // always_ff @(posedge clk) begin
-  //   $display("%h %h %h %h", output_xbar_recv_val[0], output_xbar_recv_val[1],
-  //            output_xbar_send_val[0], output_xbar_send_val[1]);
-  // end
 
 
   // PEASE FFT

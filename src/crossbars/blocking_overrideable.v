@@ -3,7 +3,7 @@
 
 //Crossbar in Verilog
 
-module blocking_with_spi #(
+module crossbars_BlockingOverrideable #(
   parameter int BIT_WIDTH = 32,
   parameter int N_INPUTS = 2,
   parameter int N_OUTPUTS = 2,
@@ -25,8 +25,8 @@ module blocking_with_spi #(
   output logic                           control_rdy,
 
   //emily's changes
-  input logic input_spi,
-  input logic output_spi
+  input logic input_override,
+  input logic output_override
 );
 
   logic [CONTROL_BIT_WIDTH - 1:0] stored_control;
@@ -47,44 +47,28 @@ module blocking_with_spi #(
 
   //emily's changes
   always_comb begin
-      if(input_spi && ~output_spi) begin
-        input_sel = 0;
-        output_sel = stored_control[CONTROL_BIT_WIDTH-$clog2(
-            N_INPUTS
-        )-1 : CONTROL_BIT_WIDTH-$clog2(
-            N_INPUTS
-        )-$clog2(
-            N_OUTPUTS
-        )];
-      end
-      else if(~input_spi && output_spi) begin
-        input_sel = stored_control[CONTROL_BIT_WIDTH-1:CONTROL_BIT_WIDTH-$clog2(N_INPUTS)];
-        output_sel = 0;
-      end
-      else if(input_spi && output_spi) begin
-        input_sel = 0;
-        output_sel = 0;
-      end
-      else begin
-        input_sel = stored_control[CONTROL_BIT_WIDTH-1:CONTROL_BIT_WIDTH-$clog2(N_INPUTS)];
-        output_sel = stored_control[CONTROL_BIT_WIDTH-$clog2(
-            N_INPUTS
-        )-1 : CONTROL_BIT_WIDTH-$clog2(
-            N_INPUTS
-        )-$clog2(
-            N_OUTPUTS
-        )];
-      end
-  end
-  //assign input_sel = stored_control[CONTROL_BIT_WIDTH-1:CONTROL_BIT_WIDTH-$clog2(N_INPUTS)];
+    input_sel = input_override ? 0 : stored_control[CONTROL_BIT_WIDTH-1:CONTROL_BIT_WIDTH-$clog2(N_INPUTS)];
 
-  /*assign output_sel = stored_control[CONTROL_BIT_WIDTH-$clog2(
-      N_INPUTS
-  )-1 : CONTROL_BIT_WIDTH-$clog2(
-      N_INPUTS
-  )-$clog2(
-      N_OUTPUTS
-  )];*/
+    output_sel = output_override ? 0 : stored_control[
+      CONTROL_BIT_WIDTH-$clog2(N_INPUTS)-1 : CONTROL_BIT_WIDTH-$clog2(N_INPUTS)-$clog2(N_OUTPUTS)
+    ];
+  end
+
+  // demetri's impl
+  // always_comb begin
+  //   input_sel = stored_control[CONTROL_BIT_WIDTH-1:CONTROL_BIT_WIDTH-$clog2(N_INPUTS)];
+
+  //   output_sel = stored_control[CONTROL_BIT_WIDTH-$clog2(
+  //       N_INPUTS
+  //   )-1 : CONTROL_BIT_WIDTH-$clog2(
+  //       N_INPUTS
+  //   )-$clog2(
+  //       N_OUTPUTS
+  //   )];
+
+  //   if (input_override) input_sel = 0;
+  //   if (output_override) output_sel = 0;
+  // end
 
   always_comb begin
     for (int i = 0; i < N_OUTPUTS; i = i + 1) begin
@@ -113,10 +97,10 @@ module blocking_with_spi #(
 
 `ifdef FORMAL
   always_comb begin
-    if (input_spi == 1'b1 && output_spi == 1'b1) begin
+    if (input_override == 1'b1 && output_override == 1'b1) begin
       assert (input_sel == 0 && output_sel == 0);
     end
-    else if (input_spi == 1'b1 && output_spi == 1'b0) begin
+    else if (input_override == 1'b1 && output_override == 1'b0) begin
       assert (input_sel == 0 && output_sel == output_sel = stored_control[CONTROL_BIT_WIDTH-$clog2(
             N_INPUTS
         )-1 : CONTROL_BIT_WIDTH-$clog2(
@@ -125,11 +109,11 @@ module blocking_with_spi #(
             N_OUTPUTS
         )]);
     end
-    else if (input_spi == 1'b0 && output_spi == 1'b1) begin
+    else if (input_override == 1'b0 && output_override == 1'b1) begin
       assert (input_sel == stored_control[CONTROL_BIT_WIDTH-1:CONTROL_BIT_WIDTH-$clog2(N_INPUTS)]
       && output_sel == 0);
     end
-    else if (input_spi == 1'b0 && output_spi == 1'b0) begin
+    else if (input_override == 1'b0 && output_override == 1'b0) begin
       assert (input_sel == stored_control[CONTROL_BIT_WIDTH-1:CONTROL_BIT_WIDTH-$clog2(N_INPUTS)] &&
         output_sel = stored_control[CONTROL_BIT_WIDTH-$clog2(
             N_INPUTS

@@ -5,7 +5,7 @@
 import pytest
 from pymtl3 import mk_bits, Component, Bits
 from pymtl3.stdlib import stream
-from src.crossbars.blocking_with_spi import BlockingCrossbarWrapper
+from src.crossbars.blocking_overrideable import BlockingCrossbarWrapper
 from src.crossbars.sim import create_crossbar_with_spi
 from pymtl3.stdlib.test_utils import run_sim
 import math
@@ -22,8 +22,8 @@ class TestHarness(Component):
         s.srcs = [stream.SourceRTL(mk_bits(BIT_WIDTH)) for _ in range(N_INPUTS)]
         s.sinks = [stream.SinkRTL(mk_bits(BIT_WIDTH)) for _ in range(N_OUTPUTS)]
 
-        s.input_spi = stream.SourceRTL(mk_bits(1))
-        s.output_spi = stream.SourceRTL(mk_bits(1))
+        s.input_override = stream.SourceRTL(mk_bits(1))
+        s.output_override = stream.SourceRTL(mk_bits(1))
 
         s.dut = BlockingCrossbarWrapper(BIT_WIDTH, N_INPUTS, N_OUTPUTS)
 
@@ -35,8 +35,8 @@ class TestHarness(Component):
             s.dut.send[i] //= s.sinks[i].recv
 
         s.control.send //= s.dut.control
-        s.input_spi.send //= s.dut.input_spi
-        s.output_spi.send //= s.dut.output_spi
+        s.input_override.send //= s.dut.input_override
+        s.output_override.send //= s.dut.output_override
 
     def done(s):
         # These are any as the unselected inputs/outputs may not be done
@@ -52,7 +52,7 @@ class TestHarness(Component):
 
 # Some basic test cases
 @pytest.mark.parametrize(
-    "bit_width, n_inputs, n_outputs, config, input_spi, output_spi, inputs",
+    "bit_width, n_inputs, n_outputs, config, input_override, output_override, inputs",
     [
         (4, 2, 2, (1, 1), 0, 1, [[1, 0], [0, 0], [1, 0]]),  # 2x2 crossbar
         (4, 2, 2, (1, 0), 0, 0, [[1, 1], [1, 0], [1, 0]]),  # 2x2 crossbar
@@ -74,8 +74,8 @@ def test_basic(
     n_inputs,
     n_outputs,
     config: tuple[int, int],
-    input_spi,
-    output_spi,
+    input_override,
+    output_override,
     inputs: list[list[int]],
     cmdline_opts,
 ):
@@ -84,7 +84,7 @@ def test_basic(
 
     # Generate expected outputs
     sim_xbar, sim_cfg = create_crossbar_with_spi(bit_width, n_inputs, n_outputs)
-    sim_cfg(*config, input_spi, output_spi)
+    sim_cfg(*config, input_override, output_override)
     outputs = [sim_xbar(inp) for inp in inputs]
 
     control_bit_width = int(math.log2(n_inputs) + math.log2(n_outputs))
@@ -122,15 +122,15 @@ def test_basic(
         )
 
     model.set_param(
-        "top.input_spi.construct",
-        msgs=[input_spi],
+        "top.input_override.construct",
+        msgs=[input_override],
         initial_delay=10,
         interval_delay=3,
     )
 
     model.set_param(
-        "top.output_spi.construct",
-        msgs=[output_spi],
+        "top.output_override.construct",
+        msgs=[output_override],
         initial_delay=10,
         interval_delay=3,
     )

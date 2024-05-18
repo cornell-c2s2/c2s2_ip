@@ -32,13 +32,15 @@ def create_crossbar_with_spi(
         # All outputs are zero except for the selected output
         return outputs
 
-    def configure(_in_sel: int, _out_sel: int, input_spi: int, output_spi: int):
+    def configure(
+        _in_sel: int, _out_sel: int, input_override: int, output_override: int
+    ):
         nonlocal in_sel, out_sel
         in_sel = _in_sel
         out_sel = _out_sel
-        if input_spi:
+        if input_override:
             in_sel = 0
-        if output_spi:
+        if output_override:
             out_sel = 0
 
     return crossbar, configure
