@@ -25,6 +25,8 @@ module tapeins_sp24_tapein1_Interconnect (
   output logic [22:0] io_oeb,
   output logic [4:0] io_out
 );
+  // NOTE: the bottom of this file describes the address mapping.
+
   // io_oeb can always be zero as we are using inputs with nopull
   assign io_oeb = 0;
   // gpios 0-4 require output values to be set.
