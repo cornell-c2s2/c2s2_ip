@@ -48,7 +48,7 @@ module classifier_Classifier #(
   // Register for classifier input data
   arr_EnResetReg #(
     .BIT_WIDTH  (BIT_WIDTH),
-    .RESET_VALUE({BIT_WIDTH{1'b0}}),
+    .RESET_VALUE(0),
     .N_ELEMENTS (N_SAMPLES)
   ) classifier_in (
     .clk  (clk),
@@ -60,7 +60,7 @@ module classifier_Classifier #(
 
   cmn_EnResetReg #(
     .p_nbits      (BIT_WIDTH),
-    .p_reset_value({BIT_WIDTH{1'b0}})
+    .p_reset_value(0)
   ) cutoff_freq_in (
     .clk  (clk),
     .reset(reset),
@@ -71,7 +71,7 @@ module classifier_Classifier #(
 
   cmn_EnResetReg #(
     .p_nbits      (BIT_WIDTH),
-    .p_reset_value({BIT_WIDTH{1'b0}})
+    .p_reset_value(0)
   ) cutoff_mag_in (
     .clk  (clk),
     .reset(reset),
@@ -82,7 +82,7 @@ module classifier_Classifier #(
 
   cmn_EnResetReg #(
     .p_nbits      (BIT_WIDTH),
-    .p_reset_value({BIT_WIDTH{1'b0}})
+    .p_reset_value(0)
   ) sampling_freq_in (
     .clk  (clk),
     .reset(reset),
@@ -148,7 +148,7 @@ module classifier_Classifier #(
   logic on_off;
   cmn_EnResetReg #(
     .p_nbits(1),
-    .p_reset_value({BIT_WIDTH{1'b0}})
+    .p_reset_value(0)
   ) classifier_out (
     .clk  (clk),
     .reset(reset),
