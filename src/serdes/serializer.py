@@ -28,7 +28,9 @@ class Serializer(VerilogPlaceholder, Component):
 
 class SerializerWrapper(Component):
     def construct(s, BIT_WIDTH, N_SAMPLES):
-        s.recv = stream.ifcs.RecvIfcRTL(mk_list_bitstruct(BIT_WIDTH, N_SAMPLES))
+        s.recv = stream.ifcs.RecvIfcRTL(
+            mk_list_bitstruct(mk_bits(BIT_WIDTH), N_SAMPLES)
+        )
         s.send = stream.ifcs.SendIfcRTL(mk_bits(BIT_WIDTH))
 
         s.dut = Serializer(BIT_WIDTH, N_SAMPLES)
