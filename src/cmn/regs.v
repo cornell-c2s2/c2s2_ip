@@ -80,7 +80,7 @@ module cmn_EnResetReg #(
   input  logic               en      // Enable input
 );
 
-  always_ff @(posedge clk) if (reset || en) q <= reset ? p_reset_value : d;
+  always_ff @(posedge clk) if (reset || en) q <= reset ? p_nbits'(p_reset_value) : d;
 
 endmodule
 
