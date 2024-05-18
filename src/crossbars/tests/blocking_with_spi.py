@@ -6,7 +6,7 @@ import pytest
 from pymtl3 import mk_bits, Component, Bits
 from pymtl3.stdlib import stream
 from src.crossbars.blocking_with_spi import BlockingCrossbarWrapper
-from src.crossbars.sim_with_spi import create_crossbar
+from src.crossbars.sim import create_crossbar_with_spi
 from pymtl3.stdlib.test_utils import run_sim
 import math
 
@@ -83,7 +83,7 @@ def test_basic(
     model = TestHarness(bit_width, n_inputs, n_outputs)
 
     # Generate expected outputs
-    sim_xbar, sim_cfg = create_crossbar(bit_width, n_inputs, n_outputs)
+    sim_xbar, sim_cfg = create_crossbar_with_spi(bit_width, n_inputs, n_outputs)
     sim_cfg(*config, input_spi, output_spi)
     outputs = [sim_xbar(inp) for inp in inputs]
 

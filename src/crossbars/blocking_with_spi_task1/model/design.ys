@@ -1,8 +1,0 @@
-# running in blocking_with_spi_task1/src/
-
-read_verilog -sv blocking_with_spi.sv
-prep -top blocking_with_spi
-
-hierarchy -smtcheck
-write_jny -no-connections ../model/design.json
-write_rtlil ../model/design.il
