@@ -12,9 +12,9 @@
 `include "classifier/helpers/comparison.v"
 
 module classifier_Classifier #(
-  parameter int BIT_WIDTH = 32,
+  parameter int BIT_WIDTH  = 32,
   parameter int DECIMAL_PT = 16,
-  parameter int N_SAMPLES = 8
+  parameter int N_SAMPLES  = 8
 ) (
   input logic clk,
   input logic reset,
@@ -62,10 +62,10 @@ module classifier_Classifier #(
     .p_nbits      (BIT_WIDTH),
     .p_reset_value({BIT_WIDTH{1'b0}})
   ) cutoff_freq_in (
-    .clk  (clk),    
-    .reset(reset), 
-    .d    (cutoff_freq_msg),      
-    .q    (in_cutoff_freq),          
+    .clk  (clk),
+    .reset(reset),
+    .d    (cutoff_freq_msg),
+    .q    (in_cutoff_freq),
     .en   (cutoff_freq_rdy && cutoff_freq_val)
   );
 
@@ -73,10 +73,10 @@ module classifier_Classifier #(
     .p_nbits      (BIT_WIDTH),
     .p_reset_value({BIT_WIDTH{1'b0}})
   ) cutoff_mag_in (
-    .clk  (clk),    
-    .reset(reset), 
-    .d    (cutoff_mag_msg),      
-    .q    (in_cutoff_mag),          
+    .clk  (clk),
+    .reset(reset),
+    .d    (cutoff_mag_msg),
+    .q    (in_cutoff_mag),
     .en   (cutoff_mag_rdy && cutoff_mag_val)
   );
 
@@ -84,10 +84,10 @@ module classifier_Classifier #(
     .p_nbits      (BIT_WIDTH),
     .p_reset_value({BIT_WIDTH{1'b0}})
   ) sampling_freq_in (
-    .clk  (clk),    
-    .reset(reset), 
-    .d    (sampling_freq_msg),      
-    .q    (in_sampling_freq),          
+    .clk  (clk),
+    .reset(reset),
+    .d    (sampling_freq_msg),
+    .q    (in_sampling_freq),
     .en   (sampling_freq_rdy && sampling_freq_val)
   );
 
@@ -116,12 +116,11 @@ module classifier_Classifier #(
     .frequency_out(frequency_array)
   );
 
-  logic [BIT_WIDTH-1:0] out_filter[N_SAMPLES - 1:0];
+  logic out_filter[N_SAMPLES - 1:0];
 
   highpass_Highpass #(
-    .BIT_WIDTH (BIT_WIDTH),
-    .DECIMAL_PT(DECIMAL_PT),
-    .N_SAMPLES (N_SAMPLES)
+    .BIT_WIDTH(BIT_WIDTH),
+    .N_SAMPLES(N_SAMPLES)
   ) highpass_fil (
     .cutoff_freq(in_cutoff_freq),
     .freq_in(frequency_array),
@@ -133,9 +132,8 @@ module classifier_Classifier #(
   logic comparison_done;
 
   comparison_Comparison #(
-    .BIT_WIDTH (BIT_WIDTH),
-    .DECIMAL_PT(DECIMAL_PT),
-    .N_SAMPLES (N_SAMPLES)
+    .BIT_WIDTH(BIT_WIDTH),
+    .N_SAMPLES(N_SAMPLES)
   ) comparison (
     .clk(clk),
     .reset(reset),
@@ -166,7 +164,7 @@ module classifier_Classifier #(
   logic [1:0] currentState;
   logic [1:0] nextState;
 
-  parameter [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
+  logic [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
 
   // Next State Comb Logic
   always_comb begin

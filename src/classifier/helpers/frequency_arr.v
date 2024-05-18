@@ -14,10 +14,15 @@ module frequency_arr #(
   output logic [BIT_WIDTH - 1:0] frequency_out[N_SAMPLES - 1:0]
 );
 
-  genvar i;
+  localparam int LOG2_N_SAMPLES = $clog2(N_SAMPLES);
+
   generate
-    for (i = 0; i < N_SAMPLES; i++) begin : gen_freq
-      assign frequency_out[i] = (i * (sampling_freq / N_SAMPLES)) << DECIMAL_PT;
+    for (genvar i = 0; i < N_SAMPLES; i++) begin : gen_freq
+      if (LOG2_N_SAMPLES > DECIMAL_PT) begin
+        assign frequency_out[i] = i * (sampling_freq >> (LOG2_N_SAMPLES - DECIMAL_PT));
+      end else begin
+        assign frequency_out[i] = i * (sampling_freq << (DECIMAL_PT - LOG2_N_SAMPLES));
+      end
     end
   endgenerate
 

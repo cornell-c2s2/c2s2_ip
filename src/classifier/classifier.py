@@ -5,17 +5,18 @@ from os import path
 from src.serdes.deserializer import Deserializer
 from src.serdes.serializer import Serializer
 
+
 # Pymtl3 harness for the `Classifier` module.
 class Classifier(VerilogPlaceholder, Component):
     # Constructor
 
-    def construct(s, BIT_WIDTH=32, DECIMAL_PT = 16, N_SAMPLES = 8):
+    def construct(s, BIT_WIDTH=32, DECIMAL_PT=16, N_SAMPLES=8):
         # Interface
 
-        s.recv = stream.ifcs.RecvIfcRTL( mk_bits(BIT_WIDTH*N_SAMPLES) )
-        s.cutoff_freq = stream.ifcs.RecvIfcRTL( mk_bits(BIT_WIDTH) )
-        s.cutoff_mag = stream.ifcs.RecvIfcRTL( mk_bits(BIT_WIDTH) )
-        s.sampling_freq = stream.ifcs.RecvIfcRTL( mk_bits(BIT_WIDTH) )
+        s.recv = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH * N_SAMPLES))
+        s.cutoff_freq = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
+        s.cutoff_mag = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
+        s.sampling_freq = stream.ifcs.RecvIfcRTL(mk_bits(BIT_WIDTH))
         s.send = stream.ifcs.SendIfcRTL(mk_bits(1))
 
         # Name of the top level module to be imported

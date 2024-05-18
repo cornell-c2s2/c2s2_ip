@@ -3,9 +3,9 @@
 //------------------------------------------------------------------------
 
 module arr_ResetReg #(
-  parameter BIT_WIDTH   = 1,
-  parameter RESET_VALUE = 0,
-  parameter N_ELEMENTS  = 1
+  parameter int BIT_WIDTH   = 1,
+  parameter int RESET_VALUE = 0,
+  parameter int N_ELEMENTS  = 1
 ) (
   input  logic                 clk,                    // Clock input
   input  logic                 reset,                  // Sync reset input
@@ -16,7 +16,7 @@ module arr_ResetReg #(
   always_ff @(posedge clk) begin
     if (reset) begin
       for (int i = 0; i < N_ELEMENTS; i++) begin
-        q[i] <= RESET_VALUE;
+        q[i] <= BIT_WIDTH'(RESET_VALUE);
       end
     end else begin
       for (int i = 0; i < N_ELEMENTS; i++) begin
@@ -32,9 +32,9 @@ endmodule
 //------------------------------------------------------------------------
 
 module arr_EnResetReg #(
-  parameter BIT_WIDTH   = 1,
-  parameter RESET_VALUE = 0,
-  parameter N_ELEMENTS  = 1
+  parameter int BIT_WIDTH   = 1,
+  parameter int RESET_VALUE = 0,
+  parameter int N_ELEMENTS  = 1
 ) (
   input  logic                 clk,                    // Clock input
   input  logic                 reset,                  // Sync reset input
@@ -46,15 +46,13 @@ module arr_EnResetReg #(
   always_ff @(posedge clk) begin
     if (reset) begin
       for (int i = 0; i < N_ELEMENTS; i++) begin
-        q[i] <= RESET_VALUE;
+        q[i] <= BIT_WIDTH'(RESET_VALUE);
       end
-    end 
-    else if (en) begin
+    end else if (en) begin
       for (int i = 0; i < N_ELEMENTS; i++) begin
         q[i] <= d[i];
       end
-    end
-    else begin
+    end else begin
       for (int i = 0; i < N_ELEMENTS; i++) begin
         q[i] <= q[i];
       end

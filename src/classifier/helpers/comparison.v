@@ -6,14 +6,13 @@
 `define COMPARISON_V
 
 module comparison_Comparison #(
-  parameter int BIT_WIDTH  = 32,
-  parameter int DECIMAL_PT = 16,
-  parameter int N_SAMPLES  = 8
+  parameter int BIT_WIDTH = 32,
+  parameter int N_SAMPLES = 8
 ) (
-  input                          clk,
-  input                          reset,
+  input  logic                   clk,
+  input  logic                   reset,
   input  logic [BIT_WIDTH - 1:0] cutoff_mag,
-  input  logic [BIT_WIDTH - 1:0] filtered_valid[N_SAMPLES - 1:0],
+  input  logic                   filtered_valid[N_SAMPLES - 1:0],
   input  logic [BIT_WIDTH - 1:0] mag_in        [N_SAMPLES - 1:0],
   output logic                   compare_out,
   output logic                   done
@@ -27,7 +26,7 @@ module comparison_Comparison #(
       done <= 0;
       i <= 0;
     end else if (!done) begin
-      if (i < N_SAMPLES - 1) begin
+      if (i < ($clog2(N_SAMPLES))'(N_SAMPLES - 1)) begin
         if (filtered_valid[i] && (mag_in[i] > cutoff_mag)) begin
           compare_out <= 1;
           done <= 1;
