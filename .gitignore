@@ -45,3 +45,6 @@ venv.bak/
 caravel/
 caravel
 core.*
+
+# Ignore all .nfs files
+.nfs*
