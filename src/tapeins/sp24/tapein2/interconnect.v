@@ -8,14 +8,18 @@
 `include "arbiter_router/router.v"
 
 module tapeins_sp24_tapein1_Interconnect (
-  input  logic clk,
-  input  logic reset,
-  input  logic cs,
-  input  logic mosi,
+  input logic clk,
+  input logic reset,
+  input logic cs,
+  input logic mosi,
   output logic miso,
-  input  logic sclk,
+  input logic sclk,
   output logic minion_parity,
-  output logic adapter_parity
+  output logic adapter_parity,
+  // These outputs are necessary to set the valid
+  // io_oeb and io_out values for the gpios.
+  output logic [22:0] io_oeb,
+  output logic [4:0] io_out
 );
   logic [17:0] spi_recv_msg;
   logic        spi_recv_rdy;
@@ -24,9 +28,18 @@ module tapeins_sp24_tapein1_Interconnect (
   logic        spi_send_rdy;
   logic        spi_send_val;
 
+  // io_oeb can always be zero as we are using inputs with nopull
+  assign io_oeb = 0;
+  // gpios 0-4 require output values to be set.
+  assign io_out = 0;
+
+  localparam ADDR_BITS = 3;
+  localparam ROUTER_ARBITER_SIZE = 1 << ADDR_BITS;
+  localparam DATA_BITS = 16;
+
   // SPI MINION
   spi_Minion #(
-    .BIT_WIDTH(18),
+    .BIT_WIDTH(ADDR_BITS + DATA_BITS),
     .N_SAMPLES(1)
   ) minion (
     .clk(clk),
@@ -43,17 +56,20 @@ module tapeins_sp24_tapein1_Interconnect (
     .send_val(spi_send_val),
     .minion_parity(minion_parity),
     .adapter_parity(adapter_parity)
-
   );
 
+  //============================================================================
+  // Interconnect 
+  //============================================================================
+
   // ROUTER
-  logic [17:0] router_msg[4];
-  logic        router_rdy[4];
-  logic        router_val[4];
+  logic [ADDR_BITS + DATA_BITS - 1:0] router_msg[ROUTER_ARBITER_SIZE];
+  logic                               router_rdy[ROUTER_ARBITER_SIZE];
+  logic                               router_val[ROUTER_ARBITER_SIZE];
 
   arbiter_router_Router #(
-    .nbits(18),
-    .noutputs(4)
+    .nbits(ADDR_BITS + DATA_BITS),
+    .noutputs(ROUTER_ARBITER_SIZE)
   ) router (
     .clk(clk),
     .reset(reset),
@@ -66,13 +82,13 @@ module tapeins_sp24_tapein1_Interconnect (
   );
 
   // ARBITER
-  logic [15:0] arbiter_msg[2];
-  logic        arbiter_rdy[2];
-  logic        arbiter_val[2];
+  logic [15:0] arbiter_msg[ROUTER_ARBITER_SIZE];
+  logic        arbiter_rdy[ROUTER_ARBITER_SIZE];
+  logic        arbiter_val[ROUTER_ARBITER_SIZE];
 
   arbiter_router_Arbiter #(
     .nbits  (16),
-    .ninputs(2)
+    .ninputs(ROUTER_ARBITER_SIZE)
   ) arbiter (
     .clk(clk),
     .reset(reset),
@@ -80,52 +96,19 @@ module tapeins_sp24_tapein1_Interconnect (
     .istream_msg(arbiter_msg),
     .istream_rdy(arbiter_rdy),
     .ostream_val(spi_recv_val),
-    .ostream_msg(spi_recv_msg[16:0]),
+    .ostream_msg(spi_recv_msg),
     .ostream_rdy(spi_recv_rdy)
   );
 
-  // There is an extra address bit that is never used
-  assign spi_recv_msg[17] = 1'b0;
-
   // INPUT XBAR
-  logic [15:0] input_xbar_recv_msg[2];
-  logic        input_xbar_recv_rdy[2];
-  logic        input_xbar_recv_val[2];
-
-  // input 0 is SPI at address 0
-  assign input_xbar_recv_msg[0] = router_msg[0][15:0];
-  assign input_xbar_recv_val[0] = router_val[0];
-  assign router_rdy[0] = input_xbar_recv_rdy[0];
-
-  // input 0 is unused (for now)
-  // TODO: change this to wishbone
-  logic unused_input_xbar = &{1'b0, input_xbar_recv_rdy[1], 1'b0};
-  assign input_xbar_recv_msg[1] = 16'b0;
-  assign input_xbar_recv_val[1] = 1'b0;
-
-  logic [15:0] input_xbar_send_msg[2];
-  logic        input_xbar_send_rdy[2];
-  logic        input_xbar_send_val[2];
-
-  // output 0 is SPI at address 0
-  assign arbiter_msg[0] = input_xbar_send_msg[0];
-  assign arbiter_val[0] = input_xbar_send_val[0];
-  assign input_xbar_send_rdy[0] = arbiter_rdy[0];
-
-  // configuration message for the crossbar
-  // 1 bit wide because there are 2 possible configs
-  logic [1:0] input_control_msg;
-  logic input_control_rdy;
-  logic input_control_val;
-  // hooked up to address 2
-  assign input_control_msg = router_msg[2][1:0];
-  assign input_control_val = router_val[2];
-  assign router_rdy[2] = input_control_rdy;
+  logic [15:0] input_xbar_recv_msg[3];
+  logic        input_xbar_recv_rdy[3];
+  logic        input_xbar_recv_val[3];
 
   crossbars_Blocking #(
-    .BIT_WIDTH(16),
-    .N_INPUTS (2),   // for now, just SPI
-    .N_OUTPUTS(2)    // SPI and FFT
+    .BIT_WIDTH(DATA_BITS),
+    .N_INPUTS (3),
+    .N_OUTPUTS(3)
   ) input_xbar (
     .clk(clk),
     .reset(reset),
@@ -140,6 +123,48 @@ module tapeins_sp24_tapein1_Interconnect (
     .control_val(input_control_val)
   );
 
+  // CLASSIFIER XBAR
+  logic [15:0] classifier_recv_msg[3];
+  logic        classifier_recv_val[3];
+  logic        classifier_recv_rdy[3];
+
+  crossbars_Blocking #(
+    .BIT_WIDTH(DATA_BITS),
+    .N_INPUTS (3),
+    .N_OUTPUTS(3)
+  ) classifier_xbar (
+    .clk(clk),
+    .reset(reset),
+    .recv_msg(classifier_recv_msg),
+    .recv_val(classifier_recv_val),
+    .recv_rdy(classifier_recv_rdy),
+    .send_msg(classifier_send_msg),
+    .send_val(classifier_send_val),
+    .send_rdy(classifier_send_rdy),
+    .control(classifier_control_msg),
+    .control_rdy(classifier_control_rdy),
+    .control_val(classifier_control_val)
+  );
+
+  // 1 bit output XBAR with classifier output
+  crossbars_Blocking #(
+    .BIT_WIDTH(1),
+    .N_INPUTS (3),
+    .N_OUTPUTS(3)
+  ) output_xbar (
+    .clk(clk),
+    .reset(reset),
+    .recv_msg(output_xbar_recv_msg),
+    .recv_val(output_xbar_recv_val),
+    .recv_rdy(output_xbar_recv_rdy),
+    .send_msg(output_xbar_send_msg),
+    .send_val(output_xbar_send_val),
+    .send_rdy(output_xbar_send_rdy),
+    .control(output_control_msg),
+    .control_rdy(output_control_rdy),
+    .control_val(output_control_val)
+  );
+
   // Deserializer for the FFT, hooked up to output 1 of the input crossbar
   logic [15:0] fft_recv_msg [32];
   logic        fft_recv_val;
@@ -148,7 +173,7 @@ module tapeins_sp24_tapein1_Interconnect (
   serdes_Deserializer #(
     .N_SAMPLES(32),
     .BIT_WIDTH(16)
-  ) deserializer (
+  ) fft_deserializer (
     .clk(clk),
     .reset(reset),
     .recv_val(input_xbar_send_val[1]),
@@ -159,7 +184,7 @@ module tapeins_sp24_tapein1_Interconnect (
     .send_msg(fft_recv_msg)
   );
 
-  // Serializer for the FFT, hooked up to input 1 of the output crossbar
+  // Serializer for the FFT, hooked up to input 1 of the classifier crossbar
   logic [15:0] fft_send_msg [32];
   logic        fft_send_val;
   logic        fft_send_rdy;
@@ -167,7 +192,7 @@ module tapeins_sp24_tapein1_Interconnect (
   serdes_Serializer #(
     .N_SAMPLES(32),
     .BIT_WIDTH(16)
-  ) serializer (
+  ) fft_serializer (
     .clk(clk),
     .reset(reset),
     .send_val(output_xbar_recv_val[1]),
@@ -177,6 +202,30 @@ module tapeins_sp24_tapein1_Interconnect (
     .recv_rdy(fft_send_rdy),
     .recv_msg(fft_send_msg)
   );
+
+  // Deserializer for the classifier, hooked up to output 1 of the classifier crossbar
+  logic [15:0] classifier_recv_msg [32];
+  logic        classifier_recv_val;
+  logic        classifier_recv_rdy;
+
+  serdes_Deserializer #(
+    .N_SAMPLES(32),
+    .BIT_WIDTH(16)
+  ) classifier_deserializer (
+    .clk(clk),
+    .reset(reset),
+    .recv_val(input_xbar_send_val[1]),
+    .recv_rdy(input_xbar_send_rdy[1]),
+    .recv_msg(input_xbar_send_msg[1]),
+    .send_val(classifier_recv_val),
+    .send_rdy(classifier_recv_rdy),
+    .send_msg(classifier_recv_msg)
+  );
+
+  // always_ff @(posedge clk) begin
+  //   $display("%h %h %h %h", output_xbar_recv_val[0], output_xbar_recv_val[1],
+  //            output_xbar_send_val[0], output_xbar_send_val[1]);
+  // end
 
 
   // PEASE FFT
@@ -195,56 +244,22 @@ module tapeins_sp24_tapein1_Interconnect (
     .send_rdy(fft_send_rdy)
   );
 
-  // OUTPUT XBAR
-  logic [15:0] output_xbar_recv_msg[2];
-  logic        output_xbar_recv_rdy[2];
-  logic        output_xbar_recv_val[2];
+  // CLASSIFIER
 
-  // input 0 is SPI at address 1
-  assign output_xbar_recv_msg[0] = router_msg[1][15:0];
-  assign output_xbar_recv_val[0] = router_val[1];
-  assign router_rdy[1] = output_xbar_recv_rdy[0];
+  // 7 inputs:
+  // 0: input xbar inject
+  // 1: input xbar config
+  // 2: classifier xbar inject
+  // 3: classifier xbar config
+  // 4: output xbar inject
+  // 5: output xbar config
+  // 6: classifier config
 
-  logic [15:0] output_xbar_send_msg[2];
-  logic        output_xbar_send_rdy[2];
-  logic        output_xbar_send_val[2];
-
-  // output 0 is SPI at address 1
-  assign arbiter_msg[1] = output_xbar_send_msg[0];
-  assign arbiter_val[1] = output_xbar_send_val[0];
-  assign output_xbar_send_rdy[0] = arbiter_rdy[1];
-  // output 1 is unused (for now)
-  // TODO: Change this to wishbone
-  logic unused_output_xbar = &{1'b0, output_xbar_send_msg[1], output_xbar_send_val[1], arbiter_rdy[1], 1'b0};
-  assign output_xbar_send_rdy[1] = 1'b0;
-
-  // configuration message for the crossbar
-  // 2 bits wide because there are 4 possible configs
-  logic [1:0] output_control_msg;
-  logic       output_control_rdy;
-  logic       output_control_val;
-
-  // hooked up to address 3
-  assign output_control_msg = router_msg[3][1:0];
-  assign output_control_val = router_val[3];
-  assign router_rdy[3] = output_control_rdy;
-
-  crossbars_Blocking #(
-    .BIT_WIDTH(16),
-    .N_INPUTS (2),   // for now, just SPI and FFT
-    .N_OUTPUTS(2)    // for now, just SPI
-  ) output_xbar (
-    .clk(clk),
-    .reset(reset),
-    .recv_msg(output_xbar_recv_msg),
-    .recv_val(output_xbar_recv_val),
-    .recv_rdy(output_xbar_recv_rdy),
-    .send_msg(output_xbar_send_msg),
-    .send_val(output_xbar_send_val),
-    .send_rdy(output_xbar_send_rdy),
-    .control(output_control_msg),
-    .control_rdy(output_control_rdy),
-    .control_val(output_control_val)
-  );
+  // 5 outputs:
+  // 0: input xbar output
+  // 1: unused
+  // 2: classifier xbar output
+  // 3: unused
+  // 4: output xbar output
 
 endmodule
