@@ -47,34 +47,11 @@ module crossbars_blocking_with_spi #(
 
   //emily's changes
   always_comb begin
-      if(input_spi && ~output_spi) begin
-        input_sel = 0;
-        output_sel = stored_control[CONTROL_BIT_WIDTH-$clog2(
-            N_INPUTS
-        )-1 : CONTROL_BIT_WIDTH-$clog2(
-            N_INPUTS
-        )-$clog2(
-            N_OUTPUTS
-        )];
-      end
-      else if(~input_spi && output_spi) begin
-        input_sel = stored_control[CONTROL_BIT_WIDTH-1:CONTROL_BIT_WIDTH-$clog2(N_INPUTS)];
-        output_sel = 0;
-      end
-      else if(input_spi && output_spi) begin
-        input_sel = 0;
-        output_sel = 0;
-      end
-      else begin
-        input_sel = stored_control[CONTROL_BIT_WIDTH-1:CONTROL_BIT_WIDTH-$clog2(N_INPUTS)];
-        output_sel = stored_control[CONTROL_BIT_WIDTH-$clog2(
-            N_INPUTS
-        )-1 : CONTROL_BIT_WIDTH-$clog2(
-            N_INPUTS
-        )-$clog2(
-            N_OUTPUTS
-        )];
-      end
+    input_sel = input_spi ? 0 : stored_control[CONTROL_BIT_WIDTH-1:CONTROL_BIT_WIDTH-$clog2(N_INPUTS)];
+
+    output_sel = output_spi ? 0 : stored_control[
+      CONTROL_BIT_WIDTH-$clog2(N_INPUTS)-1 : CONTROL_BIT_WIDTH-$clog2(N_INPUTS)-$clog2(N_OUTPUTS)
+    ];
   end
 
   // demetri's impl
