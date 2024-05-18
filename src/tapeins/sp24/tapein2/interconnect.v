@@ -28,8 +28,12 @@ module tapeins_sp24_tapein1_Interconnect (
   output logic wbs_ack_o,
   output logic [31:0] wbs_dat_o,
   // Override each of the xbar inputs/outputs to spi
-  input logic xbar_input_overrides[3],
-  input logic xbar_output_overrides[3],
+  input logic input_xbar_input_override,
+  input logic input_xbar_output_override,
+  input logic classifier_xbar_input_override,
+  input logic classifier_xbar_output_override,
+  input logic output_xbar_input_override,
+  input logic output_xbar_output_override,
   // These outputs are necessary to set the valid
   // io_oeb and io_out values for the gpios.
   output logic [22:0] io_oeb,
@@ -153,8 +157,8 @@ module tapeins_sp24_tapein1_Interconnect (
     .control(input_xbar_control_msg),
     .control_rdy(input_xbar_control_rdy),
     .control_val(input_xbar_control_val),
-    .input_override(xbar_input_overrides[0]),
-    .output_override(xbar_output_overrides[0])
+    .input_override(input_xbar_input_override),
+    .output_override(input_xbar_output_override)
   );
 
   // CLASSIFIER XBAR
@@ -186,8 +190,8 @@ module tapeins_sp24_tapein1_Interconnect (
     .control(classifier_xbar_control_msg),
     .control_rdy(classifier_xbar_control_rdy),
     .control_val(classifier_xbar_control_val),
-    .input_override(xbar_input_overrides[1]),
-    .output_override(xbar_output_overrides[1])
+    .input_override(classifier_xbar_input_override),
+    .output_override(classifier_xbar_output_override)
   );
 
   // OUTPUT XBAR
@@ -220,8 +224,8 @@ module tapeins_sp24_tapein1_Interconnect (
     .control(output_xbar_control_msg),
     .control_rdy(output_xbar_control_rdy),
     .control_val(output_xbar_control_val),
-    .input_override(xbar_input_overrides[2]),
-    .output_override(xbar_output_overrides[2])
+    .input_override(output_xbar_input_override),
+    .output_override(output_xbar_output_override)
   );
 
   // Deserializer for the FFT, hooked up to output 1 of the input crossbar
