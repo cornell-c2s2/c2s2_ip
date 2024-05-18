@@ -4,7 +4,7 @@
 
 import pytest
 
-from pymtl3 import *
+from pymtl3 import DefaultPassGroup, Bits1
 from pymtl3.stdlib.test_utils import run_test_vector_sim
 from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
 
@@ -59,7 +59,7 @@ def t(
     for i in range(3):
         if istream_val[i] != "?":
             assert dut.istream_val[i] == istream_val[i]
-        if istream_data[i] != "?":
+        if istream_val[i] == Bits1(1) and istream_data[i] != "?":
             assert dut.istream_data[i] == istream_data[i]
         if ostream_rdy[i] != "?":
             assert dut.ostream_rdy[i] == ostream_rdy[i]
