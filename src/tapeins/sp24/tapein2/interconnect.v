@@ -9,7 +9,7 @@
 `include "classifier/classifier.v"
 `include "wishbone/wishbone.v"
 
-module tapeins_sp24_tapein1_Interconnect (
+module tapeins_sp24_tapein2_Interconnect (
   input logic clk,
   input logic reset,
   input logic cs,
@@ -277,9 +277,9 @@ module tapeins_sp24_tapein1_Interconnect (
   ) classifier_deserializer (
     .clk(clk),
     .reset(reset),
-    .recv_val(input_xbar_send_val[1]),
-    .recv_rdy(input_xbar_send_rdy[1]),
-    .recv_msg(input_xbar_send_msg[1]),
+    .recv_val(classifier_xbar_send_val[1]),
+    .recv_rdy(classifier_xbar_send_rdy[1]),
+    .recv_msg(classifier_xbar_send_msg[1]),
     .send_val(classifier_recv_val),
     .send_rdy(classifier_recv_rdy),
     .send_msg(classifier_recv_msg)
@@ -329,8 +329,8 @@ module tapeins_sp24_tapein1_Interconnect (
     .sampling_freq_msg(classifier_config_msg[2]),
     // hooked up to input 1 of the output
     .send_rdy(output_xbar_recv_rdy[1]),
-    .send_val(output_xbar_send_val[1]),
-    .send_msg(output_xbar_send_msg[1])
+    .send_val(output_xbar_recv_val[1]),
+    .send_msg(output_xbar_recv_msg[1])
   );
 
   // WISHBONE HARNESS
