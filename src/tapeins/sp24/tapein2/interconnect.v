@@ -129,17 +129,19 @@ module tapeins_sp24_tapein2_Interconnect (
   endgenerate
 
   // INPUT XBAR
-  logic [     DATA_BITS-1:0] input_xbar_recv_msg    [2];
-  logic                      input_xbar_recv_rdy    [2];
-  logic                      input_xbar_recv_val    [2];
+  logic [DATA_BITS-1:0] input_xbar_recv_msg[2];
+  logic input_xbar_recv_rdy[2];
+  logic input_xbar_recv_val[2];
 
-  logic [     DATA_BITS-1:0] input_xbar_send_msg    [3];
-  logic                      input_xbar_send_rdy    [3];
-  logic                      input_xbar_send_val    [3];
+  logic [DATA_BITS-1:0] input_xbar_send_msg[3];
+  logic input_xbar_send_rdy[3];
+  logic input_xbar_send_val[3];
 
   logic [XBAR_CTRL_BITS-1:0] input_xbar_control_msg;
-  logic                      input_xbar_control_rdy;
-  logic                      input_xbar_control_val;
+  logic input_xbar_control_rdy;
+  logic input_xbar_control_val;
+
+  wire input_xbar_control_unused = &{1'b0, input_xbar_control_msg[3], 1'b0};
 
   crossbars_BlockingOverrideable #(
     .BIT_WIDTH(DATA_BITS),
@@ -154,7 +156,9 @@ module tapeins_sp24_tapein2_Interconnect (
     .send_msg(input_xbar_send_msg),
     .send_val(input_xbar_send_val),
     .send_rdy(input_xbar_send_rdy),
-    .control(input_xbar_control_msg),
+    // here, we truncate as there are only 2 inputs possible
+    // (representable by 1 bit) so the highest bit is ignored.
+    .control(input_xbar_control_msg[2:0]),
     .control_rdy(input_xbar_control_rdy),
     .control_val(input_xbar_control_val),
     .input_override(input_xbar_input_override),
@@ -195,17 +199,19 @@ module tapeins_sp24_tapein2_Interconnect (
   );
 
   // OUTPUT XBAR
-  logic                      output_xbar_recv_msg    [3];
-  logic                      output_xbar_recv_rdy    [3];
-  logic                      output_xbar_recv_val    [3];
+  logic output_xbar_recv_msg[3];
+  logic output_xbar_recv_rdy[3];
+  logic output_xbar_recv_val[3];
 
-  logic                      output_xbar_send_msg    [2];
-  logic                      output_xbar_send_rdy    [2];
-  logic                      output_xbar_send_val    [2];
+  logic output_xbar_send_msg[2];
+  logic output_xbar_send_rdy[2];
+  logic output_xbar_send_val[2];
 
   logic [XBAR_CTRL_BITS-1:0] output_xbar_control_msg;
-  logic                      output_xbar_control_rdy;
-  logic                      output_xbar_control_val;
+  logic output_xbar_control_rdy;
+  logic output_xbar_control_val;
+
+  wire output_xbar_control_unused = &{1'b0, output_xbar_control_msg[1], 1'b0};
 
   // 1 bit output XBAR with classifier output
   crossbars_BlockingOverrideable #(
@@ -221,7 +227,9 @@ module tapeins_sp24_tapein2_Interconnect (
     .send_msg(output_xbar_send_msg),
     .send_val(output_xbar_send_val),
     .send_rdy(output_xbar_send_rdy),
-    .control(output_xbar_control_msg),
+    .control({
+      output_xbar_control_msg[3:2], output_xbar_control_msg[0]
+    }),  // here, we discard the second bit (index 1) as there are only 2 outputs
     .control_rdy(output_xbar_control_rdy),
     .control_val(output_xbar_control_val),
     .input_override(output_xbar_input_override),
