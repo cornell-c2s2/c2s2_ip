@@ -95,17 +95,14 @@ def make_interconnect(cmdline_opts):
     dut.sim_reset()
     return dut
 
-
 class InXbarCfg(int):
-    SPI_SPI = 0b0000  # SPI loopback
-    SPI_FFT = 0b0001  # SPI to FFT
-    SPI_WSB = 0b0010  # SPI to Wishbone
+    SPI_SPI = 0b000  # SPI loopback
+    SPI_WSB = 0b001  # SPI to Wishbone
+    SPI_FFT = 0b010  # SPI to FFT
 
-    # input[1] currently unused
-
-    WSB_SPI = 0b1000  # Wishbone to SPI
-    WSB_FFT = 0b1001  # Wishbone to FFT
-    WSB_WSB = 0b1010  # Wishbone looback
+    WSB_SPI = 0b100  # Wishbone to SPI
+    WSB_FFT = 0b101  # Wishbone to FFT
+    WSB_WSB = 0b110  # Wishbone looback
 
 
 class ClsXbarCfg(int):
@@ -113,28 +110,37 @@ class ClsXbarCfg(int):
     SPI_CLS = 0b0001  # SPI to Classifier
     SPI_WSB = 0b0010  # SPI to Wishbone
 
-    FFT_SPI = 0b0100  # FFT to SPI
-    FFT_CLS = 0b0101  # FFT to Classifier
-    FFT_WSB = 0b0110  # FFT to Wishbone
-
-    WSB_SPI = 0b1000  # Classifier to SPI
-    WSB_CLS = 0b1001  # Wishbone to Classifier
-    WSB_WSB = 0b1010  # Wishbone loopback
+    WSB_SPI = 0b0100  # Classifier to SPI
+    WSB_CLS = 0b0101  # Wishbone to Classifier
+    WSB_WSB = 0b0110  # Wishbone loopback
+    
+    FFT_SPI = 0b1000  # FFT to SPI
+    FFT_CLS = 0b1001  # FFT to Classifier
+    FFT_WSB = 0b1010  # FFT to Wishbone
 
 
 class OutXbarCfg(int):
-    SPI_SPI = 0b0000  # SPI loopback
-    SPI_GIO = 0b0001  # SPI to GPIO
-    SPI_WSB = 0b0010  # SPI to Wishbone
+    SPI_SPI = 0b000  # SPI loopback
+    SPI_WSB = 0b001  # SPI to Wishbone
 
-    CLS_SPI = 0b0100  # Classifier to SPI
-    CLS_GIO = 0b0101  # Classifier to GPIO
-    CLS_WSB = 0b0110  # Classifier to Wishbone
+    WSB_SPI = 0b010  # Wishbone to SPI
+    WSB_WSB = 0b011  # Wishbone loopback
+    
+    CLS_SPI = 0b100  # Classifier to SPI
+    CLS_WSB = 0b101  # Classifier to Wishbone
+    
+    
+class ClsCfgType(int):
+    CTF_FRQ = 6  # Cut-off frequency
+    CTF_MAG = 7  # Cut-off Magnitude
+    SMP_FRQ = 8  # Sampling Frequency
 
-    WSB_SPI = 0b1000  # Wishbone to SPI
-    WSB_GIO = 0b1001  # Wishbone to GPIO
-    WSB_WSB = 0b1010  # Wishbone loopback
 
+# Generates classifier config messages
+def cls_config_msg(config: ClsCfgType, value: int):
+    assert value < 0x10000 and value >= 0
+    return (config << 16 ) | value
+    
 
 # Generates xbar config messages
 def input_xbar_config_msg(config: InXbarCfg):
@@ -143,7 +149,7 @@ def input_xbar_config_msg(config: InXbarCfg):
 
 
 # Generates xbar config messages
-def classifier_xbar_config_msg(config: ClsXbarCfg):
+def cls_xbar_config_msg(config: ClsXbarCfg):
     assert config < 16 and config >= 0
     return 0x30000 | config
 
@@ -166,7 +172,7 @@ def loopback_clsXbar_msg(msgs):
     for x in msgs:
         assert x >= 0 and x < 0x10000
     new_msgs = [(0x20000 | int(x)) for x in msgs]
-    return [classifier_xbar_config_msg(ClsXbarCfg.SPI_SPI)] + new_msgs, new_msgs
+    return [cls_xbar_config_msg(ClsXbarCfg.SPI_SPI)] + new_msgs, new_msgs
 
 
 # Generates input/output msgs for outXbar loopback
@@ -236,11 +242,25 @@ def fft_msg(inputs: list[Fixed], outputs: list[Fixed]):
 
     in_msgs = [
         input_xbar_config_msg(InXbarCfg.SPI_FFT),
-        classifier_xbar_config_msg(ClsXbarCfg.FFT_SPI),
+        cls_xbar_config_msg(ClsXbarCfg.FFT_SPI),
     ] + [int(x) for x in inputs]
 
     out_msgs = [(0x20000 | int(x)) for x in outputs]
 
+    return in_msgs, out_msgs
+
+# Generates input/output msgs for classifier from fixedpt inputs/outputs
+def classifer_msg(inputs: list[Fixed], outputs: list[int]):
+    
+    inputs = [fixed_bits(x) for sample in inputs for x in sample]
+    
+    in_msgs = [
+        cls_xbar_config_msg(ClsXbarCfg.SPI_CLS),
+        output_xbar_config_msg(OutXbarCfg.CLS_SPI),
+    ] + [int(x) | 0x20000 for x in inputs]
+    
+    out_msgs = [(0x40000 | int(x)) for x in outputs]
+    
     return in_msgs, out_msgs
 
 
@@ -290,6 +310,12 @@ def test_fft_random(cmdline_opts, p):
     in_msgs, out_msgs = fft_msg(inputs, outputs)
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs, max_trsns=1000)
+    
+
+def test_classifier_manual(cmdline_opts):
+    in_msgs, out_msgs = classifer_msg([[fixN(1) for _ in range(32)]], [0x0001])
+    dut = make_interconnect(cmdline_opts)
+    run_interconnect(dut, in_msgs, out_msgs)
 
 
 # Composite test that combines loopback and FFT.

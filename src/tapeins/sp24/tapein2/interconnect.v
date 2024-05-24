@@ -129,9 +129,9 @@ module tapeins_sp24_tapein2_Interconnect (
   endgenerate
 
   // INPUT XBAR
-  logic [     DATA_BITS-1:0] input_xbar_recv_msg    [3];
-  logic                      input_xbar_recv_rdy    [3];
-  logic                      input_xbar_recv_val    [3];
+  logic [     DATA_BITS-1:0] input_xbar_recv_msg    [2];
+  logic                      input_xbar_recv_rdy    [2];
+  logic                      input_xbar_recv_val    [2];
 
   logic [     DATA_BITS-1:0] input_xbar_send_msg    [3];
   logic                      input_xbar_send_rdy    [3];
@@ -199,9 +199,9 @@ module tapeins_sp24_tapein2_Interconnect (
   logic                      output_xbar_recv_rdy    [3];
   logic                      output_xbar_recv_val    [3];
 
-  logic                      output_xbar_send_msg    [3];
-  logic                      output_xbar_send_rdy    [3];
-  logic                      output_xbar_send_val    [3];
+  logic                      output_xbar_send_msg    [2];
+  logic                      output_xbar_send_rdy    [2];
+  logic                      output_xbar_send_val    [2];
 
   logic [XBAR_CTRL_BITS-1:0] output_xbar_control_msg;
   logic                      output_xbar_control_rdy;
