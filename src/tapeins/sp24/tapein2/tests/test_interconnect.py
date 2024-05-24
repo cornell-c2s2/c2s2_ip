@@ -108,27 +108,27 @@ class InXbarCfg(int):
 
 class ClsXbarCfg(int):
     SPI_SPI = 0b0000  # SPI loopback
-    SPI_CLS = 0b0001  # SPI to Classifier
-    SPI_WSB = 0b0010  # SPI to Wishbone
+    SPI_WSB = 0b0001  # SPI to Wishbone
+    SPI_CLS = 0b0010  # SPI to Classifier
 
     WSB_SPI = 0b0100  # Classifier to SPI
-    WSB_CLS = 0b0101  # Wishbone to Classifier
-    WSB_WSB = 0b0110  # Wishbone loopback
+    WSB_WSB = 0b0101  # Wishbone loopback
+    WSB_CLS = 0b0110  # Wishbone to Classifier
 
     FFT_SPI = 0b1000  # FFT to SPI
-    FFT_CLS = 0b1001  # FFT to Classifier
-    FFT_WSB = 0b1010  # FFT to Wishbone
+    FFT_WSB = 0b1001  # FFT to Wishbone
+    FFT_CLS = 0b1010  # FFT to Classifier
 
 
 class OutXbarCfg(int):
-    SPI_SPI = 0b000  # SPI loopback
-    SPI_WSB = 0b001  # SPI to Wishbone
+    SPI_SPI = 0b0000  # SPI loopback
+    SPI_WSB = 0b0001  # SPI to Wishbone
 
-    WSB_SPI = 0b010  # Wishbone to SPI
-    WSB_WSB = 0b011  # Wishbone loopback
+    WSB_SPI = 0b0100  # Wishbone to SPI
+    WSB_WSB = 0b0101  # Wishbone loopback
 
-    CLS_SPI = 0b100  # Classifier to SPI
-    CLS_WSB = 0b101  # Classifier to Wishbone
+    CLS_SPI = 0b1000  # Classifier to SPI
+    CLS_WSB = 0b1001  # Classifier to Wishbone
 
 
 class ClsCfgType(int):
@@ -315,7 +315,7 @@ def test_fft_random(cmdline_opts, p):
 
 
 def test_classifier_manual(cmdline_opts):
-    in_msgs, out_msgs = classifer_msg([[fixN(1) for _ in range(32)]], [0x0001])
+    in_msgs, out_msgs = classifer_msg([[fixN(1) for _ in range(32)]], [0x0000])
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
 
