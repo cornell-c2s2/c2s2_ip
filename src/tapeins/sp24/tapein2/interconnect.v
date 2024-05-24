@@ -143,7 +143,7 @@ module tapeins_sp24_tapein2_Interconnect (
 
   crossbars_BlockingOverrideable #(
     .BIT_WIDTH(DATA_BITS),
-    .N_INPUTS (3),
+    .N_INPUTS (2),
     .N_OUTPUTS(3)
   ) input_xbar (
     .clk(clk),
@@ -211,7 +211,7 @@ module tapeins_sp24_tapein2_Interconnect (
   crossbars_BlockingOverrideable #(
     .BIT_WIDTH(1),
     .N_INPUTS (3),
-    .N_OUTPUTS(3)
+    .N_OUTPUTS(2)
   ) output_xbar (
     .clk(clk),
     .reset(reset),
@@ -239,9 +239,9 @@ module tapeins_sp24_tapein2_Interconnect (
   ) fft_deserializer (
     .clk(clk),
     .reset(reset),
-    .recv_val(input_xbar_send_val[1]),
-    .recv_rdy(input_xbar_send_rdy[1]),
-    .recv_msg(input_xbar_send_msg[1]),
+    .recv_val(input_xbar_send_val[2]),
+    .recv_rdy(input_xbar_send_rdy[2]),
+    .recv_msg(input_xbar_send_msg[2]),
     .send_val(fft_recv_val),
     .send_rdy(fft_recv_rdy),
     .send_msg(fft_recv_msg)
@@ -258,9 +258,9 @@ module tapeins_sp24_tapein2_Interconnect (
   ) fft_serializer (
     .clk(clk),
     .reset(reset),
-    .send_val(classifier_xbar_recv_val[1]),
-    .send_rdy(classifier_xbar_recv_rdy[1]),
-    .send_msg(classifier_xbar_recv_msg[1]),
+    .send_val(classifier_xbar_recv_val[2]),
+    .send_rdy(classifier_xbar_recv_rdy[2]),
+    .send_msg(classifier_xbar_recv_msg[2]),
     .recv_val(fft_send_val),
     .recv_rdy(fft_send_rdy),
     .recv_msg(fft_send_msg)
@@ -277,9 +277,9 @@ module tapeins_sp24_tapein2_Interconnect (
   ) classifier_deserializer (
     .clk(clk),
     .reset(reset),
-    .recv_val(classifier_xbar_send_val[1]),
-    .recv_rdy(classifier_xbar_send_rdy[1]),
-    .recv_msg(classifier_xbar_send_msg[1]),
+    .recv_val(classifier_xbar_send_val[2]),
+    .recv_rdy(classifier_xbar_send_rdy[2]),
+    .recv_msg(classifier_xbar_send_msg[2]),
     .send_val(classifier_recv_val),
     .send_rdy(classifier_recv_rdy),
     .send_msg(classifier_recv_msg)
@@ -328,9 +328,9 @@ module tapeins_sp24_tapein2_Interconnect (
     .sampling_freq_val(classifier_config_val[2]),
     .sampling_freq_msg(classifier_config_msg[2]),
     // hooked up to input 1 of the output
-    .send_rdy(output_xbar_recv_rdy[1]),
-    .send_val(output_xbar_recv_val[1]),
-    .send_msg(output_xbar_recv_msg[1])
+    .send_rdy(output_xbar_recv_rdy[2]),
+    .send_val(output_xbar_recv_val[2]),
+    .send_msg(output_xbar_recv_msg[2])
   );
 
   // WISHBONE HARNESS
@@ -368,17 +368,17 @@ module tapeins_sp24_tapein2_Interconnect (
 
   // 3 WB inputs:
   // 0: input xbar inject
-  assign input_xbar_recv_msg[2] = wishbone_istream_data[0][DATA_BITS-1:0];
-  assign input_xbar_recv_val[2] = wishbone_istream_val[0];
-  assign wishbone_istream_rdy[0] = input_xbar_recv_rdy[2];
+  assign input_xbar_recv_msg[1] = wishbone_istream_data[0][DATA_BITS-1:0];
+  assign input_xbar_recv_val[1] = wishbone_istream_val[0];
+  assign wishbone_istream_rdy[0] = input_xbar_recv_rdy[1];
   // 1: classifier xbar inject
-  assign classifier_xbar_recv_msg[2] = wishbone_istream_data[1][DATA_BITS-1:0];
-  assign classifier_xbar_recv_val[2] = wishbone_istream_val[1];
-  assign wishbone_istream_rdy[1] = classifier_xbar_recv_rdy[2];
+  assign classifier_xbar_recv_msg[1] = wishbone_istream_data[1][DATA_BITS-1:0];
+  assign classifier_xbar_recv_val[1] = wishbone_istream_val[1];
+  assign wishbone_istream_rdy[1] = classifier_xbar_recv_rdy[1];
   // 2: output xbar inject
-  assign output_xbar_recv_msg[2] = wishbone_istream_data[2][0];
-  assign output_xbar_recv_val[2] = wishbone_istream_val[2];
-  assign wishbone_istream_rdy[2] = output_xbar_recv_rdy[2];
+  assign output_xbar_recv_msg[1] = wishbone_istream_data[2][0];
+  assign output_xbar_recv_val[1] = wishbone_istream_val[2];
+  assign wishbone_istream_rdy[2] = output_xbar_recv_rdy[1];
 
   wire unused_wishbone_istream_bits = &{
     1'b0,
@@ -392,19 +392,19 @@ module tapeins_sp24_tapein2_Interconnect (
   // 0: input xbar output
   // sign extend the 16 bit data to 32 bits
   assign wishbone_ostream_data[0] = {
-    {(32 - DATA_BITS) {input_xbar_send_msg[2][DATA_BITS-1]}}, input_xbar_send_msg[2]
+    {(32 - DATA_BITS) {input_xbar_send_msg[1][DATA_BITS-1]}}, input_xbar_send_msg[1]
   };
-  assign wishbone_ostream_val[0] = input_xbar_send_val[2];
-  assign input_xbar_send_rdy[2] = wishbone_ostream_rdy[0];
+  assign wishbone_ostream_val[0] = input_xbar_send_val[1];
+  assign input_xbar_send_rdy[1] = wishbone_ostream_rdy[0];
   // 1: classifier xbar output
   assign wishbone_ostream_data[1] = {
-    {(32 - DATA_BITS) {classifier_xbar_send_msg[2][DATA_BITS-1]}}, classifier_xbar_send_msg[2]
+    {(32 - DATA_BITS) {classifier_xbar_send_msg[1][DATA_BITS-1]}}, classifier_xbar_send_msg[1]
   };
-  assign wishbone_ostream_val[1] = classifier_xbar_send_val[2];
-  assign classifier_xbar_send_rdy[2] = wishbone_ostream_rdy[1];
+  assign wishbone_ostream_val[1] = classifier_xbar_send_val[1];
+  assign classifier_xbar_send_rdy[1] = wishbone_ostream_rdy[1];
   // 2: output xbar output
   // zero extend the classifier output to 32 bits
-  assign wishbone_ostream_data[2] = {31'b0, output_xbar_send_msg[2]};
+  assign wishbone_ostream_data[2] = {31'b0, output_xbar_send_msg[1]};
 
   // 9 inputs:
   // 0: input xbar inject
