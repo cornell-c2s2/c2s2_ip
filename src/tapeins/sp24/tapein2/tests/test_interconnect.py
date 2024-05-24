@@ -97,13 +97,13 @@ def make_interconnect(cmdline_opts):
 
 
 class InXbarCfg(int):
-    SPI_SPI = 0b000  # SPI loopback
-    SPI_WSB = 0b001  # SPI to Wishbone
-    SPI_FFT = 0b010  # SPI to FFT
+    SPI_SPI = 0b0000  # SPI loopback
+    SPI_WSB = 0b0001  # SPI to Wishbone
+    SPI_FFT = 0b0010  # SPI to FFT
 
-    WSB_SPI = 0b100  # Wishbone to SPI
-    WSB_FFT = 0b101  # Wishbone to FFT
-    WSB_WSB = 0b110  # Wishbone looback
+    WSB_SPI = 0b0100  # Wishbone to SPI
+    WSB_FFT = 0b0101  # Wishbone to FFT
+    WSB_WSB = 0b0110  # Wishbone looback
 
 
 class ClsXbarCfg(int):
@@ -121,14 +121,14 @@ class ClsXbarCfg(int):
 
 
 class OutXbarCfg(int):
-    SPI_SPI = 0b000  # SPI loopback
-    SPI_WSB = 0b001  # SPI to Wishbone
+    SPI_SPI = 0b0000  # SPI loopback
+    SPI_WSB = 0b0001  # SPI to Wishbone
 
-    WSB_SPI = 0b010  # Wishbone to SPI
-    WSB_WSB = 0b011  # Wishbone loopback
+    WSB_SPI = 0b0100  # Wishbone to SPI
+    WSB_WSB = 0b0101  # Wishbone loopback
 
-    CLS_SPI = 0b100  # Classifier to SPI
-    CLS_WSB = 0b101  # Classifier to Wishbone
+    CLS_SPI = 0b1000  # Classifier to SPI
+    CLS_WSB = 0b1001  # Classifier to Wishbone
 
 
 class ClsCfgType(int):
