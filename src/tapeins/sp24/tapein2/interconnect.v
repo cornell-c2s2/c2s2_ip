@@ -413,6 +413,8 @@ module tapeins_sp24_tapein2_Interconnect (
   // 2: output xbar output
   // zero extend the classifier output to 32 bits
   assign wishbone_ostream_data[2] = {31'b0, output_xbar_send_msg[1]};
+  assign wishbone_ostream_val[2] = output_xbar_send_val[1];
+  assign output_xbar_send_rdy[1] = wishbone_ostream_rdy[2];
 
   // 9 inputs:
   // 0: input xbar inject
