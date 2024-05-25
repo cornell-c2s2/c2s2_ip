@@ -345,6 +345,9 @@ endmodule  // user_project_wrapper
         if output_match:
             gpio_out_used.add(int(output_match.group(1)))
 
+    if not "GPIO_CFG" in design:
+        design["GPIO_CFG"] = {}
+
     # GPIOs 0-4 are reserved for management SoC, throw an error if we try to configure them
     for gpio in range(0, 4):
         if gpio in design["GPIO_CFG"]:
@@ -643,6 +646,12 @@ class Synth(SubCommand):
             help="Number of threads to use for synthesis. Use 'auto' to use a threadcount equal to the number of CPU cores.",
         )
 
+        args.add_argument(
+            "--wrapper-only",
+            action="store_true",
+            help="Only synthesize the user_project_wrapper",
+        )
+
     def run(args):
         """Run synthesis on a design."""
         if not caravel_installed():
@@ -801,31 +810,33 @@ class Synth(SubCommand):
         else:
             threads = args.nthreads
 
-        spinner = Spinner(args, f"Running macro synthesis with {threads} threads")
-
-        with multiprocessing.Pool(threads) as pool:
-            results = pool.starmap(
-                synthesize, [(design, path_prefix, args) for design in designs]
-            )
-            if any(results):
-                spinner.fail("Synthesis failed")
-                log.error(
-                    "Synthesis failed for the following designs:\n\t%s",
-                    "\n\t".join(
-                        [
-                            path.join(
-                                caravel_link(),
-                                "openlane",
-                                f"{path_prefix}_{design['DESIGN_NAME']}",
-                            )
-                            for design, result in zip(designs, results)
-                            if result
-                        ]
-                    ),
+        if not args.wrapper_only:
+            spinner = Spinner(args, f"Running macro synthesis with {threads} threads")
+            with multiprocessing.Pool(threads) as pool:
+                results = pool.starmap(
+                    synthesize, [(design, path_prefix, args) for design in designs]
                 )
-                return 1
+                if any(results):
+                    spinner.fail("Synthesis failed")
+                    log.error(
+                        "Synthesis failed for the following designs:\n\t%s",
+                        "\n\t".join(
+                            [
+                                path.join(
+                                    caravel_link(),
+                                    "openlane",
+                                    f"{path_prefix}_{design['DESIGN_NAME']}",
+                                )
+                                for design, result in zip(designs, results)
+                                if result
+                            ]
+                        ),
+                    )
+                    return 1
 
-        spinner.succeed("Finished macro synthesis")
+            spinner.succeed("Finished macro synthesis")
+        else:
+            log.info("Skipping macro synthesis")
 
         # If there is a core design, run synthesis on the user_project_wrapper
         if designs[0].get("DESIGN_IS_CORE", 1) == 1:
