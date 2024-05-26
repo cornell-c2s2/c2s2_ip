@@ -8,7 +8,7 @@
 `include "classifier/helpers/classifier_regs.v"
 `include "classifier/helpers/magnitude.v"
 `include "classifier/helpers/highpass.v"
-`include "classifier/helpers/frequency_arr.v"
+`include "classifier/helpers/frequency_bins.v"
 `include "classifier/helpers/comparison.v"
 
 module classifier_Classifier #(
@@ -107,7 +107,7 @@ module classifier_Classifier #(
 
   logic [BIT_WIDTH-1:0] frequency_array[N_SAMPLES-1:0];
 
-  frequency_arr #(
+  classifier_helpers_FrequencyBins #(
     .BIT_WIDTH (BIT_WIDTH),
     .DECIMAL_PT(DECIMAL_PT),
     .N_SAMPLES (N_SAMPLES)

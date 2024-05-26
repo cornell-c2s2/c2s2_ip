@@ -260,8 +260,14 @@ module tapeins_sp24_tapein2_Interconnect (
   logic                 fft_send_val;
   logic                 fft_send_rdy;
 
+  generate
+    for (genvar i = 16; i < 32; i = i + 1) begin
+      wire fft_msg_unused = &{1'b0, fft_send_msg[i], 1'b0};
+    end
+  endgenerate
+
   serdes_Serializer #(
-    .N_SAMPLES(32),
+    .N_SAMPLES(16), // halved here as the upper half of the result of the FFT is just the complex conjugate of the lower half
     .BIT_WIDTH(DATA_BITS)
   ) fft_serializer (
     .clk(clk),
@@ -271,16 +277,16 @@ module tapeins_sp24_tapein2_Interconnect (
     .send_msg(classifier_xbar_recv_msg[2]),
     .recv_val(fft_send_val),
     .recv_rdy(fft_send_rdy),
-    .recv_msg(fft_send_msg)
+    .recv_msg(fft_send_msg[0:15])
   );
 
   // Deserializer for the classifier, hooked up to output 1 of the classifier crossbar
-  logic [DATA_BITS-1:0] classifier_recv_msg [32];
+  logic [DATA_BITS-1:0] classifier_recv_msg [16];
   logic                 classifier_recv_val;
   logic                 classifier_recv_rdy;
 
   serdes_Deserializer #(
-    .N_SAMPLES(32),
+    .N_SAMPLES(16),
     .BIT_WIDTH(DATA_BITS)
   ) classifier_deserializer (
     .clk(clk),
@@ -319,7 +325,7 @@ module tapeins_sp24_tapein2_Interconnect (
   classifier_Classifier #(
     .BIT_WIDTH (16),
     .DECIMAL_PT(8),
-    .N_SAMPLES (32)
+    .N_SAMPLES (16)
   ) classifier (
     .clk(clk),
     .reset(reset),
