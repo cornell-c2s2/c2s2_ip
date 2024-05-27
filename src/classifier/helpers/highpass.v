@@ -10,8 +10,8 @@ module highpass_Highpass #(
   parameter int N_SAMPLES = 8
 ) (
   input  logic [BIT_WIDTH - 1:0] cutoff_freq,
-  input  logic [BIT_WIDTH - 1:0] freq_in       [N_SAMPLES - 1:0],
-  output logic                   filtered_valid[N_SAMPLES - 1:0]
+  input  logic [BIT_WIDTH - 1:0] freq_in       [N_SAMPLES],
+  output logic                   filtered_valid[N_SAMPLES]
 );
 
   generate

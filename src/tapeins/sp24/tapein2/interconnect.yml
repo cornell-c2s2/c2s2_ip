@@ -14,24 +14,24 @@ GPIO_MAP:
   miso: io_out[10]
   io_out: io_out[4:0]
   io_oeb: io_oeb[22:0]
-  wbs_stb_i: wbs_stb_i,
-  wbs_cyc_i: wbs_cyc_i,
-  wbs_we_i: wbs_we_i,
-  wbs_sel_i: wbs_sel_i,
-  wbs_dat_i: wbs_dat_i,
-  wbs_adr_i: wbs_adr_i,
-  wbs_ack_o: wbs_ack_o,
-  wbs_dat_o: wbs_dat_o,
-  input_xbar_input_override: io_in[11]
-  input_xbar_output_override: io_in[12]
-  classifier_xbar_input_override: io_in[13]
-  classifier_xbar_output_override: io_in[14]
-  output_xbar_input_override: io_in[15]
-  output_xbar_output_override: io_in[16]
+  wbs_stb_i: wbs_stb_i
+  wbs_cyc_i: wbs_cyc_i
+  wbs_we_i: wbs_we_i
+  wbs_sel_i: wbs_sel_i
+  wbs_dat_i: wbs_dat_i
+  wbs_adr_i: wbs_adr_i
+  wbs_ack_o: wbs_ack_o
+  wbs_dat_o: wbs_dat_o
+  input_xbar_input_override: io_in[16]
+  input_xbar_output_override: io_in[17]
+  classifier_xbar_input_override: io_in[18]
+  classifier_xbar_output_override: io_in[19]
+  output_xbar_input_override: io_in[20]
+  output_xbar_output_override: io_in[21]
 FP_PIN_ORDER_CFG: interconnect_pins.cfg
 CLOCK_PORT: clk
 FP_SIZING: absolute
 CLOCK_PERIOD: 25
 PL_TARGET_DENSITY: 0.45
-DIE_AREA: 0 0 2800 1760
-MPRJ_POS: 60 15 N
+DIE_AREA: 0 0 2500 2000
+MPRJ_POS: 200 200 N
