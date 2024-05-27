@@ -267,7 +267,9 @@ module tapeins_sp24_tapein2_Interconnect (
   endgenerate
 
   serdes_Serializer #(
-    .N_SAMPLES(16), // halved here as the upper half of the result of the FFT is just the complex conjugate of the lower half
+    // halved here as the upper half of the result of the FFT is just the
+    // complex conjugate of the lower half
+    .N_SAMPLES(16),
     .BIT_WIDTH(DATA_BITS)
   ) fft_serializer (
     .clk(clk),
