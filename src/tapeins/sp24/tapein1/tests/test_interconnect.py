@@ -4,11 +4,8 @@ from src.tapeins.sp24.tapein1.interconnect import Interconnect
 from src.tapeins.sp24.tapein1.tests.spi_stream_protocol import *
 from fixedpt import Fixed, CFixed
 from tools.utils import fixed_bits, mk_test_matrices
-
 from src.fft.tests.fft import FFTInterface, FFTPease
-
 import random
-
 from pymtl3 import *
 from pymtl3.stdlib.stream.ifcs import valrdy_to_str
 from pymtl3.stdlib.test_utils import (
