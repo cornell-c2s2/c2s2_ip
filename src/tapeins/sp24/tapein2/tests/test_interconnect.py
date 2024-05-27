@@ -4,11 +4,9 @@ from src.tapeins.sp24.tapein2.interconnect import Interconnect
 from src.tapeins.sp24.tapein2.tests.spi_stream_protocol import *
 from fixedpt import Fixed, CFixed
 from tools.utils import fixed_bits, mk_test_matrices
-
 from src.fft.tests.fft import FFTInterface, FFTPease
-
+from src.classifier.sim import classify
 import random
-
 from pymtl3 import *
 from pymtl3.stdlib.stream.ifcs import valrdy_to_str
 from pymtl3.stdlib.test_utils import (
@@ -274,7 +272,7 @@ def fixN(n):
 @pytest.mark.parametrize(
     "input, output",
     [
-        ([[fixN(1) for _ in range(32)]], [[fixN(32)] + [fixN(0) for _ in range(31)]]),
+        ([[fixN(1) for _ in range(32)]], [[fixN(32)] + [fixN(0) for _ in range(15)]]),
     ],
 )
 def test_fft_manual(input, output, cmdline_opts):
@@ -307,7 +305,7 @@ def test_fft_random(cmdline_opts, p):
     outputs = [model.transform(x) for x in inputs]
 
     inputs = [[x.real for x in sample] for sample in inputs]
-    outputs = [[x.real for x in sample] for sample in outputs]
+    outputs = [[x.real for x in sample][:16] for sample in outputs]
 
     in_msgs, out_msgs = fft_msg(inputs, outputs)
     dut = make_interconnect(cmdline_opts)
@@ -315,7 +313,7 @@ def test_fft_random(cmdline_opts, p):
 
 
 def test_classifier_manual(cmdline_opts):
-    in_msgs, out_msgs = classifer_msg([[fixN(1) for _ in range(32)]], [0x0000])
+    in_msgs, out_msgs = classifer_msg([[fixN(1) for _ in range(16)]], [0x0000])
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
 
@@ -325,7 +323,7 @@ def test_compose(cmdline_opts):
     xbar_in_in_msgs, xbar_in_out_msgs = loopback_inXbar_msg([0x5555, 0xAAAA])
     fft_in_msgs, fft_out_msgs = fft_msg(
         [[fixN(1) for _ in range(32)]],
-        [[fixN(32)] + [fixN(0) for _ in range(31)]],
+        [[fixN(32)] + [fixN(0) for _ in range(15)]],
     )
     xbar_cls_in_msgs, xbar_cls_out_msgs = loopback_clsXbar_msg([0xAAAA, 0x5555])
 
@@ -333,3 +331,58 @@ def test_compose(cmdline_opts):
     num_t1 = run_interconnect(dut, xbar_in_in_msgs, xbar_in_out_msgs, max_trsns=100)
     num_t2 = run_interconnect(dut, fft_in_msgs, fft_out_msgs, curr_trsns=num_t1)
     run_interconnect(dut, xbar_cls_in_msgs, xbar_cls_out_msgs, curr_trsns=num_t2)
+
+
+# Test the FFT -> Classifier pipeline
+@pytest.mark.parametrize(
+    *mk_test_matrices(
+        {
+            "input_mag": [1, 10],  # Maximum magnitude of the input signal
+            "input_num": [1, 10],  # Number of random inputs to generate
+            "cutoff_freq": [0, 2000],
+            "cutoff_mag": [0.7, 2.3],
+            "sampling_freq": [44800, 44100, 25000],
+        }
+    )
+)
+def test_fft_classifier_random(cmdline_opts, p):
+    inputs = [
+        [
+            CFixed((random.uniform(-p.input_mag, p.input_mag), 0), 16, 8)
+            for i in range(32)
+        ]
+        for _ in range(p.input_num)
+    ]
+
+    model: FFTInterface = FFTPease(16, 8, 32)
+    outputs = [model.transform(x) for x in inputs]
+
+    fft_inputs = [[x.real for x in sample] for sample in inputs]
+    fft_outputs = [[x.real for x in sample][:16] for sample in outputs]
+
+    cutoff_mag = Fixed(p.cutoff_mag, True, 16, 8)
+
+    classifier_outputs = [
+        classify(x, p.cutoff_freq, cutoff_mag, p.sampling_freq) for x in fft_outputs
+    ]
+
+    inputs = (
+        [  # First, configure the crossbars
+            input_xbar_config_msg(InXbarCfg.SPI_FFT),
+            cls_xbar_config_msg(ClsXbarCfg.FFT_CLS),
+            output_xbar_config_msg(OutXbarCfg.CLS_SPI),
+        ]
+        + [  # Next, configure the classifier
+            cls_config_msg(ClsCfgType.CTF_FRQ, p.cutoff_freq),
+            cls_config_msg(ClsCfgType.CTF_MAG, int(cutoff_mag)),
+            cls_config_msg(ClsCfgType.SMP_FRQ, p.sampling_freq),
+        ]
+        + [  # Finally, send the fft inputs
+            int(fixed_bits(x)) for sample in fft_inputs for x in sample
+        ]
+    )
+
+    outputs = [(0x40000 | int(x)) for x in classifier_outputs]
+
+    dut = make_interconnect(cmdline_opts)
+    run_interconnect(dut, inputs, outputs, max_trsns=1000)
