@@ -14,7 +14,7 @@ def write_msg(payload: Bits) -> Bits:
 
 
 def read_msg() -> Bits:
-    return concat(Bits2(0b01), Bits20(0))
+    return concat(Bits2(0b01), Bits18(0))
 
 
 def write_read_msg(payload: Bits) -> Bits:
@@ -22,4 +22,4 @@ def write_read_msg(payload: Bits) -> Bits:
 
 
 def nocommand_read_msg() -> Bits:
-    return concat(Bits2(0b00), Bits20(0))
+    return concat(Bits2(0b00), Bits18(0))
