@@ -7,7 +7,7 @@ from os import path
 class FrequencyBins(VerilogPlaceholder, Component):
     # Constructor
 
-    def construct(s, N_SAMPLES, BIT_WIDTH, DECIMAL_PT):
+    def construct(s, N_SAMPLES, BIT_WIDTH):
         # Interface
 
         s.sampling_freq = InPort(BIT_WIDTH)
