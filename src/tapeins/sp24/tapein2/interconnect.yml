@@ -5,7 +5,6 @@ TEST_FILES:
 DESIGN_IS_CORE: 1 # This will also be synthesized into user project wrapper
 GPIO_MAP:
   clk: wb_clk_i
-  wbs_clk_i: wb_clk_i
   reset: wb_rst_i
   adapter_parity: io_out[5]
   minion_parity: io_out[6]
@@ -36,3 +35,4 @@ CLOCK_PERIOD: 25
 PL_TARGET_DENSITY: 0.45
 DIE_AREA: 0 0 2000 1750
 MPRJ_POS: 50 50 N
+IO_PCT: 0.1

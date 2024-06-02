@@ -11,7 +11,6 @@
 
 module tapeins_sp24_tapein2_Interconnect (
   input logic clk,
-  input logic wbs_clk_i,
   input logic reset,
   input logic cs,
   input logic mosi,
@@ -365,7 +364,7 @@ module tapeins_sp24_tapein2_Interconnect (
     .p_num_istream(3),
     .p_num_ostream(3)
   ) wishbone (
-    .clk(wbs_clk_i),
+    .clk(clk),
     .reset(reset),
     .wbs_stb_i(wbs_stb_i),
     .wbs_cyc_i(wbs_cyc_i),
