@@ -149,7 +149,10 @@ module cmn_QueueDpath1 #(
         .out(deq_msg)
       );
 
-    else assign deq_msg = qstore;
+    else begin
+      logic unused = &{1'b0, bypass_mux_sel, 1'b0};
+      assign deq_msg = qstore;
+    end
   endgenerate
 
 endmodule
@@ -356,9 +359,7 @@ module cmn_QueueDpath #(
       );
 
     else begin
-      /* verilator lint_off UNUSED */
       logic unused = 1'b0 & bypass_mux_sel;
-      /* verilator lint_on UNUSED */
       assign deq_msg = read_data;
     end
   endgenerate

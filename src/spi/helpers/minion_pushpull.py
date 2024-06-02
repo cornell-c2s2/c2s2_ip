@@ -5,7 +5,7 @@ from pymtl3.stdlib.stream.ifcs import RecvIfcRTL, SendIfcRTL
 from src.spi.interfaces import SPIMinionIfc, PushOutIfc, PullInIfc
 
 
-class SPIMinion(VerilogPlaceholder, Component):
+class SPIMinionPushPull(VerilogPlaceholder, Component):
 
     # Constructor
 
@@ -33,8 +33,8 @@ class SPIMinion(VerilogPlaceholder, Component):
         # Source file path
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.join(path.dirname(__file__), "minion.v"),
+            path.join(path.dirname(__file__), "minion_pushpull.v"),
         )
 
         # Name of the top level module to be imported
-        s.set_metadata(VerilogPlaceholderPass.top_module, "Minion")
+        s.set_metadata(VerilogPlaceholderPass.top_module, "Minion_PushPull")
