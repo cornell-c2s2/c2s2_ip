@@ -15,6 +15,8 @@ class Interconnect(VerilogPlaceholder, Component):
         s.minion_parity = OutPort(1)
         s.adapter_parity = OutPort(1)
 
+        s.wbs_clk_i = InPort(1)
+
         s.input_xbar_input_override = InPort(1)
         s.input_xbar_output_override = InPort(1)
         s.classifier_xbar_input_override = InPort(1)
@@ -41,3 +43,55 @@ class Interconnect(VerilogPlaceholder, Component):
             VerilogPlaceholderPass.src_file,
             path.join(path.dirname(__file__), "interconnect.v"),
         )
+
+
+class InterconnectWrapper(Component):
+    # Constructor
+
+    def construct(s):
+        s.dut = Interconnect()
+        s.cs = InPort(1)
+        s.mosi = InPort(1)
+        s.miso = OutPort(1)
+        s.sclk = InPort(1)
+        s.minion_parity = OutPort(1)
+        s.adapter_parity = OutPort(1)
+        s.cs //= s.dut.cs
+        s.mosi //= s.dut.mosi
+        s.dut.miso //= s.miso
+        s.sclk //= s.dut.sclk
+        s.dut.minion_parity //= s.minion_parity
+        s.dut.adapter_parity //= s.adapter_parity
+
+        s.clk //= s.dut.wbs_clk_i
+
+        s.input_xbar_input_override = InPort(1)
+        s.input_xbar_output_override = InPort(1)
+        s.classifier_xbar_input_override = InPort(1)
+        s.classifier_xbar_output_override = InPort(1)
+        s.output_xbar_input_override = InPort(1)
+        s.output_xbar_output_override = InPort(1)
+
+        s.input_xbar_input_override //= s.dut.input_xbar_input_override
+        s.input_xbar_output_override //= s.dut.input_xbar_output_override
+        s.classifier_xbar_input_override //= s.dut.classifier_xbar_input_override
+        s.classifier_xbar_output_override //= s.dut.classifier_xbar_output_override
+        s.output_xbar_input_override //= s.dut.output_xbar_input_override
+        s.output_xbar_output_override //= s.dut.output_xbar_output_override
+
+        s.wbs_stb_i = InPort(1)
+        s.wbs_cyc_i = InPort(1)
+        s.wbs_we_i = InPort(1)
+        s.wbs_sel_i = InPort(4)
+        s.wbs_dat_i = InPort(32)
+        s.wbs_adr_i = InPort(32)
+        s.wbs_ack_o = OutPort(1)
+        s.wbs_dat_o = OutPort(32)
+        s.wbs_stb_i //= s.dut.wbs_stb_i
+        s.wbs_cyc_i //= s.dut.wbs_cyc_i
+        s.wbs_we_i //= s.dut.wbs_we_i
+        s.wbs_sel_i //= s.dut.wbs_sel_i
+        s.wbs_dat_i //= s.dut.wbs_dat_i
+        s.wbs_adr_i //= s.dut.wbs_adr_i
+        s.dut.wbs_ack_o //= s.wbs_ack_o
+        s.dut.wbs_dat_o //= s.wbs_dat_o
