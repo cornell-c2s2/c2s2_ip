@@ -238,4 +238,3 @@ if __name__ == "__main__":
         plt.savefig(path.join(path.dirname(__file__), f"classifier_{gi}.png"), dpi=1000)
 
     spinner.succeed("Plots generated")
-
