@@ -9,8 +9,8 @@ import multiprocessing as mp
 import argparse
 import math
 
-def run_spectrogram(sample_rate, n_samples, file, cutoff_idx_low, cutoff_idx_high, cutoff_mag):
-
+def run_spectrogram(sample_rate, file):
+    n_samples = 32
     data, sample_rate = librosa.load(
         path.join(path.dirname(__file__), "audio", file), sr=sample_rate, mono=True
     )
@@ -20,15 +20,21 @@ def run_spectrogram(sample_rate, n_samples, file, cutoff_idx_low, cutoff_idx_hig
         data,
         sample_rate,
         n_samples,
-        n_samples-1,
+        n_samples - 4,
     )
 
-    classified = classify(data, cutoff_idx_low, cutoff_idx_high, cutoff_mag)
+    classified = classify(data, bins)
 
-    return data, classified
+    return data, bins, classified
 
 
-def classify(magnitudes: list[list[float]], low: int, high: int, threshold: float) -> list[bool]:
+def classify(magnitudes: list[list[float]], bins: list[float]) -> list[bool]:
+    # Cutoff values for frequency
+    low = 2700
+    high = 9000
+
+    # Magnitude threshold
+    threshold = 0.01
 
     count = 0
     classifications = []
@@ -39,61 +45,55 @@ def classify(magnitudes: list[list[float]], low: int, high: int, threshold: floa
     curr_sound = False # Whether or not we are on a sound
 
     convVert = 0
-    convUpHalf = 0
     convLowHalf = 0
+    convUpHalf = 0
 
     for j, sample in enumerate(magnitudes):
         
-        counter = 0
 
         max_mag = 0
 
         # Check if there is a bin with a magnitude above the threshold
         for i, mag in enumerate(sample):
             # Vertical convolution
-            if (i > low):
+            if (bins[i] > low and bins[i] < 20000):
                 convVert += mag
             
             # Convolution for Upper Half (between 11350 - 20000)
-            if (i > len(sample)//2): # consider dividing into thirds, multiplying middle by 2 and rest by 1
+            if (bins[i] > 11350 and bins[i] < 20000): # consider dividing into thirds, multiplying middle by 2 and rest by 1
                 convUpHalf += mag * 2
-                convLowHalf -= mag * 2
+                convLowHalf -= mag # Removing some of the effect from the other side
                 
             # Convolution for Lower Half (between 2700 - 11350)
-            if (i < len(sample)//2): 
+            if (bins[i] > 2700 and bins[i] < 11350): 
                 convLowHalf += mag * 2
-                convUpHalf -= mag * 2
+                convUpHalf -= mag 
 
             if mag > threshold:
-                if i < low or i > high:
-                    if (mag > max_mag):
-                        max_mag = mag * 0.125
+                if bins[i] < low or bins[i] > high:
+                    if (mag * 0.1 > max_mag):
+                        max_mag = mag * 0.1
                     # Reduce magnitude outside the interval
                 else:
                     if (mag * 20 > max_mag):
-                        max_mag = mag * 16
+                        max_mag = mag * 20
                         
                     # Amplify magnitude within the interval
                     
-                counter += 1
-        if (counter == 0):
-            classifications.append(0)
-            continue
-        if (max_mag > 0.5):
+        
+        if (max_mag > 0.4):
             on_cycle += 1
             off_cycle = 0
-
-        elif (max_mag < 0.3):
-            # TODO: need to add this to verilog
-            if (curr_sound == False): # Resetting Convolutions 
+        else:
+            if (curr_sound == False): # Resetting Convolutions
                 convVert = 0
-                convUpHalf = 0
                 convLowHalf = 0
+                convUpHalf = 0
             on_cycle = 0
             off_cycle += 1
         
-        # When there are 300 cycles with a magnitude > 0.5, then curr_sound is true indicating we are on a sound
-        if (on_cycle > 300):
+        # When there are n cycles with a magnitude > 0.5, then curr_sound is true indicating we are on a sound
+        if (on_cycle > 200):
             curr_sound = True
         
         # When 2000 cycles pass with magnitude < 0.3, then we get out of any sound we may be in
@@ -101,15 +101,14 @@ def classify(magnitudes: list[list[float]], low: int, high: int, threshold: floa
             curr_sound = False
         
         if (curr_sound == True):
-            if (convLowHalf > convVert):
+            if (convLowHalf > convVert and convLowHalf > convUpHalf):
                 count = 10
         else:
             count = 0
         if (count > 0):
             count -= 1
 
-        # classifications.append([max_mag, convVert, convUpHalf, convLowHalf, math.log2(max_mag), count, on_cycle])
-        classifications.append(count>0)
+        classifications.append(count > 0) # [count, curr_sound, on_cycle, off_cycle, convVert, convLowHalf, convUpHalf]
 
     return classifications
 
@@ -118,14 +117,43 @@ if __name__ == "__main__":
     sample_rate = 44800
 
     audio_files = [
-        "716U_U19_06_08_17_46_21.179-U19_06_08_17_47_26.568.wav", #Mostly empty sound except for beginning
-        "409U_U19_06_08_12_11_41.016-U19_06_08_12_12_46.416.wav", #Shaking
-        "557U_U19_06_08_14_52_58.187-U19_06_08_14_54_3.533.wav",  #Pulsing sound in bg
-        "124U_U19_06_08_07_00_40.257-U19_06_08_07_01_45.848.wav", #Weird shaking with a couple bird calls
-        "857U_U19_06_08_20_20_21.794-U19_06_08_20_21_27.370.wav", #Other bird call very audible, some scratching
-        "033U_U19_06_08_05_21_11.070-U19_06_08_05_22_16.661.wav", #Bird making noise
-        "SSR4F_MixPre-1390_01.wav", #Bird call
-        "022U_U19_06_08_05_09_9.463-U19_06_08_05_10_15.070.wav", #Spaced out other bird call
+        # "recording.wav",
+        # "716U_U19_06_08_17_46_21.179-U19_06_08_17_47_26.568.wav", #Mostly empty sound except for beginning --
+        # "409U_U19_06_08_12_11_41.016-U19_06_08_12_12_46.416.wav", #Shaking
+        # "557U_U19_06_08_14_52_58.187-U19_06_08_14_54_3.533.wav",  #Pulsing sound in bg
+        # "124U_U19_06_08_07_00_40.257-U19_06_08_07_01_45.848.wav", #Weird shaking with a couple bird calls
+        # "857U_U19_06_08_20_20_21.794-U19_06_08_20_21_27.370.wav", #Other bird call very audible, some scratching
+        # "033U_U19_06_08_05_21_11.070-U19_06_08_05_22_16.661.wav", #Bird making noise
+        # "SSR4F_MixPre-1390_01.wav", #Bird call --
+        # "022U_U19_06_08_05_09_9.463-U19_06_08_05_10_15.070.wav", #Spaced out other bird call ----
+        "___SSR1F_MixPre-1363.WAV",
+        # "SSR4F_MixPre-1389_01.WAV",
+        # "SSF3F_MixPre-2260_01.WAV",
+        # "LHR3F_MixPre-1346_01.WAV",
+        # "SLC1F_MixPre-1809_01.WAV",
+        # "SLC1F_MixPre-1815_01.WAV",
+        # "LHR1F_MixPre-1312_01.WAV",
+        # "JS2F_MixPre-1920_01.WAV",
+        # "IMS1F_MixPre-1796_01.WAV",
+        # "DR4F_DP10E_MixPre-1414.WAV", #
+        # "ONF13F_MixPre-2209_01.WAV",
+        # "TIP1F_MixPre-1026.WAV",
+        # "ONF3F_MixPre-2122_01.WAV",
+        # "ONF11F_MixPre-2202_01.WAV",
+        # "LP1F_MixPre-1871_01.WAV",
+        # "SSF5F_MixPre-2269_01.WAV",
+        "__LA1F_MixPre-1022.WAV",
+        # "PSC3F_MixPre-1099.WAV",
+        # "NPN2F_MixPre-1285.WAV",
+        # "GT2F_MixPre-2039_01.WAV",
+        # "DR6F_MWW_MixPre-1448.WAV",
+        # "DPC1F_MixPre-1301.WAV",
+        # "JS3F_MixPre-1926_01.WAV", # Person
+        # "HC1F_MixPre-994.WAV", # Various
+        # "trimmed_scratches.wav",
+        "_trimmed_scratches2.wav",
+        # "trimmed_scratches3.wav",
+        # "trimmed_scratches4short.wav",
     ]
 
     # Check if the spectrograms have already been generated
@@ -135,7 +163,7 @@ if __name__ == "__main__":
     # Generate all the spectrograms in parallel
     with mp.Pool(16) as pool:
         results = pool.starmap(
-            run_spectrogram, [(sample_rate, 8, file, 2, 6, 0.1) for file in audio_files]
+            run_spectrogram, [(sample_rate, file) for file in audio_files]
         )
 
     spinner.succeed("Spectrograms generated")
@@ -210,3 +238,4 @@ if __name__ == "__main__":
         plt.savefig(path.join(path.dirname(__file__), f"classifier_{gi}.png"), dpi=1000)
 
     spinner.succeed("Plots generated")
+
