@@ -46,7 +46,7 @@ def spectrogram(
 
 def plot_spectrogram(
     ax: mpl.axes.Axes,
-    sample_rate: InterruptedError,
+    sample_rate: int,
     data: list[list[float]],
     bins: list[float],
     n_overlap,

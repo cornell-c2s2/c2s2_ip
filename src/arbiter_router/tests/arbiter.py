@@ -2,7 +2,7 @@ import pytest
 import random
 from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
-from pymtl3.stdlib.test_utils import run_sim, config_model_with_cmdline_opts
+from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
 from src.arbiter_router.arbiter import Arbiter
 from tools.utils import mk_test_matrices
