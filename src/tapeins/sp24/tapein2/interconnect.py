@@ -15,13 +15,6 @@ class Interconnect(VerilogPlaceholder, Component):
         s.minion_parity = OutPort(1)
         s.adapter_parity = OutPort(1)
 
-        s.input_xbar_input_override = InPort(1)
-        s.input_xbar_output_override = InPort(1)
-        s.classifier_xbar_input_override = InPort(1)
-        s.classifier_xbar_output_override = InPort(1)
-        s.output_xbar_input_override = InPort(1)
-        s.output_xbar_output_override = InPort(1)
-
         s.wbs_stb_i = InPort(1)
         s.wbs_cyc_i = InPort(1)
         s.wbs_we_i = InPort(1)

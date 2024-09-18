@@ -22,12 +22,6 @@ GPIO_MAP:
   wbs_adr_i: wbs_adr_i
   wbs_ack_o: wbs_ack_o
   wbs_dat_o: wbs_dat_o
-  input_xbar_input_override: io_in[16]
-  input_xbar_output_override: io_in[17]
-  classifier_xbar_input_override: io_in[18]
-  classifier_xbar_output_override: io_in[19]
-  output_xbar_input_override: io_in[20]
-  output_xbar_output_override: io_in[21]
 FP_PIN_ORDER_CFG: interconnect_pins.cfg
 CLOCK_PORT: clk
 FP_SIZING: absolute
