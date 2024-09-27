@@ -1,18 +1,3 @@
-//================================================
-// Iterative Butterfly Unit
-// -----------------------------------------------
-// This module performs the butterfly operation
-// which is equivalent to the following matrix
-// multiplication:
-// | 1  w |   | a |   | c |
-// | 1 -w | * | b | = | d |
-// where w is the ith root of unity e^(-2*pi*i/n)
-// and n/d is the fixed point specification`
-// This module is used in the FFT module, and
-// contains an area optimization parameter to
-// save area by not including the complex
-// multiplier in certain cases.
-//================================================
 `default_nettype none
 `ifndef FIXED_POINT_MULTI_BUTTERFLY
 `define FIXED_POINT_MULTI_BUTTERFLY
@@ -210,7 +195,7 @@ module fixed_point_combinational_MultiButterfly #(
       end else begin
       end
     end else if (state == COMP) begin
-      if (comp_state == bb[((b==1)?0 : $clog2(b)-1):0]) begin
+      if (comp_state == bb[((b == 1) ? 0 : $clog2(b) - 1) : 0]) begin
         next_state = DONE;
         next_comp_state = 0;
       end else begin

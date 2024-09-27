@@ -50,7 +50,6 @@ def classify(magnitudes: list[list[float]], bins: list[float]) -> list[bool]:
         if count > 0:
             count -= 1
         classifications.append(count > 0)
-
     return classifications
 
 
