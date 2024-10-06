@@ -13,13 +13,13 @@ module interconnect_fpga_top (
   output logic  adapter_parity
 );
 
+  // Connections for unused Wishbone inputs and outputs
   logic wbs_stb_i;
   logic wbs_cyc_i;
   logic wbs_we_i;
   logic [3:0] wbs_sel_i;
   logic [31:0] wbs_dat_i;
   logic [31:0] wbs_adr_i;
-
   logic wbs_ack_o;
   logic [31:0] wbs_dat_o;
   logic [22:0] io_oeb;
@@ -64,9 +64,8 @@ module interconnect_fpga_top (
   wire unused_io_oeb;
   wire unused_io_out;
 
-  // Using reduction AND operator; make sure syntax works
   assign unused_wbs_ack_o = wbs_ack_o;
-  assign unused_wbs_dat_o = &wbs_dat_o;
+  assign unused_wbs_dat_o = &wbs_dat_o; // Using reduction AND operator; make sure syntax works
   assign unused_io_oeb = &io_oeb;
   assign unused_io_out = &io_out;
 
