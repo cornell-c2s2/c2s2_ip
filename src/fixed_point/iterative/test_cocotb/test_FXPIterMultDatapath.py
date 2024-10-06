@@ -1,6 +1,7 @@
 import os
 import random
 import sys
+import subprocess
 from pathlib import Path
 
 import cocotb
@@ -24,28 +25,28 @@ def test_datapath_runner():
     sim = os.getenv("SIM", "icarus")
 
     proj_path = Path(__file__).resolve().parent.parent.parent.parent
+
     # equivalent to setting the PYTHONPATH environment variable
     sys.path.append(str(proj_path / "fixed_point" / "iterative" / "test_cocotb"))
-
-    sources = [
-       proj_path / "cmn" / "muxes.v",
-       proj_path / "cmn" / "assert.v",
-       proj_path / "cmn" / "regs.v",
-       proj_path / "fixed_point" / "iterative" / "multiplier.v"
-    ] 
     
+    #Set verilog source with preprocessed file
+    sources = [
+       proj_path / "fixed_point" / "iterative" / "multiplier_prep.v"
+    ] 
 
-    print(sources)
+    includes = [
+        proj_path
+    ]
+  
     build_test_args = []
-    if hdl_toplevel_lang == "vhdl" and sim == "xcelium":
-        build_test_args = ["-v93"]
 
     runner = get_runner(sim)
     runner.build(
         verilog_sources=sources,
+        includes=includes,
         hdl_toplevel="FXPIterMultDatapath",
         always=True,
-        build_args=build_test_args,
+        build_args=["-s", "FXPIterMultDatapath"]
     )
     runner.test(
         hdl_toplevel="FXPIterMultDatapath", test_module="test_FXPIterMultDatapath", test_args=build_test_args
