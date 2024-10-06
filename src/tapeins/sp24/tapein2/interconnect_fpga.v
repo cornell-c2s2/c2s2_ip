@@ -17,29 +17,29 @@ module tapeins_sp24_tapein2_Interconnect (
   output logic miso,
   input  logic sclk,
   output logic minion_parity,
-  output logic adapter_parity
+  output logic adapter_parity,
 
   // Wishbone Slave ports (WB MI A)
-  // input logic wbs_stb_i,
-  // input logic wbs_cyc_i,
-  // input logic wbs_we_i,
-  // input logic [3:0] wbs_sel_i,
-  // input logic [31:0] wbs_dat_i,
-  // input logic [31:0] wbs_adr_i,
-  // output logic wbs_ack_o,
-  // output logic [31:0] wbs_dat_o,
+  input logic wbs_stb_i,
+  input logic wbs_cyc_i,
+  input logic wbs_we_i,
+  input logic [3:0] wbs_sel_i,
+  input logic [31:0] wbs_dat_i,
+  input logic [31:0] wbs_adr_i,
+  output logic wbs_ack_o,
+  output logic [31:0] wbs_dat_o,
 
   // These outputs are necessary to set the valid
   // io_oeb and io_out values for the gpios.
-  // output logic [22:0] io_oeb,
-  // output logic [4:0] io_out
+  output logic [22:0] io_oeb,
+  output logic [ 4:0] io_out
 );
   // NOTE: the bottom of this file describes the address mapping.
 
   // io_oeb can always be zero as we are using inputs with nopull
-  // assign io_oeb = 0;
+  assign io_oeb = 0;
   // gpios 0-4 require output values to be set.
-  // assign io_out = 0;
+  assign io_out = 0;
 
   localparam int ADDR_BITS = 4;
   localparam int ROUTER_ARBITER_SIZE = 1 << ADDR_BITS;
@@ -249,6 +249,7 @@ module tapeins_sp24_tapein2_Interconnect (
   logic                 fft_send_val;
   logic                 fft_send_rdy;
 
+  // Top half of the FFT output is unused
   generate
     for (genvar i = 16; i < 32; i = i + 1) begin
       wire fft_msg_unused = &{1'b0, fft_send_msg[i], 1'b0};
