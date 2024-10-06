@@ -5,15 +5,16 @@ module lfsr_valready_FSM (
     input logic reset,
     
     //BIST-LFSR
-    input logic req_val;
-    output logic req_rdy;
+    input logic req_val,
+    output logic req_rdy,
 
     //LFSR-circuit interface
-    input logic resq_rdy;
-    output logic resq_val;
+    input logic resq_rdy,
+    output logic resq_val,
 
     //LFSR
-    output logic state, next_state;
+    output logic state,
+    output logic next_state
 
 );
     logic [1:0] IDLE = 2'b00, GEN_VAL = 2'b01, SEND_VAL = 2'b10;
@@ -67,6 +68,7 @@ module lfsr_valready_FSM (
             default: begin
                 req_rdy = 1'b0;
                 resq_val = 1'b0;
+                counter_reset = 1'b0;
             end
         endcase
     end

@@ -39,14 +39,15 @@ module lfsr_design
     
     //The value coming out of the taps
     logic Q0;
+    logic Qin;
 
     //
     //Shifts Q over by 1 digit, and shifts in the value from taps
     //
     always_ff @(posedge clk) begin 
         if(state == 1'b10) begin
-            Q << 1'b1;
-            Q[0] <= Q0;
+            Q <= {Q[30:0], Qin};
+            Qin <= Q0;
         end
     end
 
