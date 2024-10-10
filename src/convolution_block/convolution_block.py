@@ -8,7 +8,7 @@ from os import path
 class ConvolutionBlock(VerilogPlaceholder, Component):
     # Constructor
 
-    def construct(s):
+    def construct(s, n):
         # Interface
 
         s.recv = stream.ifcs.RecvIfcRTL(mk_bits(n))

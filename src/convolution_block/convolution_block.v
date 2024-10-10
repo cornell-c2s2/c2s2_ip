@@ -38,7 +38,9 @@ module convolution_block_ConvolutionBlock #(
   // perform array convolution: output[i] = input[i] * filter[n - i]
   generate
     for (genvar i = 0; i < ARRAY_LENGTH; i++) begin
-      assign output_arr_msg[i] = input_arr_msg[i] * filter_msg[ARRAY_LENGTH-i];
+      always @(posedge clk) begin
+        output_arr_msg[i] <= reset ? 0 : input_arr_msg[i] * filter_msg[ARRAY_LENGTH-i-1];
+      end
     end
   endgenerate
 endmodule
