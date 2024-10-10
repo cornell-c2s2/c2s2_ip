@@ -20,9 +20,10 @@ async def generate_clock(dut):
         await Timer(1, units="ns")
 
 #Check if expected value of c is the same as the actual value
-#TODO:Account for overflow
 def equal(actual, expected):
+    #To account for underflow discrepancy
     return actual == expected or actual == expected-1
+
 #Updating the state of the multiplier
 def update_control(dut, counter):
     if (counter == 31):
@@ -83,18 +84,18 @@ async def datapath_reset_test(dut):
 async def datapath_randomized_test(dut):
     for i in range(1000):
         #Reset multiplier then multiply inputs
-        A = random.uniform(-150, 150)
-        B = random.uniform(-150, 150)
+        A = random.uniform(-300, 300)
+        B = random.uniform(-300, 300)
         await reset_then_mult(dut, A, B)
 
         #Check the value returned by the datapath
         C = Fxp(A, signed=True, n_word=48, n_frac=16, rounding='around')*Fxp(B, signed=True, n_word=32, n_frac=16, rounding='around')
         C.resize(n_word=32, n_frac=16)
 
-        if not equal(int(dut.c.value), int(C.bin(), 2)):
-            print("A = %f and B = %f" % (A, B))
+        #Check for overflow
+        overflow = A*B > 32768 or A*B < -32768
 
-        assert equal(int(dut.c.value), int(C.bin(), 2)), "C not correct" 
+        assert equal(int(dut.c.value), int(C.bin(), 2)) or overflow, "C not correct" 
 
 def test_datapath_runner():
     """Simulate the multiplier datapath using the Python runner.
