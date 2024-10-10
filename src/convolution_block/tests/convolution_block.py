@@ -4,7 +4,7 @@ from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
-from src.convolution_block.harnesses.convolution_block import ConvolutionBlock
+from src.convolution_block.convolution_block import ConvolutionBlock
 
 
 # Creates a test harness class for the `ConvolutionBlock` module.
