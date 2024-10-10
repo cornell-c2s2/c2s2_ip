@@ -65,7 +65,7 @@ module interconnect_fpga_top (
   wire unused_io_out;
 
   assign unused_wbs_ack_o = wbs_ack_o;
-  assign unused_wbs_dat_o = &wbs_dat_o; // Using reduction AND operator; make sure syntax works
+  assign unused_wbs_dat_o = &wbs_dat_o;
   assign unused_io_oeb = &io_oeb;
   assign unused_io_out = &io_out;
 
