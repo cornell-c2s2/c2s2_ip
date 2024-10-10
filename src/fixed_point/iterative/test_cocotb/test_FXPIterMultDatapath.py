@@ -78,6 +78,19 @@ async def datapath_basic_test(dut):
 
 @cocotb.test()
 async def datapath_reset_test(dut):
+    #Initialize signal values
+
+    #Reset
+
+    #End reset
+
+    #Run multiplication coroutine for a few cycles
+
+    #Reset again
+
+    #Check if values are correct
+
+    #End reset
     pass
 
 @cocotb.test()

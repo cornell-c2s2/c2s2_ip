@@ -33,6 +33,7 @@ async def reset_then_mult(dut, a, b):
     dut.b.value = int(B.bin(), 2)
     dut.reset.value = 1
     dut.recv_val.value = 0
+    dut.send_rdy.value = 0
 
     #Start clock
     await cocotb.start(generate_clock(dut))
@@ -68,6 +69,19 @@ async def multiplier_basic_test(dut):
 
 @cocotb.test()
 async def multiplier_reset_test(dut):
+    #Initialize signal values
+
+    #Reset
+
+    #End reset
+
+    #Run multiplication coroutine for a few cycles
+
+    #Reset again
+
+    #Check if values are correct
+
+    #End reset
     pass
 
 @cocotb.test()
