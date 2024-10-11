@@ -76,10 +76,10 @@ async def reset_test(dut):
 @cocotb.test()
 async def done_test(dut):
     await cocotb.start(generate_clock(dut))
-    await Timer(40, 'ns')
-    assert True
+    for i in range(20):
+        await FallingEdge(dut.clk)
     # assert not is_done(dut)
-    
+    assert True
 
     # for _ in range(15):
     #     await FallingEdge(dut)
