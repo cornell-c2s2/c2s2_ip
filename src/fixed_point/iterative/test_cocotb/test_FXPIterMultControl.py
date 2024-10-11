@@ -123,7 +123,7 @@ def test_FXPIterMultControl():
 
     runner.test(
         hdl_toplevel="FXPIterMultControl", 
-        test_module="test_FXPIterMultControl,", test_args=test_args
+        test_module="test_FXPIterMultControl", test_args=test_args
         )
 
 
