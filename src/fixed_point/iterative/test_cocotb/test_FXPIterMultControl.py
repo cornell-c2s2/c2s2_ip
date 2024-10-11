@@ -1,3 +1,5 @@
+import pytest
+
 import cocotb
 from cocotb.triggers import Timer
 
@@ -74,17 +76,17 @@ async def reset_test(dut):
 @cocotb.test()
 async def done_test(dut):
     await cocotb.start(generate_clock(dut))
-    for _ in range(20):
-        await FallingEdge(dut)
-    # assert not is_done(dut)
+    await Timer(40, 'ns')
     assert True
+    # assert not is_done(dut)
+    
 
     # for _ in range(15):
     #     await FallingEdge(dut)
     # assert is_done(dut)
 
 
-def test_FXPIterMultControl():
+def test_FXPIterMultControl_runner():
     hdl_toplevel_lang = os.getenv("HDL_TOPLEVEL_LANG", "verilog")
     sim = os.getenv("SIM", "icarus")
 
@@ -122,10 +124,9 @@ def test_FXPIterMultControl():
     )
 
     runner.test(
-        hdl_toplevel="FXPIterMultControl", 
-        test_module="test_FXPIterMultControl", test_args=test_args
-        )
+        hdl_toplevel="FXPIterMultControl", test_module="test_FXPIterMultControl", test_args=test_args
+    )
 
 
 if __name__ == "__main__":
-    test_FXPIterMultControl()
+    test_FXPIterMultControl_runner()
