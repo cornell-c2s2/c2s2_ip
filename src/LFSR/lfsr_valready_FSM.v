@@ -34,7 +34,7 @@ module lfsr_valready_FSM (
                 else next_state = GEN_VAL;
             end
 
-            SEND_VAL begin
+            SEND_VAL: begin
                 if(counter > 3'b101) next_state = IDLE;
                 else if(counter <= 3'b101) next_state = GEN_VAL;
                 else next_state = SEND_VAL;
@@ -78,7 +78,7 @@ module lfsr_valready_FSM (
             state <= IDLE;
         end 
         else begin
-            state = next_state;
+            state <= next_state;
         end 
     end
 

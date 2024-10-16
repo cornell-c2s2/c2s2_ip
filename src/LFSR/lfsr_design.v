@@ -1,18 +1,18 @@
 module lfsr_design 
-(   input logic clk, reset;
+(   input logic clk, reset,
 
     //BIST-LFSR interface
-    input logic req_val;
+    input logic req_val,
     //input [N+4:0] req_msg; //5 MSB = # of loops, 32 LSB = seed
-    input logic [36:0] req_msg;
-    output logic req_rdy;
+    input logic [36:0] req_msg,
+    output logic req_rdy,
 
     //LFSR-circuit interface
-    input logic resq_rdy;
-    output logic resq_val;
-    output logic [31:0] resq_msg;
+    input logic resq_rdy,
+    output logic resq_val,
+    output logic [31:0] resq_msg,
     
-    )
+    );
 
     //FSM - Design Comms
     lfsr_valready_FSM FSM( 
@@ -30,8 +30,8 @@ module lfsr_design
 
    
     
-    logic state;
-    logic next_state;
+    logic [1:0] state;
+    logic [1:0] next_state;
     
 
     //Chain of "DFFs"
@@ -44,15 +44,18 @@ module lfsr_design
     //
     //Shifts Q over by 1 digit, and shifts in the value from taps
     //
-    always_ff @(posedge clk) begin 
-        if(state == 1'b10) begin
+    always_ff @(posedge clk || posedge reset) begin 
+        if(reset) begin
+            Q <= 32'b0;
+        end
+        else if(state == 1'b10) begin
             Q <= {Q[30:0], Qin};
             Qin <= Q0;
         end
     end
 
     always_comb begin
-        if (req_val) Q = req_msg;
+        if (req_val) Q = req_msg[31:0];
         else if (resq_rdy) resq_msg = Q;
     end
 
