@@ -30,6 +30,11 @@ def cp(src, dst):
     run(f"rm -rf {dst} && cp -rf {src} {dst}")
 
 
+# Workspace root directory
+def c2s2_ip_dir():
+    return root_dir()
+
+
 # Custom directory where caravel is installed
 def caravel_dir() -> str:
     return path.join("/scratch", "caravel", get_user())

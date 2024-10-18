@@ -21,7 +21,7 @@
 module arbiter_router_Arbiter #(
   parameter int nbits = 32,
   parameter int ninputs = 3,
-  parameter int addr_nbits = $clog2(ninputs)
+  localparam int addr_nbits = $clog2(ninputs)
 ) (
   input logic clk,
   input logic reset,
