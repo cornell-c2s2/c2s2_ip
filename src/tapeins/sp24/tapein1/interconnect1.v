@@ -1,3 +1,6 @@
+`ifndef INTERCONNECT1_V
+`define INTERCONNECT1_V
+
 `include "spi/minion.v"
 `include "arbiter_router/router.v"
 `include "crossbars/blocking.v"
@@ -7,7 +10,7 @@
 `include "arbiter_router/arbiter.v"
 `include "arbiter_router/router.v"
 
-module tapeins_sp24_tapein1_Interconnect (
+module tapeins_sp24_tapein1_Interconnect1 (
   input  logic clk,
   input  logic reset,
   input  logic cs,
@@ -329,3 +332,5 @@ module tapeins_sp24_tapein1_Interconnect (
   );
 
 endmodule
+
+`endif // INTERCONNECT_V

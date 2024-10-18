@@ -4,7 +4,7 @@ from pymtl3.passes.backends.verilog import *
 from os import path
 
 
-class Interconnect(VerilogPlaceholder, Component):
+class Interconnect2(VerilogPlaceholder, Component):
     # Constructor
 
     def construct(s):
@@ -35,9 +35,9 @@ class Interconnect(VerilogPlaceholder, Component):
         s.io_oeb = OutPort(23)
         s.io_out = OutPort(5)
 
-        s.set_metadata(VerilogPlaceholderPass.top_module, "Interconnect")
+        s.set_metadata(VerilogPlaceholderPass.top_module, "Interconnect2")
 
         s.set_metadata(
             VerilogPlaceholderPass.src_file,
-            path.join(path.dirname(__file__), "interconnect.v"),
+            path.join(path.dirname(__file__), "interconnect2.v"),
         )

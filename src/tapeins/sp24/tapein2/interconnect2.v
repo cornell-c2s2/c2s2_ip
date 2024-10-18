@@ -1,3 +1,6 @@
+`ifndef INTERCONNECT2_V
+`define INTERCONNECT2_V
+
 `include "spi/minion.v"
 `include "arbiter_router/router.v"
 `include "fft/pease/fft.v"
@@ -9,7 +12,7 @@
 `include "classifier/classifier.v"
 `include "wishbone/wishbone.v"
 
-module tapeins_sp24_tapein2_Interconnect (
+module tapeins_sp24_tapein2_Interconnect2 (
   input logic clk,
   input logic reset,
   input logic cs,
@@ -541,3 +544,5 @@ module tapeins_sp24_tapein2_Interconnect (
   };
 
 endmodule
+
+`endif
