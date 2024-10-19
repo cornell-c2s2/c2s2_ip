@@ -144,7 +144,8 @@ module fixed_point_combinational_MultiButterfly #(
 
   // registers for storing the inputs / outputs
   generate
-    for (genvar i = 0; i < b; i++) begin : g_loop
+    genvar i;
+    for (i = 0; i < b; i++) begin : g_loop
       always_ff @(posedge clk) begin
         if (reset) begin
           s_ac[i] <= 0;

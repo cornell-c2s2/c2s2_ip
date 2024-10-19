@@ -41,8 +41,8 @@ module cmn_FixedArbChain #(
 
   logic [p_num_reqs-1:0] grants_int;
 
-  genvar i;
   generate
+    genvar i;
     for (i = 0; i < p_num_reqs; i = i + 1) begin : per_req_logic
 
       // Grant is true if this requester is not killed and it is actually

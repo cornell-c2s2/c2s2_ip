@@ -17,7 +17,8 @@ module comparison_Comparison #(
   logic [N_SAMPLES-1:0] compare_outs;
 
   generate
-    for (genvar i = 0; i < N_SAMPLES; i = i + 1) begin
+    genvar i;
+    for (i = 0; i < N_SAMPLES; i = i + 1) begin
       assign compare_outs[i] = filtered_valid[i] & (mag_in[i] > cutoff_mag);
     end
   endgenerate

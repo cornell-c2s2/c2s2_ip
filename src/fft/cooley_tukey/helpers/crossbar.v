@@ -24,8 +24,10 @@ module fft_cooley_tukey_helpers_Crossbar #(
   input  logic                   send_rdy      [SIZE_FFT]
 );
   generate
-    for (genvar m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin
-      for (genvar i = m; i < SIZE_FFT; i = i + 2 ** (STAGE_FFT + 1)) begin
+    genvar m;
+    genvar i;
+    for (m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin
+      for (i = m; i < SIZE_FFT; i = i + 2 ** (STAGE_FFT + 1)) begin
         if (FRONT == 1) begin
           assign send_real[i+m]        = recv_real[i];
           assign send_imaginary[i+m]   = recv_imaginary[i];

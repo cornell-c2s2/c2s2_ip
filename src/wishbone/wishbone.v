@@ -103,7 +103,8 @@ module wishbone_Wishbone #(
   logic [31:0] istream_enq_msg[p_num_istream];
 
   generate
-    for (genvar i = 0; i < p_num_istream; i++) begin : g_istream_enq_gen
+    genvar i;
+    for (i = 0; i < p_num_istream; i++) begin : g_istream_enq_gen
       assign istream_enq_val[i] = (is_write_istream && (istream_write_ind == i)) ? 1'b1 : 1'b0;
       assign istream_enq_msg[i] = (is_write_istream && (istream_write_ind == i)) ? wbs_dat_i : 32'b0;
     end
@@ -111,7 +112,8 @@ module wishbone_Wishbone #(
 
 
   generate
-    for (genvar n = 0; n < p_num_istream; n = n + 1) begin : g_istream_queue_gen
+    genvar n;
+    for (n = 0; n < p_num_istream; n = n + 1) begin : g_istream_queue_gen
       cmn_Queue #(`CMN_QUEUE_NORMAL, 32, p_num_msgs) istream_queue (
         .clk(clk),
         .reset(reset),
@@ -137,13 +139,15 @@ module wishbone_Wishbone #(
   logic [31:0] ostream_deq_msg[p_num_ostream];
 
   generate
-    for (genvar i = 0; i < p_num_ostream; i++) begin : g_ostream_enq_gen
+    genvar i;
+    for (i = 0; i < p_num_ostream; i++) begin : g_ostream_enq_gen
       assign ostream_deq_rdy[i] = (is_read_ostream && (ostream_read_ind == i)) ? 1'b1 : 1'b0;
     end
   endgenerate
 
   generate
-    for (genvar m = 0; m < p_num_ostream; m = m + 1) begin : g_ostream_queue_gen
+    genvar m;
+    for (m = 0; m < p_num_ostream; m = m + 1) begin : g_ostream_queue_gen
       cmn_Queue #(`CMN_QUEUE_NORMAL, 32, p_num_msgs) ostream_queue (
         .clk(clk),
         .reset(reset),

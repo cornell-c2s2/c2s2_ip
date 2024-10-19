@@ -19,6 +19,8 @@ module fft_helpers_SineWave #(
     if (D >= 32) begin
       $error("D must be less than 32");
     end
+
+    genvar i;
     for (genvar i = 0; i < N; i++) begin
       localparam real sinvalue = $sin(2 * PI * i / N);
       /* verilator lint_off UNUSED */

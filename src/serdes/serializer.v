@@ -30,7 +30,8 @@ module serdes_Serializer #(
       logic reg_en;
       logic [BIT_WIDTH - 1:0] reg_out[N_SAMPLES - 1:0];
 
-      for (genvar i = 0; i < N_SAMPLES; i++) begin : l_regs
+      genvar i;
+      for (i = 0; i < N_SAMPLES; i++) begin : l_regs
         cmn_EnResetReg #(BIT_WIDTH) register (
           .clk(clk),
           .reset(reset),

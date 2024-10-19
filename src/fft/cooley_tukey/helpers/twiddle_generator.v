@@ -13,8 +13,10 @@ module fft_cooley_tukey_helpers_TwiddleGenerator #(
 );
 
   generate
-    for (genvar m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin
-      for (genvar i = 0; i < SIZE_FFT; i = i + 2 ** (STAGE_FFT + 1)) begin
+    genvar m;
+    genvar i;
+    for (m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin
+      for (i = 0; i < SIZE_FFT; i = i + 2 ** (STAGE_FFT + 1)) begin
         // the index of the sine wave to use.
         int idx = m * SIZE_FFT / (1 << (STAGE_FFT + 1));
 

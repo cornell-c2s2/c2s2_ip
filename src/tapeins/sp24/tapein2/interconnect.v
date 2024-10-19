@@ -248,7 +248,8 @@ module tapeins_sp24_tapein2_Interconnect (
   logic                 fft_send_rdy;
 
   generate
-    for (genvar i = 16; i < 32; i = i + 1) begin
+    genvar i;
+    for (i = 16; i < 32; i = i + 1) begin
       wire fft_msg_unused = &{1'b0, fft_send_msg[i], 1'b0};
     end
   endgenerate
@@ -455,6 +456,7 @@ module tapeins_sp24_tapein2_Interconnect (
   assign router_rdy[9] = arbiter_rdy[9];
   // 10+: unused
   generate
+    genvar i;
     for (genvar i = 10; i < ROUTER_ARBITER_SIZE; i = i + 1) begin
       assign router_rdy[i] = 1'b0;
     end
@@ -472,7 +474,8 @@ module tapeins_sp24_tapein2_Interconnect (
   wire unused_output_xbar_msg = &{1'b0, router_msg[4][DATA_BITS-1:1], 1'b0};
   // address bits are retained by the router but we don't use them
   generate
-    for (genvar i = 0; i <= 9; i = i + 1) begin
+    genvar i;
+    for (i = 0; i <= 9; i = i + 1) begin
       wire unused_router_addr = &{1'b0, router_msg[i][DATA_BITS+ADDR_BITS-1:DATA_BITS], 1'b0};
     end
   endgenerate
@@ -503,7 +506,8 @@ module tapeins_sp24_tapein2_Interconnect (
   assign output_xbar_send_rdy[0] = arbiter_rdy[4];
   // 5-8: unused
   generate
-    for (genvar i = 5; i <= 8; i = i + 1) begin
+    genvar i;
+    for (i = 5; i <= 8; i = i + 1) begin
       assign arbiter_msg[i] = 16'b0;
       assign arbiter_val[i] = 1'b0;
     end
@@ -512,6 +516,7 @@ module tapeins_sp24_tapein2_Interconnect (
   // 9: loopback to arbiter
   // 10+: unused
   generate
+    genvar i;
     for (genvar i = 10; i < ROUTER_ARBITER_SIZE; i = i + 1) begin
       assign arbiter_msg[i] = 16'b0;
       assign arbiter_val[i] = 1'b0;

@@ -99,8 +99,8 @@ module cmn_ResetRegfile_1r1w #(
   // Write on positive clock edge. We have to use a generate statement to
   // allow us to include the reset logic for each individual register.
 
-  genvar i;
   generate
+    genvar i;
     for (i = 0; i < p_num_entries; i = i + 1) begin : wport
       always_ff @(posedge clk)
         if (reset) rfile[i] <= p_reset_value;
