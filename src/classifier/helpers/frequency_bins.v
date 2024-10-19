@@ -18,7 +18,7 @@ module classifier_helpers_FrequencyBins #(
   localparam int LOG2_N_SAMPLES = $clog2(N_SAMPLES);
 
   initial begin
-    if ($pow(2, LOG2_N_SAMPLES) != N_SAMPLES) begin
+    if (LOG2_N_SAMPLES**2 != N_SAMPLES) begin
       $error("N_SAMPLES must be a power of 2");
     end
   end
