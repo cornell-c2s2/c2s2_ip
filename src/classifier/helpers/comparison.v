@@ -18,7 +18,7 @@ module comparison_Comparison #(
 
   generate
     genvar i;
-    for (i = 0; i < N_SAMPLES; i = i + 1) begin
+    for (i = 0; i < N_SAMPLES; i = i + 1) begin : for_loop
       assign compare_outs[i] = filtered_valid[i] & (mag_in[i] > cutoff_mag);
     end
   endgenerate

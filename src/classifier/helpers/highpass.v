@@ -16,7 +16,7 @@ module highpass_Highpass #(
 
   generate
     genvar i;
-    for (i = 0; i < N_SAMPLES; i = i + 1) begin
+    for (i = 0; i < N_SAMPLES; i = i + 1) begin : for_loop
       assign filtered_valid[i] = freq_in[i] > cutoff_freq;
     end
   endgenerate

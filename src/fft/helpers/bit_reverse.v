@@ -27,10 +27,10 @@ module fft_helpers_BitReverse #(
       assign out[7] = in[7];
     end else begin
       genvar m;
-      for (m = 0; m < N_SAMPLES; m++) begin
+      for (m = 0; m < N_SAMPLES; m++) begin : for_loop
         logic [n-1:0] m_rev;
         genvar i;
-        for (i = 0; i < n; i++) begin
+        for (i = 0; i < n; i++) begin : for_loop
           assign m_rev[n-i-1] = m[i];
         end
         assign out[m] = in[m_rev];

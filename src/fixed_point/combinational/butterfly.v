@@ -47,7 +47,7 @@ module fixed_point_combinational_Butterfly #(
 
   generate
     genvar i;
-    for (i = 0; i < b; i++) begin
+    for (i = 0; i < b; i++) begin : for_loop
       // complex multiplier instantiation as combinatorial
       fixed_point_combinational_ComplexMultiplierS #(
         .n(n),

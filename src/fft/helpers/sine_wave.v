@@ -12,17 +12,18 @@ module fft_helpers_SineWave #(
   output logic [W - 1:0] out[N]
 );
   // arccos(-1) = pi
-  localparam real PI = $acos(-1);
+  //localparam real PI = $acos(-1); <- does not synthesize on quartus; replaced with line below
+  localparam [31:0] PI = 32'd314159; // synthesis-specific code: fixed-point approx of pi
 
   // Checks on parameters to make sure behavior is well defined.
   generate
     if (D >= 32) begin
-      $error("D must be less than 32");
-    end
+		//	$error("D must be less than 32"); <- does not synthesize on quartus; commented out for synthesis
+	 end
 
     genvar i;
-    for (genvar i = 0; i < N; i++) begin
-      localparam real sinvalue = $sin(2 * PI * i / N);
+    for ( i = 0; i < N; i++) begin : for_loop
+      localparam real sinvalue = $sin(2 * PI/65536 * i / N); // PI is scaled by 65536 for synthesis-specific code
       /* verilator lint_off UNUSED */
       int fixedptvalue = int'(sinvalue * 2.0 ** D);
       /* lint_on */

@@ -14,7 +14,8 @@ module fft_pease_helpers_StridePermutation #(
 );
 
   generate
-    for (genvar i = 0; i < N_SAMPLES / 2; i++) begin
+    genvar i;
+    for (i = 0; i < N_SAMPLES / 2; i++) begin : for_loop
       assign send[i] = recv[i*2];
       assign send[i+N_SAMPLES/2] = recv[i*2+1];
     end

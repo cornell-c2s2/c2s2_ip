@@ -139,7 +139,6 @@ module wishbone_Wishbone #(
   logic [31:0] ostream_deq_msg[p_num_ostream];
 
   generate
-    genvar i;
     for (i = 0; i < p_num_ostream; i++) begin : g_ostream_enq_gen
       assign ostream_deq_rdy[i] = (is_read_ostream && (ostream_read_ind == i)) ? 1'b1 : 1'b0;
     end

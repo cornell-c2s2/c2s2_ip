@@ -14,7 +14,7 @@ module magnitude_Magnitude #(
 );
   generate
     genvar i;
-    for (i = 0; i < N_SAMPLES; i = i + 1) begin
+    for (i = 0; i < N_SAMPLES; i = i + 1) begin : for_loop
       assign send_msg[i] = (recv_msg[i] < 0) ? -recv_msg[i] : recv_msg[i];
     end
   endgenerate

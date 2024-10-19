@@ -72,7 +72,6 @@ module arbiter_router_Arbiter #(
   endgenerate
 
   generate
-    genvar i;
 
     // hooks up a chain of muxes to create a
     // priority encoder that gives highest priority to the LSB and lowest to MSB
@@ -82,7 +81,7 @@ module arbiter_router_Arbiter #(
     logic [addr_nbits-1:0] encoder_outs[ninputs+1];
     /* verilator lint_on UNOPTFLAT */
     assign encoder_outs[ninputs] = 0;
-    for (i = 0; i < ninputs; i++) begin
+    for (i = 0; i < ninputs; i++) begin : for_loop
       // if this input is valid, then it is the highest priority. Otherwise, use the result of the next index
       assign encoder_outs[i] = istream_val[i] ? i : encoder_outs[i+1];
     end
