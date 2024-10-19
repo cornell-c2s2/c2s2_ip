@@ -20,8 +20,8 @@
 
 module arbiter_router_Arbiter #(
   parameter int nbits = 32,
-  parameter int ninputs = 3,
-  localparam int addr_nbits = $clog2(ninputs)
+  parameter int ninputs = 3
+  
 ) (
   input logic clk,
   input logic reset,
@@ -36,6 +36,9 @@ module arbiter_router_Arbiter #(
   input  logic                        ostream_rdy,
   output logic [addr_nbits+nbits-1:0] ostream_msg
 );
+
+  localparam int addr_nbits = $clog2(ninputs);
+
   logic [addr_nbits-1:0] grants_index;  // which input is granted access to send to SPI
   logic [addr_nbits-1:0] old_grants_index;
   logic [addr_nbits-1:0] encoder_out;

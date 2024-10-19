@@ -6,8 +6,8 @@
 module crossbars_BlockingOverrideable #(
   parameter int BIT_WIDTH = 32,
   parameter int N_INPUTS = 2,
-  parameter int N_OUTPUTS = 2,
-  localparam int CONTROL_BIT_WIDTH = $clog2(N_INPUTS * N_OUTPUTS)
+  parameter int N_OUTPUTS = 2
+  
 ) (
   input  logic [BIT_WIDTH - 1:0] recv_msg[N_INPUTS],
   input  logic                   recv_val[N_INPUTS],
@@ -28,6 +28,8 @@ module crossbars_BlockingOverrideable #(
   input logic input_override,
   input logic output_override
 );
+
+  localparam int CONTROL_BIT_WIDTH = $clog2(N_INPUTS * N_OUTPUTS);
 
   logic [CONTROL_BIT_WIDTH - 1:0] stored_control;
   logic [$clog2(N_INPUTS)  - 1:0] input_sel;

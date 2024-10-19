@@ -14,12 +14,8 @@ module wishbone_Wishbone #(
   // parameter p_msg_nbits = 1,
   parameter int p_num_msgs = 2,
   parameter int p_num_istream = 2,
-  parameter int p_num_ostream = 2,
+  parameter int p_num_ostream = 2
 
-  // Local constants not meant to be set from outside the module
-  localparam int c_addr_nbits = $clog2(p_num_msgs),
-  localparam int istream_addr_nbits = $clog2(p_num_istream),
-  localparam int ostream_addr_nbits = $clog2(p_num_ostream)
 ) (
   // Wishbone Slave ports (WB MI A)
   input logic clk,
@@ -43,6 +39,12 @@ module wishbone_Wishbone #(
   input  logic [31:0] ostream_data[p_num_ostream],
   output logic [31:0] istream_data[p_num_istream]
 );
+
+  // Local constants not meant to be set from outside the module
+  localparam int c_addr_nbits = $clog2(p_num_msgs);
+  localparam int istream_addr_nbits = $clog2(p_num_istream);
+  localparam int ostream_addr_nbits = $clog2(p_num_ostream);
+
   /////////////////
   // address decoder
   //////////////////
