@@ -7,6 +7,8 @@ TOPLEVEL_LANG ?= verilog
 VERILOG_SOURCES += $(PWD)/convolution_block.v
 # use VHDL_SOURCES for VHDL files
 
+VERILOG_INCLUDE_DIRS += ../
+
 # TOPLEVEL is the name of the toplevel module in your Verilog or VHDL file
 TOPLEVEL = convolution_block_ConvolutionBlock 
 
