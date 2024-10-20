@@ -1,3 +1,5 @@
+import numpy as np
+
 class LFSRDesign:
     def __init__(self):
         self.state = 'IDLE'  # Initial FSM state
@@ -36,8 +38,10 @@ class LFSRDesign:
         elif self.state == 'SEND_VAL':
             if self.counter > 5:
                 self.next_state = 'IDLE'
-            else:
+            elif self.counter <= 5:
                 self.next_state = 'GEN_VAL'
+            else:
+                self.next_state = 'SEND_VAL'
         else:
             self.next_state = 'IDLE'
 
@@ -105,6 +109,7 @@ class LFSRDesign:
     
     def get_req_msg(self):
         return self.req_msg
+    
     # Overall function to run one clock cycle
     def run_cycle(self):
         self.update_state()
@@ -113,6 +118,21 @@ class LFSRDesign:
         self.shift()
         self.clock_cycle()
 
+    # Converts ['101', '001', '111'] to  [[1, 0, 1], [0, 0, 1], [1, 1, 1]]
+    def convert_binary_strings_to_lists(binary_strings):
+        return [[int(bit) for bit in binary_string] for binary_string in binary_strings]
+
+    # Converts [0,1,1] to '011'
+    def convert_list_to_binary_string(arr):
+        return ''.join(map(str, arr))
 
 def main():
-    resq_msg_collector = []
+    #BIST seeds generated
+    req_msgs = [] * 10
+    num = np.random.rand(10)
+    print(num)
+
+if __name__ == "__main__":
+    print("in")
+    main()
+
