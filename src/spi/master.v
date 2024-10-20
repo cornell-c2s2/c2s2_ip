@@ -1,6 +1,6 @@
 /*
 ==========================================================================
-master.v
+master.v (BUGGED, DO NOT USE)
 ==========================================================================
 SPIMaster module for sending messages over SPI.
 Supports SPI mode 0.
@@ -76,6 +76,23 @@ run. When running the desired number of cycles, we get an erroneous
 number. Right now, if 7 was written then 8 hold cycles run instead
 of 127.
 -Austin
+*/
+
+
+/*
+==========================================================================
+DO NOT USE!!!!!
+
+!!! THIS MASTER HAS MANY BUGS. !!! NEEDS COMPLETE REWORK !!!
+
+- Does not read the pull_val signal from client
+- Does not get the correct, unpadded message from the client
+- Does not pass interval delay testing
+
+Barry Lyu, May 4, 2024
+
+==========================================================================
+
 */
 
 `ifndef SPI_MASTER
