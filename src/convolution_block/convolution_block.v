@@ -29,7 +29,7 @@ module convolution_block_ConvolutionBlock #(
 );
 
   // assign val and rdy bits
-  always_comb begin
+  always @(posedge clk) begin
     input_arr_rdy = output_arr_rdy;
     filter_rdy = output_arr_rdy;
     output_arr_val = input_arr_val & filter_val;
