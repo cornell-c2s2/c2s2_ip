@@ -2,15 +2,17 @@
 // FPGA Emulation Top Module
 //======================================================================
 
+`include "tapeins/sp24/tapein2/interconnect.v"
+
 module interconnect_fpga_top (
-  input  logic  clk,
-  input  logic  reset,
-  input  logic  cs,
-  input  logic  mosi,
-  output logic  miso,
-  input  logic  sclk,
-  output logic  minion_parity,
-  output logic  adapter_parity
+  input  logic clk,
+  input  logic reset,
+  input  logic cs,
+  input  logic mosi,
+  output logic miso,
+  input  logic sclk,
+  output logic minion_parity,
+  output logic adapter_parity
 );
 
   // Connections for unused Wishbone inputs and outputs
@@ -25,35 +27,35 @@ module interconnect_fpga_top (
   logic [22:0] io_oeb;
   logic [4:0] io_out;
 
-  tapeins_sp24_tapein2_Interconnect interconnect (
+  tapeins_sp24_tapein2_Interconnect interconnection (
     // SPI Connections
-    .clk (clk),
-    .reset (reset),
-    .cs (cs),
-    .mosi (mosi),
-    .miso (miso),
-    .sclk (sclk),
-    .minion_parity (minion_parity),
-    .adapter_parity (adapter_parity),
+    .clk(clk),
+    .reset(reset),
+    .cs(cs),
+    .mosi(mosi),
+    .miso(miso),
+    .sclk(sclk),
+    .minion_parity(minion_parity),
+    .adapter_parity(adapter_parity),
 
     // Wishbone Connections
-    .wbs_stb_i (wbs_stb_i),
-    .wbs_cyc_i (wbs_cyc_i),
-    .wbs_we_i  (wbs_we_i),
-    .wbs_sel_i (wbs_sel_i),
-    .wbs_dat_i (wbs_dat_i),
-    .wbs_adr_i (wbs_adr_i),
-    .wbs_ack_o (wbs_ack_o),
-    .wbs_dat_o (wbs_dat_o),
+    .wbs_stb_i(wbs_stb_i),
+    .wbs_cyc_i(wbs_cyc_i),
+    .wbs_we_i (wbs_we_i),
+    .wbs_sel_i(wbs_sel_i),
+    .wbs_dat_i(wbs_dat_i),
+    .wbs_adr_i(wbs_adr_i),
+    .wbs_ack_o(wbs_ack_o),
+    .wbs_dat_o(wbs_dat_o),
 
-    .io_oeb (io_oeb),
-    .io_out (io_out)
+    .io_oeb(io_oeb),
+    .io_out(io_out)
   );
 
   // Set wishbone inputs to zero.
   assign wbs_stb_i = 1'b0;
   assign wbs_cyc_i = 1'b0;
-  assign wbs_we_i = 1'b0;
+  assign wbs_we_i  = 1'b0;
   assign wbs_sel_i = 4'b0;
   assign wbs_dat_i = 32'b0;
   assign wbs_adr_i = 32'b0;
