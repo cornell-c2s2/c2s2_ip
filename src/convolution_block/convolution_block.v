@@ -29,76 +29,81 @@ module convolution_block_ConvolutionBlock #(
   output logic output_val,
   output logic [BIT_WIDTH - 1:0] output_msg[ARRAY_LENGTH - 1:0]
 );
+  logic [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
+  logic [1:0] state, next_state;
 
-  assign output_msg[0] = input_msg[0] * filter_msg[ARRAY_LENGTH-1];
+  logic [ARRAY_LENGTH - 1:0] recv_rdy_bus;
+  logic [ARRAY_LENGTH - 1:0] send_val_bus;
 
-  // logic [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
-  // logic [1:0] state, next_state;
+  // manage state
+  always_comb begin
+    case (state)
+      IDLE: begin
+        if (input_val && filter_val && &recv_rdy_bus) next_state = CALC;
+        else next_state = IDLE;
+      end
+      CALC: begin
+        if (&send_val_bus) next_state = DONE;
+        else next_state = CALC;
+      end
+      DONE: begin
+        if (output_rdy) next_state = IDLE;
+        else next_state = DONE;
+      end
+      default: begin
+        next_state = IDLE;
+      end
+    endcase
+  end
 
-  // logic [ARRAY_LENGTH - 1:0] recv_rdy_bus;
-  // logic recv_val = input_val & filter_val;
+  // manage data path
+  always_comb begin
+    case (state)
+      IDLE: begin
+        input_rdy  = &recv_rdy_bus;
+        filter_rdy = &recv_rdy_bus;
+        output_val = 0;
+      end
+      CALC: begin
+        input_rdy  = 0;
+        filter_rdy = 0;
+        output_val = 0;
+      end
+      DONE: begin
+        input_rdy  = 0;
+        filter_rdy = 0;
+        output_val = 1;
+      end
+      default: begin
+      end
+    endcase
+  end
 
-  // logic send_rdy = output_rdy;
-  // logic [ARRAY_LENGTH - 1:0] send_val_bus;
+  // reset logic
+  always_ff @(posedge clk) begin
+    if (reset) begin
+      state <= IDLE;
+    end else begin
+      state <= next_state;
+    end
+  end
 
-  // // manage state
-  // always_comb begin
-  //   case (state)
-  //     IDLE: begin
-  //       if (input_val && filter_val) next_state = CALC;
-  //       else next_state = IDLE;
-  //     end
-  //     CALC: begin
-  //       if (&send_val_bus) next_state = DONE;
-  //       else next_state = CALC;
-  //     end
-  //     DONE: begin
-  //       if (output_rdy) next_state = IDLE;
-  //       else next_state = DONE;
-  //     end
-  //     default: begin
-  //       next_state = IDLE;
-  //     end
-  //   endcase
-  // end
-
-  // // reset logic
-  // always_ff @(posedge clk) begin
-  //   if (reset) begin
-  //     state <= IDLE;
-  //   end else begin
-  //     state <= next_state;
-  //   end
-  // end
-
-  // fixed_point_iterative_Multiplier #(BIT_WIDTH, 0, 1) mult (
-  //   .clk(clk),
-  //   .reset(reset),
-  //   .recv_rdy(recv_rdy_bus[i]),
-  //   .recv_val(recv_val),
-  //   .a(input_msg[0]),
-  //   .b(filter_msg[ARRAY_LENGTH-0-1]),
-  //   .send_rdy(send_rdy),
-  //   .send_val(send_val_bus[i]),
-  //   .c(output_msg[0])
-  // );
-
-  // // perform array convolution: output[i] = input[i] * filter[n - i]
-  // generate
-  //   for (genvar i = 0; i < ARRAY_LENGTH; i++) begin
-  //     // fixed_point_iterative_Multiplier #(BIT_WIDTH, 0, 1) mult (
-  //     //   .clk(clk),
-  //     //   .reset(reset),
-  //     //   .recv_rdy(recv_rdy_bus[i]),
-  //     //   .recv_val(recv_val),
-  //     //   .a(input_msg[i]),
-  //     //   .b(filter_msg[ARRAY_LENGTH-i-1]),
-  //     //   .send_rdy(send_rdy),
-  //     //   .send_val(send_val_bus[i]),
-  //     //   .c(output_msg[i])
-  //     // );
-  //   end
-  // endgenerate
+  // perform array convolution: output[i] = input[i] * filter[n - i]
+  generate
+    for (genvar i = 0; i < ARRAY_LENGTH; i++) begin
+      fixed_point_iterative_Multiplier #(BIT_WIDTH, 0, 0) mult (
+        .clk(clk),
+        .reset(reset),
+        .recv_rdy(recv_rdy_bus[i]),
+        .recv_val(input_val & filter_val),
+        .a(input_msg[i]),
+        .b(filter_msg[ARRAY_LENGTH-i-1]),
+        .send_rdy(output_rdy),
+        .send_val(send_val_bus[i]),
+        .c(output_msg[i])
+      );
+    end
+  endgenerate
 endmodule
 
 `endif
