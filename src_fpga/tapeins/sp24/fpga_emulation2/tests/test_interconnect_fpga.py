@@ -1,7 +1,7 @@
 import pytest
-from src_fpga.tapeins.sp24.tapein2.tests.spi_driver_sim import spi_write
+from src_fpga.tapeins.sp24.fpga_emulation2.tests.spi_driver_sim import spi_write
 from src_fpga.tapeins.sp24.fpga_emulation2.interconnect_fpga import Interconnect_Fpga
-from src_fpga.tapeins.sp24.tapein2.tests.spi_stream_protocol import *
+from src_fpga.tapeins.sp24.fpga_emulation2.tests.spi_stream_protocol import *
 from fixedpt import Fixed, CFixed
 from tools.utils import fixed_bits, mk_test_matrices
 from src_fpga.fft.tests.fft import FFTInterface, FFTPease

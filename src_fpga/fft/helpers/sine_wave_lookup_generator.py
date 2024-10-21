@@ -17,7 +17,7 @@ from math import trunc
 # import fxpmath
 
 # The path where the file should be written
-path = '../fpga_emulation2/'
+path = '../helpers/'
 
 # Takes user input the bit width, decimal point, and fft size. Format command in terminal as: 
 # `python sine_wave_lookup_generator.py <BIT_WIDTH> <DECIMAL_POINT> <SIZE_FFT>`
@@ -30,20 +30,24 @@ except:
     sys.exit('One of your inputs was not an integer or you are missing an input.\n')
 
 
-module_name = 'SineWave__BIT_WIDTH_' + str(BIT_WIDTH) + '__DECIMAL_POINT_' +\
-                str(DECIMAL_POINT) + '__SIZE_FFT_' + str(SIZE_FFT) + 'VRTL'
+str_BIT_WIDTH = str(BIT_WIDTH) if BIT_WIDTH>9 else ('0'+str(BIT_WIDTH))
+str_DECIMAL_POINT = str(DECIMAL_POINT) if DECIMAL_POINT>9 else ('0'+str(DECIMAL_POINT))
+str_SIZE_FFT = str(SIZE_FFT) if SIZE_FFT>9 else ('0'+str(SIZE_FFT))
+
+file_name = 'sine_wave_lookup_' + str_BIT_WIDTH + str_DECIMAL_POINT + str_SIZE_FFT
+module_name_extension = 'fft_helpers_'
 
 def write_module_header(f):
     f.write('// SINE WAVE OF BIT_WIDTH = ' + str(BIT_WIDTH) + ', DECIMAL_PT =  ' + str(DECIMAL_POINT) + '\n')
     f.write('// FOR FFT OF SIZE = ' + str(SIZE_FFT) + '\n')
-    f.write('module ' + module_name + '\n')
+    f.write('module ' + module_name_extension + file_name + '\n')
     f.write('   (' + '\n')
     f.write('       output logic [' + str(BIT_WIDTH) +' - 1:0] sine_wave_out [0:' + str(SIZE_FFT) + ' - 1]' + '\n')
     f.write('   );' + '\n')
 
 
 
-with open(path + module_name + '.v', 'w') as f:
+with open(path + file_name + '.v', 'w') as f:
     write_module_header(f)
 
     for n in range(SIZE_FFT):
@@ -53,4 +57,4 @@ with open(path + module_name + '.v', 'w') as f:
     f.write('endmodule')
 
 print('\nFile write was successful. Check for file at:')
-print(path + module_name + '.v\n')
+print(path + file_name + '.v\n')

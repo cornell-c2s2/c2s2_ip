@@ -1,6 +1,6 @@
 // SINE WAVE OF BIT_WIDTH = 16, DECIMAL_PT =  8
 // FOR FFT OF SIZE = 32
-module SineWave__BIT_WIDTH_16__DECIMAL_POINT_8__SIZE_FFT_32VRTL
+module fft_helpers_sine_wave_lookup_160832
    (
        output logic [16 - 1:0] sine_wave_out [0:32 - 1]
    );

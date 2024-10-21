@@ -3,7 +3,7 @@
 //======================================================================
 `include "tapeins/sp24/tapein2/interconnect.v"
 
-module tapeins_sp24_tapein2_Interconnect_Fpga (
+module tapeins_sp24_fpga_emulation2_Interconnect_Fpga (
   input  logic clk,
   input  logic reset,
   input  logic cs,
