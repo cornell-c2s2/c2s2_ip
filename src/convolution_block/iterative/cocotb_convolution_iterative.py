@@ -24,6 +24,7 @@ async def conv_test_gen(dut, input_arr, filter, bit_width):
     dut.reset.value = 0
 
     # cycle for BIT_WIDTH + 2 cycles so that the iterative multipliers can complete their task
+    # this requirement comes from the fixed point iterative multiplier
     for cycle in range(bit_width + 2):
         dut.clk.value = 0
         await Timer(1, units="ns")
@@ -44,6 +45,8 @@ async def multiply_tests(dut):
     # set parameters to module defaults
     BIT_WIDTH = 32
     ARRAY_LENGTH = 8
+
+    # positive integer testing
     for _ in range(1000):
         input_arr = random.choices(
             population=range(2 ** (BIT_WIDTH // 2)), k=ARRAY_LENGTH

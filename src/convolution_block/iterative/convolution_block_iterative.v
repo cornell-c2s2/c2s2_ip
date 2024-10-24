@@ -2,12 +2,12 @@
 // convolution_block.v
 //================================================
 `default_nettype none
-`ifndef CONVOLUTION_BLOCK_V
-`define CONVOLUTION_BLOCK_V
+`ifndef iterative_CONVOLUTION_BLOCK_V
+`define iterative_CONVOLUTION_BLOCK_V
 
 `include "fixed_point/iterative/multiplier.v"
 
-module convolution_block_ConvolutionBlock #(
+module convolution_block_iterative_ConvolutionBlock #(
   parameter int BIT_WIDTH = 32,
   parameter int ARRAY_LENGTH = 8
 ) (
@@ -39,7 +39,7 @@ module convolution_block_ConvolutionBlock #(
   always_comb begin
     case (state)
       IDLE: begin
-        if (input_val && filter_val && &recv_rdy_bus) next_state = CALC;
+        if (input_val && filter_val) next_state = CALC;
         else next_state = IDLE;
       end
       CALC: begin
@@ -60,8 +60,8 @@ module convolution_block_ConvolutionBlock #(
   always_comb begin
     case (state)
       IDLE: begin
-        input_rdy  = &recv_rdy_bus;
-        filter_rdy = &recv_rdy_bus;
+        input_rdy  = 1;
+        filter_rdy = 1;
         output_val = 0;
       end
       CALC: begin
