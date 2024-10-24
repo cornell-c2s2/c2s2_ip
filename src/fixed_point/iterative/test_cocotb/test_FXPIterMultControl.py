@@ -18,7 +18,7 @@ from cocotb.triggers import FallingEdge, Timer
 
 
 async def generate_clock(dut):
-    for cycle in range(50):
+    for cycle in range(5000):
         dut.clk.value = 0
         await Timer(1, units="ns")
         dut.clk.value = 1
@@ -52,6 +52,9 @@ def is_done(dut):
             return False
     return True
 
+def is_calc(dut):
+    return not is_done(dut) and not is_idle(dut)
+
 
 @cocotb.test()
 async def reset_test(dut):
@@ -59,31 +62,81 @@ async def reset_test(dut):
     await FallingEdge(dut.clk)
     dut.reset.value = 1
     await FallingEdge(dut.clk)
-    tests = [
-        (dut.in_wait.value, 1),
-        (dut.do_add.value, 0),
-        (dut.do_carry.value, 0),
-        (dut.counter_reset.value, 0),
-        (dut.recv_rdy.value, 1),
-        (dut.send_val.value, 0)
-    ]
-    # for actual, expected in tests:
-    #     assert actual == expected
-    # assert False
     assert is_idle(dut)
     
 
 @cocotb.test()
-async def done_test(dut):
+async def one_cycle_test(dut):
     await cocotb.start(generate_clock(dut))
-    for i in range(20):
-        await FallingEdge(dut.clk)
-    # assert not is_done(dut)
-    assert True
+    
+    await FallingEdge(dut.clk)
+    dut.reset.value = 1
+    
+    await FallingEdge(dut.clk)
+    dut.reset.value = 0
+    dut.recv_val.value = 1
+    assert is_idle(dut)
 
-    # for _ in range(15):
-    #     await FallingEdge(dut)
-    # assert is_done(dut)
+    for _ in range(32):
+        await FallingEdge(dut.clk)
+        assert is_calc(dut)
+    await FallingEdge(dut.clk)
+    assert is_done(dut)
+
+
+@cocotb.test()
+async def reset_injection_test(dut):
+    await cocotb.start(generate_clock(dut))
+
+    dut.reset.value = 1
+    await FallingEdge(dut.clk)
+
+    assert is_idle(dut)
+    dut.reset.value = 0
+
+    for i in range(32):
+        dut.recv_val.value = 1
+        await FallingEdge(dut.clk)
+
+        dut.recv_val.value = 0
+        for j in range(i):
+            assert is_calc(dut)
+            await FallingEdge(dut.clk)
+
+        dut.reset.value = 1
+        await FallingEdge(dut.clk)
+
+        dut.reset.value = 0
+        await FallingEdge(dut.clk)
+
+        for _ in range(5):
+            assert is_idle(dut)
+            await FallingEdge(dut.clk)
+    
+        
+
+
+
+
+
+
+
+
+
+# @cocotb.test()
+# async def one_cycle_test(dut):
+#     await cocotb.start(generate_clock(dut))
+#     dut.reset.value = 1
+#     await FallingEdge(dut.clk)
+
+#     assert is_idle(dut)
+#     dut.recv_val = 1
+#     await FallingEdge(dut.clk)
+
+#     for _ in range(10):
+#         assert is_calc(dut)
+#         await FallingEdge(dut.clk)
+
 
 
 def test_FXPIterMultControl_runner():
