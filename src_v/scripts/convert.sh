@@ -2,11 +2,11 @@
 TOP_DIR=$(git rev-parse --show-toplevel)
 SRC_DIR=$TOP_DIR/src
 
-FPGA_DIR=$(pwd)
+FPGA_DIR=$TOP_DIR/src_v
 
-mkdir -p build
+mkdir -p temp
 
-BUID_DIR=$FPGA_DIR/build
+TEMP_DIR=$FPGA_DIR/temp
 
 echo "Converting .v files to .sv files"
 
@@ -15,9 +15,9 @@ find $SRC_DIR -type f -name "*.v" | while read -r file; do
   # Get the base name of the file (without the .v extension)
   base=$(basename "${file%.v}")
   # Rename the file to have the .sv extension
-  cp "$file" "$BUID_DIR/$base.sv"
-  sv2v --incdir="$SRC_DIR" -w adjacent "$BUID_DIR/$base.sv"
-  rm "$BUID_DIR/$base.sv"
+  cp "$file" "$TEMP_DIR/$base.sv"
+  sv2v --incdir="$SRC_DIR" -w adjacent "$TEMP_DIR/$base.sv"
+  rm "$TEMP_DIR/$base.sv"
 done
 
 echo "Conversion done"

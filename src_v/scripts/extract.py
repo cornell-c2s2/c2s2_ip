@@ -1,6 +1,15 @@
+#!/bin/bash
+
 import re
 import os
 import argparse
+        
+def get_file_name(module_name: str):
+    lst = module_name.split('_')
+    for str in lst:
+        if str[0].isupper():
+            return str
+    return NameError
 
 def extract_modules(input_file, output_dir):
     # Ensure output directory exists
@@ -23,6 +32,9 @@ def extract_modules(input_file, output_dir):
             inside_module = True
             continue
 
+        # Get the file name
+        file_name = get_file_name(module_name)
+
         # Capture lines within the module
         if inside_module:
             module_content.append(line)
@@ -30,7 +42,7 @@ def extract_modules(input_file, output_dir):
         # Look for the end of the module
         if re.match(r'\s*endmodule\s*', line) and inside_module:
             # Write the module to a new file in the specified output directory
-            output_file_path = os.path.join(output_dir, f'{module_name}.v')
+            output_file_path = os.path.join(output_dir, f'{file_name}.v')
             with open(output_file_path, 'w') as outfile:
                 outfile.writelines(module_content)
             print(f'Extracted module {module_name} to {output_file_path}')
