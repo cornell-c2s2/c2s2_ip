@@ -83,6 +83,10 @@ async def one_cycle_test(dut):
     await FallingEdge(dut.clk)
     assert is_done(dut)
 
+    dut.send_rdy.value = 1
+    await FallingEdge(dut.clk)
+    assert is_idle(dut)
+
 
 @cocotb.test()
 async def reset_injection_test(dut):
