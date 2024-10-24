@@ -52,7 +52,7 @@ with open(path + file_name + '.v', 'w') as f:
 
     for n in range(SIZE_FFT):
         f.write('   assign sine_wave_out[' + str(n) + '] = ' +\
-            str(trunc(sin( 2 * math.pi * n / SIZE_FFT) * (2**DECIMAL_POINT))) + ';\n')
+            str(round(sin( 2 * math.pi * n / SIZE_FFT) * (2**DECIMAL_POINT))) + ';\n')
 
     f.write('endmodule')
 
