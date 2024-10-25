@@ -9,7 +9,9 @@
 
 module convolution_block_iterative_ConvolutionBlock #(
   parameter int BIT_WIDTH = 32,
-  parameter int ARRAY_LENGTH = 8
+  parameter int ARRAY_LENGTH = 8,
+  parameter int DECIMAL_BITS = 0,
+  parameter bit SIGN = 1
 ) (
   input logic clk,
   input logic reset,
@@ -32,7 +34,6 @@ module convolution_block_iterative_ConvolutionBlock #(
   logic [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
   logic [1:0] state, next_state;
 
-  logic [ARRAY_LENGTH - 1:0] recv_rdy_bus;
   logic [ARRAY_LENGTH - 1:0] send_val_bus;
 
   // manage state
@@ -91,10 +92,10 @@ module convolution_block_iterative_ConvolutionBlock #(
   // perform array convolution: output[i] = input[i] * filter[n - i]
   generate
     for (genvar i = 0; i < ARRAY_LENGTH; i++) begin
-      fixed_point_iterative_Multiplier #(BIT_WIDTH, 0, 0) mult (
+      fixed_point_iterative_Multiplier #(BIT_WIDTH, DECIMAL_BITS, SIGN) mult (
         .clk(clk),
         .reset(reset),
-        .recv_rdy(recv_rdy_bus[i]),
+        .recv_rdy(),
         .recv_val(input_val & filter_val),
         .a(input_msg[i]),
         .b(filter_msg[ARRAY_LENGTH-i-1]),
