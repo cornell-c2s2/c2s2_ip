@@ -16,8 +16,8 @@ TOPLEVEL = convolution_block_iterative_ConvolutionBlock
 MODULE = cocotb_convolution_iterative
 
 # send test build outputs to build folder
-SIM_BUILD = ../../build/iterative
-COCOTB_RESULTS_FILE = ../../build/iterative.results.xml
+SIM_BUILD = ../../build/convolution_block/iterative
+COCOTB_RESULTS_FILE = ../../build/convolution_block/iterative/results.xml
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
