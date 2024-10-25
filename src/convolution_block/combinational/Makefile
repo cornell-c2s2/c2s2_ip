@@ -16,8 +16,8 @@ TOPLEVEL = convolution_block_combinational_ConvolutionBlock
 MODULE = cocotb_convolution_combinational
 
 # send test build outputs to build folder
-SIM_BUILD = ../../build/combinational
-COCOTB_RESULTS_FILE = ../../build/combinational.results.xml
+SIM_BUILD = ../../build/convolution_block/combinational
+COCOTB_RESULTS_FILE = ../../build/convolution_block/combinational/results.xml
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
