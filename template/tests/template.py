@@ -4,7 +4,7 @@ from pymtl3 import *
 from pymtl3.passes.backends.verilog import *
 from pymtl3.stdlib.test_utils import run_sim
 from pymtl3.stdlib import stream
-from src.template.harnesses.template import Template
+from src_fpga.template.harnesses.template import Template
 
 
 # Creates a test harness class for the `Template` module.
