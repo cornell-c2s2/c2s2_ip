@@ -157,7 +157,6 @@ module fft_cooley_tukey_helpers_Stage #(
 
   logic [N_SAMPLES - 1:0] imm2;
   generate
-    genvar i;
     for (i = 0; i < N_SAMPLES; i++) begin
       assign imm2[i] = val_out[i];
       assign rdy_out[i] = send_rdy & send_val;

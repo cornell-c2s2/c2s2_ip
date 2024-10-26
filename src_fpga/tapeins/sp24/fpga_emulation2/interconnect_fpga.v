@@ -2,6 +2,8 @@
 // FPGA Emulation Top Module
 //======================================================================
 `include "tapeins/sp24/tapein2/interconnect2.v"
+`ifndef  tapeins_sp24_fpga_emulation2_Interconnect_Fpga
+`define  tapeins_sp24_fpga_emulation2_Interconnect_Fpga
 
 module tapeins_sp24_fpga_emulation2_Interconnect_Fpga (
   input  logic clk,
@@ -71,3 +73,5 @@ module tapeins_sp24_fpga_emulation2_Interconnect_Fpga (
   assign unused_io_out = &io_out;
 
 endmodule
+
+`endif /* tapeins_sp24_fpga_emulation2_Interconnect_Fpga */
