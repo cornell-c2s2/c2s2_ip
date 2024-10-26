@@ -1,13 +1,7 @@
 import pytest
-<<<<<<< HEAD:src/tapeins/sp24/tapein1/tests/test_interconnect.py
 from src.tapeins.sp24.tapein1.tests.spi_driver_sim import spi_write
 from src.tapeins.sp24.tapein1.interconnect1 import Interconnect1
 from src.tapeins.sp24.tapein1.tests.spi_stream_protocol import *
-=======
-from src_fpga.tapeins.sp24.tapein1.tests.spi_driver_sim import spi_write
-from src_fpga.tapeins.sp24.tapein1.interconnect import Interconnect
-from src_fpga.tapeins.sp24.tapein1.tests.spi_stream_protocol import *
->>>>>>> 39f8728857b19c2a86d78c435ec7a334f3904c01:src_fpga/tapeins/sp24/tapein1/tests/test_interconnect.py
 from fixedpt import Fixed, CFixed
 from tools.utils import fixed_bits, mk_test_matrices
 from src_fpga.fft.tests.fft import FFTInterface, FFTPease

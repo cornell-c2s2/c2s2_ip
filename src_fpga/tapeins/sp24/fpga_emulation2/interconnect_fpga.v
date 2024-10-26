@@ -1,7 +1,7 @@
 //======================================================================
 // FPGA Emulation Top Module
 //======================================================================
-`include "tapeins/sp24/tapein2/interconnect.v"
+`include "tapeins/sp24/tapein2/interconnect2.v"
 
 module tapeins_sp24_fpga_emulation2_Interconnect_Fpga (
   input  logic clk,
@@ -26,7 +26,7 @@ module tapeins_sp24_fpga_emulation2_Interconnect_Fpga (
   logic [22:0] io_oeb;
   logic [4:0] io_out;
 
-  tapeins_sp24_tapein2_Interconnect interconnect_top (
+  tapeins_sp24_tapein2_Interconnect2 interconnect_top (
     // SPI Connections
     .clk(clk),
     .reset(reset),

@@ -1,6 +1,6 @@
 import pytest
 from src_fpga.tapeins.sp24.tapein2.tests.spi_driver_sim import spi_write
-from src_fpga.tapeins.sp24.tapein2.interconnect import Interconnect
+from src_fpga.tapeins.sp24.tapein2.interconnect2 import Interconnect2
 from src_fpga.tapeins.sp24.tapein2.tests.spi_stream_protocol import *
 from fixedpt import Fixed, CFixed
 from tools.utils import fixed_bits, mk_test_matrices
@@ -87,7 +87,7 @@ def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
 
 # Makes a new interconnect dut
 def make_interconnect(cmdline_opts):
-    dut = Interconnect()
+    dut = Interconnect2()
     dut = config_model_with_cmdline_opts(dut, cmdline_opts, duts=[])
     dut.apply(DefaultPassGroup(linetrace=False))
     dut.sim_reset()
