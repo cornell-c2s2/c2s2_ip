@@ -14,8 +14,9 @@ class Interconnect_Fpga(VerilogPlaceholder, Component):
         s.minion_parity = OutPort(1)
         s.adapter_parity = OutPort(1)
 
-        s.set_metadata(VerilogPlaceholderPass.top_module, "src_v_Interconnect_Fpga")
+        s.set_metadata(VerilogPlaceholderPass.top_module, "interconnect_fpga_top")
 
         s.set_metadata(
-            VerilogPlaceholderPass.src_file, "interconnect_fpga.v"
+            VerilogPlaceholderPass.src_file,
+            path.join(path.dirname(__file__), "interconnect_fpga.v"),
         )

@@ -5,11 +5,11 @@ import os
 import argparse
         
 def get_file_name(module_name: str):
-    lst = module_name.split('_')
-    for str in lst:
-        if str[0].isupper():
-            return str
-    return NameError
+    # lst = module_name.split('_')
+    # for str in lst:
+    #     if str[0].isupper():
+    #         return str
+    return module_name
 
 def extract_modules(input_file, output_dir):
     # Ensure output directory exists

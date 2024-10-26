@@ -6,7 +6,7 @@ INTER_FPGA_FILE=$(TOP_DIR)/src_v/temp/interconnect_fpga.v
 INTER_FPGA_EX_DIR=$(TOP_DIR)/src_v
 all:
 	@./scripts/convert.sh
-	@python3 scripts/extract.py $(INTER_FPGA_FILE) $(INTER_FPGA_EX_DIR)
+	# @python3 scripts/extract.py $(INTER_FPGA_FILE) $(INTER_FPGA_EX_DIR)
 
 mostlyclean:
 	@echo "Cleaning temporary Verilog files in $(TEMP_DIR)..."
