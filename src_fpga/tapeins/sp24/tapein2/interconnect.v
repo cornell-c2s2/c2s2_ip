@@ -9,6 +9,9 @@
 `include "classifier/classifier.v"
 `include "wishbone/wishbone.v"
 
+`ifndef  tapeins_sp24_tapein2_Interconnect
+`define  tapeins_sp24_tapein2_Interconnect
+
 module tapeins_sp24_tapein2_Interconnect (
   input logic clk,
   input logic reset,
@@ -529,3 +532,5 @@ module tapeins_sp24_tapein2_Interconnect (
   //};
 
 endmodule
+
+`endif /* tapeins_sp24_fpga_emulation2_Interconnect */

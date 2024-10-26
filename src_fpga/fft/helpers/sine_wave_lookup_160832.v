@@ -1,5 +1,8 @@
 // SINE WAVE OF BIT_WIDTH = 16, DECIMAL_PT =  8
 // FOR FFT OF SIZE = 32
+`ifndef  fft_helpers_sine_wave_lookup_160832
+`define  fft_helpers_sine_wave_lookup_160832
+
 module fft_helpers_sine_wave_lookup_160832
    (
        output logic [16 - 1:0] sine_wave_out [0:32 - 1]
@@ -37,3 +40,5 @@ module fft_helpers_sine_wave_lookup_160832
    assign sine_wave_out[30] = -98;
    assign sine_wave_out[31] = -50;
 endmodule
+
+`endif /* fft_helpers_sine_wave_lookup_160832 */
