@@ -61,7 +61,6 @@ module fft_cooley_tukey_FFT #(
   );
 
   generate
-    genvar i;
     for (i = 0; i < $clog2(N_SAMPLES); i++) begin
       fft_cooley_tukey_helpers_Stage #(
         .BIT_WIDTH (BIT_WIDTH),

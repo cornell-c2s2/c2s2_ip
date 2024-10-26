@@ -2,8 +2,7 @@
 `ifndef FIXED_POINT_FFT
 `define FIXED_POINT_FFT
 
-// `include "fft/helpers/sine_wave.v"
-`include "fft/helpers/sine_wave_lookup_160832.v"
+`include "fft/helpers/sine_wave.v"
 `include "fft/helpers/bit_reverse.v"
 `include "fixed_point/combinational/butterfly.v"
 `include "fft/pease/helpers/stride_permutation.v"
@@ -82,16 +81,12 @@ module fft_pease_FFT #(
     end
   endgenerate
 
-  // fft_helpers_SineWave #(
-  //   .N(N_SAMPLES),
-  //   .W(BIT_WIDTH),
-  //   .D(DECIMAL_PT)
-  // ) sine_wave (
-  //   .out(sine_wave_out)
-  // );
-
-  fft_helpers_sine_wave_lookup_160832 sine_wave (
-    .sine_wave_out (sine_wave_out)
+  fft_helpers_SineWave #(
+    .N(N_SAMPLES),
+    .W(BIT_WIDTH),
+    .D(DECIMAL_PT)
+  ) sine_wave (
+    .out(sine_wave_out)
   );
 
 
