@@ -13,10 +13,10 @@ module convolution_block_combinational_ConvolutionBlock #(
   input logic reset,
 
   // input array
-  input logic [BIT_WIDTH - 1:0] input_msg[ARRAY_LENGTH - 1:0],
+  input  logic [BIT_WIDTH - 1:0] input_msg [ARRAY_LENGTH - 1:0],
 
   // input filter
-  input logic [BIT_WIDTH - 1:0] filter_msg[ARRAY_LENGTH - 1:0],
+  input  logic [BIT_WIDTH - 1:0] filter_msg[ARRAY_LENGTH - 1:0],
 
   // output array
   output logic [BIT_WIDTH - 1:0] output_msg[ARRAY_LENGTH - 1:0]

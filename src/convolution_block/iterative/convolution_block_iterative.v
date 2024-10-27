@@ -13,34 +13,35 @@ module convolution_block_iterative_ConvolutionBlock #(
   parameter int DECIMAL_BITS = 0,
   parameter bit SIGN = 1
 ) (
-  input logic clk,
-  input logic reset,
+  input  logic clk,
+  input  logic reset,
 
   // input array
   output logic input_rdy,
-  input logic input_val,
-  input logic [BIT_WIDTH - 1:0] input_msg[ARRAY_LENGTH - 1:0],
+  input  logic input_val,
+  input  logic [BIT_WIDTH - 1:0] input_msg [ARRAY_LENGTH - 1:0],
 
   // input filter
   output logic filter_rdy,
-  input logic filter_val,
-  input logic [BIT_WIDTH - 1:0] filter_msg[ARRAY_LENGTH - 1:0],
+  input  logic filter_val,
+  input  logic [BIT_WIDTH - 1:0] filter_msg[ARRAY_LENGTH - 1:0],
 
   // output array
-  input logic output_rdy,
+  input  logic output_rdy,
   output logic output_val,
   output logic [BIT_WIDTH - 1:0] output_msg[ARRAY_LENGTH - 1:0]
 );
-  logic [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
+  localparam IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
   logic [1:0] state, next_state;
 
   logic [ARRAY_LENGTH - 1:0] send_val_bus;
+  logic [ARRAY_LENGTH - 1:0] recv_rdy_bus;
 
   // manage state
   always_comb begin
     case (state)
       IDLE: begin
-        if (input_val && filter_val) next_state = CALC;
+        if (input_val && filter_val && &recv_rdy_bus) next_state = CALC;
         else next_state = IDLE;
       end
       CALC: begin
@@ -95,7 +96,7 @@ module convolution_block_iterative_ConvolutionBlock #(
       fixed_point_iterative_Multiplier #(BIT_WIDTH, DECIMAL_BITS, SIGN) mult (
         .clk(clk),
         .reset(reset),
-        .recv_rdy(),
+        .recv_rdy(recv_rdy_bus[i]),
         .recv_val(input_val & filter_val),
         .a(input_msg[i]),
         .b(filter_msg[ARRAY_LENGTH-i-1]),
