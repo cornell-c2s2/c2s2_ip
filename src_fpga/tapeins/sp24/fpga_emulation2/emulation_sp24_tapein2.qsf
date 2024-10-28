@@ -86,7 +86,6 @@ set_global_assignment -name VERILOG_FILE ../../../wishbone/wishbone.v
 # ==========================
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
-set_global_assignment -name NOMINAL_CORE_SUPPLY_VOLTAGE 1.2V
 
 # Analysis & Synthesis Assignments
 # ================================
@@ -172,4 +171,12 @@ set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name VERILOG_FILE interconnect_fpga.v
+set_location_assignment PIN_Y2 -to CLOCK_50
+set_location_assignment PIN_M23 -to KEY0
+set_location_assignment PIN_AB22 -to GPIO0
+set_location_assignment PIN_AB21 -to GPIO2
+set_location_assignment PIN_AC21 -to GPIO4
+set_location_assignment PIN_AD21 -to GPIO6
+set_location_assignment PIN_AD15 -to GPIO8
+set_global_assignment -name SDC_FILE timing.sdc
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
