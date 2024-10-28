@@ -87,7 +87,6 @@ module fft_cooley_tukey_FFT #(
   endgenerate
 
   generate
-    genvar i;
     for (i = 0; i < N_SAMPLES; i++) begin
       assign send_msg[i] = real_msg[$clog2(N_SAMPLES)][i];
     end

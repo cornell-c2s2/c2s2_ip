@@ -52,7 +52,7 @@ module fft_helpers_SineWave #(
   // Checks on parameters to make sure behavior is well defined.
   generate
     // if (D >= 32) begin
-	 //		$error("D must be less than 32"); // <- does not synthesize on quartus; commented out for synthesis
+	 //		 $error("D must be less than 32"); // <- does not synthesize on quartus; commented out for synthesis
 	 // end
 
     genvar i;

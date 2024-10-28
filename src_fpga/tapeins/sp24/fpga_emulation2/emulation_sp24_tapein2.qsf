@@ -164,8 +164,9 @@ set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_
 
 # end ENTITY(interconnect)
 # ------------------------
-set_global_assignment -name SEARCH_PATH /home/c2/c2s2_ip/src
-set_global_assignment -name VERILOG_FILE ../tapein2/interconnect2.v
+set_global_assignment -name SEARCH_PATH /home/c2/c2s2_ip/src_fpga
+set_global_assignment -name VERILOG_FILE interconnect_fpga.v
+set_global_assignment -name VERILOG_FILE ../../../fft/helpers/sine_wave_lookup_160832.v
 set_global_assignment -name VERILOG_FILE FPGA_top.v
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
