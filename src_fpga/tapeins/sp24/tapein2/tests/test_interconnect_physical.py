@@ -1,12 +1,12 @@
 import pytest
 
-from src.tapeins.sp24.tapein2.tests.spi_driver_physical import spi_write_physical
-from src.tapeins.sp24.tapein2.interconnect2 import Interconnect2
-from src.tapeins.sp24.tapein2.tests.spi_stream_protocol import *
+from src_fpga.tapeins.sp24.tapein2.tests.spi_driver_physical import spi_write_physical
+from src_fpga.tapeins.sp24.tapein2.interconnect2 import Interconnect2
+from src_fpga.tapeins.sp24.tapein2.tests.spi_stream_protocol import *
 from fixedpt import Fixed, CFixed
 from tools.utils import fixed_bits, mk_test_matrices
-from src.fft.tests.fft import FFTInterface, FFTPease
-from src.classifier.sim import classify
+from src_fpga.fft.tests.fft import FFTInterface, FFTPease
+from src_fpga.classifier.sim import classify
 import random
 from pymtl3 import *
 from pymtl3.stdlib.stream.ifcs import valrdy_to_str
