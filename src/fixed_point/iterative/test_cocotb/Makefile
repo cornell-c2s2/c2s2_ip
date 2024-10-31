@@ -22,14 +22,19 @@ COMPILE_ARGS += +incdir+/home/mlm439/c2s2_ip/src
 TOPLEVEL = fixed_point_iterative_Multiplier
 MODULE = test_fixed_point_iterative_Multiplier
 
-#Generating waveforms (Set environment variable WAVES to 1)
+#Step 4: Set environment variables for waveforms and coverage data to 1 if you  \
+would like either waveforms or coverage data to be produced by the simulation
+WAVES = 1
+COVER = 1
+
+#Generating waveform files (Set environment variable WAVES to 1)
 #Resulting waveform will be called waves.vcd and will be in the working directory
 WAVES ?= 0
 ifeq ($(WAVES), 1)
 	EXTRA_ARGS += +vcs+dumpvars+waves.vcd
 endif
 
-#Generate line and toggle coverage data (Set environment variable COVER to 1)
+#Generating line and toggle coverage data (Set environment variable COVER to 1)
 COVER ?= 0
 ifeq ($(COVER), 1)
 	COMPILE_ARGS += -cm line+tgl
