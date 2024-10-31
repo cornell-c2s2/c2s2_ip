@@ -1,19 +1,15 @@
-import pytest
-
-import os
-import random
-import sys
-import subprocess
-from pathlib import Path
-
+#Cocotb imports
 import cocotb
-from fxpmath.objects import Fxp
 from cocotb.triggers import Timer, RisingEdge
 from cocotb.runner import get_runner
 
-#Generate clock pulses (50 cycles)
+#Util imports
+from fxpmath.objects import Fxp
+import random
+
+#Generate clock pulses (40 cycles)
 async def generate_clock(dut):
-    for cycle in range(50):
+    for cycle in range(37):
         dut.clk.value = 0
         await Timer(1, units="ns")
         dut.clk.value = 1
@@ -68,23 +64,6 @@ async def multiplier_basic_test(dut):
     assert equal(int(dut.c.value), int(C.bin(), 2)), "C not correct" 
 
 @cocotb.test()
-async def multiplier_reset_test(dut):
-    #Initialize signal values
-
-    #Reset
-
-    #End reset
-
-    #Run multiplication coroutine for a few cycles
-
-    #Reset again
-
-    #Check if values are correct
-
-    #End reset
-    pass
-
-@cocotb.test()
 async def multiplier_randomized_test(dut):
     for i in range(1000):
         #Reset multiplier then multiply inputs
@@ -100,48 +79,3 @@ async def multiplier_randomized_test(dut):
         overflow = A*B > 32768 or A*B < -32768
 
         assert equal(int(dut.c.value), int(C.bin(), 2)) or overflow, "C not correct" 
-
-def test_multiplier_runner():
-    """Simulate the multiplier datapath using the Python runner.
-
-        This file can be run directly or via pytest discovery.
-    """
-    sim = os.getenv("SIM", "icarus")
-
-    proj_path = Path(__file__).resolve().parent.parent.parent.parent
-
-    #equivalent to setting the PYTHONPATH environment variable
-    sys.path.append(str(proj_path / "fixed_point" / "iterative" / "test_cocotb"))
-
-    #1) Preprocess Verilog code using Icarus Verilog
-
-    #2) Set verilog source with Preprocessed file (do not need includes)
-    sources = [
-       proj_path / "fixed_point" / "iterative" / "multiplier.v"
-    ] 
-
-    includes = [
-        proj_path
-    ]
-  
-    #3)Set build and test arguments
-    build_args = []
-    test_args = []
-
-    #4) Instantiate runner (no includes necessary)
-    runner = get_runner(sim)
-    runner.build(
-        verilog_sources=sources,
-        includes=includes,
-        hdl_toplevel="fixed_point_iterative_Multiplier",
-        always=True,
-        build_args=build_args
-    )
-
-    runner.test(
-        hdl_toplevel="fixed_point_iterative_Multiplier", test_module="test_fixed_point_iterative_Multiplier", waves=True,test_args=test_args
-    )
-
-
-if __name__ == "__main__":
-    test_multiplier_runner()
