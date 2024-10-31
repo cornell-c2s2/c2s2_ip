@@ -8,7 +8,7 @@ SIM := vcs
 PWD=$(shell pwd)
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
 
-#If working with functional models, make sure to UNCOMMENT the following line:
+#Note: If working with functional models, make sure to UNCOMMENT the following line:
 
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
@@ -22,7 +22,11 @@ COMPILE_ARGS += +incdir+/home/mlm439/c2s2_ip/src
 TOPLEVEL = fixed_point_iterative_Multiplier
 MODULE = test_fixed_point_iterative_Multiplier
 
-#Step 4: Set environment variables for waveforms and coverage data to 1 if you  \
+#Step 4: Set model parameters by adding them to EXTRA_ARGS \
+using the following line as a reference:
+#EXTRA_ARGS += +MY_PARAM=42
+
+#Step 5: Set environment variables for waveforms and coverage data to 1 if you  \
 would like either waveforms or coverage data to be produced by the simulation
 WAVES = 1
 COVER = 1
