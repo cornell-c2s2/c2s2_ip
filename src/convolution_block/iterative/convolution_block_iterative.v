@@ -17,19 +17,19 @@ module convolution_block_iterative_ConvolutionBlock #(
   input  logic reset,
 
   // input array
-  output logic input_rdy,
-  input  logic input_val,
-  input  logic [BIT_WIDTH - 1:0] input_msg [ARRAY_LENGTH - 1:0],
+  output logic req1_rdy,
+  input  logic req1_val,
+  input  logic [BIT_WIDTH - 1:0] req1_msg[ARRAY_LENGTH - 1:0],
 
-  // input filter
-  output logic filter_rdy,
-  input  logic filter_val,
-  input  logic [BIT_WIDTH - 1:0] filter_msg[ARRAY_LENGTH - 1:0],
+  // input filter (array that gets reversed)
+  output logic req2_rdy,
+  input  logic req2_val,
+  input  logic [BIT_WIDTH - 1:0] req2_msg[ARRAY_LENGTH - 1:0],
 
   // output array
-  input  logic output_rdy,
-  output logic output_val,
-  output logic [BIT_WIDTH - 1:0] output_msg[ARRAY_LENGTH - 1:0]
+  input  logic resp_rdy,
+  output logic resp_val,
+  output logic [BIT_WIDTH - 1:0] resp_msg[ARRAY_LENGTH - 1:0]
 );
   localparam IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
   logic [1:0] state, next_state;
@@ -41,7 +41,7 @@ module convolution_block_iterative_ConvolutionBlock #(
   always_comb begin
     case (state)
       IDLE: begin
-        if (input_val && filter_val && &recv_rdy_bus) next_state = CALC;
+        if (req1_val && req2_val && &recv_rdy_bus) next_state = CALC;
         else next_state = IDLE;
       end
       CALC: begin
@@ -49,7 +49,7 @@ module convolution_block_iterative_ConvolutionBlock #(
         else next_state = CALC;
       end
       DONE: begin
-        if (output_rdy) next_state = IDLE;
+        if (resp_rdy) next_state = IDLE;
         else next_state = DONE;
       end
       default: begin
@@ -62,19 +62,19 @@ module convolution_block_iterative_ConvolutionBlock #(
   always_comb begin
     case (state)
       IDLE: begin
-        input_rdy  = 1;
-        filter_rdy = 1;
-        output_val = 0;
+        req1_rdy = 1;
+        req2_rdy = 1;
+        resp_val = 0;
       end
       CALC: begin
-        input_rdy  = 0;
-        filter_rdy = 0;
-        output_val = 0;
+        req1_rdy = 0;
+        req2_rdy = 0;
+        resp_val = 0;
       end
       DONE: begin
-        input_rdy  = 0;
-        filter_rdy = 0;
-        output_val = 1;
+        req1_rdy = 0;
+        req2_rdy = 0;
+        resp_val = 1;
       end
       default: begin
       end
@@ -90,19 +90,19 @@ module convolution_block_iterative_ConvolutionBlock #(
     end
   end
 
-  // perform array convolution: output[i] = input[i] * filter[n - i]
+  // perform array convolution: resp[i] = req1[i] * req2[n - i]
   generate
     for (genvar i = 0; i < ARRAY_LENGTH; i++) begin
       fixed_point_iterative_Multiplier #(BIT_WIDTH, DECIMAL_BITS, SIGN) mult (
         .clk(clk),
         .reset(reset),
         .recv_rdy(recv_rdy_bus[i]),
-        .recv_val(input_val & filter_val),
-        .a(input_msg[i]),
-        .b(filter_msg[ARRAY_LENGTH-i-1]),
-        .send_rdy(output_rdy),
+        .recv_val(req1_val & req2_val),
+        .a(req1_msg[i]),
+        .b(req2_msg[ARRAY_LENGTH-i-1]),
+        .send_rdy(resp_rdy),
         .send_val(send_val_bus[i]),
-        .c(output_msg[i])
+        .c(resp_msg[i])
       );
     end
   endgenerate

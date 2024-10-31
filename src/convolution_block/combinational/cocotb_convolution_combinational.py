@@ -6,8 +6,8 @@ import random
 async def conv_test_gen(dut, input_arr, filter):
     assert len(input_arr) == len(filter)
 
-    dut.input_msg.value = input_arr
-    dut.filter_msg.value = filter
+    dut.req1_msg.value = input_arr
+    dut.req2_msg.value = filter
 
     dut.clk.value = 0
     dut.reset.value = 0
@@ -16,9 +16,9 @@ async def conv_test_gen(dut, input_arr, filter):
     await Timer(1, units="ns")
 
     # assert that convolution has multiplied values correctly
-    out = dut.output_msg.value
+    out = dut.resp_msg.value
     for i in range(len(out)):
-        assert out[i].integer == input_arr[i] * filter[len(out) - i - 1]
+        assert out[i] == input_arr[i] * filter[len(out) - i - 1]
 
 
 @cocotb.test()
