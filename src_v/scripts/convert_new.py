@@ -122,9 +122,16 @@ def move_localparams(content : List[str]):
 
     return result
 
+"""
+Returns a copy of module content with everything cleaned up
+"""
 def extract_module(content : List[str]):
+    output_content = []
     module_content = []
     inside_module = False
+
+    module_name = []
+    module_exist = False
 
     for line in content:
         # print(line)
@@ -133,19 +140,27 @@ def extract_module(content : List[str]):
         if module_match and not inside_module:
             # print(f"found module: {line}")
             module_content = [line]  # Start capturing the module content
-            inside_module = True
-            continue
+            if module_name:
+                module_name.append(line)
+                inside_module = True
+            
 
         # Capture lines within the module
         if inside_module:
             module_content.append(line)
-            # print(line)
+        else:
+            output_content.append(line)
 
         # Look for the end of the module
         if re.match(r'\s*endmodule\s*', line) and inside_module:
-            return module_content
+            module_content = remove_duplicate_genvars(
+                             clean_generate_block    (
+                             move_localparams        (module_content)))
+            output_content = output_content + module_content
+            module_content = []
+            inside_module = False
 
-    return None
+    return output_content
 
 def main():
     filename = sys.argv[1]
@@ -153,19 +168,9 @@ def main():
     with open(filename, "r") as file:
         content = file.readlines()
 
-    # Extract the module content
-    module_content = extract_module(content)
-
-    # Clean up generate blocks
-    module_content = clean_generate_block(module_content)
-
-    # Remove duplicate genvars
-    module_content = remove_duplicate_genvars(module_content)
-
-    # Move localparams outside parameter declaration
-    module_content = move_localparams(module_content)
+    new_content = extract_module(content)
 
     # Write the modified content to a new file
     with open("src_v/rtl/arbiter_clean.sv", "w") as file:
-        for line in module_content:
+        for line in new_content:
             file.write(line)
