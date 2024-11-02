@@ -48,3 +48,7 @@ core.*
 
 # Ignore all .nfs files
 .nfs*
+
+src/convolution_block/*/tests/*
+!src/convolution_block/*/tests/*.py
+!src/convolution_block/*/tests/Makefile
