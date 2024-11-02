@@ -17,7 +17,6 @@ from pymtl3.stdlib.test_utils import (
 )
 
 
-
 # Helper function for interconnect printouts
 def pad(n: int) -> str:
     return " " * (3 - len(str(n))) + str(n)
