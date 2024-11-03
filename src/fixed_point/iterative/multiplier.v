@@ -6,6 +6,7 @@
 // unpipelined multiplier that takes `n` cycles
 // to complete a multiplication.
 //================================================
+`timescale 1ns/1ps
 `default_nettype none
 `ifndef fixed_point_iterative_MULTIPLIER
 `define fixed_point_iterative_MULTIPLIER
