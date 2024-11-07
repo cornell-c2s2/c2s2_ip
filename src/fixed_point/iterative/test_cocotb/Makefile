@@ -15,21 +15,24 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 #Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
 VERILOG_SOURCES = $(PWD)/../multiplier.v
 
-#Step 2: Add all include directories referenced in the verilog source file
+#Step 2: Add all include directories referenced in the verilog source file (use absolute path)
 COMPILE_ARGS += +incdir+/home/mlm439/c2s2_ip/src 
 
 #Step 3: Set top level module and corresponding python test module
-TOPLEVEL = fixed_point_iterative_Multiplier
+TOPLEVEL = fixed_point_iterative_Multiplier	
 MODULE = test_fixed_point_iterative_Multiplier
 
-#Step 4: Set model parameters by adding them to EXTRA_ARGS \
-using the following line as a reference:
-#EXTRA_ARGS += +MY_PARAM=42
-
-#Step 5: Set environment variables for waveforms and coverage data to 1 if you  \
+#Step 4: Set environment variables for waveforms and coverage data to 1 if you  \
 would like either waveforms or coverage data to be produced by the simulation
 WAVES = 1
 COVER = 1
+N ?= 32
+D ?= 16
+
+#Step 5: Set model parameters by adding them to EXTRA_ARGS \
+using the following line as a reference:
+EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.n=$N
+EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
 
 #Generating waveform files (Set environment variable WAVES to 1)
 #Resulting waveform will be called waves.vcd and will be in the working directory
@@ -56,6 +59,3 @@ clean_all:
 #Generate a coverage report after running a simulation
 coverage_report:
 	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
-
-
-
