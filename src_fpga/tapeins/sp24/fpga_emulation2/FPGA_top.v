@@ -8,9 +8,18 @@ module FPGA_top (
 
 );
 
+logic K1;
+logic K2;
+
+always_ff @(posedge CLOCK_50) begin
+	K1 <= ~KEY0;
+	K2 <= K1;
+end
+
+
 tapeins_sp24_fpga_emulation2_Interconnect_Fpga dut(
   .clk(CLOCK_50),
-  .reset(~KEY0),
+  .reset(K2),
   .cs(GPIO6),
   .mosi(GPIO4),
   .miso(GPIO2),

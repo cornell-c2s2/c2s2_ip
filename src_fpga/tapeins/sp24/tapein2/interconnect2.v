@@ -55,7 +55,7 @@ module tapeins_sp24_tapein2_Interconnect2 (
 
   // SPI MINION
   spi_Minion #(
-    .BIT_WIDTH(ADDR_BITS + DATA_BITS),
+    .BIT_WIDTH(ADDR_BITS+DATA_BITS),
     .N_SAMPLES(1)
   ) minion (
     .clk(clk),

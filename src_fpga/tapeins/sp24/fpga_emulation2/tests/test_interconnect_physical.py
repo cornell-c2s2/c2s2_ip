@@ -1,12 +1,10 @@
-import pytest
 
-from src.tapeins.sp24.tapein2.tests.spi_driver_physical import spi_write_physical
-from src.tapeins.sp24.tapein2.interconnect2 import Interconnect2
-from src.tapeins.sp24.tapein2.tests.spi_stream_protocol import *
+from spi_driver_physical import spi_write_physical
+from src_fpga.tapeins.sp24.fpga_emulation2.tests.spi_stream_protocol import write_read_msg, read_msg
 from fixedpt import Fixed, CFixed
 from tools.utils import fixed_bits, mk_test_matrices
-from src.fft.tests.fft import FFTInterface, FFTPease
-from src.classifier.sim import classify
+from src_fpga.fft.tests.fft import FFTInterface, FFTPease
+from src_fpga.classifier.sim import classify
 import random
 from pymtl3 import *
 from pymtl3.stdlib.stream.ifcs import valrdy_to_str
@@ -15,7 +13,7 @@ from pymtl3.stdlib.test_utils import (
     run_sim,
     config_model_with_cmdline_opts,
 )
-
+import pytest
 
 
 # Helper function for interconnect printouts
@@ -89,11 +87,7 @@ def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
 
 # Makes a new interconnect dut
 def make_interconnect(cmdline_opts):
-    dut = Interconnect2()
-    dut = config_model_with_cmdline_opts(dut, cmdline_opts, duts=[])
-    dut.apply(DefaultPassGroup(linetrace=False))
-    dut.sim_reset()
-    return dut
+    return None
 
 
 class InXbarCfg(int):
@@ -196,7 +190,9 @@ def loopback_outXbar_msg(msgs):
     ],
 )
 def test_loopback_inXbar(msgs, cmdline_opts):
+    print(msgs)
     in_msgs, out_msgs = loopback_inXbar_msg(msgs)
+    print(in_msgs)
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
 

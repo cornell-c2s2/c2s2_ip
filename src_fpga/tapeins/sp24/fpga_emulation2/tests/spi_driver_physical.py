@@ -1,19 +1,25 @@
 from pymtl3 import *
 from spidriver import SPIDriver
+import time
 
-s = SPIDriver("/dev/ttyUSB0")
+s = SPIDriver("\\\\.\\COM3")
 
 
 def spi_write_physical(dut, src_msg):
     src_msg_bytes = []
+    
+    print("src_msg", src_msg)
 
     while src_msg.nbits > 8:
         src_msg_bytes.append(int(src_msg[src_msg.nbits - 8 : src_msg.nbits]))
         src_msg = src_msg[: src_msg.nbits - 8]
     src_msg_bytes.append(int(src_msg))
     s.sel()
+    print(src_msg_bytes)
     readbytes = s.writeread(src_msg_bytes)
-
+    # time.sleep(0.1)
+    
+    #print("readbytes: ", hex(int.from_bytes(readbytes, "big") >> 2))
     s.unsel()
 
-    return Bits40(int.from_bytes(readbytes, "big"))
+    return Bits40(int.from_bytes(readbytes, "big")  >> 2)

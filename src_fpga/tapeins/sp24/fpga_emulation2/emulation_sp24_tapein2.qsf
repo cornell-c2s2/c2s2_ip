@@ -42,7 +42,7 @@
 # ========================
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 23.1STD.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "14:32:26  OCTOBER 19, 2024"
-set_global_assignment -name LAST_QUARTUS_VERSION "23.1std.1 Lite Edition"
+set_global_assignment -name LAST_QUARTUS_VERSION 15.0.0
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name VERILOG_FILE ../../../arbiter_router/arbiter.v
 set_global_assignment -name VERILOG_FILE ../../../arbiter_router/router.v
@@ -89,14 +89,14 @@ set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 
 # Analysis & Synthesis Assignments
 # ================================
-set_global_assignment -name FAMILY "Cyclone IV E"
+set_global_assignment -name FAMILY "Cyclone V"
 set_global_assignment -name TOP_LEVEL_ENTITY FPGA_top
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
 
 # Fitter Assignments
 # ==================
-set_global_assignment -name DEVICE EP4CE115F29C7
+set_global_assignment -name DEVICE 5CEBA4F23C7
 set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
 
 # Power Estimation Assignments
@@ -164,20 +164,19 @@ set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_
 
 # end ENTITY(interconnect)
 # ------------------------
-set_global_assignment -name SEARCH_PATH /home/c2/c2s2_ip/src_fpga
-set_global_assignment -name VERILOG_FILE interconnect_fpga.v
 set_global_assignment -name VERILOG_FILE ../../../fft/helpers/sine_wave_lookup_160832.v
 set_global_assignment -name VERILOG_FILE FPGA_top.v
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name VERILOG_FILE interconnect_fpga.v
-set_location_assignment PIN_Y2 -to CLOCK_50
-set_location_assignment PIN_M23 -to KEY0
-set_location_assignment PIN_AB22 -to GPIO0
-set_location_assignment PIN_AB21 -to GPIO2
-set_location_assignment PIN_AC21 -to GPIO4
-set_location_assignment PIN_AD21 -to GPIO6
-set_location_assignment PIN_AD15 -to GPIO8
+set_location_assignment PIN_M9 -to CLOCK_50
+set_location_assignment PIN_P22 -to KEY0
+set_location_assignment PIN_H16 -to GPIO0
+set_location_assignment PIN_H15 -to GPIO2
+set_location_assignment PIN_A13 -to GPIO4
+set_location_assignment PIN_C13 -to GPIO6
 set_global_assignment -name SDC_FILE timing.sdc
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
+set_global_assignment -name SEARCH_PATH ../../..
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
