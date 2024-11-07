@@ -9,12 +9,17 @@ async def conv_test_gen(dut, input_arr, filter):
     dut.req1_msg.value = input_arr
     dut.req2_msg.value = filter
 
+    dut.reset.value = 1
     dut.clk.value = 0
-    dut.reset.value = 0
     await Timer(1, units="ns")
     dut.clk.value = 1
     await Timer(1, units="ns")
 
+    dut.reset.value = 0
+    dut.clk.value = 0
+    await Timer(1, units="ns")
+    dut.clk.value = 1
+    await Timer(1, units="ns")
     # assert that convolution has multiplied values correctly
     out = dut.resp_msg.value
     for i in range(len(out)):

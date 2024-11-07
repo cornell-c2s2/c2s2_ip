@@ -51,11 +51,16 @@ async def conv_test_gen(dut, input_arr, filter, BIT_WIDTH, random_max):
         dut.clk.value = 1
         await Timer(1, units="ns")
 
+    dut.req1_val.value = 0
+    dut.req2_val.value = 0
+    dut.resp_rdy.value = 1
+
     # assert that convolution has multiplied values correctly
     assert dut.resp_val
     out = dut.resp_msg.value
     for i in range(len(out)):
-        assert out[i] == input_arr[i] * filter[len(out) - i - 1]
+        expected = (input_arr[i] * filter[len(out) - i - 1]) & ((1 << BIT_WIDTH) - 1)
+        assert out[i] == expected
 
 
 @cocotb.test()
@@ -68,8 +73,6 @@ async def multiply_tests(dut):
 
     # randomized testing
     for _ in range(1000):
-        input_arr = random.choices(
-            population=range(2 ** (BIT_WIDTH // 2)), k=ARRAY_LENGTH
-        )
-        filter = random.choices(population=range(2 ** (BIT_WIDTH // 2)), k=ARRAY_LENGTH)
+        input_arr = random.choices(population=range(2 ** (BIT_WIDTH)), k=ARRAY_LENGTH)
+        filter = random.choices(population=range(2 ** (BIT_WIDTH)), k=ARRAY_LENGTH)
         await conv_test_gen(dut, input_arr, filter, BIT_WIDTH, random_delay)
