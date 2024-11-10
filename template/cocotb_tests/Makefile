@@ -13,7 +13,6 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
 #Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
-# VERILOG_SOURCES = $(C2S2_PATH)/src/fixed_point/iterative/multiplier.v
 VERILOG_SOURCES = $(C2S2_PATH)/template/template.v
 
 #Step 2: Add all include directories referenced in the verilog source file
