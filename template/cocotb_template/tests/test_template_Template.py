@@ -1,27 +1,34 @@
-# Cocotb imports
-import cocotb
-import os
-from cocotb.triggers import Timer, RisingEdge, FallingEdge
-from cocotb.runner import get_runner
-
-# Util imports
 import random
 
-# Use environment variables for model parameters set in the Makefile as a reference for writing tests
-# Examples (from multiplier example):
-# bits = int(os.getenv("N", 32))
-# decimal = int(os.getenv("D", 16))
+import cocotb
+from cocotb.triggers import Timer, Edge, RisingEdge, FallingEdge, ClockCycles
+from cocotb.clock import Clock
 
-# Generate clock pulses
-async def generate_clock(dut, cycles):
-    for cycle in range(cycles):
-        dut.clk.value = 0
-        await Timer(1, units="ns")
-        dut.clk.value = 1
-        await Timer(1, units="ns")
-
-# Use this as reference for creating tests. Make sure to run this test with only "pass" to see if your 
-# your envoronment is properly configured.
 @cocotb.test()
-async def sample_test(dut):
-    pass
+async def basic_test(dut):
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+
+    dut.reset.value = 1
+    await ClockCycles(dut.clk, 1)
+    dut.reset.value = 0
+
+    dut.recv_msg.value = 1
+    await ClockCycles(dut.clk, 1)
+    dut._log.info("Hello world!")
+    assert dut.send_msg.value == dut.recv_msg.value
+
+@cocotb.test()
+async def randomized_test(dut):
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    dut.reset.value = 1
+    await ClockCycles(dut.clk, 1)
+    dut.reset.value = 0
+
+    for i in range(100):
+        dut.recv_msg.value = random.randint(0, 2 ** 20 - 1)
+        dut._log.info(f"a_{i} = {hex(dut.recv_msg.value)}")
+        assert dut.send_msg.value == dut.recv_msg.value
+        await ClockCycles(dut.clk, 1)
+    
+
+    

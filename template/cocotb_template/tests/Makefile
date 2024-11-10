@@ -4,33 +4,23 @@ TOPLEVEL_LANG ?= verilog
 #RTL Simulator (always Synopsys VCS)
 SIM := vcs
 
-#Adding working directory to the Python virtual environment path
+#Add working directory to the Python virtual environment path
 PWD=$(shell pwd)
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
 
-#Step 0: Set this variable to the full path to your clone of the c2s2_ip repository (required)
-#Example: C2S2IP_DIR = /home/mlm439/c2s2_ip
-C2S2IP_DIR = 
+# .phony: ALL
 
 #Note: If working with functional models, make sure to UNCOMMENT the following line:
 
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
-#Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES (required) \
-Note: If there are multiple verilog sources, make sure to order them by model hierarchy.
-
+#Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
 VERILOG_SOURCES = $(PWD)/../template.v
 
-#Step 2: Add all include directories referenced in the verilog source file (if neccesary)
-#Note: An include directory is simply a directory that can be used by the simulator to evaluate \
-relative paths in your Verilog include statements.
-COMPILE_ARGS += +incdir+$(C2S2IP_DIR)/src 
+#Step 2: Add all include directories referenced in the verilog source file
+COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
 
-#Step 3: Set top level module and corresponding python test module (required) \
-Examples: \
-TOPLEVEL = fixed_point_iterative_Multiplier	\
-MODULE = test_fixed_point_iterative_Multiplier
-
+#Step 3: Set top level module and corresponding python test module
 TOPLEVEL = template_Template
 MODULE = test_template_Template
 
@@ -38,21 +28,22 @@ MODULE = test_template_Template
 would like either waveforms or coverage data to be produced by the simulation. You can \
 also set enviroment variables for model parameters and configure them in the simulation with \
 the next step.
+#EXTRA_ARGS += +MY_PARAM=42
+
+#Step 5: Set environment variables for waveforms and coverage data to 1 if you  \
+would like either waveforms or coverage data to be produced by the simulation
 WAVES = 1
 COVER = 1
 
-#Step 5: Set model parameters by appending them to EXTRA_ARGS (if neccessary)\
-#Examples (from multiplier example): \
-EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.n=$N \
-EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
-
 #Generating waveform files (Set environment variable WAVES to 1)
 #Resulting waveform will be called waves.vcd and will be in the working directory
+WAVES ?= 0
 ifeq ($(WAVES), 1)
 	EXTRA_ARGS += +vcs+dumpvars+waves.vcd
 endif
 
 #Generating line and toggle coverage data (Set environment variable COVER to 1)
+COVER ?= 0
 ifeq ($(COVER), 1)
 	COMPILE_ARGS += -cm line+tgl
 	SIM_ARGS += -cm line+tgl
@@ -64,9 +55,12 @@ include $(shell cocotb-config --makefiles)/Makefile.sim
 clean_all:
 	rm -f waves.vcd
 	rm -rf coverage_report
-	rm -f results.xml
+	rm -rf results.xml
 	make clean
 
 #Generate a coverage report after running a simulation
 coverage_report:
 	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
+
+
+
