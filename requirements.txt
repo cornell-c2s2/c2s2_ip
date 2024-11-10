@@ -10,3 +10,4 @@ halo
 pyyaml
 matplotlib
 librosa
+spidriver

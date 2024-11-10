@@ -8,19 +8,15 @@ SIM := vcs
 PWD=$(shell pwd)
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
 
-#Set this variable to the full path to your clone of the c2s2_ip repository
-#Example: C2S2IP_DIR = /home/mlm439/c2s2_ip
-C2S2IP_DIR = /home/mlm439/c2s2_ip
-
 #Note: If working with functional models, make sure to UNCOMMENT the following line:
 
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
 #Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
-VERILOG_SOURCES = $(PWD)/../multiplier.v
+VERILOG_SOURCES = $(C2S2_PATH)/src/fixed_point/iterative/multiplier.v
 
 #Step 2: Add all include directories referenced in the verilog source file 
-COMPILE_ARGS += +incdir+$(C2S2IP_DIR)/src 
+COMPILE_ARGS += +incdir+$(C2S2_PATH)/src 
 
 #Step 3: Set top level module and corresponding python test module (required)
 TOPLEVEL = fixed_point_iterative_Multiplier	
@@ -32,12 +28,10 @@ also set enviroment variables for model parameters and configure them in the sim
 the next step.
 WAVES = 1
 COVER = 1
-N ?= 32
-D ?= 16
 
-#Step 5: Set model parameters by adding them to EXTRA_ARGS \
-using the following line as a reference:
-EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.n=$N
+#Step 5: Set model parameters by appending them to EXTRA_ARGS (if neccessary)\
+#Examples (from multiplier example): \
+EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.n=$N \
 EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
 
 #Generating waveform files (Set environment variable WAVES to 1)
@@ -64,3 +58,6 @@ clean_all:
 #Generate a coverage report after running a simulation
 coverage_report:
 	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
+
+
+

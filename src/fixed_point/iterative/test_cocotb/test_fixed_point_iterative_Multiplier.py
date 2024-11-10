@@ -1,8 +1,9 @@
 #Cocotb imports
 import cocotb
 import os
-from cocotb.triggers import Timer, RisingEdge
+from cocotb.triggers import Timer, Edge, RisingEdge, FallingEdge, ClockCycles
 from cocotb.runner import get_runner
+from cocotb.clock import Clock
 
 #Util imports
 from fxpmath.objects import Fxp
@@ -11,14 +12,6 @@ import random
 #Model parameters
 bits = int(os.getenv("N", 32))
 decimal = int(os.getenv("D", 16))
-
-#Generate clock pulses (40 cycles)
-async def generate_clock(dut):
-    for cycle in range(bits+5):
-        dut.clk.value = 0
-        await Timer(1, units="ns")
-        dut.clk.value = 1
-        await Timer(1, units="ns")
 
 #Check if expected value of c is the same as the actual value
 def equal(actual, expected):
@@ -35,15 +28,11 @@ async def reset_then_mult(dut, n, d, a, b):
     dut.reset.value = 1
     dut.recv_val.value = 0
     dut.send_rdy.value = 0
-
-    #Start clock
-    await cocotb.start(generate_clock(dut))
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
 
     #End reset and spend whole cycle in IDLE state
     dut.reset.value = 0
-    await RisingEdge(dut.clk)
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 2)
 
     #Send valid request signal to the multiplier and wait for a valid response
     dut.recv_val.value = 1
@@ -52,12 +41,14 @@ async def reset_then_mult(dut, n, d, a, b):
     #Acknowledge the valid response
     dut.send_rdy.value = 1
     dut.recv_val.value = 0
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     
 
 #Single directed test
 @cocotb.test()
 async def multiplier_basic_test(dut):
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+
     #Reset multiplier then multiply inputs
     A = 5.37232
     B = 4.7883
@@ -68,7 +59,9 @@ async def multiplier_basic_test(dut):
     C.resize(n_word=bits, n_frac=decimal)
     assert equal(int(dut.c.value), int(C.bin(), 2)), "C not correct" 
 
-async def multiplier_randomized_test(dut, n, d):
+@cocotb.test()
+async def multiplier_randomized_test(dut):
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     for i in range(1000):
         #Reset multiplier then multiply inputs
         A = random.uniform(-300, 300)
