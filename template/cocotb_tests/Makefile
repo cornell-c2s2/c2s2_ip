@@ -13,14 +13,12 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
 #Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
-VERILOG_SOURCES = $(pwd)/../template.v
+VERILOG_SOURCES = $(PWD)/../template.v
 
 #Step 2: Add all include directories referenced in the verilog source file
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
 
 #Step 3: Set top level module and corresponding python test module
-# TOPLEVEL = fixed_point_iterative_Multiplier
-# MODULE = test_fixed_point_iterative_Multiplier
 TOPLEVEL = template_Template
 MODULE = test_template_Template
 
