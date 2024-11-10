@@ -8,8 +8,6 @@ SIM := vcs
 PWD=$(shell pwd)
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
 
-# .phony: ALL
-
 #Note: If working with functional models, make sure to UNCOMMENT the following line:
 
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
@@ -28,12 +26,13 @@ MODULE = test_template_Template
 would like either waveforms or coverage data to be produced by the simulation. You can \
 also set enviroment variables for model parameters and configure them in the simulation with \
 the next step.
-#EXTRA_ARGS += +MY_PARAM=42
-
-#Step 5: Set environment variables for waveforms and coverage data to 1 if you  \
-would like either waveforms or coverage data to be produced by the simulation
 WAVES = 1
 COVER = 1
+
+#Step 5: Set model parameters by appending them to EXTRA_ARGS (if neccessary)\
+#Examples (from multiplier example): \
+EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.n=$N \
+EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
 
 #Generating waveform files (Set environment variable WAVES to 1)
 #Resulting waveform will be called waves.vcd and will be in the working directory
@@ -55,6 +54,7 @@ include $(shell cocotb-config --makefiles)/Makefile.sim
 clean_all:
 	rm -f waves.vcd
 	rm -rf coverage_report
+	rm -rf results.xml
 	make clean
 
 #Generate a coverage report after running a simulation
