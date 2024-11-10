@@ -1,7 +1,0 @@
-<testsuites name="results">
-  <testsuite name="all" package="all">
-    <property name="random_seed" value="1728256816" />
-    <testcase name="datapath_basic_test" classname="test_FXPIterMultDatapath" file="/home/mlm439/c2s2_ip/src/fixed_point/iterative/test_cocotb/test_FXPIterMultDatapath.py" lineno="11" time="0.00018644332885742188" sim_time_ns="1000000000" ratio_time="5363560102301.79" />
-    <testcase name="datapath_randomised_test" classname="test_FXPIterMultDatapath" file="/home/mlm439/c2s2_ip/src/fixed_point/iterative/test_cocotb/test_FXPIterMultDatapath.py" lineno="15" time="6.29425048828125e-05" sim_time_ns="1000000000" ratio_time="15887515151515.152" />
-  </testsuite>
-</testsuites>

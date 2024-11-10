@@ -1,5 +1,6 @@
 #Cocotb imports
 import cocotb
+import os
 from cocotb.triggers import Timer, RisingEdge
 from cocotb.runner import get_runner
 
@@ -7,9 +8,13 @@ from cocotb.runner import get_runner
 from fxpmath.objects import Fxp
 import random
 
+#Model parameters
+bits = int(os.getenv("N", 32))
+decimal = int(os.getenv("D", 16))
+
 #Generate clock pulses (40 cycles)
 async def generate_clock(dut):
-    for cycle in range(37):
+    for cycle in range(bits+5):
         dut.clk.value = 0
         await Timer(1, units="ns")
         dut.clk.value = 1
@@ -21,10 +26,10 @@ def equal(actual, expected):
     return actual == expected or actual == expected-1
 
 #Reset then multiply coroutine
-async def reset_then_mult(dut, a, b): 
+async def reset_then_mult(dut, n, d, a, b): 
     #Set initial values of signals
-    A = Fxp(a, signed=True, n_word=32, n_frac=16, rounding='around')
-    B = Fxp(b, signed=True, n_word=32, n_frac=16, rounding='around')
+    A = Fxp(a, signed=True, n_word=n, n_frac=d, rounding='around')
+    B = Fxp(b, signed=True, n_word=n, n_frac=d, rounding='around')
     dut.a.value = int(A.bin(), 2)
     dut.b.value = int(B.bin(), 2)
     dut.reset.value = 1
@@ -56,26 +61,31 @@ async def multiplier_basic_test(dut):
     #Reset multiplier then multiply inputs
     A = 5.37232
     B = 4.7883
-    await reset_then_mult(dut, A, B)
+    await reset_then_mult(dut, bits, decimal, A, B)
 
     #Check the value returned by the multiplier
-    C = Fxp(A, signed=True, n_word=32, n_frac=16, rounding='around')*Fxp(B, signed=True, n_word=32, n_frac=16, rounding='around')
-    C.resize(n_word=32, n_frac=16)
+    C = Fxp(A, signed=True, n_word=bits, n_frac=decimal, rounding='around')*Fxp(B, signed=True, n_word=bits, n_frac=decimal, rounding='around')
+    C.resize(n_word=bits, n_frac=decimal)
     assert equal(int(dut.c.value), int(C.bin(), 2)), "C not correct" 
 
-@cocotb.test()
-async def multiplier_randomized_test(dut):
+async def multiplier_randomized_test(dut, n, d):
     for i in range(1000):
         #Reset multiplier then multiply inputs
         A = random.uniform(-300, 300)
         B = random.uniform(-300, 300)
-        await reset_then_mult(dut, A, B)
+        await reset_then_mult(dut, n, d, A, B)
 
         #Check the value returned by the multiplier
-        C = Fxp(A, signed=True, n_word=32, n_frac=16, rounding='around')*Fxp(B, signed=True, n_word=32, n_frac=16, rounding='around')
-        C.resize(n_word=32, n_frac=16)
+        C = Fxp(A, signed=True, n_word=n, n_frac=d, rounding='around')*Fxp(B, signed=True, n_word=n, n_frac=d, rounding='around')
+        C.resize(n_word=n, n_frac=d)
 
         #Check for overflow
-        overflow = A*B > 32768 or A*B < -32768
+        overflow = A*B > 2**(n-d-1) or A*B < -2**(n-d-1)
 
         assert equal(int(dut.c.value), int(C.bin(), 2)) or overflow, "C not correct" 
+
+#Creation of test factories for parameter combinations
+@cocotb.test()
+async def multiplier_randomized_test_wrapper(dut):
+    await multiplier_randomized_test(dut, bits, decimal)
+  

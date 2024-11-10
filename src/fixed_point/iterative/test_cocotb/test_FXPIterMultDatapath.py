@@ -10,6 +10,7 @@ import cocotb
 from fxpmath.objects import Fxp
 from cocotb.triggers import Timer, RisingEdge
 from cocotb.runner import get_runner
+from cocotb.binary import BinaryValue
 
 #Generate clock pulses (50 cycles)
 async def generate_clock(dut):
@@ -40,7 +41,7 @@ async def reset_then_mult(dut, a, b):
     B = Fxp(b, signed=True, n_word=32, n_frac=16, rounding='around')
     dut.a.value = int(A.bin(), 2)
     dut.b.value = int(B.bin(), 2)
-    dut.in_wait.value = 1
+    dut.in_wait.value = BinaryValue("x")
     dut.reset.value = 1
     dut.do_add.value = 0
     dut.do_carry.value = 0
@@ -52,13 +53,14 @@ async def reset_then_mult(dut, a, b):
     #End reset and spend whole cycle in IDLE
     dut.reset.value = 0
     await RisingEdge(dut.clk)
+    dut.in_wait.value = 1
     await RisingEdge(dut.clk)
     #Transition from IDLE to CALC
     dut.do_add.value = 1
     dut.in_wait.value = 0
     update_control(dut, 0)
     await RisingEdge(dut.clk)
-    #Remain in CALC for 32 cycles
+    #Remain in CALC for 32 cycles then transition to DONE
     for x in range(1,33):
         update_control(dut, x)
         await RisingEdge(dut.clk)
@@ -79,7 +81,7 @@ async def datapath_basic_test(dut):
 @cocotb.test()
 async def datapath_reset_test(dut):
     #Initialize signal values
-
+    
     #Reset
 
     #End reset
@@ -115,7 +117,7 @@ def test_datapath_runner():
 
         This file can be run directly or via pytest discovery.
     """
-    sim = os.getenv("SIM", "icarus")
+    sim = os.getenv("SIM", "vcs")
 
     proj_path = Path(__file__).resolve().parent.parent.parent.parent
 
@@ -134,8 +136,8 @@ def test_datapath_runner():
     ]
   
     #3)Set build and test arguments
-    build_args = ["-s", "FXPIterMultDatapath"]
-    test_args = []
+    build_args = ["-s", "FXPIterMultDatapath", "-debug_all", "-cm line+tgl", "-sverilog"]
+    test_args = ["+vcs+dumpvars+waveform.vcd", "-cm line+tgl"]
 
     #4) Instantiate runner (no includes necessary)
     runner = get_runner(sim)
