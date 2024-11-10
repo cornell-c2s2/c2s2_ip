@@ -5,8 +5,8 @@ clear -all
 check_cov -init -type all -model {branch toggle statement} -toggle_ports_only
 
 # you must analyze all the files in your design (source and testbench) before doing anything in jasper
-analyze -v template.v 
-analyze -sv template_sva.sv 
+analyze -v template_Template.v 
+analyze -sv template_Template_sva.sv 
 
 # specify the top level module, in this case the testbench 
 elaborate -top template -create_related_covers {precondition witness}
