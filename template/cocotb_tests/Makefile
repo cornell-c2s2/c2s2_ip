@@ -8,6 +8,8 @@ SIM := vcs
 PWD=$(shell pwd)
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
 
+# .phony: ALL
+
 #Note: If working with functional models, make sure to UNCOMMENT the following line:
 
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
