@@ -13,7 +13,7 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
 #Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
-VERILOG_SOURCES = $(C2S2_PATH)/template/template.v
+VERILOG_SOURCES = $(pwd)/../template.v
 
 #Step 2: Add all include directories referenced in the verilog source file
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
@@ -24,8 +24,10 @@ COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
 TOPLEVEL = template_Template
 MODULE = test_template_Template
 
-#Step 4: Set model parameters by adding them to EXTRA_ARGS \
-using the following line as a reference:
+#Step 4: Set environment variables for waveforms and coverage data to 1 if you  \
+would like either waveforms or coverage data to be produced by the simulation. You can \
+also set enviroment variables for model parameters and configure them in the simulation with \
+the next step.
 #EXTRA_ARGS += +MY_PARAM=42
 
 #Step 5: Set environment variables for waveforms and coverage data to 1 if you  \
