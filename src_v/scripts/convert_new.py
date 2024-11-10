@@ -1,11 +1,44 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 import os
 import re
 import sys
-from typing import List
+from typing import List, Callable
 
 # scan through the file and look for delimiter module and endmodule
+
+"""
+Given the "begin" and "end" declarations of a block, finds all 
+blocks in the content and apply the block_func to the block and 
+return the modified content.
+"""
+def apply_block_func(content : List[str], begin : str, end : str, 
+                     block_funcs : List[Callable[[List[str]], List[str]]]):
+    output_content = []
+    block_content = []
+    inside_block = False
+
+    for line in content:
+        # Look for the module declaration
+        block_match = re.match(fr'\s*{begin}\s*', line)
+        if block_match and not inside_block:
+            inside_block = True
+            
+        # Capture lines within the module
+        if inside_block:
+            block_content.append(line)
+        else:
+            output_content.append(line)
+
+        # Look for the end of the module
+        if re.match(fr'\s*{end}\s*', line) and inside_block:
+            for block_func in block_funcs:
+                block_content = block_func(block_content)
+            output_content = output_content + block_content
+            block_content = []
+            inside_block = False
+
+    return output_content
 
 """
 Cleans up generate blocks.
@@ -23,20 +56,20 @@ def clean_generate_block(content : List[str]):
         line = result[idx]
         genvar_match = re.match(r'\s*for\s*\(genvar\s+(\w+)', line)
         
-        print(genvar_match)
+        # print(genvar_match)
 
         # if genvar is found, remove it from the for loop and add it to the genvar declaration list
         if genvar_match:
-            print(f"genvar found: " + genvar_match.group(1))
+            # print(f"genvar found: " + genvar_match.group(1))
             line = line.replace('genvar ', '')
             genvar_decl.append(genvar_match.group(1))
-            print(f"for loop is: " + line)
+            # print(f"for loop is: " + line)
         
         # update the for loop content
         result[idx] = line
     
     for genvar in genvar_decl:
-        result.insert(0, "  genvar " + genvar + ";")
+        result.insert(0, "  genvar " + genvar + "; \n")
 
     return result
 
@@ -56,7 +89,7 @@ def remove_duplicate_genvars(content : List[str]):
 
     idx = 0
     while idx < len(result):
-        print(f"idx: {idx} and len: {len(result)}")
+        # print(f"idx: {idx} and len: {len(result)}")
         # for idx in range(len(result)):
         line = result[idx]
         genvar_match = re.match(r'\s*genvar\s+(\w+)', line)
@@ -70,12 +103,28 @@ def remove_duplicate_genvars(content : List[str]):
 
     return result
 
+
 """
-Moves localparams outside parameter declaration.
+Removes problems with generate statement in the module.
+
+Given a module, moves all genvar declarations before
+generate statement, and removes uncecessary generate statements.
+"""
+def clean_generates(content : List[str]): 
+    # find all generate blocks
+    output_content = content
+
+    output_content = apply_block_func(output_content, "generate", "endgenerate", [clean_generate_block])
+
+    output_content = apply_block_func(output_content, "module", "endmodule", [remove_duplicate_genvars])
+    return output_content
+
+"""
+Removes problems with localparam in the module.
 
 Given a module, moves all localparams to the top of the module.
 """
-def move_localparams(content : List[str]):
+def clean_localparams(content : List[str]):
     result = content
     param_end = []
     header_end = []
@@ -100,7 +149,7 @@ def move_localparams(content : List[str]):
     # Find the end of the module header declaration
     for idx in range(len(result)):
         # end of module header declaration must succeed the end of input/output declaration
-        print(re.match(r'\s*\);\s*', result[idx]))
+        # print(re.match(r'\s*\);\s*', result[idx]))
         if (re.match(r'\s*\);\s*', result[idx]) and 
             any(re.match(r'\s*input\s*', result[i]) or 
                 re.match(r'\s*output\s*', result[i]) for i in range(idx))):
@@ -126,51 +175,26 @@ def move_localparams(content : List[str]):
 Returns a copy of module content with everything cleaned up
 """
 def extract_module(content : List[str]):
-    output_content = []
-    module_content = []
-    inside_module = False
+    output_content = content
 
-    module_name = []
-    module_exist = False
-
-    for line in content:
-        # print(line)
-        # Look for the module declaration
-        module_match = re.match(r'\s*module\s+', line)
-        if module_match and not inside_module:
-            # print(f"found module: {line}")
-            module_content = [line]  # Start capturing the module content
-            if module_name:
-                module_name.append(line)
-                inside_module = True
-            
-
-        # Capture lines within the module
-        if inside_module:
-            module_content.append(line)
-        else:
-            output_content.append(line)
-
-        # Look for the end of the module
-        if re.match(r'\s*endmodule\s*', line) and inside_module:
-            module_content = remove_duplicate_genvars(
-                             clean_generate_block    (
-                             move_localparams        (module_content)))
-            output_content = output_content + module_content
-            module_content = []
-            inside_module = False
+    output_content = apply_block_func(output_content, "module", "endmodule", [clean_localparams])
+    output_content = apply_block_func(output_content, "module", "endmodule", [clean_generates])
 
     return output_content
 
-def main():
+if __name__ == "__main__":
     filename = sys.argv[1]
+    print("hello")
+    print(filename)
     # Open the file
     with open(filename, "r") as file:
         content = file.readlines()
 
     new_content = extract_module(content)
 
+    # print(new_content)
+
     # Write the modified content to a new file
-    with open("src_v/rtl/arbiter_clean.sv", "w") as file:
+    with open("/home/yb265/c2s2/c2s2_ip/src_v/interconnect_convered_fpga.v", "w") as file:
         for line in new_content:
             file.write(line)
