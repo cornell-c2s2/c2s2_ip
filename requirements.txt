@@ -11,3 +11,4 @@ pyyaml
 matplotlib
 librosa
 spidriver
+cocotb
