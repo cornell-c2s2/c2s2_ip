@@ -79,23 +79,6 @@ async def datapath_basic_test(dut):
     assert equal(int(dut.c.value), int(C.bin(), 2)), "C not correct" 
 
 @cocotb.test()
-async def datapath_reset_test(dut):
-    #Initialize signal values
-    
-    #Reset
-
-    #End reset
-
-    #Run multiplication coroutine for a few cycles
-
-    #Reset again
-
-    #Check if values are correct
-
-    #End reset
-    pass
-
-@cocotb.test()
 async def datapath_randomized_test(dut):
     for i in range(1000):
         #Reset multiplier then multiply inputs
@@ -111,48 +94,3 @@ async def datapath_randomized_test(dut):
         overflow = A*B > 32768 or A*B < -32768
 
         assert equal(int(dut.c.value), int(C.bin(), 2)) or overflow, "C not correct" 
-
-def test_datapath_runner():
-    """Simulate the multiplier datapath using the Python runner.
-
-        This file can be run directly or via pytest discovery.
-    """
-    sim = os.getenv("SIM", "vcs")
-
-    proj_path = Path(__file__).resolve().parent.parent.parent.parent
-
-    #equivalent to setting the PYTHONPATH environment variable
-    sys.path.append(str(proj_path / "fixed_point" / "iterative" / "test_cocotb"))
-
-    #1) Preprocess Verilog code using Icarus Verilog
-
-    #2) Set verilog source with Preprocessed file (do not need includes)
-    sources = [
-       proj_path / "fixed_point" / "iterative" / "multiplier.v"
-    ] 
-
-    includes = [
-        proj_path
-    ]
-  
-    #3)Set build and test arguments
-    build_args = ["-s", "FXPIterMultDatapath", "-debug_all", "-cm line+tgl", "-sverilog"]
-    test_args = ["+vcs+dumpvars+waveform.vcd", "-cm line+tgl"]
-
-    #4) Instantiate runner (no includes necessary)
-    runner = get_runner(sim)
-    runner.build(
-        verilog_sources=sources,
-        includes=includes,
-        hdl_toplevel="FXPIterMultDatapath",
-        always=True,
-        build_args=build_args
-    )
-
-    runner.test(
-        hdl_toplevel="FXPIterMultDatapath", test_module="test_FXPIterMultDatapath", waves=True,test_args=test_args
-    )
-
-
-if __name__ == "__main__":
-    test_datapath_runner()
