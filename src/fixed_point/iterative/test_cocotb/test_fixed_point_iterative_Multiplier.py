@@ -59,8 +59,7 @@ async def multiplier_basic_test(dut):
     C.resize(n_word=bits, n_frac=decimal)
     assert equal(int(dut.c.value), int(C.bin(), 2)), "C not correct" 
 
-@cocotb.test()
-async def multiplier_randomized_test(dut):
+async def multiplier_randomized_test(dut, n, d):
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     for i in range(1000):
         #Reset multiplier then multiply inputs

@@ -12,3 +12,4 @@ matplotlib
 librosa
 spidriver
 cocotb
+fxpmath
