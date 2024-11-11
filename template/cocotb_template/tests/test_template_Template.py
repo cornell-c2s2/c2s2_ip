@@ -26,7 +26,6 @@ async def randomized_test(dut):
 
     for i in range(100):
         dut.recv_msg.value = random.randint(0, 2 ** 20 - 1)
-        dut._log.info(f"a_{i} = {hex(dut.recv_msg.value)}")
         assert dut.send_msg.value == dut.recv_msg.value
         await ClockCycles(dut.clk, 1)
     
