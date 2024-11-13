@@ -42,70 +42,62 @@ module lbist_controller #(
   );
 
 //============================LOCAL_PARAMETERS=================================
-  logic [1:0] IDLE = 2'd0, START = 2'd1, COMP_SIG = 2'd2;
+  localparam [1:0] IDLE = 2'd0, START = 2'd1, COMP_SIG = 2'd2;
   logic [1:0] state, next_state;
   logic [$clog2(NUM_HASHES)-1:0] counter;
   
   logic [NUM_HASHES-1:0] next_lbist_resp_msg;
   logic next_lbist_resp_val;
 
-  logic [SIGNATURE_BITS-1:0] lfsr_seeds [NUM_HASHES-1:0] = '{
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7
+  logic [SIGNATURE_BITS-1:0] lfsr_seeds [NUM_HASHES-1:0] = {
+      32'h0a89687e,
+      32'ha87ded5f,
+      32'h481c5077,
+      32'h81595729,
+      32'hffd39769,
+      32'h24b05d57,
+      32'h9913b1fd,
+      32'hd8df8ed2
     };
     
-  logic [SIGNATURE_BITS-1:0] expected_signatures [NUM_HASHES-1:0] = '{
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7
+  logic [SIGNATURE_BITS-1:0] expected_signatures [NUM_HASHES-1:0] = {
+      32'h2435b217,
+      32'hb25e4d4c,
+      32'h16307bd1,
+      32'h2ced25e0,
+      32'hc5145ccb,
+      32'h6180254b,
+      32'hc329c75c,
+      32'h89b9c2ec
     };
 
 //================================DATAPATH=====================================
   always_comb begin
     case (state)
       IDLE: begin
-        lbist_req_rdy  = 1;
-        // lbist_resp_val = 0;
-        // lbist_resp_msg = 0;
+        lbist_req_rdy       = 1;
         next_lbist_resp_val = 0;
         for (int i = 0; i < NUM_HASHES; i++) begin
           next_lbist_resp_msg[i] = 0;
         end
-
-        lfsr_resp_val  = 0;
-        lfsr_resp_msg  = 0;
-        misr_req_val   = 0;
-        misr_req_msg   = 0;
-        misr_resp_rdy  = 0;
+        lfsr_resp_val = 0;
+        lfsr_resp_msg = 0;
+        misr_req_val  = 0;
+        misr_req_msg  = 0;
+        misr_resp_rdy = 0;
       end
       START: begin
-        lbist_req_rdy  = 0;
-        // lbist_resp_val = 0;
-        // lbist_resp_msg = 0;
+        lbist_req_rdy       = 0;
         next_lbist_resp_val = 0;
         next_lbist_resp_msg = lbist_resp_msg;
-
-        lfsr_resp_val  = 1;
-        lfsr_resp_msg  = lfsr_seeds[counter];
-        misr_req_val   = 1;
-        misr_req_msg   = MAX_OUTPUTS_TO_HASH;
-        misr_resp_rdy  = 1;
+        lfsr_resp_val       = 1;
+        lfsr_resp_msg       = lfsr_seeds[counter];
+        misr_req_val        = 1;
+        misr_req_msg        = MAX_OUTPUTS_TO_HASH;
+        misr_resp_rdy       = 1;
       end
       COMP_SIG: begin
-        lbist_req_rdy           = 0;
-        // lbist_resp_val          = counter == (NUM_HASHES - 1);
-        // lbist_resp_msg[counter] = misr_resp_msg == expected_signatures[counter];
+        lbist_req_rdy       = 0;
         next_lbist_resp_val = counter == (NUM_HASHES - 1);
         for (int i = 0; i < NUM_HASHES; i++) begin
           if (i == counter) begin
@@ -114,12 +106,11 @@ module lbist_controller #(
             next_lbist_resp_msg[i] = lbist_resp_msg[i];
           end
         end
-
-        lfsr_resp_val           = 0;
-        lfsr_resp_msg           = 0;
-        misr_req_val            = 0;
-        misr_req_msg            = 0;
-        misr_resp_rdy           = 0;
+        lfsr_resp_val = 0;
+        lfsr_resp_msg = 0;
+        misr_req_val  = 0;
+        misr_req_msg  = 0;
+        misr_resp_rdy = 0;
       end
       default: begin
       end
@@ -143,7 +134,6 @@ module lbist_controller #(
         else next_state = COMP_SIG;
       end
       default: begin
-        next_state = IDLE;
       end
     endcase
   end
@@ -168,7 +158,7 @@ module lbist_controller #(
     end
   end
   
-  // lbist_resp_msg logic
+  // lbist_resp_msg and lbist_resp_val logic
   always_ff @(posedge clk) begin
     if (reset) begin
       for (int i = 0; i < NUM_HASHES; i++) begin
