@@ -128,7 +128,7 @@
 //------------------------------------------------------------------------
 
 module cmn_Reg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -145,7 +145,7 @@ endmodule
 
 module cmn_ResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -162,7 +162,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_EnReg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -180,7 +180,7 @@ endmodule
 
 module cmn_EnResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -210,7 +210,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux2 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -233,7 +233,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux3 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -258,7 +258,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux4 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -285,7 +285,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux5 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -314,7 +314,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux6 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -345,7 +345,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux7 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -378,7 +378,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux8 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -505,7 +505,7 @@ module cmn_Regfile_1r1w #(
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
 
@@ -562,7 +562,7 @@ module cmn_ResetRegfile_1r1w #(
   parameter p_reset_value = 0,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
   input logic reset,
@@ -627,7 +627,7 @@ module cmn_Regfile_2r1w #(
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
 
@@ -689,7 +689,7 @@ module cmn_Regfile_2r2w #(
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
 
@@ -894,7 +894,7 @@ endmodule
 // storage element is empty.
 
 module cmn_QueueCtrl1 #(
-  parameter p_type = `CMN_QUEUE_NORMAL
+  parameter p_type = `CMN_QUEUE_NORMAL 
 ) (
   input logic clk,
   input logic reset,
@@ -977,7 +977,7 @@ endmodule
 
 module cmn_QueueDpath1 #(
   parameter p_type      = `CMN_QUEUE_NORMAL,
-  parameter p_msg_nbits = 1
+  parameter p_msg_nbits = 1 
 ) (
   input  logic                   clk,
   input  logic                   reset,
@@ -1037,7 +1037,7 @@ module cmn_QueueCtrl #(
   parameter p_num_msgs = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_msgs)
+  parameter c_addr_nbits = $clog2(p_num_msgs) 
 ) (
   input logic clk,
   reset,
@@ -1184,7 +1184,7 @@ module cmn_QueueDpath #(
   parameter p_num_msgs  = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_msgs)
+  parameter c_addr_nbits = $clog2(p_num_msgs) 
 ) (
   input  logic                    clk,
   input  logic                    write_en,
@@ -1238,7 +1238,7 @@ module cmn_Queue #(
   parameter p_num_msgs  = 2,
 
   // parameters not meant to be set outside this module
-  parameter c_addr_nbits = $clog2(p_num_msgs)
+  parameter c_addr_nbits = $clog2(p_num_msgs) 
 ) (
   input logic clk,
   input logic reset,
@@ -1358,7 +1358,7 @@ endmodule
 
 module spi_helpers_Minion_Adapter #(
   parameter int nbits = 8,
-  parameter int num_entries = 1
+  parameter int num_entries = 1 
 ) (
   input  logic             clk,
   input  logic             reset,
@@ -1472,7 +1472,7 @@ Data cannot be inputted when `load_en` is high.
 */
 module regs_shift_Bitwise #(
   parameter int p_nbits = 8,
-  parameter bit p_reset_value = 0
+  parameter bit p_reset_value = 0 
 ) (
   input  logic               clk,      // Clock input
   input  logic               reset,    // Sync reset input
@@ -1514,7 +1514,7 @@ Synchronizer.v
 `define SPI_HELPERS_SYNCHRONIZER
 
 module spi_helpers_Synchronizer #(
-  parameter bit reset_value = 0
+  parameter bit reset_value = 0 
 ) (
   input  logic clk,
   input  logic reset,
@@ -1545,7 +1545,7 @@ endmodule
 `line 14 "spi/helpers/minion_pushpull.v" 0
 
 module spi_helpers_Minion_PushPull #(
-  parameter int nbits = 8
+  parameter int nbits = 8 
 ) (
   input  logic             clk,
   input  logic             cs,
@@ -1794,7 +1794,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux2 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -1817,7 +1817,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux3 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -1842,7 +1842,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux4 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -1869,7 +1869,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux5 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -1898,7 +1898,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux6 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -1929,7 +1929,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux7 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -1962,7 +1962,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux8 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -2132,7 +2132,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Reg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -2149,7 +2149,7 @@ endmodule
 
 module cmn_ResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -2166,7 +2166,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_EnReg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -2184,7 +2184,7 @@ endmodule
 
 module cmn_EnResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -2214,7 +2214,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux2 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -2237,7 +2237,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux3 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -2262,7 +2262,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux4 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -2289,7 +2289,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux5 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -2318,7 +2318,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux6 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -2349,7 +2349,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux7 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -2382,7 +2382,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux8 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -2509,7 +2509,7 @@ module cmn_Regfile_1r1w #(
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
 
@@ -2566,7 +2566,7 @@ module cmn_ResetRegfile_1r1w #(
   parameter p_reset_value = 0,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
   input logic reset,
@@ -2631,7 +2631,7 @@ module cmn_Regfile_2r1w #(
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
 
@@ -2693,7 +2693,7 @@ module cmn_Regfile_2r2w #(
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
 
@@ -2898,7 +2898,7 @@ endmodule
 // storage element is empty.
 
 module cmn_QueueCtrl1 #(
-  parameter p_type = `CMN_QUEUE_NORMAL
+  parameter p_type = `CMN_QUEUE_NORMAL 
 ) (
   input logic clk,
   input logic reset,
@@ -2981,7 +2981,7 @@ endmodule
 
 module cmn_QueueDpath1 #(
   parameter p_type      = `CMN_QUEUE_NORMAL,
-  parameter p_msg_nbits = 1
+  parameter p_msg_nbits = 1 
 ) (
   input  logic                   clk,
   input  logic                   reset,
@@ -3041,7 +3041,7 @@ module cmn_QueueCtrl #(
   parameter p_num_msgs = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_msgs)
+  parameter c_addr_nbits = $clog2(p_num_msgs) 
 ) (
   input logic clk,
   reset,
@@ -3188,7 +3188,7 @@ module cmn_QueueDpath #(
   parameter p_num_msgs  = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_msgs)
+  parameter c_addr_nbits = $clog2(p_num_msgs) 
 ) (
   input  logic                    clk,
   input  logic                    write_en,
@@ -3242,7 +3242,7 @@ module cmn_Queue #(
   parameter p_num_msgs  = 2,
 
   // parameters not meant to be set outside this module
-  parameter c_addr_nbits = $clog2(p_num_msgs)
+  parameter c_addr_nbits = $clog2(p_num_msgs) 
 ) (
   input logic clk,
   input logic reset,
@@ -3376,7 +3376,7 @@ endmodule
 */
 module arbiter_router_Router #(
   parameter int nbits = 32,
-  parameter int noutputs = 8
+  parameter int noutputs = 8 
 ) (
   input logic clk,
   input logic reset,
@@ -3458,42 +3458,6 @@ endmodule
 `ifndef FIXED_POINT_FFT
 `define FIXED_POINT_FFT
 
-`line 1 "fft/helpers/sine_wave.v" 0
-`ifndef fft_helpers_SINE_WAVE
-`define fft_helpers_SINE_WAVE
-`default_nettype none
-
-// Macro to generate a sine table for N evenly spaced values from 0 to 2pi.
-// Returns values in a fixedpoint format with D fractional bits and W total bits.
-module fft_helpers_SineWave #(
-  parameter int N = 8,
-  parameter int W = 32,
-  parameter int D = 16
-) (
-  output logic [W - 1:0] out[N]
-);
-  // arccos(-1) = pi
-  localparam real PI = $acos(-1);
-
-  // Checks on parameters to make sure behavior is well defined.
-  genvar i; 
-  generate
-    if (D >= 32) begin
-      $error("D must be less than 32");
-    end
-    for (i = 0; i < N; i++) begin
-      localparam real sinvalue = $sin(2 * PI * i / N);
-      /* verilator lint_off UNUSED */
-      int fixedptvalue = int'(sinvalue * 2.0 ** D);
-      /* lint_on */
-
-      assign out[i] = {{(W - D - 1) {fixedptvalue[31]}}, fixedptvalue[D:0]};
-    end
-  endgenerate
-
-endmodule
-
-`endif
 
 `line 6 "fft/pease/fft.v" 0
 `line 1 "fft/helpers/bit_reverse.v" 0
@@ -3506,7 +3470,7 @@ endmodule
 /// @param N_SAMPLES   : Number of points in the FFT
 module fft_helpers_BitReverse #(
   parameter int BIT_WIDTH = 32,
-  parameter int N_SAMPLES = 8
+  parameter int N_SAMPLES = 8 
 ) (
   input  logic [BIT_WIDTH - 1:0] in [N_SAMPLES],
   output logic [BIT_WIDTH - 1:0] out[N_SAMPLES]
@@ -3527,9 +3491,9 @@ module fft_helpers_BitReverse #(
       assign out[6] = in[3];
       assign out[7] = in[7];
     end else begin
-      for (m = 0; m < N_SAMPLES; m++) begin
+      for (m = 0; m < N_SAMPLES; m++) begin : for_3529 
         logic [n-1:0] m_rev;
-        for (i = 0; i < n; i++) begin
+        for (i = 0; i < n; i++) begin : for_3531 
           assign m_rev[n-i-1] = m[i];
         end
         assign out[m] = in[m_rev];
@@ -3574,7 +3538,7 @@ endmodule
 module fixed_point_combinational_Multiplier #(
   parameter int n = 32,  // bit width
   parameter int d = 16,  // number of decimal bits
-  parameter bit sign = 1  // 1 if signed, 0 otherwise.
+  parameter bit sign = 1  // 1 if signed 
 ) (
   input  logic [n-1:0] a,
   input  logic [n-1:0] b,
@@ -3639,7 +3603,7 @@ endmodule
  */
 module fixed_point_combinational_ComplexMultiplierS #(
   parameter int n = 32,  // bit width
-  parameter int d = 16   // number of decimal bits
+  parameter int d = 16   // number of decimal bits 
 ) (
   input  logic [n-1:0] ar,
   input  logic [n-1:0] ac,
@@ -3731,7 +3695,7 @@ endmodule
 module fixed_point_combinational_ComplexMultiplier #(
   parameter int n = 32,  // bit width
   parameter int d = 16,  // number of decimal bits
-  parameter int num_mults = 1  // number of multipliers
+  parameter int num_mults = 1  // number of multipliers 
 ) (
   input logic clk,
   input logic reset,
@@ -3906,7 +3870,7 @@ endmodule
 module fixed_point_combinational_Butterfly #(
   parameter int n = 32,
   parameter int d = 16,
-  parameter int b = 4
+  parameter int b = 4 
   // Number of inputs to rotate around
 ) (
   input logic [n-1:0] ar[b],
@@ -3932,7 +3896,7 @@ module fixed_point_combinational_Butterfly #(
 
   genvar i; 
   generate
-    for (i = 0; i < b; i++) begin
+    for (i = 0; i < b; i++) begin : for_3934 
       // complex multiplier instantiation as combinatorial
       fixed_point_combinational_ComplexMultiplierS #(
         .n(n),
@@ -3968,7 +3932,7 @@ endmodule
 /// @param WIDTH The width of each sample in the bus.
 module fft_pease_helpers_StridePermutation #(
   parameter int N_SAMPLES = 8,
-  parameter int BIT_WIDTH = 32
+  parameter int BIT_WIDTH = 32 
 ) (
   input  logic [BIT_WIDTH-1:0] recv[N_SAMPLES],
   output logic [BIT_WIDTH-1:0] send[N_SAMPLES]
@@ -3976,7 +3940,7 @@ module fft_pease_helpers_StridePermutation #(
 
   genvar i; 
   generate
-    for (i = 0; i < N_SAMPLES / 2; i++) begin
+    for (i = 0; i < N_SAMPLES / 2; i++) begin : for_3978 
       assign send[i] = recv[i*2];
       assign send[i+N_SAMPLES/2] = recv[i*2+1];
     end
@@ -3996,7 +3960,7 @@ module fft_pease_helpers_TwiddleGenerator #(
   parameter int BIT_WIDTH  = 4,
   parameter int DECIMAL_PT = 2,
   parameter int SIZE_FFT   = 8,
-  parameter int STAGE_FFT  = 0
+  parameter int STAGE_FFT  = 0 
 ) (
   input logic [BIT_WIDTH - 1:0] sine_wave_in[SIZE_FFT],  //sine_wave_in = sin(2*pi m / N)
 
@@ -4008,15 +3972,15 @@ module fft_pease_helpers_TwiddleGenerator #(
   genvar i; 
   generate
     if (STAGE_FFT == 0) begin
-      for (i = 0; i < SIZE_FFT / 2; i = i + 1) begin
+      for (i = 0; i < SIZE_FFT / 2; i = i + 1) begin : for_4010 
         assign twiddle_real[i] = {{BIT_WIDTH - DECIMAL_PT - 1{1'b0}}, 1'b1, {DECIMAL_PT{1'b0}}};
         assign twiddle_imaginary[i] = 0;
       end
-      logic unused = &sine_wave_in;
+      // logic unused = &sine_wave_in;
     end else begin
 
-      for (m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin
-        for (j = 0; j < 2 ** ($clog2(SIZE_FFT) - STAGE_FFT - 1); j = j + 1) begin
+      for (m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin : for_4017 
+        for (j = 0; j < 2 ** ($clog2(SIZE_FFT) - STAGE_FFT - 1); j = j + 1) begin : for_4018 
           localparam int stageLeft = $clog2(SIZE_FFT) - STAGE_FFT - 1;
           localparam int idx = m * (2 ** stageLeft);
           localparam int si = idx + j;
@@ -4036,7 +4000,7 @@ endmodule
 module fft_pease_FFT #(
   parameter int BIT_WIDTH  = 32,
   parameter int DECIMAL_PT = 16,
-  parameter int N_SAMPLES  = 8
+  parameter int N_SAMPLES  = 8 
 ) (
   input  logic [BIT_WIDTH - 1:0] recv_msg[N_SAMPLES],
   input  logic                   recv_val,
@@ -4092,7 +4056,7 @@ module fft_pease_FFT #(
 
   genvar i; 
   generate
-    for (i = 0; i < $clog2(N_SAMPLES); i++) begin
+    for (i = 0; i < $clog2(N_SAMPLES); i++) begin : for_4094 
       fft_pease_helpers_TwiddleGenerator #(
         .BIT_WIDTH (BIT_WIDTH),
         .DECIMAL_PT(DECIMAL_PT),
@@ -4106,13 +4070,9 @@ module fft_pease_FFT #(
     end
   endgenerate
 
-  fft_helpers_SineWave #(
-    .N(N_SAMPLES),
-    .W(BIT_WIDTH),
-    .D(DECIMAL_PT)
-  ) sine_wave (
-    .out(sine_wave_out)
-  );
+  fft_helpers_sine_wave_lookup_160832 sine_wave ( 
+    .sine_wave_out (sine_wave_out) 
+  ); 
 
 
   logic [BIT_WIDTH - 1:0] ar[N_SAMPLES/2];
@@ -4125,7 +4085,7 @@ module fft_pease_FFT #(
   logic [BIT_WIDTH - 1:0] dc[N_SAMPLES/2];
 
   generate
-    for (i = 0; i < N_SAMPLES / 2; i++) begin
+    for (i = 0; i < N_SAMPLES / 2; i++) begin : for_4127 
       assign ar[i] = in_butterfly[i*2][BIT_WIDTH-1:0];
       assign ac[i] = in_butterfly[i*2][2*BIT_WIDTH-1:BIT_WIDTH];
       assign br[i] = in_butterfly[i*2+1][BIT_WIDTH-1:0];
@@ -4138,7 +4098,7 @@ module fft_pease_FFT #(
   endgenerate
 
   generate
-    for (i = 0; i < N_SAMPLES; i++) begin
+    for (i = 0; i < N_SAMPLES; i++) begin : for_4140 
       assign send_msg[i] = in_butterfly[i][BIT_WIDTH-1:0];
     end
   endgenerate
@@ -4190,7 +4150,7 @@ module fft_pease_FFT #(
   end
 
   generate
-    for (i = 0; i < N_SAMPLES; i++) begin
+    for (i = 0; i < N_SAMPLES; i++) begin : for_4192 
       always_ff @(posedge clk) begin
         if (reset) begin
           in_butterfly[i] <= 0;
@@ -4296,7 +4256,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Reg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -4313,7 +4273,7 @@ endmodule
 
 module cmn_ResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -4330,7 +4290,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_EnReg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -4348,7 +4308,7 @@ endmodule
 
 module cmn_EnResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -4368,7 +4328,7 @@ endmodule
 
 module serdes_Deserializer #(
   parameter int N_SAMPLES = 8,
-  parameter int BIT_WIDTH = 32
+  parameter int BIT_WIDTH = 32 
 ) (
 
   input logic recv_val,
@@ -4425,7 +4385,7 @@ module serdes_Deserializer #(
 endmodule
 
 module DeserializerControl #(
-  parameter int N_SAMPLES = 8
+  parameter int N_SAMPLES = 8 
 ) (
   input logic recv_val,
   input logic send_rdy,
@@ -4518,7 +4478,7 @@ module DeserializerControl #(
 endmodule
 
 module Decoder #(
-  parameter int BIT_WIDTH = 3
+  parameter int BIT_WIDTH = 3 
 ) (
   input logic [BIT_WIDTH - 1:0] in,
   output logic [(1 << BIT_WIDTH) - 1:0] out
@@ -4610,7 +4570,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Reg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -4627,7 +4587,7 @@ endmodule
 
 module cmn_ResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -4644,7 +4604,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_EnReg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -4662,7 +4622,7 @@ endmodule
 
 module cmn_EnResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -4682,7 +4642,7 @@ endmodule
 
 module serdes_Serializer #(
   parameter int BIT_WIDTH = 32,
-  parameter int N_SAMPLES = 8
+  parameter int N_SAMPLES = 8 
 ) (
   input logic [BIT_WIDTH - 1:0] recv_msg[N_SAMPLES],
   input logic recv_val,
@@ -4738,7 +4698,7 @@ endmodule
 
 
 module SerializerControl #(
-  parameter int N_SAMPLES = 8
+  parameter int N_SAMPLES = 8 
 ) (
   input  logic recv_val,
   output logic recv_rdy,
@@ -4839,7 +4799,7 @@ endmodule
 
 module arbiter_router_Arbiter #(
   parameter int nbits = 32,
-  parameter int ninputs = 3,
+  parameter int ninputs = 3 
 ) (
   input logic clk,
   input logic reset,
@@ -4854,7 +4814,7 @@ module arbiter_router_Arbiter #(
   input  logic                        ostream_rdy,
   output logic [addr_nbits+nbits-1:0] ostream_msg
 );
-  localparam int addr_nbits = $clog2(ninputs)
+  localparam int addr_nbits = $clog2(ninputs); 
   logic [addr_nbits-1:0] grants_index;  // which input is granted access to send to SPI
   logic [addr_nbits-1:0] old_grants_index;
   logic [addr_nbits-1:0] encoder_out;
@@ -4896,7 +4856,7 @@ module arbiter_router_Arbiter #(
     logic [addr_nbits-1:0] encoder_outs[ninputs+1];
     /* verilator lint_on UNOPTFLAT */
     assign encoder_outs[ninputs] = 0;
-    for (i = 0; i < ninputs; i++) begin
+    for (i = 0; i < ninputs; i++) begin : for_4898 
       // if this input is valid, then it is the highest priority. Otherwise, use the result of the next index
       assign encoder_outs[i] = istream_val[i] ? i : encoder_outs[i+1];
     end
@@ -4941,7 +4901,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux2 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -4964,7 +4924,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux3 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -4989,7 +4949,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux4 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -5016,7 +4976,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux5 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -5045,7 +5005,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux6 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -5076,7 +5036,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux7 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -5109,7 +5069,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux8 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -5279,7 +5239,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Reg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -5296,7 +5256,7 @@ endmodule
 
 module cmn_ResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -5313,7 +5273,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_EnReg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -5331,7 +5291,7 @@ endmodule
 
 module cmn_EnResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -5361,7 +5321,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux2 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -5384,7 +5344,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux3 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -5409,7 +5369,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux4 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -5436,7 +5396,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux5 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -5465,7 +5425,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux6 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -5496,7 +5456,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux7 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -5529,7 +5489,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux8 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -5656,7 +5616,7 @@ module cmn_Regfile_1r1w #(
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
 
@@ -5713,7 +5673,7 @@ module cmn_ResetRegfile_1r1w #(
   parameter p_reset_value = 0,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
   input logic reset,
@@ -5778,7 +5738,7 @@ module cmn_Regfile_2r1w #(
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
 
@@ -5840,7 +5800,7 @@ module cmn_Regfile_2r2w #(
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
 
@@ -6045,7 +6005,7 @@ endmodule
 // storage element is empty.
 
 module cmn_QueueCtrl1 #(
-  parameter p_type = `CMN_QUEUE_NORMAL
+  parameter p_type = `CMN_QUEUE_NORMAL 
 ) (
   input logic clk,
   input logic reset,
@@ -6128,7 +6088,7 @@ endmodule
 
 module cmn_QueueDpath1 #(
   parameter p_type      = `CMN_QUEUE_NORMAL,
-  parameter p_msg_nbits = 1
+  parameter p_msg_nbits = 1 
 ) (
   input  logic                   clk,
   input  logic                   reset,
@@ -6188,7 +6148,7 @@ module cmn_QueueCtrl #(
   parameter p_num_msgs = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_msgs)
+  parameter c_addr_nbits = $clog2(p_num_msgs) 
 ) (
   input logic clk,
   reset,
@@ -6335,7 +6295,7 @@ module cmn_QueueDpath #(
   parameter p_num_msgs  = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_msgs)
+  parameter c_addr_nbits = $clog2(p_num_msgs) 
 ) (
   input  logic                    clk,
   input  logic                    write_en,
@@ -6389,7 +6349,7 @@ module cmn_Queue #(
   parameter p_num_msgs  = 2,
 
   // parameters not meant to be set outside this module
-  parameter c_addr_nbits = $clog2(p_num_msgs)
+  parameter c_addr_nbits = $clog2(p_num_msgs) 
 ) (
   input logic clk,
   input logic reset,
@@ -6523,7 +6483,7 @@ endmodule
 */
 module arbiter_router_Router #(
   parameter int nbits = 32,
-  parameter int noutputs = 8
+  parameter int noutputs = 8 
 ) (
   input logic clk,
   input logic reset,
@@ -6609,7 +6569,7 @@ endmodule
 module crossbars_Blocking #(
   parameter int BIT_WIDTH = 32,
   parameter int N_INPUTS = 2,
-  parameter int N_OUTPUTS = 2,
+  parameter int N_OUTPUTS = 2 
 ) (
   input  logic [BIT_WIDTH - 1:0] recv_msg[N_INPUTS],
   input  logic                   recv_val[N_INPUTS],
@@ -6626,7 +6586,7 @@ module crossbars_Blocking #(
   input  logic                           control_val,
   output logic                           control_rdy
 );
-  localparam int CONTROL_BIT_WIDTH = $clog2(N_INPUTS * N_OUTPUTS)
+  localparam int CONTROL_BIT_WIDTH = $clog2(N_INPUTS * N_OUTPUTS); 
 
   logic [CONTROL_BIT_WIDTH - 1:0] stored_control;
   logic [$clog2(N_INPUTS)  - 1:0] input_sel;
@@ -6657,7 +6617,7 @@ module crossbars_Blocking #(
   )];
 
   always_comb begin
-    for (int i = 0; i < N_OUTPUTS; i = i + 1) begin
+    for (int i = 0; i < N_OUTPUTS; i = i + 1) begin : for_6659 
       /* verilator lint_off WIDTH */
       if ((i != output_sel)) begin
         /* verilator lint_on WIDTH */
@@ -6668,7 +6628,7 @@ module crossbars_Blocking #(
         send_val[i] = recv_val[input_sel];
       end
     end
-    for (int i = 0; i < N_INPUTS; i = i + 1) begin
+    for (int i = 0; i < N_INPUTS; i = i + 1) begin : for_6670 
       /* verilator lint_off WIDTH */
       if ((i != input_sel)) begin
         /* verilator lint_on WIDTH */
@@ -6769,7 +6729,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Reg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -6786,7 +6746,7 @@ endmodule
 
 module cmn_ResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -6803,7 +6763,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_EnReg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -6821,7 +6781,7 @@ endmodule
 
 module cmn_EnResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -6848,14 +6808,14 @@ endmodule
 
 module magnitude_Magnitude #(
   parameter int BIT_WIDTH = 32,
-  parameter int N_SAMPLES = 8
+  parameter int N_SAMPLES = 8 
 ) (
   input logic signed [BIT_WIDTH - 1:0] recv_msg[N_SAMPLES],
   output logic [BIT_WIDTH - 1:0] send_msg[N_SAMPLES]
 );
   genvar i; 
   generate
-    for (i = 0; i < N_SAMPLES; i = i + 1) begin
+    for (i = 0; i < N_SAMPLES; i = i + 1) begin : for_6857 
       assign send_msg[i] = (recv_msg[i] < 0) ? -recv_msg[i] : recv_msg[i];
     end
   endgenerate
@@ -6875,7 +6835,7 @@ endmodule
 
 module highpass_Highpass #(
   parameter int BIT_WIDTH = 32,
-  parameter int N_SAMPLES = 8
+  parameter int N_SAMPLES = 8 
 ) (
   input  logic [BIT_WIDTH - 1:0] cutoff_freq,
   input  logic [BIT_WIDTH - 1:0] freq_in       [N_SAMPLES],
@@ -6884,7 +6844,7 @@ module highpass_Highpass #(
 
   genvar i; 
   generate
-    for (i = 0; i < N_SAMPLES; i = i + 1) begin
+    for (i = 0; i < N_SAMPLES; i = i + 1) begin : for_6886 
       assign filtered_valid[i] = freq_in[i] > cutoff_freq;
     end
   endgenerate
@@ -6907,7 +6867,7 @@ endmodule
 // Requires that N_SAMPLES is a power of 2
 module classifier_helpers_FrequencyBins #(
   parameter int BIT_WIDTH = 32,
-  parameter int N_SAMPLES = 16
+  parameter int N_SAMPLES = 16 
 ) (
   input  logic [BIT_WIDTH - 1:0] sampling_freq,
   output logic [BIT_WIDTH - 1:0] frequency_out[N_SAMPLES]
@@ -6917,7 +6877,6 @@ module classifier_helpers_FrequencyBins #(
 
   initial begin
     if ($pow(2, LOG2_N_SAMPLES) != N_SAMPLES) begin
-      $error("N_SAMPLES must be a power of 2");
     end
   end
 
@@ -6951,7 +6910,7 @@ endmodule
 
 module comparison_Comparison #(
   parameter int BIT_WIDTH = 32,
-  parameter int N_SAMPLES = 8
+  parameter int N_SAMPLES = 8 
 ) (
   input  logic [BIT_WIDTH - 1:0] cutoff_mag,
   input  logic                   filtered_valid[N_SAMPLES],
@@ -6962,7 +6921,7 @@ module comparison_Comparison #(
 
   genvar i; 
   generate
-    for (i = 0; i < N_SAMPLES; i = i + 1) begin
+    for (i = 0; i < N_SAMPLES; i = i + 1) begin : for_6964 
       assign compare_outs[i] = filtered_valid[i] & (mag_in[i] > cutoff_mag);
     end
   endgenerate
@@ -6980,7 +6939,7 @@ module classifier_Classifier #(
   // bit width used for frequency calculations
   // this should be large enough to handle the sampling frequency
   parameter int FREQ_BIT_WIDTH = 16,
-  parameter int N_SAMPLES = 8
+  parameter int N_SAMPLES = 8 
 ) (
   input logic clk,
   input logic reset,
@@ -7187,7 +7146,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Reg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -7204,7 +7163,7 @@ endmodule
 
 module cmn_ResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -7221,7 +7180,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_EnReg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -7239,7 +7198,7 @@ endmodule
 
 module cmn_EnResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -7342,7 +7301,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Reg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -7359,7 +7318,7 @@ endmodule
 
 module cmn_ResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -7376,7 +7335,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_EnReg #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic               clk,  // Clock input
   output logic [p_nbits-1:0] q,    // Data output
@@ -7394,7 +7353,7 @@ endmodule
 
 module cmn_EnResetReg #(
   parameter p_nbits       = 1,
-  parameter p_reset_value = 0
+  parameter p_reset_value = 0 
 ) (
   input  logic               clk,    // Clock input
   input  logic               reset,  // Sync reset input
@@ -7424,7 +7383,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux2 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -7447,7 +7406,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux3 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -7472,7 +7431,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux4 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -7499,7 +7458,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux5 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -7528,7 +7487,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux6 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -7559,7 +7518,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux7 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -7592,7 +7551,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Mux8 #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   in1,
@@ -7719,7 +7678,7 @@ module cmn_Regfile_1r1w #(
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
 
@@ -7776,7 +7735,7 @@ module cmn_ResetRegfile_1r1w #(
   parameter p_reset_value = 0,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
   input logic reset,
@@ -7841,7 +7800,7 @@ module cmn_Regfile_2r1w #(
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
 
@@ -7903,7 +7862,7 @@ module cmn_Regfile_2r2w #(
   parameter p_num_entries = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_entries)
+  parameter c_addr_nbits = $clog2(p_num_entries) 
 ) (
   input logic clk,
 
@@ -8108,7 +8067,7 @@ endmodule
 // storage element is empty.
 
 module cmn_QueueCtrl1 #(
-  parameter p_type = `CMN_QUEUE_NORMAL
+  parameter p_type = `CMN_QUEUE_NORMAL 
 ) (
   input logic clk,
   input logic reset,
@@ -8191,7 +8150,7 @@ endmodule
 
 module cmn_QueueDpath1 #(
   parameter p_type      = `CMN_QUEUE_NORMAL,
-  parameter p_msg_nbits = 1
+  parameter p_msg_nbits = 1 
 ) (
   input  logic                   clk,
   input  logic                   reset,
@@ -8251,7 +8210,7 @@ module cmn_QueueCtrl #(
   parameter p_num_msgs = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_msgs)
+  parameter c_addr_nbits = $clog2(p_num_msgs) 
 ) (
   input logic clk,
   reset,
@@ -8398,7 +8357,7 @@ module cmn_QueueDpath #(
   parameter p_num_msgs  = 2,
 
   // Local constants not meant to be set from outside the module
-  parameter c_addr_nbits = $clog2(p_num_msgs)
+  parameter c_addr_nbits = $clog2(p_num_msgs) 
 ) (
   input  logic                    clk,
   input  logic                    write_en,
@@ -8452,7 +8411,7 @@ module cmn_Queue #(
   parameter p_num_msgs  = 2,
 
   // parameters not meant to be set outside this module
-  parameter c_addr_nbits = $clog2(p_num_msgs)
+  parameter c_addr_nbits = $clog2(p_num_msgs) 
 ) (
   input logic clk,
   input logic reset,
@@ -8582,7 +8541,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Adder #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   input  logic [p_nbits-1:0] in1,
@@ -8599,7 +8558,7 @@ module cmn_Adder #(
 endmodule
 
 module cmn_SimpleAdder #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   input  logic [p_nbits-1:0] in1,
@@ -8615,7 +8574,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_Subtractor #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   input  logic [p_nbits-1:0] in1,
@@ -8632,7 +8591,7 @@ endmodule
 
 module cmn_Incrementer #(
   parameter p_nbits     = 1,
-  parameter p_inc_value = 1
+  parameter p_inc_value = 1 
 ) (
   input  logic [p_nbits-1:0] in,
   output logic [p_nbits-1:0] out
@@ -8648,7 +8607,7 @@ endmodule
 
 module cmn_ZeroExtender #(
   parameter p_in_nbits  = 1,
-  parameter p_out_nbits = 8
+  parameter p_out_nbits = 8 
 ) (
   input  logic [ p_in_nbits-1:0] in,
   output logic [p_out_nbits-1:0] out
@@ -8664,7 +8623,7 @@ endmodule
 
 module cmn_SignExtender #(
   parameter p_in_nbits  = 1,
-  parameter p_out_nbits = 8
+  parameter p_out_nbits = 8 
 ) (
   input  logic [ p_in_nbits-1:0] in,
   output logic [p_out_nbits-1:0] out
@@ -8679,7 +8638,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_ZeroComparator #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in,
   output logic               out
@@ -8694,7 +8653,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_EqComparator #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   input  logic [p_nbits-1:0] in1,
@@ -8710,7 +8669,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_LtComparator #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   input  logic [p_nbits-1:0] in1,
@@ -8726,7 +8685,7 @@ endmodule
 //------------------------------------------------------------------------
 
 module cmn_GtComparator #(
-  parameter p_nbits = 1
+  parameter p_nbits = 1 
 ) (
   input  logic [p_nbits-1:0] in0,
   input  logic [p_nbits-1:0] in1,
@@ -8743,7 +8702,7 @@ endmodule
 
 module cmn_LeftLogicalShifter #(
   parameter p_nbits       = 1,
-  parameter p_shamt_nbits = 1
+  parameter p_shamt_nbits = 1 
 ) (
   input  logic [      p_nbits-1:0] in,
   input  logic [p_shamt_nbits-1:0] shamt,
@@ -8760,7 +8719,7 @@ endmodule
 
 module cmn_RightLogicalShifter #(
   parameter p_nbits       = 1,
-  parameter p_shamt_nbits = 1
+  parameter p_shamt_nbits = 1 
 ) (
   input  logic [      p_nbits-1:0] in,
   input  logic [p_shamt_nbits-1:0] shamt,
@@ -8780,11 +8739,11 @@ module wishbone_Wishbone #(
   // parameter p_msg_nbits = 1,
   parameter int p_num_msgs = 2,
   parameter int p_num_istream = 2,
-  parameter int p_num_ostream = 2,
+  parameter int p_num_ostream = 2 
 
   // Local constants not meant to be set from outside the module
-  localparam int istream_addr_nbits = $clog2(p_num_istream),
 ) (
+  // Wishbone Slave ports (WB MI A)
   input logic clk,
   input logic reset,
   input logic wbs_stb_i,
@@ -8806,9 +8765,9 @@ module wishbone_Wishbone #(
   input  logic [31:0] ostream_data[p_num_ostream],
   output logic [31:0] istream_data[p_num_istream]
 );
-  localparam int c_addr_nbits = $clog2(p_num_msgs),
-  localparam int ostream_addr_nbits = $clog2(p_num_ostream)
-  // Wishbone Slave ports (WB MI A)
+  localparam int ostream_addr_nbits = $clog2(p_num_ostream); 
+  localparam int istream_addr_nbits = $clog2(p_num_istream); 
+  localparam int c_addr_nbits = $clog2(p_num_msgs); 
   /////////////////
   // address decoder
   //////////////////
@@ -9058,7 +9017,6 @@ module tapeins_sp24_tapein2_Interconnect (
 
   generate
     if (XBAR_CTRL_BITS > DATA_BITS) begin
-      $error("XBAR_CTRL_BITS must be less than or equal to DATA_BITS");
     end
   endgenerate
 
@@ -9190,7 +9148,7 @@ module tapeins_sp24_tapein2_Interconnect (
 
   genvar i; 
   generate
-    for (i = 16; i < 32; i = i + 1) begin
+    for (i = 16; i < 32; i = i + 1) begin : for_9192 
       wire fft_msg_unused = &{1'b0, fft_send_msg[i], 1'b0};
     end
   endgenerate
@@ -9397,7 +9355,7 @@ module tapeins_sp24_tapein2_Interconnect (
   assign router_rdy[9] = arbiter_rdy[9];
   // 10+: unused
   generate
-    for (i = 10; i < ROUTER_ARBITER_SIZE; i = i + 1) begin
+    for (i = 10; i < ROUTER_ARBITER_SIZE; i = i + 1) begin : for_9399 
       assign router_rdy[i] = 1'b0;
     end
   endgenerate
@@ -9414,7 +9372,7 @@ module tapeins_sp24_tapein2_Interconnect (
   wire unused_output_xbar_msg = &{1'b0, router_msg[4][DATA_BITS-1:1], 1'b0};
   // address bits are retained by the router but we don't use them
   generate
-    for (i = 0; i <= 9; i = i + 1) begin
+    for (i = 0; i <= 9; i = i + 1) begin : for_9416 
       wire unused_router_addr = &{1'b0, router_msg[i][DATA_BITS+ADDR_BITS-1:DATA_BITS], 1'b0};
     end
   endgenerate
@@ -9445,7 +9403,7 @@ module tapeins_sp24_tapein2_Interconnect (
   assign output_xbar_send_rdy[0] = arbiter_rdy[4];
   // 5-8: unused
   generate
-    for (i = 5; i <= 8; i = i + 1) begin
+    for (i = 5; i <= 8; i = i + 1) begin : for_9447 
       assign arbiter_msg[i] = 16'b0;
       assign arbiter_val[i] = 1'b0;
     end
@@ -9454,7 +9412,7 @@ module tapeins_sp24_tapein2_Interconnect (
   // 9: loopback to arbiter
   // 10+: unused
   generate
-    for (i = 10; i < ROUTER_ARBITER_SIZE; i = i + 1) begin
+    for (i = 10; i < ROUTER_ARBITER_SIZE; i = i + 1) begin : for_9456 
       assign arbiter_msg[i] = 16'b0;
       assign arbiter_val[i] = 1'b0;
     end
@@ -9476,54 +9434,54 @@ endmodule
 // Wrapper of placeholder Interconnect_noparam
 //-----------------------------------------------------------
 
-`ifndef INTERCONNECT_NOPARAM
-`define INTERCONNECT_NOPARAM
+// `ifndef INTERCONNECT_NOPARAM
+// `define INTERCONNECT_NOPARAM
 
-module Interconnect_noparam
-(
-  output logic [1-1:0] adapter_parity ,
-  input logic [1-1:0] clk ,
-  input logic [1-1:0] cs ,
-  output logic [23-1:0] io_oeb ,
-  output logic [5-1:0] io_out ,
-  output logic [1-1:0] minion_parity ,
-  output logic [1-1:0] miso ,
-  input logic [1-1:0] mosi ,
-  input logic [1-1:0] reset ,
-  input logic [1-1:0] sclk ,
-  output logic [1-1:0] wbs_ack_o ,
-  input logic [32-1:0] wbs_adr_i ,
-  input logic [1-1:0] wbs_cyc_i ,
-  input logic [32-1:0] wbs_dat_i ,
-  output logic [32-1:0] wbs_dat_o ,
-  input logic [4-1:0] wbs_sel_i ,
-  input logic [1-1:0] wbs_stb_i ,
-  input logic [1-1:0] wbs_we_i 
-);
-  tapeins_sp24_tapein2_Interconnect
-  #(
-  ) v
-  (
-    .adapter_parity( adapter_parity ),
-    .clk( clk ),
-    .cs( cs ),
-    .io_oeb( io_oeb ),
-    .io_out( io_out ),
-    .minion_parity( minion_parity ),
-    .miso( miso ),
-    .mosi( mosi ),
-    .reset( reset ),
-    .sclk( sclk ),
-    .wbs_ack_o( wbs_ack_o ),
-    .wbs_adr_i( wbs_adr_i ),
-    .wbs_cyc_i( wbs_cyc_i ),
-    .wbs_dat_i( wbs_dat_i ),
-    .wbs_dat_o( wbs_dat_o ),
-    .wbs_sel_i( wbs_sel_i ),
-    .wbs_stb_i( wbs_stb_i ),
-    .wbs_we_i( wbs_we_i )
-  );
-endmodule
+// module Interconnect_noparam
+// (
+//   output logic [1-1:0] adapter_parity ,
+//   input logic [1-1:0] clk ,
+//   input logic [1-1:0] cs ,
+//   output logic [23-1:0] io_oeb ,
+//   output logic [5-1:0] io_out ,
+//   output logic [1-1:0] minion_parity ,
+//   output logic [1-1:0] miso ,
+//   input logic [1-1:0] mosi ,
+//   input logic [1-1:0] reset ,
+//   input logic [1-1:0] sclk ,
+//   output logic [1-1:0] wbs_ack_o ,
+//   input logic [32-1:0] wbs_adr_i ,
+//   input logic [1-1:0] wbs_cyc_i ,
+//   input logic [32-1:0] wbs_dat_i ,
+//   output logic [32-1:0] wbs_dat_o ,
+//   input logic [4-1:0] wbs_sel_i ,
+//   input logic [1-1:0] wbs_stb_i ,
+//   input logic [1-1:0] wbs_we_i 
+// );
+//   tapeins_sp24_tapein2_Interconnect
+//   #(
+//   ) v
+//   (
+//     .adapter_parity( adapter_parity ),
+//     .clk( clk ),
+//     .cs( cs ),
+//     .io_oeb( io_oeb ),
+//     .io_out( io_out ),
+//     .minion_parity( minion_parity ),
+//     .miso( miso ),
+//     .mosi( mosi ),
+//     .reset( reset ),
+//     .sclk( sclk ),
+//     .wbs_ack_o( wbs_ack_o ),
+//     .wbs_adr_i( wbs_adr_i ),
+//     .wbs_cyc_i( wbs_cyc_i ),
+//     .wbs_dat_i( wbs_dat_i ),
+//     .wbs_dat_o( wbs_dat_o ),
+//     .wbs_sel_i( wbs_sel_i ),
+//     .wbs_stb_i( wbs_stb_i ),
+//     .wbs_we_i( wbs_we_i )
+//   );
+// endmodule
 
-`endif /* INTERCONNECT_NOPARAM */
+// `endif /* INTERCONNECT_NOPARAM */
 

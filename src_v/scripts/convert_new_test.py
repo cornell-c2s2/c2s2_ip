@@ -1,201 +1,174 @@
 import convert_new
 import numpy as np
 
-module = """/*
-  * Module: Router
-  *
-  * Functionality: The router takes in an n-bit long message, and uses the first log2(number of outputs) of the input
-  * to determine which receiving port receives a high valid bit. All receiving ports receive the input but not a 
-  * corresponding high valid bit. The block itself outputs a low ready bit if its internal queue is full;
-  * otherwise the ready bit is high.
-  * 
-  * NOTE: Address bits are not truncated from the input message.
-  *
-  * Dependencies: muxes.v, demuxes.v, queues.v
-  * @param nbits: number of total bits in the message (includes address bits)
-  * @param noutputs: number of output ports
-*/
-module arbiter_router_Router #(
-  parameter int nbits = 32,
-  parameter int noutputs = 8
+module = """module wishbone_Wishbone #(
+  // parameter p_msg_nbits = 1,
+  parameter int p_num_msgs = 2,
+  parameter int p_num_istream = 2,
+  parameter int p_num_ostream = 2,
+
+  // Local constants not meant to be set from outside the module
+  localparam int c_addr_nbits = $clog2(p_num_msgs),
+  localparam int istream_addr_nbits = $clog2(p_num_istream),
+  localparam int ostream_addr_nbits = $clog2(p_num_ostream)
 ) (
+  // Wishbone Slave ports (WB MI A)
   input logic clk,
   input logic reset,
+  input logic wbs_stb_i,
+  input logic wbs_cyc_i,
+  input logic wbs_we_i,
+  input logic [3:0] wbs_sel_i,
+  input logic [31:0] wbs_dat_i,
+  input logic [31:0] wbs_adr_i,
+  output logic wbs_ack_o,
+  output logic [31:0] wbs_dat_o,
 
-  // In stream
-  input  logic             istream_val,
-  input  logic [nbits-1:0] istream_msg,
-  output logic             istream_rdy,
+  // Ports to connect to modules
+  input  logic istream_rdy[p_num_istream],
+  output logic istream_val[p_num_istream],
 
-  // Out stream
-  output logic             ostream_val[noutputs],
-  output logic [nbits-1:0] ostream_msg[noutputs],
-  input  logic             ostream_rdy[noutputs]
+  output logic ostream_rdy[p_num_ostream],
+  input  logic ostream_val[p_num_ostream],
+
+  input  logic [31:0] ostream_data[p_num_ostream],
+  output logic [31:0] istream_data[p_num_istream]
 );
-  // Number of address bits
-  localparam int n_addr_bits = $clog2(noutputs);
+  /////////////////
+  // address decoder
+  //////////////////
+  localparam int ISTREAM_BASE = 32'h3000_0000;  // istream base address
+  localparam int OSTREAM_BASE = ISTREAM_BASE + p_num_istream * 8;  // ostream base address
 
-  logic [n_addr_bits-1:0] select;
-  logic [      nbits-1:0] payload_msg;
-  logic                   payload_val;
-  logic                   payload_rdy;
+  logic transaction_val;
+  assign transaction_val = wbs_stb_i && wbs_cyc_i;
 
-  assign select = payload_msg[nbits-1 : nbits-n_addr_bits];
-
-  // not used, assigned to the unused net below
-  logic [$clog2(3):0] num_free_entries;
-
-  cmn_Queue #(
-    .p_msg_nbits(nbits),
-    .p_num_msgs (3)
-  ) queue_inst (
-    .clk             (clk),
-    .reset           (reset),
-    .enq_val         (istream_val),
-    .enq_rdy         (istream_rdy),
-    .enq_msg         (istream_msg),
-    .deq_val         (payload_val),
-    .deq_rdy         (payload_rdy),
-    .deq_msg         (payload_msg),
-    .num_free_entries(num_free_entries)
+  logic [31:0] adr_sub;
+  cmn_Subtractor #(32) ostream_addr_sub (
+    .in0(wbs_adr_i),
+    .in1(OSTREAM_BASE),
+    .out(adr_sub)
   );
 
-  // Ready bit
-  cmn_MuxN #(
-    .nbits  (1),
-    .ninputs(noutputs)
-  ) mux_inst (
-    .in (ostream_rdy),
-    .sel(select),
-    .out(payload_rdy)
-  );
+  logic is_check_istream;
+  assign is_check_istream = (wbs_adr_i >= ISTREAM_BASE)
+    && (wbs_adr_i < OSTREAM_BASE)
+    && (wbs_adr_i[2:0] == 3'b0)
+    && transaction_val && !wbs_we_i;
+  logic [istream_addr_nbits-1:0] istream_check_ind;
 
-  // Valid bit
-  cmn_DemuxN #(
-    .nbits   (1),
-    .noutputs(noutputs)
-  ) demux_inst (
-    .in (payload_val),
-    .sel(select),
-    .out(ostream_val)
-  );
+  logic is_write_istream;
+  assign is_write_istream = (wbs_adr_i >= ISTREAM_BASE)
+    && (wbs_adr_i < OSTREAM_BASE)
+    && (wbs_adr_i[2:0] == 3'd4)
+    && transaction_val && wbs_we_i;
+  logic [istream_addr_nbits-1:0] istream_write_ind;
+
+  logic is_check_ostream;
+  assign is_check_ostream = (wbs_adr_i >= OSTREAM_BASE)
+    && (wbs_adr_i[2:0] == 3'b0)
+    && transaction_val
+    && !wbs_we_i;
+  logic [ostream_addr_nbits-1:0] ostream_check_ind;
+
+  logic is_read_ostream;
+  assign is_read_ostream = (wbs_adr_i >= OSTREAM_BASE)
+    && (wbs_adr_i[2:0] == 3'd4)
+    && transaction_val
+    && !wbs_we_i;
+  logic [ostream_addr_nbits-1:0] ostream_read_ind;
+
+  assign istream_check_ind = wbs_adr_i[istream_addr_nbits-1+3:3];
+  assign istream_write_ind = wbs_adr_i[istream_addr_nbits-1+3:3];
+  assign ostream_check_ind = adr_sub[ostream_addr_nbits-1+3:3];
+  assign ostream_read_ind  = adr_sub[ostream_addr_nbits-1+3:3];
+
+  /////////////////
+  // istream queue
+  //////////////////
+
+  logic istream_enq_val[p_num_istream];
+  logic istream_enq_rdy[p_num_istream];
+  logic [31:0] istream_enq_msg[p_num_istream];
 
   generate
-    for (genvar i = 0; i < noutputs; i = i + 1) begin : output_gen
-      assign ostream_msg[i] = payload_msg;
+    for (genvar i = 0; i < p_num_istream; i++) begin : g_istream_enq_gen
+      assign istream_enq_val[i] = (is_write_istream && (istream_write_ind == i)) ? 1'b1 : 1'b0;
+      assign istream_enq_msg[i] = (is_write_istream && (istream_write_ind == i)) ? wbs_dat_i : 32'b0;
     end
   endgenerate
 
-  /* verilator lint_off UNUSED */
-  logic unused = &{1'b0, num_free_entries, 1'b0};
-  /* verilator lint_on UNUSED */
-endmodule
+
+  generate
+    for (genvar n = 0; n < p_num_istream; n = n + 1) begin : g_istream_queue_gen
+      cmn_Queue #(`CMN_QUEUE_NORMAL, 32, p_num_msgs) istream_queue (
+        .clk(clk),
+        .reset(reset),
+        .enq_val(istream_enq_val[n]),
+        .enq_rdy(istream_enq_rdy[n]),
+        .enq_msg(istream_enq_msg[n]),
+        .deq_val(istream_val[n]),
+        .deq_rdy(istream_rdy[n]),
+        .deq_msg(istream_data[n]),
+        /* verilator lint_off PINCONNECTEMPTY */
+        .num_free_entries()
+        /* verilator lint_on PINCONNECTEMPTY */
+      );
+    end
+  endgenerate
+
+  //////////////////
+  // ostream queue
+  //////////////////
+
+  logic [p_num_ostream-1:0] ostream_deq_val;
+  logic [p_num_ostream-1:0] ostream_deq_rdy;
+  logic [31:0] ostream_deq_msg[p_num_ostream];
+
+  generate
+    for (genvar i = 0; i < p_num_ostream; i++) begin : g_ostream_enq_gen
+      assign ostream_deq_rdy[i] = (is_read_ostream && (ostream_read_ind == i)) ? 1'b1 : 1'b0;
+    end
+  endgenerate
+
+  generate
+    for (genvar m = 0; m < p_num_ostream; m = m + 1) begin : g_ostream_queue_gen
+      cmn_Queue #(`CMN_QUEUE_NORMAL, 32, p_num_msgs) ostream_queue (
+        .clk(clk),
+        .reset(reset),
+        .enq_val(ostream_val[m]),
+        .enq_rdy(ostream_rdy[m]),
+        .enq_msg(ostream_data[m]),
+        .deq_val(ostream_deq_val[m]),
+        .deq_rdy(ostream_deq_rdy[m]),
+        .deq_msg(ostream_deq_msg[m]),
+        /* verilator lint_off PINCONNECTEMPTY */
+        .num_free_entries()
+        /* verilator lint_on PINCONNECTEMPTY */
+      );
+    end
+  endgenerate
 
 
-/*
-  ==========================================================================
-  Arbitrator module
-  ==========================================================================
-  This module is used to pick which component gets to output to the val/rdy
-  SPI wrapper if multiple components can send a valid message.
-  The arbitrator puts an address header on the outgoing packet so that
-  downstream components can tell which component sent the response
-  The nbits parameter is the length of the message.
-  
-  The num_inputs parameter is the number of input components that the
-  Arbitrator is selecting from.
-  NOTE: MUST be >= 2
-
-  Original Author  : Dilan Lakhani
-  Date             : Dec 19, 2021
-*/
-
-module arbiter_router_Arbiter #(
-  parameter int nbits = 32,
-  parameter int ninputs = 3,
-  localparam int addr_nbits = $clog2(ninputs)
-) (
-  input logic clk,
-  input logic reset,
-
-  // Receive Interface - need recv signals for each component connected to arbitrator
-  input  logic             istream_val[ninputs],
-  output logic             istream_rdy[ninputs],
-  input  logic [nbits-1:0] istream_msg[ninputs],
-
-  // Send Interface
-  output logic                        ostream_val,
-  input  logic                        ostream_rdy,
-  output logic [addr_nbits+nbits-1:0] ostream_msg
-);
-  logic [addr_nbits-1:0] grants_index;  // which input is granted access to send to SPI
-  logic [addr_nbits-1:0] old_grants_index;
-  logic [addr_nbits-1:0] encoder_out;
-  logic [     nbits-1:0] ostream_msg_data;
-  logic [addr_nbits-1:0] ostream_msg_addr;
-
-  assign ostream_msg_data = istream_msg[grants_index];
-  assign ostream_msg_addr = grants_index;
-  assign ostream_val = istream_val[grants_index] & istream_rdy[grants_index];
-  assign ostream_msg = {
-    ostream_msg_addr, ostream_msg_data
-  };  // append component address to the beginning of the message  
-
-
+  //////////////
+  // set outputs
+  /////////////
   always_comb begin
-    // change grants_index if the last cycle's grant index is 0
-    // (that component has finished sending its message)
-    if (!istream_val[old_grants_index]) begin
-      grants_index = encoder_out;
-    end else begin
-      grants_index = old_grants_index;
-    end
+    if (is_check_istream) wbs_dat_o = {31'b0, istream_enq_rdy[istream_check_ind]};
+    else if (is_check_ostream) wbs_dat_o = {31'b0, ostream_deq_val[ostream_check_ind]};
+    else if (is_read_ostream) wbs_dat_o = ostream_deq_msg[ostream_read_ind];
+    else wbs_dat_o = 32'b0;
   end
 
-  generate
-    for (genvar i = 0; i < ninputs; i++) begin : input_assign
-      // Only tell one input that the arbitrator is ready for it
-      assign istream_rdy[i] = (grants_index == i[addr_nbits-1:0]) ? ostream_rdy : 1'b0;
-    end
-  endgenerate
 
-  generate
-    // hooks up a chain of muxes to create a
-    // priority encoder that gives highest priority to the LSB and lowest to MSB
-    // Disable unoptflat because there isn't actually circular logic as different
-    // indices are accessed each time
-    /* verilator lint_off UNOPTFLAT */
-    logic [addr_nbits-1:0] encoder_outs[ninputs+1];
-    /* verilator lint_on UNOPTFLAT */
-    assign encoder_outs[ninputs] = 0;
-    for (genvar i = 0; i < ninputs; i++) begin
-      // if this input is valid, then it is the highest priority. Otherwise, use the result of the next index
-      assign encoder_outs[i] = istream_val[i] ? i : encoder_outs[i+1];
-    end
-    assign encoder_out = encoder_outs[0];
-  endgenerate
+  assign wbs_ack_o = 1'b1;
 
-  /*
-    One issue arises with having multiple Disassemblers.
-    Since the SPI width is normally less than the size of a response,
-    a PacketDisassembler component needs multiple cycles to fully send a message to the arbitrator.
-    Thus, we do not want to change which Disassembler is allowed to send to the Arbitrator
-    in the middle of a message. Fix this by holding a trailing value of the grants_index.
-    We need to be able to check the req_val of the old grants_index to make sure that it
-    is not 1, then we can allow a different Disassembler to send a message.
-  */
 
-  always_ff @(posedge clk) begin
-    if (reset) begin
-      old_grants_index <= 0;
-    end else begin
-      old_grants_index <= grants_index;
-    end
-  end
-
+  // Unused Net
+  logic unused = &{1'b0, wbs_sel_i, adr_sub, 1'b0};
 endmodule"""
 
 module_content = module.split('\n')
-module_content = convert_new.extract_module(module_content)
+module_content = convert_new.clean_localparams_from_module(module_content)
 print("\n".join(module_content))
 

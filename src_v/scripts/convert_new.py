@@ -5,8 +5,6 @@ import re
 import sys
 from typing import List, Callable
 
-# scan through the file and look for delimiter module and endmodule
-
 """
 Given the "begin" and "end" declarations of a block, finds all 
 blocks in the content and apply the block_func to the block and 
@@ -39,6 +37,32 @@ def apply_block_func(content : List[str], begin : str, end : str,
             inside_block = False
 
     return output_content
+
+"""
+Remove lines that starts at the first occurance of [begin] and ends at 
+the first occurance of [end]
+"""
+def remove_block(content : List[str], begin : str, end : str):
+    output_content = []
+    inside_block = False
+
+    for line in content:
+        if begin in line:
+            inside_block = True
+            
+        # Capture lines within the module
+        if not inside_block:
+            output_content.append(line)
+
+        # Look for the end of the module
+        if end in content and inside_block:
+            inside_block = False
+
+    return output_content
+
+#------------------------------------------------------------------------
+# Generate Blocks
+#------------------------------------------------------------------------
 
 """
 Cleans up generate blocks.
@@ -81,7 +105,7 @@ remove all but the first declaration.
 
 Returns the modified module content.
 """
-def remove_duplicate_genvars(content : List[str]):
+def remove_duplicate_genvars_from_module(content : List[str]):
     result = content
 
     # keeps track of a list of genvar declarations indices
@@ -103,28 +127,46 @@ def remove_duplicate_genvars(content : List[str]):
 
     return result
 
-
 """
 Removes problems with generate statement in the module.
 
 Given a module, moves all genvar declarations before
 generate statement, and removes uncecessary generate statements.
 """
-def clean_generates(content : List[str]): 
+def clean_generates_from_module(content : List[str]): 
     # find all generate blocks
     output_content = content
 
     output_content = apply_block_func(output_content, "generate", "endgenerate", [clean_generate_block])
 
-    output_content = apply_block_func(output_content, "module", "endmodule", [remove_duplicate_genvars])
+    output_content = apply_block_func(output_content, "module", "endmodule", [remove_duplicate_genvars_from_module])
     return output_content
+
+"""
+Add for loop names to all for loops in the content
+"""
+def add_for_loop_names(content : List[str]):
+    result = content
+
+    for idx in range(len(result)):
+        line = result[idx]
+        if ("for" in line) and ("begin" in line) and (":" not in line):
+            print(f"Found for loop #{idx}")
+            line = line[:-1] + f" : for_{idx} \n"
+            result[idx] = line
+    
+    return result
+
+#------------------------------------------------------------------------
+# Local Params
+#------------------------------------------------------------------------
 
 """
 Removes problems with localparam in the module.
 
 Given a module, moves all localparams to the top of the module.
 """
-def clean_localparams(content : List[str]):
+def clean_localparams_from_module(content : List[str]):
     result = content
     param_end = []
     header_end = []
@@ -149,7 +191,6 @@ def clean_localparams(content : List[str]):
     # Find the end of the module header declaration
     for idx in range(len(result)):
         # end of module header declaration must succeed the end of input/output declaration
-        # print(re.match(r'\s*\);\s*', result[idx]))
         if (re.match(r'\s*\);\s*', result[idx]) and 
             any(re.match(r'\s*input\s*', result[i]) or 
                 re.match(r'\s*output\s*', result[i]) for i in range(idx))):
@@ -159,17 +200,130 @@ def clean_localparams(content : List[str]):
     # check I only have one module header declaration    
     if len(header_end) != 1:
         raise Exception("Module header declaration not closed")
-    
+
     # Find local param declaration
     localparams = []
     for idx in range(param_end[0]):
         if re.match(r'\s*localparam\s+', result[idx]):
             localparams.append(idx)
     
-    for idx in localparams:
-        result.insert(header_end[0], result.pop(idx))
+    for idx in localparams[::-1]:
+        if "," in result[idx]:
+            comma_idx = result[idx].find(",")
+            print(f"Found comma in localparam: {result[idx][:comma_idx]}")
+            result.insert(header_end[0], result.pop(idx)[:comma_idx]+"; \n")
+        else:
+            result.insert(header_end[0], result.pop(idx)[:-1]+"; \n")
+
+    # Parse the parameter declaration,
+    # Fine the last parameter declaration
+    # remove the comma
+    param_idx = []
+    for idx in range(param_end[0]):
+        if re.match(r'\s*parameter\s+', result[idx]):
+            param_idx.append(idx)
+    
+    if param_idx != []:
+        comma_idx = result[param_idx[-1]].find(",")
+        result[param_idx[-1]] = result[param_idx[-1]][:comma_idx] + " \n"
 
     return result
+
+#------------------------------------------------------------------------
+# SystemVerilog function calls
+#------------------------------------------------------------------------
+
+"""
+Clean $<func> statements from module by removing them
+"""
+def remove_func_calls_from_module(content : List[str], func_name : str):
+    result = content
+
+    for idx in range(len(result)):
+        line = result[idx]
+        func_call = re.match(fr'\s*\${func_name}\s*', line)
+        if func_call:
+            result.pop(idx)
+    
+    return result
+
+"""
+Replaces [fft_helpers_SineWave] with [sine_wave_lookup] in any content.
+If [fft_helpers_SineWave] does not exist, return the content as is.
+
+The function reads the lookup file and replaces the sine calls with the
+sine_wave_lookup calls
+
+This function DOES NOT remove the [fft_helpers_SineWave] module declaration
+"""
+def replace_sine_with_lookup(content : List[str], lookup_file : str):
+    inside_block = False
+    result = []
+
+    # Read the lookup file
+    with open(lookup_file, "r") as file:
+        lookup_content = file.readlines()
+
+    # Get the name of the lookup table
+    lookup_module_name = re.match(r'\s*`ifndef\s+(\w+)', lookup_content[0]).group(1)
+
+    for line in content:
+        module_start = re.match(r'(\s*)fft_helpers_SineWave #\(\s*', line)
+        module_end = re.match(r'\s*\);\s*', line)
+        if module_start:
+            # Find number of spaces before the module declaration (aka tab size)
+            tab = module_start.group(1)
+            inside_block = True
+
+        if not inside_block:
+            result.append(line)
+        
+        if module_end and inside_block:
+            inside_block = False
+            result.append(f"{tab + lookup_module_name} sine_wave ( \n")
+            result.append(f"{tab * 2}.sine_wave_out (sine_wave_out) \n")
+            result.append(f"{tab}); \n")
+
+    return result
+
+"""
+Cleans the entire interconnect file with function calls
+
+Given the entire interconnect file, replace all instances of
+[fft_helpers_SineWave] with [sine_wave_lookup],
+removes fft_helpers_SineWave declaration, and
+removes all function calls [func_names]. 
+Return the modified content
+"""
+def clean_function_from_all(content : List[str]):
+    result = []
+    inside_block = False
+
+    # Mark the begin and end of fft_helpers_SineWave 
+    begin = "fft/helpers/sine_wave.v"
+    end = "endif"
+
+    for line in content:
+        if begin in line:
+            print("Found start of module")
+            inside_block = True
+            
+        # Capture lines within the module
+        if not (inside_block or "$error" in line):
+            result.append(line)
+
+        # Look for the end of the module
+        if (end in line) and inside_block:
+            print("Found end of module")
+            inside_block = False
+
+    # output_content = remove_func_calls_from_module(output_content, func_name)
+
+    return result
+
+#------------------------------------------------------------------------
+# Piece everything together
+#------------------------------------------------------------------------
 
 """
 Returns a copy of module content with everything cleaned up
@@ -177,15 +331,19 @@ Returns a copy of module content with everything cleaned up
 def extract_module(content : List[str]):
     output_content = content
 
-    output_content = apply_block_func(output_content, "module", "endmodule", [clean_localparams])
-    output_content = apply_block_func(output_content, "module", "endmodule", [clean_generates])
+    output_content = apply_block_func(output_content, "module", "endmodule", [clean_localparams_from_module])
+    output_content = apply_block_func(output_content, "module", "endmodule", [clean_generates_from_module])
+    output_content = add_for_loop_names(output_content)
+    output_content = clean_function_from_all(output_content)
+    output_content = replace_sine_with_lookup(output_content, "../helpers/sine_wave_lookup_160832.v")
 
     return output_content
 
 if __name__ == "__main__":
     filename = sys.argv[1]
-    print("hello")
-    print(filename)
+
+
+
     # Open the file
     with open(filename, "r") as file:
         content = file.readlines()
