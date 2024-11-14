@@ -40,7 +40,7 @@ async def sig_test_gen(dut, num_hashes, seeds, signatures, expected):
         assert dut.state.value == 1
 
         dut.misr_resp_val.value = 1
-        dut.misr_resp_msg = signatures[i]
+        dut.misr_resp_msg.value = signatures[i]
 
         await ClockCycles(dut.clk, 2)
         assert dut.state.value == 2
@@ -48,9 +48,9 @@ async def sig_test_gen(dut, num_hashes, seeds, signatures, expected):
         dut.misr_resp_val.value = 0
 
         await ClockCycles(dut.clk, 2)
-    assert dut.state.value == 2
 
     # assert signature match bits
+    assert dut.state.value == 2
     assert dut.lbist_resp_msg.value == expected
 
     dut.lbist_resp_rdy.value = 1
