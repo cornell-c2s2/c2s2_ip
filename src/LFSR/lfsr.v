@@ -1,5 +1,5 @@
 //Emily Lan
-//32-bit FSM, no parametrization
+//32-bit FSM
 module lfsr#(
     //Width
     parameter N = 32,
