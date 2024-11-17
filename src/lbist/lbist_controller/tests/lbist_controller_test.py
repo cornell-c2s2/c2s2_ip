@@ -46,6 +46,7 @@ async def sig_test_gen(dut, num_hashes, seeds, signatures, expected):
         assert dut.state.value == 2
 
         dut.misr_resp_val.value = 0
+        dut.misr_resp_msg.value = 0
 
         await ClockCycles(dut.clk, 2)
 
