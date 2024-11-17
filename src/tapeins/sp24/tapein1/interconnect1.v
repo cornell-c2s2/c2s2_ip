@@ -1,4 +1,3 @@
-`default_nettype none
 `ifndef INTERCONNECT1_V
 `define INTERCONNECT1_V
 
@@ -36,7 +35,7 @@ module tapeins_sp24_tapein1_Interconnect1 (
   assign io_oeb = 0;
   // gpios 0-4 require output values to be set.
   assign io_out = 0;
-  
+
   // OUTPUT XBAR
   logic [15:0] output_xbar_recv_msg[2];
   logic        output_xbar_recv_rdy[2];
