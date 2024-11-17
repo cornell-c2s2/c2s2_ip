@@ -1,9 +1,11 @@
 #Cocotb imports
 import cocotb
 import os
+import sys
 from cocotb.triggers import Timer, Edge, RisingEdge, FallingEdge, ClockCycles
 from cocotb.runner import get_runner
 from cocotb.clock import Clock
+from pathlib import Path
 
 #Util imports
 from fxpmath.objects import Fxp
@@ -80,4 +82,30 @@ async def multiplier_randomized_test(dut, n, d):
 @cocotb.test()
 async def multiplier_randomized_test_wrapper(dut):
     await multiplier_randomized_test(dut, bits, decimal)
-  
+
+def test_multiplier_runner():
+    sim = os.getenv("SIM", "verilator")
+
+    proj_path = Path(__file__).resolve().parent.parent
+
+    sources = [proj_path / "multiplier.v"]
+    includes =[proj_path / ".." / ".."]
+
+    # equivalent to setting the PYTHONPATH environment variable
+    sys.path.append(str(proj_path / "test_cocotb"))
+
+    runner = get_runner(sim)
+    runner.build(
+        verilog_sources=sources,
+        hdl_toplevel="fixed_point_iterative_Multiplier",
+        always=True,
+        includes= includes,
+        build_args=[],
+    )
+    runner.test(
+        hdl_toplevel="fixed_point_iterative_Multiplier", test_module="test_fixed_point_iterative_Multiplier", test_args=[]
+    )
+
+
+if __name__ == "__main__":
+    test_multiplier_runner()

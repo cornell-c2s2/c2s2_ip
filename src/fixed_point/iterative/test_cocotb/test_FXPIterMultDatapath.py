@@ -94,3 +94,31 @@ async def datapath_randomized_test(dut):
         overflow = A*B > 32768 or A*B < -32768
 
         assert equal(int(dut.c.value), int(C.bin(), 2)) or overflow, "C not correct" 
+
+def test_multiplier_datapath_runner():
+    sim = os.getenv("SIM", "verilator")
+
+    proj_path = Path(__file__).resolve().parent.parent
+
+    sources = [proj_path / "multiplier.v"]
+    includes =[proj_path / ".." / ".."]
+
+    # equivalent to setting the PYTHONPATH environment variable
+    sys.path.append(str(proj_path / "test_cocotb"))
+
+    runner = get_runner(sim)
+    runner.build(
+        verilog_sources=sources,
+        hdl_toplevel="FXPIterMultDatapath",
+        always=True,
+        includes= includes,
+        build_args=[],
+        waves = True
+    )
+    runner.test(
+        hdl_toplevel="FXPIterMultDatapath", test_module="test_FXPIterMultDatapath", test_args=[], waves = True
+    )
+
+
+if __name__ == "__main__":
+    test_multiplier_datapath_runner()
