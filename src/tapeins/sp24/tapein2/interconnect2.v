@@ -479,8 +479,13 @@ module tapeins_sp24_tapein2_Interconnect2 (
       wire unused_router_addr = &{1'b0, router_msg[i][DATA_BITS+ADDR_BITS-1:DATA_BITS], 1'b0};
     end
   endgenerate
+<<<<<<< HEAD
   //wire unused_router_val = &{1'b0, router_val[10:ROUTER_ARBITER_SIZE-1], 1'b0};
   //wire unused_router_msg = &{1'b0, router_msg[10:ROUTER_ARBITER_SIZE-1], 1'b0};
+=======
+  // wire unused_router_val = &{1'b0, router_val[10:ROUTER_ARBITER_SIZE-1], 1'b0};
+  // wire unused_router_msg = &{1'b0, router_msg[10:ROUTER_ARBITER_SIZE-1], 1'b0};
+>>>>>>> refs/remotes/origin/cocotb-pathfinding
 
   // 5 outputs:
   // 0: input xbar output
@@ -521,6 +526,7 @@ module tapeins_sp24_tapein2_Interconnect2 (
     end
   endgenerate
 
+<<<<<<< HEAD
   //wire unused_arbiter_rdy = &{
   //  1'b0,
   //  arbiter_rdy[1],
@@ -528,6 +534,15 @@ module tapeins_sp24_tapein2_Interconnect2 (
   //  arbiter_rdy[5:8],
   //  arbiter_rdy[10:ROUTER_ARBITER_SIZE-1],
   //  1'b0
+=======
+  // wire unused_arbiter_rdy = &{
+  //   1'b0,
+  //   arbiter_rdy[1],
+  //   arbiter_rdy[3],
+  //   arbiter_rdy[5:8],
+  //   arbiter_rdy[10:ROUTER_ARBITER_SIZE-1],
+  //   1'b0
+>>>>>>> refs/remotes/origin/cocotb-pathfinding
   // };
 
 endmodule
