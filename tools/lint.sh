@@ -30,7 +30,19 @@ while IFS= read -r -d '' line; do
 
     # Check the exit code of verilator
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Verilog compilation error(s) found in $line${RESET}"
+        echo -e "${RED}SystemVerilog compilation error(s) found in $line${RESET}"
+        has_errors=true
+    fi
+    
+    bash tools/sv2v.sh $line build > /dev/null
+    FILE=build/$(basename -- "$line")
+    iverilog -Wall -g2012 -tnull $FILE \
+        |& tee /dev/stderr \
+        | ifne false
+
+    # Check the exit code of verilator
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}IVerilog compilation error(s) found in $line${RESET}"
         has_errors=true
     fi
 done < <(find $DIR -name "*.v" -not -path "./cmn/*" -print0)
