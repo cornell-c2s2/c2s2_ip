@@ -16,7 +16,7 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 VERILOG_SOURCES = $(PWD)/../interconnect2.v
 
 #Step 2: Add all include directories referenced in the verilog source file
-COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
+COMPILE_ARGS += +incdir+$(C2S2_PATH)/src -assert svaext
 
 #Step 3: Set top level module and corresponding python test module
 TOPLEVEL = tapeins_sp24_tapein2_Interconnect2
