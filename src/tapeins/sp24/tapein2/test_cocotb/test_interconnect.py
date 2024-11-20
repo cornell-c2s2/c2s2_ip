@@ -16,11 +16,9 @@ import cocotb
 import os
 import sys
 from cocotb.triggers import Timer, Edge, RisingEdge, FallingEdge, ClockCycles
-from cocotb.types.logic_array import *
-from cocotb.types.logic import *
 from cocotb.runner import get_runner
 from cocotb.clock import Clock
-from pathlib import Path
+from cocotb.regression import TestFactory
 
 
 
@@ -195,28 +193,57 @@ async def reset_dut(dut):
     dut.reset.value = 0
     await ClockCycles(dut.clk, 1)
 
-@cocotb.test()
-async def test_loopback_inXbar(dut):
-    in_msgs, out_msgs = loopback_inXbar_msg([0xDEAD, 0xBEEF, 0xCAFE, 0xBABE])
+#Loopback tests
+msgs_values = [
+        [0xFFFF],
+        [0x0000],
+        [0x5555, 0xAAAA],
+        [0xAAAA, 0x5555],
+        [0xDEAD, 0xBEEF, 0xCAFE, 0xBABE],
+        [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0]
+]
+
+#@cocotb.test()
+async def test_loopback_inXbar(dut, msgs):
+    in_msgs, out_msgs = loopback_inXbar_msg(msgs)
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
     await run_interconnect(dut, in_msgs, out_msgs)
 
-@cocotb.test()
-async def test_loopback_clsXbar(dut):
-    in_msgs, out_msgs = loopback_clsXbar_msg([0xDEAD, 0xBEEF, 0xCAFE, 0xBABE])
+factory = TestFactory(test_loopback_inXbar)
+factory.add_option("msgs", msgs_values)
+factory.generate_tests()
+
+#@cocotb.test()
+async def test_loopback_clsXbar(dut, msgs):
+    in_msgs, out_msgs = loopback_clsXbar_msg(msgs)
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
     await run_interconnect(dut, in_msgs, out_msgs)
 
+factory = TestFactory(test_loopback_clsXbar)
+factory.add_option("msgs", msgs_values)
+factory.generate_tests()
 
-@cocotb.test()
-async def test_loopback_outXbar(dut):
-    in_msgs, out_msgs = loopback_outXbar_msg([0x0, 0x1, 0x0, 0x1])
+#@cocotb.test()
+async def test_loopback_outXbar(dut, msgs):
+    in_msgs, out_msgs = loopback_outXbar_msg(msgs)
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
     await run_interconnect(dut, in_msgs, out_msgs)
 
+msgs_values = [
+        [0x1],
+        [0x0],
+        [0x1, 0x0],
+        [0x0, 0x1],
+        [0x1, 0x0, 0x1, 0x0],
+        [0x0, 0x1, 0x0, 0x1]
+]
+
+factory = TestFactory(test_loopback_outXbar)
+factory.add_option("msgs", msgs_values)
+factory.generate_tests()
 
 # Generates input/output msgs for FFT from fixedpt inputs/outputs
 def fft_msg(inputs: list[Fixed], outputs: list[Fixed]):
@@ -255,23 +282,35 @@ def fixN(n):
 
 
 #@cocotb.test()
-async def test_fft_manual(dut):
-    in_msgs, out_msgs = fft_msg([[fixN(1) for _ in range(32)]], [[fixN(32)] + [fixN(0) for _ in range(15)]])
+async def test_fft_manual(dut, input, output):
+    in_msgs, out_msgs = fft_msg(input, output)
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
     await run_interconnect(dut, in_msgs, out_msgs)
 
+input_values = [
+    [[fixN(1) for _ in range(32)]]
+]
+
+output_values = [
+    [[fixN(32)] + [fixN(0) for _ in range(15)]]
+]
+
+factory = TestFactory(test_fft_manual)
+factory.add_option("input", input_values)
+factory.add_option("output", output_values)
+factory.generate_tests()
 
 # Randomized test for the FFT
 #@cocotb.test()
-async def test_fft_random(dut):
-    random.seed(random.random())
+async def test_fft_random(dut, input_mag, input_num, seed):
+    random.seed(random.random() + seed)
     inputs = [
         [
-            CFixed((random.uniform(-10, 10), 0), 16, 8)
+            CFixed((random.uniform(-input_mag, input_mag), 0), 16, 8)
             for i in range(32)
         ]
-        for _ in range(10)
+        for _ in range(input_num)
     ]
 
     model: FFTInterface = FFTPease(16, 8, 32)
@@ -285,7 +324,17 @@ async def test_fft_random(dut):
     await reset_dut(dut)
     await run_interconnect(dut, in_msgs, out_msgs, max_trsns=1000)
 
-#@cocotb.test()
+input_mag_values =[1, 10]
+input_num_values =[1, 10]
+seed_values = list(range(2))
+
+factory = TestFactory(test_fft_random)
+factory.add_option("input_mag", input_mag_values)
+factory.add_option("input_num", input_num_values)
+factory.add_option("seed", seed_values)
+factory.generate_tests()
+
+@cocotb.test()
 async def test_classifier_manual(dut):
     in_msgs, out_msgs = classifer_msg([[fixN(1) for _ in range(16)]], [0x0000])
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
@@ -294,7 +343,7 @@ async def test_classifier_manual(dut):
 
 
 # Composite test that combines loopback and FFT.
-#@cocotb.test()
+@cocotb.test()
 async def test_compose(dut):
     xbar_in_in_msgs, xbar_in_out_msgs = loopback_inXbar_msg([0x5555, 0xAAAA])
     fft_in_msgs, fft_out_msgs = fft_msg(
@@ -311,11 +360,11 @@ async def test_compose(dut):
 
 
 # Test the FFT -> Classifier pipeline
-@cocotb.test()
-async def test_fft_classifier_random(dut):
+#@cocotb.test()
+async def test_fft_classifier_random(dut, input_mag, input_num, cutoff_freq, cutoff_mag, sampling_freq):
     inputs = [
         [
-            CFixed((random.uniform(-10, 10), 0), 16, 8)
+            CFixed((random.uniform(-input_mag, input_mag), 0), 16, 8)
             for i in range(32)
         ]
         for _ in range(10)
@@ -327,10 +376,10 @@ async def test_fft_classifier_random(dut):
     fft_inputs = [[x.real for x in sample] for sample in inputs]
     fft_outputs = [[x.real for x in sample][:16] for sample in outputs]
 
-    cutoff_mag = Fixed(0.7, True, 16, 8)
+    cutoff_mag = Fixed(cutoff_mag, True, 16, 8)
 
     classifier_outputs = [
-        classify(x, 2000, cutoff_mag, 25000) for x in fft_outputs
+        classify(x, cutoff_freq, cutoff_mag, sampling_freq) for x in fft_outputs
     ]
 
     inputs = (
@@ -340,9 +389,9 @@ async def test_fft_classifier_random(dut):
             output_xbar_config_msg(OutXbarCfg.CLS_SPI),
         ]
         + [  # Next, configure the classifier
-            cls_config_msg(ClsCfgType.CTF_FRQ, 2000),
+            cls_config_msg(ClsCfgType.CTF_FRQ, cutoff_freq),
             cls_config_msg(ClsCfgType.CTF_MAG, int(cutoff_mag)),
-            cls_config_msg(ClsCfgType.SMP_FRQ, 25000),
+            cls_config_msg(ClsCfgType.SMP_FRQ, sampling_freq),
         ]
         + [  # Finally, send the fft inputs
             int(fixed_bits(x)) for sample in fft_inputs for x in sample
@@ -354,3 +403,17 @@ async def test_fft_classifier_random(dut):
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
     await run_interconnect(dut, inputs, outputs, max_trsns=1000)
+
+input_mag_values =[1, 10]
+input_num_values =[1, 10]
+cutoff_freq_values = [0, 2000]
+cutoff_mag_values = [0.7, 2.3]
+sampling_freq_values = [44800, 44100, 25000]
+
+factory = TestFactory(test_fft_classifier_random)
+factory.add_option("input_mag", input_mag_values)
+factory.add_option("input_num", input_num_values)
+factory.add_option("cutoff_freq", cutoff_freq_values)
+factory.add_option("cutoff_mag", cutoff_mag_values)
+factory.add_option("sampling_freq", sampling_freq_values)
+factory.generate_tests()

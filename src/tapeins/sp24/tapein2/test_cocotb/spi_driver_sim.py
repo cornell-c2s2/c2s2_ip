@@ -7,7 +7,6 @@
 # --------------------------------------------------------------
 
 #Cocotb imports
-import cocotb
 from cocotb.triggers import ClockCycles
 
 #Pymtl imports
