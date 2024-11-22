@@ -4,6 +4,19 @@ TOPLEVEL_LANG ?= verilog
 #RTL Simulator (always Synopsys VCS)
 SIM := vcs
 
+#Sets location for sim_build directory depending on if tests are run with the Makefile or with the bash script
+ifneq ($(TESTSUFFIX),)
+	TEST_DIR = work/$(TESTNAME)/$(TESTSUFFIX)
+else 
+	TEST_DIR = work/Misc/$(TESTNAME)
+endif
+
+ifneq ($(TESTNAME),)
+	SIM_BUILD = $(TEST_DIR)/sim_build
+else
+	SIM_BUILD = sim_build
+endif
+
 #Add working directory to the Python virtual environment path
 PWD=$(shell pwd)
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
@@ -55,11 +68,14 @@ clean_all:
 	rm -f waves.vcd
 	rm -rf coverage_report
 	rm -rf results.xml
+	rm -rf logs
+	rm -rf work
+	rm -rf sim_build
 	make clean
 
 #Generate a coverage report after running a simulation
 coverage_report:
-	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
+	urg -dir ./$(SIM_BUILD)/simv.vdb -format both -report ./coverage_report
 
 
 

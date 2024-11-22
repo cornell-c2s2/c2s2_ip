@@ -78,7 +78,7 @@ async def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
             print(
                 "Trsn" + pad(trsns) + ":",
                 valrdy_to_str(0, in_idx < len(in_msgs), spc, 6),
-                ">",
+               ">",
                 valrdy_to_str(retmsg[0:20], retmsg[21], 1, 6),
             )
             spc = retmsg[20]
