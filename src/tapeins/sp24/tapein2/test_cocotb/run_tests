@@ -12,10 +12,8 @@ show_help() {
 WAVES=0
 COVER=0
 DUT_NAME=""
+SOURCE=""
 SELECTED_TESTS=()
-
-#Clean the environment
-make clean
 
 # Parse command-line arguments
 while [[ "$#" -gt 0 ]]; do
@@ -46,15 +44,6 @@ while [[ "$#" -gt 0 ]]; do
                 shift
             done
             ;;
-        -dut)
-            if [[ -z "$2" || "$2" == -* ]]; then
-                echo "Error: Missing argument for -dut flag."
-                show_help
-                exit 1
-            fi
-            DUT_NAME="$2"
-            shift 2
-            ;;
         *)
             echo "Unknown option: $1"
             show_help
@@ -63,17 +52,63 @@ while [[ "$#" -gt 0 ]]; do
     esac
 done
 
-# Validate -dut flag
-if [[ -z "$DUT_NAME" ]]; then
-    echo "Error: The -dut flag is required."
+# Automatically find Verilog file and prompt the user if there are multiple
+SOURCES=$(find .. -type f -name "*.v")
+
+#Prompt user to choose the Verilog file that contains the DUT
+if [ -z "$SOURCES" ]; then
+    echo "Error: No valid Verilog files found."
     exit 1
+elif [ $(echo "$SOURCES" | wc -l) -gt 1 ]; then
+    echo "Multiple Verilog files found:"
+    echo "$SOURCES" | nl -w2 -s") "
+    
+    while true; do
+        echo -n "Please select the Verilog file that contains the DUT by number: "
+        read -r CHOICE
+
+        # Validate input
+        if [[ "$CHOICE" =~ ^[0-9]+$ ]] && [ "$CHOICE" -ge 1 ] && [ "$CHOICE" -le $(echo "$SOURCES" | wc -l) ]; then
+            SOURCE=$(echo "$SOURCES" | sed -n "${CHOICE}p")
+            break
+        else
+            echo "Invalid selection. Please choose a number between 1 and $(echo "$SOURCES" | wc -l)."
+        fi
+    done
+else
+    SOURCE="$SOURCES"
 fi
 
-echo "Detected DUT: $DUT_NAME"
+echo "Selected Verilog file: $SOURCE"
 
-# Python script to extract test names from the cocotb registry
-export PYTHONPATH=$PWD:$PYTHONPATH
-export PYTHONPATH=$C2S2_PATH:$PYTHONPATH
+#Python script to extract the names of modules in Verilog file
+DUTS=$(grep -Eo "\bmodule\s+[a-zA-Z_][a-zA-Z0-9_]*" $SOURCE | awk '{print $2}')
+
+#Prompt user to choose the DUT
+if [ -z "$DUTS" ]; then
+    echo "Error: No Verilog modules found in $SOURCE."
+    exit 1
+elif [ $(echo "$DUTS" | wc -l) -gt 1 ]; then
+    echo "Multiple Verilog modules found:"
+    echo "$DUTS" | nl -w2 -s") "
+    
+    while true; do
+        echo -n "Please select the Verilog module to use as DUT by number: "
+        read -r CHOICE
+
+        # Validate input
+        if [[ "$CHOICE" =~ ^[0-9]+$ ]] && [ "$CHOICE" -ge 1 ] && [ "$CHOICE" -le $(echo "$DUTS" | wc -l) ]; then
+            DUT_NAME=$(echo "$DUTS" | sed -n "${CHOICE}p")
+            break
+        else
+            echo "Invalid selection. Please choose a number between 1 and $(echo "$DUTS" | wc -l)."
+        fi
+    done
+else
+    DUT_NAME="$DUTS"
+fi
+
+echo "Selected DUT: $DUT_NAME"
 
 #Automatically find the name of all Python test modules in your working directory
 TEST_MODULES=$(find . -type f -name "*test*.py" ! -name "*physical*" | grep -v '__pycache__' | sed 's|^\./||' | sed 's|/|.|g' | sed 's|\.py$||')
@@ -103,6 +138,11 @@ else
 fi
 
 echo "Selected test module: $MODULE"
+
+
+# Python script to extract test names from the cocotb registry
+export PYTHONPATH=$PWD:$PYTHONPATH
+export PYTHONPATH=$C2S2_PATH:$PYTHONPATH
 
 PYTHON_SCRIPT="
 import inspect
@@ -149,6 +189,9 @@ fi
 
 echo "Found tests: $TESTS"
 
+#Clean the environment
+make clean >/dev/null
+
 START_TIME=$(date +%s)
 
 #Make the logs directory
@@ -180,15 +223,17 @@ for TEST in $TESTS; do
 
         # Run the test with a unique working directory
         echo "Running test: $TEST"
-        TOPLEVEL=$DUT_NAME MODULE=$MODULE WAVES=$WAVES COVER=$COVER WAVEFORM_DIR=$WAVEFORM_DIR TESTCASE=$TEST TESTNAME=$TEST_NAME TESTSUFFIX=$TEST_SUFFIX make -C ../../../ > ../../../$LOG_DIR/$TEST.log 2>&1
-        if [ $? -eq 0 ]; then
+        SOURCE=$SOURCE TOPLEVEL=$DUT_NAME MODULE=$MODULE WAVES=$WAVES COVER=$COVER WAVEFORM_DIR=$WAVEFORM_DIR TESTCASE=$TEST TESTNAME=$TEST_NAME TESTSUFFIX=$TEST_SUFFIX make -C ../../../ > ../../../$LOG_DIR/$TEST.log 2>&1
+
+        # Return to the original directory
+        cd - >/dev/null
+
+        # Check if the log contains a line with "PASS "
+        if grep -A 10 "TEST" $LOG_DIR/$TEST.log | grep -E "PASS " >/dev/null; then
             echo "Test $TEST PASSED"
         else
             echo "Test $TEST FAILED"
         fi
-
-        # Return to the original directory
-        cd - >/dev/null
     ) &
 done
 

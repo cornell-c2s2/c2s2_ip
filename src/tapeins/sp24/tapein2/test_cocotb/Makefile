@@ -28,13 +28,13 @@ WAVEFORM_DIR ?= $(PWD)
 
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
-#Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
-VERILOG_SOURCES = $(PWD)/../interconnect2.v
+#Adding relative path of the Verilog file that contains the top level module to VERILOG_SOURCES
+VERILOG_SOURCES ?= $(PWD)/$(SOURCE)
 
-#Step 2: Add all include directories referenced in the verilog source file
+#Step 1: Add all include directories referenced in the verilog source file
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src -assert svaext
 
-#Step 3: Set model parameters by appending them to EXTRA_ARGS (if neccessary)\
+#Step 2: Set model parameters by appending them to EXTRA_ARGS (if neccessary)\
 #Examples (from multiplier example): \
 EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.n=$N \
 EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
