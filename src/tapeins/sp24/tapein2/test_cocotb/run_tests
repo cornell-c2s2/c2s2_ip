@@ -5,7 +5,7 @@ show_help() {
     echo "Options:"
     echo "  -h, -help       Show this help message"
     echo "  -waves          Include wave data in simulation"
-    echo "  -coverage       Include coverage data in you simulation"
+    echo "  -coverage       Include coverage data in simulation"
     echo "  -t, -test       Insert specific tests in your python file you want to run by name (As listed in the test registry)"
 }
 

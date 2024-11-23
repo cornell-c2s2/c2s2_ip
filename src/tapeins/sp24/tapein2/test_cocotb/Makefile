@@ -65,7 +65,7 @@ clean::
 
 #Generate a coverage report after running a simulation
 coverage_report:
-	@urg -dir $(shell find obj_dir -type d -name "*.vdb") -merge_strict -dbname coverage_data -noreport -warn none > /dev/null
+	@urg -dir $(shell find obj_dir -type d -name "*.vdb") -merge_strict -dbname coverage_data -noreport -warn none >/dev/null
 	@urg -dir coverage_data.vdb -format both -report ./coverage
 	@rm -rf coverage_data.vdb
 
