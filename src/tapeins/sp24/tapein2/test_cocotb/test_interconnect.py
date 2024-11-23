@@ -192,6 +192,10 @@ async def reset_dut(dut):
     await ClockCycles(dut.clk, 1)
     dut.reset.value = 0
     await ClockCycles(dut.clk, 1)
+    dut.reset.value = 1
+    await ClockCycles(dut.clk, 1)
+    dut.reset.value = 0
+    await ClockCycles(dut.clk, 1)
 
 #Loopback tests
 msgs_values = [

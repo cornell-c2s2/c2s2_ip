@@ -1,12 +1,108 @@
 #!/bin/bash
+# Function to display help message
+show_help() {
+    echo "Usage: $0 [options]"
+    echo "Options:"
+    echo "  -h, -help       Show this help message"
+    echo "  -waves          Include wave data in simulation"
+    echo "  -coverage       Include coverage data in you simulation"
+    echo "  -t, -test       Insert specific tests in your python file you want to run by name (As listed in the test registry)"
+}
+
+WAVES=0
+COVER=0
+DUT_NAME=""
+SELECTED_TESTS=()
 
 #Clean the environment
-make clean_all
+make clean
+
+# Parse command-line arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -h|-help)
+            show_help
+            exit 0
+            ;;
+        -waves)
+            WAVES=1
+            echo "Waves enabled"
+            shift
+            ;;
+        -coverage)
+            COVER=1
+            echo "Coverage enabled"
+            shift
+            ;;
+        -t|-tests)
+            shift
+            if [[ $# -eq 0 || $1 == -* ]]; then
+                echo "Error: Missing arguments for -tests flag."
+                show_help
+                exit 1
+            fi
+            while [[ $# -gt 0 && $1 != -* ]]; do
+                SELECTED_TESTS+=("$1")
+                shift
+            done
+            ;;
+        -dut)
+            if [[ -z "$2" || "$2" == -* ]]; then
+                echo "Error: Missing argument for -dut flag."
+                show_help
+                exit 1
+            fi
+            DUT_NAME="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown option: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+done
+
+# Validate -dut flag
+if [[ -z "$DUT_NAME" ]]; then
+    echo "Error: The -dut flag is required."
+    exit 1
+fi
+
+echo "Detected DUT: $DUT_NAME"
 
 # Python script to extract test names from the cocotb registry
 export PYTHONPATH=$PWD:$PYTHONPATH
 export PYTHONPATH=$C2S2_PATH:$PYTHONPATH
-MODULE="test_interconnect"
+
+#Automatically find the name of all Python test modules in your working directory
+TEST_MODULES=$(find . -type f -name "*test*.py" ! -name "*physical*" | grep -v '__pycache__' | sed 's|^\./||' | sed 's|/|.|g' | sed 's|\.py$||')
+
+#Validate the test module
+if [ -z "$TEST_MODULES" ]; then
+    echo "Error: No valid test module found (containing 'test' and not 'physical')."
+    exit 1
+elif [ $(echo "$TEST_MODULES" | wc -l) -gt 1 ]; then
+    echo "Multiple test modules found:"
+    echo "$TEST_MODULES" | nl -w2 -s") "
+    
+    while true; do
+        echo -n "Please select the test module by number: "
+        read -r CHOICE
+
+        # Validate input
+        if [[ "$CHOICE" =~ ^[0-9]+$ ]] && [ "$CHOICE" -ge 1 ] && [ "$CHOICE" -le $(echo "$TEST_MODULES" | wc -l) ]; then
+            MODULE=$(echo "$TEST_MODULES" | sed -n "${CHOICE}p")
+            break
+        else
+            echo "Invalid selection. Please choose a number between 1 and $(echo "$TEST_MODULES" | wc -l)."
+        fi
+    done
+else
+    MODULE="$TEST_MODULES"
+fi
+
+echo "Selected test module: $MODULE"
 
 PYTHON_SCRIPT="
 import inspect
@@ -35,12 +131,28 @@ if [ -z "$TESTS" ]; then
     exit 1
 fi
 
+#Filter for selected tests if specified
+if [[ ${#SELECTED_TESTS[@]} -gt 0 ]]; then
+    echo "Selected tests: ${SELECTED_TESTS[@]}"
+
+    # Validate selected tests
+    for TEST in "${SELECTED_TESTS[@]}"; do
+        if [[ ! " $TESTS " =~ " $TEST " ]]; then
+            echo "Error: Invalid test specified: $TEST"
+            exit 1
+        fi
+    done
+
+    # Use only the selected tests
+    TESTS="${SELECTED_TESTS[@]}"
+fi
+
 echo "Found tests: $TESTS"
 
 START_TIME=$(date +%s)
 
 #Make the logs directory
-mkdir -p logs work
+mkdir -p obj_dir logs waves
 
 #Terminate all simulations after Ctrl+C
 trap "echo 'Terminating...'; kill 0" SIGINT SIGTERM
@@ -53,21 +165,22 @@ for TEST in $TESTS; do
             TEST_NAME=${BASH_REMATCH[1]} # Extract the part before _###
             TEST_SUFFIX=${BASH_REMATCH[2]} # Extract the ### part
         else
-            TEST_NAME="Misc" # For individual tests without _###
+            TEST_NAME="individual" # For individual tests without _###
             TEST_SUFFIX=$TEST
         fi
         
         # Create a unique directory for the test
-        TEST_DIR="work/$TEST_NAME/$TEST_SUFFIX"
-        LOG_DIR="logs/$TEST_NAME"
-        mkdir -p "$TEST_DIR" "$LOG_DIR"
+        TEST_DIR="obj_dir/$TEST_NAME/$TEST_SUFFIX"
+        LOG_DIR="logs/$TEST_NAME/$TEST_SUFFIX"
+        WAVEFORM_DIR="waves/$TEST_NAME/$TEST_SUFFIX"
+        mkdir -p "$TEST_DIR" "$LOG_DIR" "$WAVEFORM_DIR"
 
         # Change to the test's unique directory
         cd "$TEST_DIR" || exit 1
 
         # Run the test with a unique working directory
         echo "Running test: $TEST"
-        TESTCASE=$TEST TESTNAME=$TEST_NAME TESTSUFFIX=$TEST_SUFFIX make -C ../../../ > ../../../$LOG_DIR/$TEST.log 2>&1
+        TOPLEVEL=$DUT_NAME MODULE=$MODULE WAVES=$WAVES COVER=$COVER WAVEFORM_DIR=$WAVEFORM_DIR TESTCASE=$TEST TESTNAME=$TEST_NAME TESTSUFFIX=$TEST_SUFFIX make -C ../../../ > ../../../$LOG_DIR/$TEST.log 2>&1
         if [ $? -eq 0 ]; then
             echo "Test $TEST PASSED"
         else
