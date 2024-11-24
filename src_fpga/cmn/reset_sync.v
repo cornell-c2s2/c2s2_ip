@@ -9,7 +9,7 @@
 `ifndef CMN_RESET_SYNC_V
 `define CMN_RESET_SYNC_V
 
-module reset_synchronizer (
+module cmn_reset_synchronizer (
   input  logic clk,
   input  logic reset,
   output logic s_reset
