@@ -179,8 +179,6 @@ module tapeins_sp24_tapein2_Interconnect (
   localparam int XBAR_CTRL_BITS = $clog2(3 * 3);
 
   generate
-    if (XBAR_CTRL_BITS > DATA_BITS) begin
-    end
   endgenerate
 
   // INPUT XBAR
@@ -446,13 +444,13 @@ module tapeins_sp24_tapein2_Interconnect (
   assign output_xbar_recv_val[1] = wishbone_istream_val[2];
   assign wishbone_istream_rdy[2] = output_xbar_recv_rdy[1];
 
-  wire unused_wishbone_istream_bits = &{
-    1'b0,
-    wishbone_istream_data[0][31:DATA_BITS],
-    wishbone_istream_data[1][31:DATA_BITS],
-    wishbone_istream_data[2][31:1],
-    1'b0
-  };
+//   wire unused_wishbone_istream_bits = &{
+//     1'b0,
+//     wishbone_istream_data[0][31:DATA_BITS],
+//     wishbone_istream_data[1][31:DATA_BITS],
+//     wishbone_istream_data[2][31:1],
+//     1'b0
+//   };
 
   // 3 WB outputs:
   // 0: input xbar output
@@ -524,23 +522,23 @@ module tapeins_sp24_tapein2_Interconnect (
   endgenerate
 
   // config messages for the classifiers shorter than 16 bits
-  wire unused_xbar_cfg_bits = &{
-    1'b0,
-    router_msg[1][DATA_BITS-1:XBAR_CTRL_BITS],
-    router_msg[3][DATA_BITS-1:XBAR_CTRL_BITS],
-    router_msg[5][DATA_BITS-1:XBAR_CTRL_BITS],
-    1'b0
-  };
+//   wire unused_xbar_cfg_bits = &{
+//     1'b0,
+//     router_msg[1][DATA_BITS-1:XBAR_CTRL_BITS],
+//     router_msg[3][DATA_BITS-1:XBAR_CTRL_BITS],
+//     router_msg[5][DATA_BITS-1:XBAR_CTRL_BITS],
+//     1'b0
+//   };
   // output xbar inject is 1 bit wide
-  wire unused_output_xbar_msg = &{1'b0, router_msg[4][DATA_BITS-1:1], 1'b0};
+//   wire unused_output_xbar_msg = &{1'b0, router_msg[4][DATA_BITS-1:1], 1'b0};
   // address bits are retained by the router but we don't use them
   generate
     for (i = 0; i <= 9; i = i + 1) begin : for_538 
-      wire unused_router_addr = &{1'b0, router_msg[i][DATA_BITS+ADDR_BITS-1:DATA_BITS], 1'b0};
+//       wire unused_router_addr = &{1'b0, router_msg[i][DATA_BITS+ADDR_BITS-1:DATA_BITS], 1'b0};
     end
   endgenerate
-  wire unused_router_val = &{1'b0, router_val[10:ROUTER_ARBITER_SIZE-1], 1'b0};
-  wire unused_router_msg = &{1'b0, router_msg[10:ROUTER_ARBITER_SIZE-1], 1'b0};
+//   wire unused_router_val = &{1'b0, router_val[10:ROUTER_ARBITER_SIZE-1], 1'b0};
+//   wire unused_router_msg = &{1'b0, router_msg[10:ROUTER_ARBITER_SIZE-1], 1'b0};
 
   // 5 outputs:
   // 0: input xbar output
@@ -581,14 +579,14 @@ module tapeins_sp24_tapein2_Interconnect (
     end
   endgenerate
 
-  wire unused_arbiter_rdy = &{
-    1'b0,
-    arbiter_rdy[1],
-    arbiter_rdy[3],
-    arbiter_rdy[5:8],
-    arbiter_rdy[10:ROUTER_ARBITER_SIZE-1],
-    1'b0
-  };
+//   wire unused_arbiter_rdy = &{
+//     1'b0,
+//     arbiter_rdy[1],
+//     arbiter_rdy[3],
+//     arbiter_rdy[5:8],
+//     arbiter_rdy[10:ROUTER_ARBITER_SIZE-1],
+//     1'b0
+//   };
 
 endmodule
 
@@ -896,7 +894,7 @@ module cmn_QueueDpath1 #(
       );
 
     else begin
-      logic unused = &{1'b0, bypass_mux_sel, 1'b0};
+//       logic unused = &{1'b0, bypass_mux_sel, 1'b0};
       assign deq_msg = qstore;
     end
   endgenerate
@@ -1105,7 +1103,7 @@ module cmn_QueueDpath #(
       );
 
     else begin
-      logic unused = 1'b0 & bypass_mux_sel;
+//       logic unused = 1'b0 & bypass_mux_sel;
       assign deq_msg = read_data;
     end
   endgenerate
@@ -2286,7 +2284,7 @@ module arbiter_router_Router #(
   endgenerate
 
   /* verilator lint_off UNUSED */
-  logic unused = &{1'b0, num_free_entries, 1'b0};
+//   logic unused = &{1'b0, num_free_entries, 1'b0};
   /* verilator lint_on UNUSED */
 endmodule
 `endif
@@ -2499,12 +2497,6 @@ module fft_pease_FFT #(
 endmodule
 
 `endif
-`ifndef fft_helpers_SINE_WAVE
-`define fft_helpers_SINE_WAVE
-`default_nettype none
-
-// Macro to generate a sine table for N evenly spaced values from 0 to 2pi.
-// Returns values in a fixedpoint format with D fractional bits and W total bits.
 `ifndef fft_helpers_BIT_REVERSE
 `define fft_helpers_BIT_REVERSE
 `default_nettype none
@@ -2810,7 +2802,7 @@ module fixed_point_combinational_ComplexMultiplier #(
       assign recv_rdy = send_rdy;
       assign send_val = recv_val;
 
-      logic unused = &({clk, reset});
+//       logic unused = &({clk, reset});
 
       // 1 multiplier implementation, completes computations in three cycles.
     end else if (num_mults == 1) begin
@@ -2822,7 +2814,7 @@ module fixed_point_combinational_ComplexMultiplier #(
       // Intermediate results
       logic [n-1:0] mul_a, mul_b, mul_c;
 
-      logic unused = &({IDLE, MUL1, MUL2, MUL3, DONE});
+//       logic unused = &({IDLE, MUL1, MUL2, MUL3, DONE});
 
       always_ff @(posedge clk) begin
         if (reset) begin
@@ -3005,7 +2997,7 @@ module fft_pease_helpers_TwiddleGenerator #(
         assign twiddle_real[i] = {{BIT_WIDTH - DECIMAL_PT - 1{1'b0}}, 1'b1, {DECIMAL_PT{1'b0}}};
         assign twiddle_imaginary[i] = 0;
       end
-      logic unused = &sine_wave_in;
+//       logic unused = &sine_wave_in;
     end else begin
 
       for (m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin : for_3044 
@@ -3051,7 +3043,7 @@ module serdes_Deserializer #(
       assign send_val = recv_val;
       assign send_msg[0] = recv_msg;
 
-      logic unused = {1'b0, clk, reset, 1'b0};
+//       logic unused = {1'b0, clk, reset, 1'b0};
     end else begin
       logic [N_SAMPLES - 1:0] en_sel;
 
@@ -3213,7 +3205,7 @@ module serdes_Serializer #(
       assign send_val = recv_val;
       assign send_msg = recv_msg[0];
 
-      logic unused = {1'b0, clk, reset, 1'b0};
+//       logic unused = {1'b0, clk, reset, 1'b0};
     end else begin
       logic [$clog2(N_SAMPLES) - 1:0] mux_sel;
       logic reg_en;
@@ -3714,8 +3706,6 @@ module classifier_helpers_FrequencyBins #(
   localparam int LOG2_N_SAMPLES = $clog2(N_SAMPLES);
 
   initial begin
-    if ($pow(2, LOG2_N_SAMPLES) != N_SAMPLES) begin
-    end
   end
 
   // We make the sampling frequency a bit wider to avoid overflow
@@ -3729,7 +3719,7 @@ module classifier_helpers_FrequencyBins #(
       wire [LOG2_N_SAMPLES + BIT_WIDTH - 1:0] wide_freq_out = (i * wide_sampling_freq) >> (LOG2_N_SAMPLES + 1);
       assign frequency_out[i] = wide_freq_out[BIT_WIDTH-1:0];
 
-      wire unused = &{1'b0, wide_freq_out[LOG2_N_SAMPLES+BIT_WIDTH-1:BIT_WIDTH], 1'b0};
+//       wire unused = &{1'b0, wide_freq_out[LOG2_N_SAMPLES+BIT_WIDTH-1:BIT_WIDTH], 1'b0};
     end
   endgenerate
 
@@ -3941,7 +3931,7 @@ module wishbone_Wishbone #(
 
 
   // Unused Net
-  logic unused = &{1'b0, wbs_sel_i, adr_sub, 1'b0};
+//   logic unused = &{1'b0, wbs_sel_i, adr_sub, 1'b0};
 endmodule
 
 `endif  /* REG_ARRAY_V */
@@ -4189,3 +4179,4 @@ module fft_helpers_sine_wave_lookup_16_8_32
    assign sine_wave_out[30] = -98;
    assign sine_wave_out[31] = -50;
 endmodule
+`endif

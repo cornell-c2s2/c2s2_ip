@@ -352,6 +352,7 @@ Cleans the entire interconnect file with function calls
 Given the entire interconnect file, replace all instances of
 [fft_helpers_SineWave] with [sine_wave_lookup],
 removes fft_helpers_SineWave declaration, and
+removes all function calls [$pow]
 removes all function calls [$error]. 
 Return the modified content
 """
@@ -360,17 +361,29 @@ def clean_function_from_all(content : List[str], lookup_file : str):
     inside_block = False
 
     # Mark the begin and end of fft_helpers_SineWave 
-    begin = "module fft_helpers_SineWave"
+    begin = "ifndef fft_helpers_SINE_WAVE"
     end = "endif"
 
-    for line in content:
+    found_end = False
+
+    for i in range(len(content)):
+        line = content[i]
         if begin in line:
             print("Found start of module")
             inside_block = True
             
         # Capture lines within the module
-        if not (inside_block or "$error" in line):
+        if not (inside_block or ("$error" in line) or found_end):
             result.append(line)
+        
+        found_end = False
+        
+        if ("$error" in line and 
+            re.match(r"\s*if.*begin\s*$", content[i-1]) and
+            re.match(r"\s*end\s*$", content[i+1])):
+            if result[-1] == content[i-1]:
+                result.pop()
+            found_end = True
 
         # Look for the end of the module
         if (end in line) and inside_block:
@@ -384,6 +397,27 @@ def clean_function_from_all(content : List[str], lookup_file : str):
 
     # output_content = remove_func_calls_from_module(output_content, func_name)
 
+    return result
+
+"""
+Removes all unsed declarations from the module
+
+comments out every line that starts with `logic unused` or `wire unused`
+"""
+def remove_unused_declarations(content : List[str]):
+    result = content
+
+    content_ok = True
+    for idx in range(len(result)):
+        line = result[idx]
+        if re.match(r'\s*logic\s+unused\w*\s*=', line) or re.match(r'\s*wire\s+unused\w*\s*=', line):
+            content_ok = False
+        if (not content_ok):
+            result[idx] = "// " + line
+        # End of the declaration
+        if (not content_ok) and ";" in line:
+            content_ok = True
+    
     return result
 
 #------------------------------------------------------------------------
@@ -401,6 +435,7 @@ def extract_module(content : List[str], lookup_file : str):
     output_content = add_for_loop_names(output_content)
     output_content = clean_function_from_all(output_content, lookup_file)
     output_content = replace_sine_with_lookup(output_content, lookup_file)
+    output_content = remove_unused_declarations(output_content)
 
     return output_content
 

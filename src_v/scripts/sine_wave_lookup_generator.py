@@ -55,6 +55,7 @@ with open(output_filename, 'w') as f:
     for n in range(SIZE_FFT):
         f.write('   assign sine_wave_out[' + str(n) + '] = ' +\
             str(round(sin( 2 * math.pi * n / SIZE_FFT) * (2**DECIMAL_POINT))) + ';\n')
-    f.write('endmodule')
+    f.write('endmodule\n')
+    f.write('`endif\n')
 
 print(f'\nFile write was successful. Check for file at: {output_filename}\n')
