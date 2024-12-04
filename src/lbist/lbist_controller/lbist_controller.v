@@ -95,17 +95,12 @@ module lbist_controller #(
   logic [1:0] state, next_state;
   logic [$clog2(NUM_HASHES)-1:0] counter;
   
-  logic [NUM_HASHES-1:0] next_lbist_resp_msg;
-  logic next_lbist_resp_val;
-
 //================================DATAPATH=====================================
 
   always_comb begin
     case (state)
       IDLE: begin
         lbist_req_rdy  = 1;
-        lbist_resp_val = next_lbist_resp_val;
-        lbist_resp_msg = next_lbist_resp_msg;
         lfsr_resp_val  = 0;
         lfsr_resp_msg  = 0;
         misr_req_val   = 0;
@@ -114,8 +109,6 @@ module lbist_controller #(
       end
       START: begin
         lbist_req_rdy  = 0;
-        lbist_resp_val = next_lbist_resp_val;
-        lbist_resp_msg = next_lbist_resp_msg;
         lfsr_resp_val  = 1;
         lfsr_resp_msg  = LFSR_SEEDS[counter];
         misr_req_val   = 1;
@@ -124,8 +117,6 @@ module lbist_controller #(
       end
       COMP_SIG: begin
         lbist_req_rdy  = 0;
-        lbist_resp_val = next_lbist_resp_val;
-        lbist_resp_msg = next_lbist_resp_msg;
         lfsr_resp_val  = 0;
         lfsr_resp_msg  = 0;
         misr_req_val   = 0;
@@ -179,26 +170,26 @@ module lbist_controller #(
     end
   end
   
-  // next_lbist_resp_msg and next_lbist_resp_val logic
+  // lbist_resp_msg and lbist_resp_val logic
   always_ff @(posedge clk) begin
     case (state)
       IDLE: begin
-        next_lbist_resp_val <= 0;
+        lbist_resp_val <= 0;
         for (int i = 0; i < NUM_HASHES; i++) begin
-          next_lbist_resp_msg[i] <= 0;
+          lbist_resp_msg[i] <= 0;
         end
       end
       START: begin
-        next_lbist_resp_val <= 0;
-        next_lbist_resp_msg <= lbist_resp_msg;
+        lbist_resp_val <= 0;
+        lbist_resp_msg <= lbist_resp_msg;
       end
       COMP_SIG: begin
-        next_lbist_resp_val <= counter == (NUM_HASHES - 1);
+        lbist_resp_val <= counter == (NUM_HASHES - 1);
         for (int i = 0; i < NUM_HASHES; i++) begin
           if (i == counter && misr_resp_val) begin
-            next_lbist_resp_msg[i] <= misr_resp_msg == EXPECTED_SIGNATURES[i];
+            lbist_resp_msg[i] <= misr_resp_msg == EXPECTED_SIGNATURES[i];
           end else begin
-            next_lbist_resp_msg[i] <= lbist_resp_msg[i];
+            lbist_resp_msg[i] <= lbist_resp_msg[i];
           end
         end
       end
