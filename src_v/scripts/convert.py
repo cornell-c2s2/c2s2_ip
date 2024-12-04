@@ -1,9 +1,69 @@
-#!/usr/bin/bash
+#!/usr/bin/env python
+#=========================================================================
+# convert.py [options]
+#=========================================================================
+#
+#  -h --help           Display this message
+#     --vfile          The verilog file to be converted (default: src_v/build/out.v)
+#     --lookup         The lookup file to be used       (default: src_v/build/sine_wave_lookup_160832.v)
+#     --out            File to write extracted code     (default: src_v/fpga_converted.v)
+#
+# Converts the interconnect file to a format that can be used in Quartus
+#
+# Author : Anjelica Bian (adopted from Christopher Batten)
+# Date   : Nov 17, 2024
+#
 
 import os
 import re
 import sys
 from typing import List, Callable
+
+import argparse
+import os, subprocess, sys, re
+from typing import List
+
+#-------------------------------------------------------------------------
+# Command line processing
+#-------------------------------------------------------------------------
+
+class ArgumentParserWithCustomError(argparse.ArgumentParser):
+  def error( self, msg = "" ):
+    if ( msg ): print("\n ERROR: %s" % msg)
+    print("")
+    file = open( sys.argv[0] )
+    for ( lineno, line ) in enumerate( file ):
+      if ( line[0] != '#' ): sys.exit(msg != "")
+      if ( (lineno == 2) or (lineno >= 4) ): print( line[1:].rstrip("\n") )
+
+def parse_cmdline():
+  p = ArgumentParserWithCustomError( add_help=False )
+
+  p.add_argument( "-h", "--help",        action="store_true" )
+  p.add_argument(       "--vfile",       type=str,   default=os.path.join(find_top_level(), "src_v", "build", "out.v")  )
+  p.add_argument(       "--lookup",      type=str,   default=os.path.join(find_top_level(), "src_v", "build", "sine_wave_lookup_160832.v") )
+  p.add_argument(       "--out",         type=str,   default=os.path.join(find_top_level(), "src_v", "fpga_converted.v") )
+
+  opts = p.parse_args()
+  if opts.help: p.error()
+  return opts
+
+def find_top_level():
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"], 
+            capture_output=True, 
+            text=True,
+            check=True
+        )
+        return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        print("Not a Git repository")
+        return None
+    
+#-------------------------------------------------------------------------
+# Parsing functions
+#-------------------------------------------------------------------------
 
 """
 Given the "begin" and "end" declarations of a block, finds all 
@@ -151,7 +211,7 @@ def add_for_loop_names(content : List[str]):
     for idx in range(len(result)):
         line = result[idx]
         if ("for" in line) and ("begin" in line) and (":" not in line):
-            print(f"Found for loop #{idx}")
+            # print(f"Found for loop #{idx}")
             line = line[:-1] + f" : for_{idx} \n"
             result[idx] = line
     
@@ -233,19 +293,19 @@ def clean_localparams_from_module(content : List[str]):
 # SystemVerilog function calls
 #------------------------------------------------------------------------
 
-"""
-Clean $<func> statements from module by removing them
-"""
-def remove_func_calls_from_module(content : List[str], func_name : str):
-    result = content
+# """
+# Clean $<func> statements from module by removing them
+# """
+# def remove_func_calls_from_module(content : List[str], func_name : str):
+#     result = content
 
-    for idx in range(len(result)):
-        line = result[idx]
-        func_call = re.match(fr'\s*\${func_name}\s*', line)
-        if func_call:
-            result.pop(idx)
+#     for idx in range(len(result)):
+#         line = result[idx]
+#         func_call = re.match(fr'\s*\${func_name}\s*', line)
+#         if func_call:
+#             result.pop(idx)
     
-    return result
+#     return result
 
 """
 Replaces [fft_helpers_SineWave] with [sine_wave_lookup] in any content.
@@ -292,15 +352,15 @@ Cleans the entire interconnect file with function calls
 Given the entire interconnect file, replace all instances of
 [fft_helpers_SineWave] with [sine_wave_lookup],
 removes fft_helpers_SineWave declaration, and
-removes all function calls [func_names]. 
+removes all function calls [$error]. 
 Return the modified content
 """
-def clean_function_from_all(content : List[str]):
+def clean_function_from_all(content : List[str], lookup_file : str):
     result = []
     inside_block = False
 
     # Mark the begin and end of fft_helpers_SineWave 
-    begin = "fft/helpers/sine_wave.v"
+    begin = "module fft_helpers_SineWave"
     end = "endif"
 
     for line in content:
@@ -316,6 +376,11 @@ def clean_function_from_all(content : List[str]):
         if (end in line) and inside_block:
             print("Found end of module")
             inside_block = False
+    
+    with open(lookup_file, "r") as file:
+        lookup_content = file.readlines()
+
+    result = result + lookup_content
 
     # output_content = remove_func_calls_from_module(output_content, func_name)
 
@@ -328,31 +393,31 @@ def clean_function_from_all(content : List[str]):
 """
 Returns a copy of module content with everything cleaned up
 """
-def extract_module(content : List[str]):
+def extract_module(content : List[str], lookup_file : str):
     output_content = content
 
     output_content = apply_block_func(output_content, "module", "endmodule", [clean_localparams_from_module])
     output_content = apply_block_func(output_content, "module", "endmodule", [clean_generates_from_module])
     output_content = add_for_loop_names(output_content)
-    output_content = clean_function_from_all(output_content)
-    output_content = replace_sine_with_lookup(output_content, "../helpers/sine_wave_lookup_160832.v")
+    output_content = clean_function_from_all(output_content, lookup_file)
+    output_content = replace_sine_with_lookup(output_content, lookup_file)
 
     return output_content
 
+#-------------------------------------------------------------------------
+# Main
+#-------------------------------------------------------------------------
+
 if __name__ == "__main__":
-    filename = sys.argv[1]
-
-
+    opts = parse_cmdline()
 
     # Open the file
-    with open(filename, "r") as file:
+    with open(opts.vfile, "r") as file:
         content = file.readlines()
 
-    new_content = extract_module(content)
-
-    # print(new_content)
+    new_content = extract_module(content, opts.lookup)
 
     # Write the modified content to a new file
-    with open("/home/yb265/c2s2/c2s2_ip/src_v/interconnect_convered_fpga.v", "w") as file:
+    with open(opts.out, "w") as file:
         for line in new_content:
             file.write(line)

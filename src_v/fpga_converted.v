@@ -2397,7 +2397,7 @@ module fft_pease_FFT #(
     end
   endgenerate
 
-  fft_helpers_sine_wave_lookup_160832 sine_wave ( 
+  fft_helpers_sine_wave_lookup_16_8_32 sine_wave ( 
     .sine_wave_out (sine_wave_out) 
   ); 
 
@@ -2505,34 +2505,6 @@ endmodule
 
 // Macro to generate a sine table for N evenly spaced values from 0 to 2pi.
 // Returns values in a fixedpoint format with D fractional bits and W total bits.
-module fft_helpers_SineWave #(
-  parameter int N = 8,
-  parameter int W = 32,
-  parameter int D = 16 
-) (
-  output logic [W - 1:0] out[N]
-);
-  // arccos(-1) = pi
-  localparam real PI = $acos(-1);
-
-  // Checks on parameters to make sure behavior is well defined.
-  genvar i; 
-  generate
-    if (D >= 32) begin
-    end
-    for (i = 0; i < N; i++) begin : for_2528 
-      localparam real sinvalue = $sin(2 * PI * i / N);
-      /* verilator lint_off UNUSED */
-      int fixedptvalue = int'(sinvalue * 2.0 ** D);
-      /* lint_on */
-
-      assign out[i] = {{(W - D - 1) {fixedptvalue[31]}}, fixedptvalue[D:0]};
-    end
-  endgenerate
-
-endmodule
-
-`endif
 `ifndef fft_helpers_BIT_REVERSE
 `define fft_helpers_BIT_REVERSE
 `default_nettype none
@@ -4176,3 +4148,44 @@ endmodule
 
 `endif  /* CMN_ARITHMETIC_V */
 
+`ifndef  fft_helpers_sine_wave_lookup_16_8_32 
+`define  fft_helpers_sine_wave_lookup_16_8_32 
+// SINE WAVE OF BIT_WIDTH = 16, DECIMAL_PT =  8
+// FOR FFT OF SIZE = 32
+module fft_helpers_sine_wave_lookup_16_8_32 
+   (
+       output logic [16 - 1:0] sine_wave_out [0:32 - 1]
+   );
+   assign sine_wave_out[0] = 0;
+   assign sine_wave_out[1] = 50;
+   assign sine_wave_out[2] = 98;
+   assign sine_wave_out[3] = 142;
+   assign sine_wave_out[4] = 181;
+   assign sine_wave_out[5] = 213;
+   assign sine_wave_out[6] = 237;
+   assign sine_wave_out[7] = 251;
+   assign sine_wave_out[8] = 256;
+   assign sine_wave_out[9] = 251;
+   assign sine_wave_out[10] = 237;
+   assign sine_wave_out[11] = 213;
+   assign sine_wave_out[12] = 181;
+   assign sine_wave_out[13] = 142;
+   assign sine_wave_out[14] = 98;
+   assign sine_wave_out[15] = 50;
+   assign sine_wave_out[16] = 0;
+   assign sine_wave_out[17] = -50;
+   assign sine_wave_out[18] = -98;
+   assign sine_wave_out[19] = -142;
+   assign sine_wave_out[20] = -181;
+   assign sine_wave_out[21] = -213;
+   assign sine_wave_out[22] = -237;
+   assign sine_wave_out[23] = -251;
+   assign sine_wave_out[24] = -256;
+   assign sine_wave_out[25] = -251;
+   assign sine_wave_out[26] = -237;
+   assign sine_wave_out[27] = -213;
+   assign sine_wave_out[28] = -181;
+   assign sine_wave_out[29] = -142;
+   assign sine_wave_out[30] = -98;
+   assign sine_wave_out[31] = -50;
+endmodule

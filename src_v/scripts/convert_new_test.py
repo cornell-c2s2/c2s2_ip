@@ -1,4 +1,4 @@
-import convert_new
+import src_v.scripts.convert as convert
 import numpy as np
 
 module = """module wishbone_Wishbone #(
@@ -169,6 +169,6 @@ module = """module wishbone_Wishbone #(
 endmodule"""
 
 module_content = module.split('\n')
-module_content = convert_new.clean_localparams_from_module(module_content)
+module_content = convert.clean_localparams_from_module(module_content)
 print("\n".join(module_content))
 

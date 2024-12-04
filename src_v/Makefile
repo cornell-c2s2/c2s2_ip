@@ -1,42 +1,19 @@
 TOP_DIR=$(shell git rev-parse --show-toplevel)
+SRC_DIR=$(TOP_DIR)/src
 FPGA_DIR=$(TOP_DIR)/src_v
-BUILD_DIR=$(TOP_DIR)/build
-
+BUILD_DIR=$(TOP_DIR)/src_v/build
 SCRIPT_DIR=$(FPGA_DIR)/scripts
 
+interconnect_file = $(SRC_DIR)/tapeins/sp24/tapein2/interconnect_fpga.v
+
 # Make sure the pickled file exists
-pickled_file = $(BUILD_DIR)/Interconnect_Fpga_noparam__pickled.v
-
-# Temp helpers folder
-temp_dir=$(FPGA_DIR)/helpers
-
+pickled_file = $(BUILD_DIR)/Interconnect_Fpga_pickled.v
+lookup_file = $(BUILD_DIR)/sine_wave_lookup_16_8_32.v
+	
 all:
-	@echo "Converting pickled file to Verilog..."
-	@if [! test -f $(pickled_file)]; then \
-		echo "Pickled file does not exist. Run 'pytest' on interconnect_fpga first."; \
-		exit 1; \
-	fi
-	@mkdir -p $(temp_dir)
-	@python3 $(SCRIPT_DIR)/sine_wave_lookup_generator.py 16 8 32
-
-# @./scripts/convert.sh
-# # @python3 scripts/extract.py $(INTER_FPGA_FILE) $(INTER_FPGA_EX_DIR)
-
-# mostlyclean:
-# 	@echo "Cleaning temporary Verilog files in $(TEMP_DIR)..."
-# 	@find $(TEMP_DIR) -type f -name "*.v" | while read -r file; do \
-#   		rm "$$file"; \
-# 	done
-# 	@echo "Done"
-
-# clean:
-# 	@echo "Cleaning Verilog files in FPGA and TEMP directories..."
-# 	@find $(FPGA_DIR) -type f -name "*.v" | while read -r file; do \
-# 		rm "$$file"; \
-# 	done
-
-	@find $(TEMP_DIR) -type f -name "*.v" | while read -r file; do \
-		rm "$$file"; \
-	done
+	@python $(SCRIPT_DIR)/sine_wave_lookup_generator.py 16 8 32 $(lookup_file)
+	@python $(SCRIPT_DIR)/pickel.py --src $(SRC_DIR) \
+					--interconnect $(interconnect_file) --out $(pickled_file)
+	@python $(SCRIPT_DIR)/convert.py --vfile $(pickled_file) --lookup $(lookup_file)
 
 	@echo "Done"
