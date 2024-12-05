@@ -1,18 +1,23 @@
 import pytest
-from src.tapeins.sp24.tapein1.tests.spi_driver_sim import spi_write
+from src.tapeins.sp24.tapein1.test_cocotb.spi_driver_sim import spi_write
 from src.tapeins.sp24.tapein1.interconnect1 import Interconnect1
-from src.tapeins.sp24.tapein1.tests.spi_stream_protocol import *
+from src.tapeins.sp24.tapein1.test_cocotb.spi_stream_protocol import *
 from fixedpt import Fixed, CFixed
 from tools.utils import fixed_bits, mk_test_matrices
 from src.fft.tests.fft import FFTInterface, FFTPease
 import random
-from pymtl3 import *
+# from pymtl3 import *
 from pymtl3.stdlib.stream.ifcs import valrdy_to_str
-from pymtl3.stdlib.test_utils import (
-    mk_test_case_table,
-    run_sim,
-    config_model_with_cmdline_opts,
-)
+# from pymtl3.stdlib.test_utils import (
+#     mk_test_case_table,
+#     run_sim,
+#     config_model_with_cmdline_opts,
+# )
+
+import cocotb
+from cocotb.triggers import Timer, Edge, RisingEdge, FallingEdge, ClockCycles
+from cocotb.clock import Clock
+from cocotb.regression import TestFactory
 
 
 # Helper function for interconnect printouts
@@ -20,7 +25,7 @@ def pad(n: int) -> str:
     return " " * (3 - len(str(n))) + str(n)
 
 
-def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
+async def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
     """
     Run src/sink testing on the interconnect RTL model, src/sink msgs are
     converted to SPI protocol transactions. Testing is done at the transaction
@@ -53,7 +58,7 @@ def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
             assert False, "Exceeded max transactions"
 
         if in_idx < len(in_msgs) and spc == 1:
-            retmsg = spi_write(dut, write_read_msg(in_msgs[in_idx]))
+            retmsg = await spi_write(dut, write_read_msg(in_msgs[in_idx]))
             spc = retmsg[18]
             print(
                 "Trsn" + pad(trsns) + ":",
@@ -125,39 +130,70 @@ def loopback_outXbar_msg(msgs):
     new_msgs = [(0x10000 | int(x)) for x in msgs]
     return [output_xbar_config_msg(OutXbarCfg.SPI_SPI)] + new_msgs, new_msgs
 
+async def reset_dut(dut):
+    dut.reset.value = 1
+    await ClockCycles(dut.clk, 1)
+    dut.reset.value = 0
+    await ClockCycles(dut.clk, 1)
 
-@pytest.mark.parametrize(
-    "msgs",
-    [
-        [0xFFFF],
-        [0x0000],
-        [0x5555, 0xAAAA],
-        [0xAAAA, 0x5555],
-        [0xDEAD, 0xBEEF, 0xCAFE, 0xBABE],
-        [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0],
-    ],
-)
-def test_loopback_inXbar(msgs, cmdline_opts):
+msgs_values = [
+    [0xFFFF],
+    [0x0000],
+    [0x5555, 0xAAAA],
+    [0xAAAA, 0x5555],
+    [0xDEAD, 0xBEEF, 0xCAFE, 0xBABE],
+    [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0],
+]
+
+# @pytest.mark.parametrize(
+#     "msgs",
+#     [
+#         [0xFFFF],
+#         [0x0000],
+#         [0x5555, 0xAAAA],
+#         [0xAAAA, 0x5555],
+#         [0xDEAD, 0xBEEF, 0xCAFE, 0xBABE],
+#         [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0],
+#     ],
+# )
+
+# TODO: revisit cmdline_opts
+async def test_loopback_inXbar(dut, msgs, cmdline_opts=None):
     in_msgs, out_msgs = loopback_inXbar_msg(msgs)
-    dut = make_interconnect(cmdline_opts)
-    run_interconnect(dut, in_msgs, out_msgs)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_interconnect(dut, in_msgs, out_msgs)
+
+    # dut = make_interconnect(cmdline_opts)
+    # run_interconnect(dut, in_msgs, out_msgs)
+
+factory = TestFactory(test_loopback_inXbar)
+factory.add_option("msgs", msgs_values)
+factory.generate_tests()
 
 
-@pytest.mark.parametrize(
-    "msgs",
-    [
-        [0xFFFF],
-        [0x0000],
-        [0x5555, 0xAAAA],
-        [0xAAAA, 0x5555],
-        [0xDEAD, 0xBEEF, 0xCAFE, 0xBABE],
-        [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0],
-    ],
-)
-def test_loopback_outXbar(msgs, cmdline_opts):
+# @pytest.mark.parametrize(
+#     "msgs",
+#     [
+#         [0xFFFF],
+#         [0x0000],
+#         [0x5555, 0xAAAA],
+#         [0xAAAA, 0x5555],
+#         [0xDEAD, 0xBEEF, 0xCAFE, 0xBABE],
+#         [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0],
+#     ],
+# )
+async def test_loopback_outXbar(dut, msgs, cmdline_opts=None):
     in_msgs, out_msgs = loopback_outXbar_msg(msgs)
-    dut = make_interconnect(cmdline_opts)
-    run_interconnect(dut, in_msgs, out_msgs)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_interconnect(dut, in_msgs, out_msgs)
+    # dut = make_interconnect(cmdline_opts)
+    # run_interconnect(dut, in_msgs, out_msgs)
+
+factory = TestFactory(test_loopback_outXbar)
+factory.add_option("msgs", msgs_values)
+factory.generate_tests()
 
 
 # Generates input/output msgs for FFT from fixedpt inputs/outputs
@@ -180,37 +216,49 @@ def fft_msg(inputs: list[Fixed], outputs: list[Fixed]):
 def fixN(n):
     return Fixed(n, True, 16, 8)
 
+input_values = [[fixN(1) for _ in range(32)]]
+output_values = [[fixN(32)] + [fixN(0) for _ in range(31)]]
 
-@pytest.mark.parametrize(
-    "input, output",
-    [
-        ([[fixN(1) for _ in range(32)]], [[fixN(32)] + [fixN(0) for _ in range(31)]]),
-    ],
-)
-def test_fft_manual(input, output, cmdline_opts):
+# @pytest.mark.parametrize(
+#     "input, output",
+#     [
+#         ([[fixN(1) for _ in range(32)]], [[fixN(32)] + [fixN(0) for _ in range(31)]]),
+#     ],
+# )
+async def test_fft_manual(dut, input, output, cmdline_opts=None):
     in_msgs, out_msgs = fft_msg(input, output)
-    dut = make_interconnect(cmdline_opts)
-    run_interconnect(dut, in_msgs, out_msgs)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_interconnect(dut, in_msgs, out_msgs)
+    # dut = make_interconnect(cmdline_opts)
+    # run_interconnect(dut, in_msgs, out_msgs)
 
+factory = TestFactory(test_fft_manual)
+factory.add_option("input", input_values)
+factory.add_option("output", output_values)
+factory.generate_tests()
 
+input_mag_values = [1, 10]
+input_num_values = [1, 10]
+seed_values = list(range(2))
 # Randomized test for the FFT
-@pytest.mark.parametrize(
-    *mk_test_matrices(
-        {
-            "input_mag": [1, 10],  # Maximum magnitude of the input signal
-            "input_num": [1, 10],  # Number of random inputs to generate
-            "seed": list(range(2)),  # Random seed
-        }
-    )
-)
-def test_fft_random(cmdline_opts, p):
-    random.seed(random.random() + p.seed)
+# @pytest.mark.parametrize(
+#     *mk_test_matrices(
+#         {
+#             "input_mag": [1, 10],  # Maximum magnitude of the input signal
+#             "input_num": [1, 10],  # Number of random inputs to generate
+#             "seed": list(range(2)),  # Random seed
+#         }
+#     )
+# )
+async def test_fft_random(dut, input_mag, input_num, seed, cmdline_opts=None):
+    random.seed(random.random() + seed)
     inputs = [
         [
-            CFixed((random.uniform(-p.input_mag, p.input_mag), 0), 16, 8)
+            CFixed((random.uniform(-input_mag, input_mag), 0), 16, 8)
             for i in range(32)
         ]
-        for _ in range(p.input_num)
+        for _ in range(input_num)
     ]
 
     model: FFTInterface = FFTPease(16, 8, 32)
@@ -220,12 +268,23 @@ def test_fft_random(cmdline_opts, p):
     outputs = [[x.real for x in sample] for sample in outputs]
 
     in_msgs, out_msgs = fft_msg(inputs, outputs)
-    dut = make_interconnect(cmdline_opts)
-    run_interconnect(dut, in_msgs, out_msgs, max_trsns=1000)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_interconnect(dut, in_msgs, out_msgs, max_trsns=1000)
+
+    # dut = make_interconnect(cmdline_opts)
+    # run_interconnect(dut, in_msgs, out_msgs, max_trsns=1000)
+
+factory = TestFactory(test_fft_random)
+factory.add_option("input_mag", input_mag_values)
+factory.add_option("input_num", input_num_values)
+factory.add_option("seed", seed_values)
+factory.generate_tests()
 
 
 # Composite test that combines loopback and FFT.
-def test_compose(cmdline_opts):
+@cocotb.test()
+async def test_compose(dut, cmdline_opts=None):
     xbar_in_in_msgs, xbar_in_out_msgs = loopback_inXbar_msg([0x5555, 0xAAAA])
     fft_in_msgs, fft_out_msgs = fft_msg(
         [[fixN(1) for _ in range(32)]],
@@ -233,7 +292,13 @@ def test_compose(cmdline_opts):
     )
     xbar_out_in_msgs, xbar_out_out_msgs = loopback_outXbar_msg([0xAAAA, 0x5555])
 
-    dut = make_interconnect(cmdline_opts)
-    num_t1 = run_interconnect(dut, xbar_in_in_msgs, xbar_in_out_msgs, max_trsns=100)
-    num_t2 = run_interconnect(dut, fft_in_msgs, fft_out_msgs, curr_trsns=num_t1)
-    run_interconnect(dut, xbar_out_in_msgs, xbar_out_out_msgs, curr_trsns=num_t2)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    num_t1 = await run_interconnect(dut, xbar_in_in_msgs, xbar_in_out_msgs, max_trsns=100)
+    num_t2 = await run_interconnect(dut, fft_in_msgs, fft_out_msgs, curr_trsns=num_t1)
+    await run_interconnect(dut, xbar_out_in_msgs, xbar_out_out_msgs, curr_trsns=num_t2)
+
+    # dut = make_interconnect(cmdline_opts)
+    # num_t1 = run_interconnect(dut, xbar_in_in_msgs, xbar_in_out_msgs, max_trsns=100)
+    # num_t2 = run_interconnect(dut, fft_in_msgs, fft_out_msgs, curr_trsns=num_t1)
+    # run_interconnect(dut, xbar_out_in_msgs, xbar_out_out_msgs, curr_trsns=num_t2)
