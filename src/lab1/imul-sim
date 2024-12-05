@@ -1,0 +1,232 @@
+#!/usr/bin/env python
+#=========================================================================
+# imul-sim [options]
+#=========================================================================
+#
+#  -h --help           Display this message
+#
+#  --impl              {fl,base,alt}
+#  --input dataset     {small,large,lomask,himask,lohimask,sparse}
+#  --trace             Display line tracing
+#  --stats             Display statistics
+#  --dump-vcd          Dump VCD to imul-<impl>-<input>.vcd
+#
+# Author : Christopher Batten, Shunning Jiang
+# Date   : February 5, 2015
+#
+
+# Hack to add project root to python path
+
+import os
+import sys
+
+sim_dir = os.path.dirname( os.path.abspath( __file__ ) )
+while sim_dir:
+  if os.path.exists( sim_dir + os.path.sep + "pymtl.ini" ):
+    sys.path.insert(0,sim_dir)
+    break
+  sim_dir = os.path.dirname(sim_dir)
+
+import argparse
+import re
+
+from random import randint, seed
+
+seed(0xdeadbeef)
+
+from pymtl3 import *
+from pymtl3.stdlib.test_utils import config_model_with_cmdline_opts
+from pymtl3.passes.backends.verilog import VerilogPlaceholderPass
+
+from lab1_imul.IntMulFL   import IntMulFL
+from lab1_imul.IntMulBase import IntMulBase
+from lab1_imul.IntMulAlt  import IntMulAlt
+
+from lab1_imul.test.IntMulFL_test import TestHarness
+
+#-------------------------------------------------------------------------
+# mk_imsg/mk_omsg
+#-------------------------------------------------------------------------
+
+# Make input message, truncate ints to ensure they fit in 32 bits.
+
+def mk_imsg( a, b ):
+  return concat( Bits32( a, trunc_int=True ), Bits32( b, trunc_int=True ) )
+
+# Make output message, truncate ints to ensure they fit in 32 bits.
+
+def mk_omsg( a ):
+  return Bits32( a, trunc_int=True )
+
+#----------------------------------------------------------------------
+# Data Set: random small
+#----------------------------------------------------------------------
+
+random_small_msgs = []
+for i in range(50):
+  a = randint(0,100)
+  b = randint(0,100)
+  random_small_msgs.extend([ mk_imsg( a, b ), mk_omsg( a * b ) ])
+
+
+# ''' LAB TASK '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+# You should add more datasets for evaluation. Remember these datasets
+# are not for testing; your design should already be thoroughly tested
+# before you begin your evaluation.
+# ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+
+random_large_msgs = []
+for i in range(50):
+  a = randint(10000,100000000)
+  b = randint(10000,100000000)
+  random_large_msgs.extend([ mk_imsg( a, b ), mk_omsg( a * b ) ])
+
+
+random_neg_msgs = []
+for i in range(50):
+  a = randint(-5000,0)
+  b = randint(-5000,0)
+  random_neg_msgs.extend([ mk_imsg( a, b ), mk_omsg( a * b ) ])
+
+random_dense_msgs = [
+  mk_imsg( 254, 254 ), mk_omsg( 64516 ),
+  mk_imsg( 65534, 2 ), mk_omsg( 131068 ),
+  mk_imsg( 8191, 1023 ), mk_omsg( 8379393 ),
+  mk_imsg( 65535, 3 ), mk_omsg( 196605 ),
+  mk_imsg( 65535, 65535 ), mk_omsg( 4294836225 ),
+]
+
+
+#-------------------------------------------------------------------------
+# Command line processing
+#-------------------------------------------------------------------------
+
+class ArgumentParserWithCustomError(argparse.ArgumentParser):
+  def error( self, msg = "" ):
+    if ( msg ): print("\n ERROR: %s" % msg)
+    print("")
+    file = open( sys.argv[0] )
+    for ( lineno, line ) in enumerate( file ):
+      if ( line[0] != '#' ): sys.exit(msg != "")
+      if ( (lineno == 2) or (lineno >= 4) ): print( line[1:].rstrip("\n") )
+
+def parse_cmdline():
+  p = ArgumentParserWithCustomError( add_help=False )
+
+  # Standard command line arguments
+
+  p.add_argument( "-h", "--help",    action="store_true" )
+
+  # Additional commane line arguments for the simulator
+
+  p.add_argument( "--impl", default="fl",
+    choices=["fl","base","alt"] )
+
+  # ''' LAB TASK '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+  # Add more choices below for the --input command line option. There
+  # should be one choice for each input dataset that you defined above.
+  # ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+  p.add_argument( "--input", default="small",
+    choices=["small","large","neg","dense"] )
+  
+
+  p.add_argument( "--trace",     action="store_true" )
+  p.add_argument( "--stats",     action="store_true" )
+  p.add_argument( "--translate", action="store_true" )
+  p.add_argument( "--dump-vcd",  action="store_true" )
+
+  opts = p.parse_args()
+  if opts.help: p.error()
+  return opts
+
+#-------------------------------------------------------------------------
+# Main
+#-------------------------------------------------------------------------
+
+def main():
+  opts = parse_cmdline()
+
+  # Create the input pattern
+
+  inputs  = None
+
+  # ''' LAB TASK '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+  # Use additional if statements to set the inputs appropriately based on
+  # the --input command line option.
+  # ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+  if opts.input == "small":
+    inputs = random_small_msgs
+  elif opts.input == "large":
+    inputs = random_large_msgs
+  elif opts.input == "neg":
+    inputs = random_neg_msgs
+  elif opts.input == "dense":
+    inputs = random_dense_msgs
+  
+
+  ninputs = len(inputs[::2])
+
+  # Determine which model to use in the simulator
+
+  model_impl_dict = {
+    "fl"  : IntMulFL,
+    "base": IntMulBase,
+    "alt" : IntMulAlt,
+  }
+
+  # Check if translation is valid
+
+  if opts.translate and not opts.impl.startswith("rtl"):
+    print("\n ERROR: --translate only works with RTL models \n")
+    exit(1)
+
+  # Create test harness (we can reuse the harness from unit testing)
+
+  th = TestHarness( model_impl_dict[ opts.impl ]() )
+
+  th.set_param( "top.src.construct",  msgs=inputs[::2]  )
+  th.set_param( "top.sink.construct", msgs=inputs[1::2] )
+
+  # Create VCD filename
+
+  unique_name = f"imul-{opts.impl}-{opts.input}"
+
+  cmdline_opts = {
+    'dump_vcd': f"{unique_name}" if opts.dump_vcd else '',
+    'test_verilog': 'zeros' if opts.translate else '',
+  }
+
+  # Configure the test harness component
+
+  config_model_with_cmdline_opts( th, cmdline_opts, duts=['imul'] )
+
+  # Apply necessary passes
+
+  th.apply( DefaultPassGroup( linetrace=opts.trace ) )
+
+  # Reset test harness
+
+  th.sim_reset()
+
+  # Run simulation
+
+  while not th.done():
+    th.sim_tick()
+
+  # Extra ticks to make VCD easier to read
+
+  th.sim_tick()
+  th.sim_tick()
+  th.sim_tick()
+
+  # Display statistics
+
+  if opts.stats:
+    print( f"num_cycles         = {th.sim_cycle_count()}" )
+    print( f"num_cycles_per_mul = {th.sim_cycle_count()/(1.0*ninputs):1.2f}" )
+
+main()
+
