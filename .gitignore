@@ -20,6 +20,11 @@ __pycache__/
 out*
 *.log
 log*/
+sim_build/
+coverage_report/
+waves.vcd
+results.xml
+ucli.key
 
 .vscode/*
 !.vscode/settings.default.json
@@ -48,3 +53,9 @@ core.*
 
 # Ignore all .nfs files
 .nfs*
+
+# Ignore all backup files
+**/*.bak
+
+# Ignore quartus files
+**/db/
