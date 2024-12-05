@@ -2,7 +2,7 @@
 // FPGA Emulation Top Module
 //======================================================================
 
-`include "tapeins/sp24/tapein2/interconnect.v"
+`include "tapeins/sp24/tapein2/interconnect2.v"
 
 module interconnect_fpga_top (
   input  logic clk,
