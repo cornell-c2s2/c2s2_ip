@@ -72,7 +72,7 @@ async def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
             in_idx += 1
 
         else:
-            retmsg = spi_write(dut, read_msg())
+            retmsg = await spi_write(dut, read_msg())
             print(
                 "Trsn" + pad(trsns) + ":",
                 valrdy_to_str(0, in_idx < len(in_msgs), spc, 6),
@@ -216,8 +216,8 @@ def fft_msg(inputs: list[Fixed], outputs: list[Fixed]):
 def fixN(n):
     return Fixed(n, True, 16, 8)
 
-input_values = [[fixN(1) for _ in range(32)]]
-output_values = [[fixN(32)] + [fixN(0) for _ in range(31)]]
+input_values = [[[fixN(1) for _ in range(32)]]]
+output_values = [[[fixN(32)] + [fixN(0) for _ in range(31)]]]
 
 # @pytest.mark.parametrize(
 #     "input, output",
