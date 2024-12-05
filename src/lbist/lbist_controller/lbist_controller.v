@@ -36,11 +36,12 @@
 `define LBIST_CONTROLLER_V
 
 module lbist_controller #(
+    parameter int SEED_BITS = 32,
     parameter int SIGNATURE_BITS = 32,
     parameter int NUM_HASHES = 8,
     parameter int MAX_OUTPUTS_TO_HASH = 32,
     parameter int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH),
-    parameter [SIGNATURE_BITS-1:0] LFSR_SEEDS [NUM_HASHES-1:0] = {
+    parameter [SEED_BITS-1:0] LFSR_SEEDS [NUM_HASHES-1:0] = {
       32'h0a89687e,
       32'ha87ded5f,
       32'h481c5077,
@@ -75,18 +76,18 @@ module lbist_controller #(
 
     // LBIST CONTROLLER to LFSR
     output logic                      lfsr_resp_val,
-    output logic [SIGNATURE_BITS-1:0] lfsr_resp_msg,
+    output logic [SEED_BITS-1:0]      lfsr_resp_msg,
     input  logic                      lfsr_resp_rdy,
 
     // LBIST CONTROLLER to MISR
     output logic                      misr_req_val,
-    output logic [MISR_MSG_BITS-1:0]  misr_req_msg,
+    output logic [MISR_MSG_BITS:0]    misr_req_msg,
     input  logic                      misr_req_rdy,
 
     // MISR to LBIST CONTROLLER
     input  logic                      misr_resp_val,
     input  logic [SIGNATURE_BITS-1:0] misr_resp_msg,
-    output logic                      misr_resp_rdy 
+    output logic                      misr_resp_rdy
   );
 
 //============================LOCAL_PARAMETERS=================================

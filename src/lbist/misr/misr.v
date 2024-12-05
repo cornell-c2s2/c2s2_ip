@@ -38,7 +38,7 @@ module misr #(
     parameter int SIGNATURE_BITS = 32,
     parameter int MAX_OUTPUTS_TO_HASH = 32,
     parameter int SEED = 32'd0,
-    parameter int LBIST_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH) - 1
+    parameter int LBIST_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH)
     )(
     input logic clk,
     input logic reset,
@@ -63,8 +63,8 @@ module misr #(
 
   logic [1:0]  state;
   logic [1:0]  next_state;
-  logic [$clog2(MAX_OUTPUTS_TO_HASH) - 1:0] outputs_hashed;   // Counts number of inputs hashed
-  logic [$clog2(MAX_OUTPUTS_TO_HASH) - 1:0] outputs_to_hash;  // Number of outputs to be hashed for one signature
+  logic [$clog2(MAX_OUTPUTS_TO_HASH):0] outputs_hashed;   // Counts number of inputs hashed
+  logic [$clog2(MAX_OUTPUTS_TO_HASH):0] outputs_to_hash;  // Number of outputs to be hashed for one signature
 
   logic [SIGNATURE_BITS - 1:0] signature;                     // Initialized to "SEED" parameter
   logic [SIGNATURE_BITS - 1:0] next_signature;

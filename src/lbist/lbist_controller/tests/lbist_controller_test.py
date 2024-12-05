@@ -38,6 +38,8 @@ async def sig_test_gen(dut, num_hashes, seeds, signatures, expected):
         # simulate calculation time
         await ClockCycles(dut.clk, 8)
         assert dut.state.value == 1
+        
+        assert dut.misr_req_msg.value == dut.MAX_OUTPUTS_TO_HASH.value
 
         dut.misr_resp_val.value = 1
         dut.misr_resp_msg.value = signatures[i]
