@@ -2,7 +2,7 @@ import pytest
 
 from src.tapeins.sp24.tapein2.tests.spi_driver_physical import spi_write_physical
 from src.tapeins.sp24.tapein2.interconnect2 import Interconnect2
-from src.tapeins.sp24.tapein2.tests.spi_stream_protocol import *
+from src.tapeins.sp24.tapein2.tests.spi_stream_protocol_physical import *
 from fixedpt import Fixed, CFixed
 from tools.utils import fixed_bits, mk_test_matrices
 from src.fft.tests.fft import FFTInterface, FFTPease

@@ -16,4 +16,4 @@ def spi_write_physical(dut, src_msg):
 
     s.unsel()
 
-    return Bits40(int.from_bytes(readbytes, "big"))
+    return Bits40(int.from_bytes(readbytes, "big") >> 2)
