@@ -1,7 +1,10 @@
 //======================================================================
 // FPGA Emulation Top Module
 //======================================================================
-`include "tapeins/sp24/tapein2/interconnect.v"
+`include "tapeins/sp24/tapein2/interconnect2.v"
+`include "cmn/reset_sync.v"
+`ifndef  tapeins_sp24_fpga_emulation2_Interconnect_Fpga
+`define  tapeins_sp24_fpga_emulation2_Interconnect_Fpga
 
 module tapeins_sp24_fpga_emulation2_Interconnect_Fpga (
   input  logic clk,
@@ -13,6 +16,15 @@ module tapeins_sp24_fpga_emulation2_Interconnect_Fpga (
   output logic minion_parity,
   output logic adapter_parity
 );
+
+  // Reset synchronizer
+  logic s_reset;
+
+  cmn_reset_synchronizer reset_sync (
+    .clk (clk),
+    .reset (reset),
+    .s_reset (s_reset)
+  );
 
   // Connections for unused Wishbone inputs and outputs
   logic wbs_stb_i;
@@ -26,10 +38,10 @@ module tapeins_sp24_fpga_emulation2_Interconnect_Fpga (
   logic [22:0] io_oeb;
   logic [4:0] io_out;
 
-  tapeins_sp24_tapein2_Interconnect interconnect_top (
+  tapeins_sp24_tapein2_Interconnect2 interconnect_top (
     // SPI Connections
     .clk(clk),
-    .reset(reset),
+    .reset(s_reset),
     .cs(cs),
     .mosi(mosi),
     .miso(miso),
@@ -71,3 +83,5 @@ module tapeins_sp24_fpga_emulation2_Interconnect_Fpga (
   assign unused_io_out = &io_out;
 
 endmodule
+
+`endif /* tapeins_sp24_fpga_emulation2_Interconnect_Fpga */
