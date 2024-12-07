@@ -8,7 +8,7 @@ interconnect_file = $(SRC_DIR)/tapeins/sp24/fpga_emulation2/interconnect_fpga.v
 
 pickled_file = $(BUILD_DIR)/Interconnect_Fpga_pickled.v
 lookup_file = $(BUILD_DIR)/sine_wave_lookup_16_8_32.v
-	
+
 all:
 	@mkdir -p $(BUILD_DIR)
 	#@chmod +wx $(BUILD_DIR)

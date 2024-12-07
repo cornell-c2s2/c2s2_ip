@@ -1,0 +1,6 @@
+interconnect_fpga.v
+*_description.txt
+*.done
+*.rpt
+*.summary
+incremental_db/

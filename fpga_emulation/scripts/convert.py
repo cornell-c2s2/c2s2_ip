@@ -408,7 +408,7 @@ def remove_unused_declarations(content : List[str]):
     content_ok = True
     for idx in range(len(result)):
         line = result[idx]
-        if re.match(r'\s*logic\s+unused\w*\s*=', line) or re.match(r'\s*wire\s+unused\w*\s*=', line):
+        if re.match(r"\s+logic\s*\w*unused", line) or re.match(r"\s+wire\s+\w*unused", line) or re.match(r"\s+assign\s+\w*unused", line):
             content_ok = False
         if (not content_ok):
             result[idx] = "// " + line
@@ -433,7 +433,7 @@ def extract_module(content : List[str], lookup_file : str):
     output_content = add_for_loop_names(output_content)
     output_content = clean_function_from_all(output_content, lookup_file)
     output_content = replace_sine_with_lookup(output_content, lookup_file)
-    output_content = remove_unused_declarations(output_content)
+    # output_content = remove_unused_declarations(output_content)
 
     return output_content
 
