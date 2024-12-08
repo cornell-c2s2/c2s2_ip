@@ -6,7 +6,7 @@ show_help() {
     echo "  -h, -help       Show this help message"
     echo "  -waves          Include wave data in simulation"
     echo "  -coverage       Include coverage data in simulation"
-    echo "  -t, -test       Insert specific tests in your python file you want to run by name (As listed in the test registry)"
+    echo "  -t, -tests       Insert specific tests in your python file you want to run by name (As listed in the test registry)"
 }
 
 WAVES=0
@@ -81,7 +81,7 @@ fi
 
 echo "Selected Verilog file: $SOURCE"
 
-#Python script to extract the names of modules in Verilog file
+#Extract the names of modules in Verilog file
 DUTS=$(grep -Eo "\bmodule\s+[a-zA-Z_][a-zA-Z0-9_]*" $SOURCE | awk '{print $2}')
 
 #Prompt user to choose the DUT
@@ -162,7 +162,7 @@ print(' '.join(test_names))
 "
 
 
-# Extract test names using Python
+# Run python script and store test names in an environment variable
 TESTS=$(python3 -c "$PYTHON_SCRIPT")
 
 # Check if any tests were found
