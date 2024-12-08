@@ -16,7 +16,7 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 VERILOG_SOURCES = $(PWD)/../lbist_toplevel.v
 
 #Step 2: Add all include directories referenced in the verilog source file
-COMPILE_ARGS += +incdir+/home/jjm469/c2s2/demo_fa24/src
+COMPILE_ARGS += +incdir+$(PWD)/../../../
 
 #Step 3: Set top level module and corresponding python test module
 TOPLEVEL = lbist_toplevel 

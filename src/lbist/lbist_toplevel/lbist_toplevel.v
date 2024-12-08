@@ -88,7 +88,7 @@ module lbist_toplevel #(
     .lfsr_resp_val (ctrl_lfsr_resp_val),
     .lfsr_resp_msg (ctrl_lfsr_resp_msg),
     .lfsr_resp_rdy (ctrl_lfsr_resp_rdy),
-    .lfsr_reset    (lfsr_reset),
+    .lfsr_cut_reset(lfsr_reset),
     .misr_req_val  (ctrl_misr_req_val),
     .misr_req_msg  (ctrl_misr_req_msg),
     .misr_req_rdy  (ctrl_misr_req_rdy),
