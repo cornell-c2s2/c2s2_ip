@@ -20,10 +20,14 @@
 // - lbist_req_rdy: LBIST ready to service new LBIST request
 // - lbist_resp_val: Valid output
 // - lbist_resp_msg: Binary number where each bit represents a test sequence. 1 means test passed zero otherwise
-// - lbist_resp_rdy: Requestor ready for lbist outpu
+// - lbist_resp_rdy: Requestor ready for lbist output
 // - lfsr_resp_val: Valid output
 // - lfsr_resp_msg: Seed sent to LFSR
 // - lfsr_resp_rdy: LFSR ready for next seed
+// - lfsr_cut_reset: Ensures the LFSR generates test vectors for the most up-to-date seed and that
+//   the CUT uses the most up-to-date values from the LFSR. VERY IMPORTANT, this signal needs to be
+//   ORed with the standard reset. For example, the reset of the CUT and LFSR should look as follows:
+//   .reset   (reset || lfsr_reset)
 // - misr_req_val: Valid number of outputs from CUT to hash
 // - misr_req_msg: Number of outputs from CUT to hash
 // - misr_req_rdy: MISR ready to service new request
@@ -38,10 +42,12 @@
 module lbist_controller #(
     parameter int SEED_BITS = 32,
     parameter int SIGNATURE_BITS = 32,
-    parameter int NUM_HASHES = 8,
-    parameter int MAX_OUTPUTS_TO_HASH = 32,
+    parameter int NUM_SEEDS = 8,             // Number of seeds to iterate over
+    parameter int NUM_HASHES = 8,          // Number of outputs from CUT misr should hash
+    parameter int MAX_OUTPUTS_TO_HASH = 32,  // Max number of outputs from CUT misr should hash
     parameter int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH),
-    parameter [SEED_BITS-1:0] LFSR_SEEDS [NUM_HASHES-1:0] = {
+    // Avoid unpacked arrays...
+    parameter [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
       32'h0a89687e,
       32'ha87ded5f,
       32'h481c5077,
@@ -51,7 +57,7 @@ module lbist_controller #(
       32'h9913b1fd,
       32'hd8df8ed2
     },
-    parameter [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_HASHES-1:0] = {
+    parameter [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
       32'h2435b217,
       32'hb25e4d4c,
       32'h16307bd1,
@@ -71,13 +77,14 @@ module lbist_controller #(
 
     // LBIST CONTROLLER to requestor
     output logic                      lbist_resp_val,
-    output logic [NUM_HASHES-1:0]     lbist_resp_msg,
+    output logic [NUM_SEEDS-1:0]      lbist_resp_msg,
     input  logic                      lbist_resp_rdy,
 
     // LBIST CONTROLLER to LFSR
     output logic                      lfsr_resp_val,
     output logic [SEED_BITS-1:0]      lfsr_resp_msg,
     input  logic                      lfsr_resp_rdy,
+    output logic                      lfsr_cut_reset,  // Added
 
     // LBIST CONTROLLER to MISR
     output logic                      misr_req_val,
@@ -94,7 +101,7 @@ module lbist_controller #(
 
   localparam [1:0] IDLE = 2'd0, START = 2'd1, COMP_SIG = 2'd2;
   logic [1:0] state, next_state;
-  logic [$clog2(NUM_HASHES)-1:0] counter;
+  logic [$clog2(NUM_SEEDS)-1:0] counter;
   
 //================================DATAPATH=====================================
 
@@ -107,14 +114,16 @@ module lbist_controller #(
         misr_req_val   = 0;
         misr_req_msg   = 0;
         misr_resp_rdy  = 0;
+        lfsr_cut_reset = 0;
       end
       START: begin
         lbist_req_rdy  = 0;
         lfsr_resp_val  = 1;
         lfsr_resp_msg  = LFSR_SEEDS[counter];
         misr_req_val   = 1;
-        misr_req_msg   = MAX_OUTPUTS_TO_HASH;
+        misr_req_msg   = NUM_HASHES;   // Corrected by johnny
         misr_resp_rdy  = 0;
+        lfsr_cut_reset = 0;
       end
       COMP_SIG: begin
         lbist_req_rdy  = 0;
@@ -123,6 +132,7 @@ module lbist_controller #(
         misr_req_val   = 0;
         misr_req_msg   = 0;
         misr_resp_rdy  = 1;
+        lfsr_cut_reset = 1;
       end
       default: begin
       end
@@ -142,7 +152,7 @@ module lbist_controller #(
         else next_state = START;
       end
       COMP_SIG: begin
-        if (counter != NUM_HASHES - 1) next_state = START;
+        if (counter != NUM_SEEDS - 1) next_state = START;
         else if (lbist_resp_rdy && lbist_resp_val) next_state = IDLE;
         else next_state = COMP_SIG;
       end
@@ -176,17 +186,19 @@ module lbist_controller #(
     case (state)
       IDLE: begin
         lbist_resp_val <= 0;
-        for (int i = 0; i < NUM_HASHES; i++) begin
-          lbist_resp_msg[i] <= 0;
-        end
+        lbist_resp_msg <= '0;
+        // Above code does what the for loop below does
+        // for (int i = 0; i < NUM_HASHES; i++) begin
+        //   lbist_resp_msg[i] <= 0;
+        // end
       end
       START: begin
         lbist_resp_val <= 0;
         lbist_resp_msg <= lbist_resp_msg;
       end
       COMP_SIG: begin
-        lbist_resp_val <= counter == (NUM_HASHES - 1);
-        for (int i = 0; i < NUM_HASHES; i++) begin
+        lbist_resp_val <= counter == (NUM_SEEDS - 1);
+        for (int i = 0; i < NUM_SEEDS; i++) begin
           if (i == counter && misr_resp_val) begin
             lbist_resp_msg[i] <= misr_resp_msg == EXPECTED_SIGNATURES[i];
           end else begin
