@@ -26,9 +26,9 @@
 // - req_val: Valid packet from BIST controller to LFSR
 // - req_msg: Packet (starting seed) from BIST controller
 // - req_rdy: LFSR ready to receive packet from BIT controller
-// - resq_val: Valid request to CUT
-// - resq_msg: Pseudo-random output to drive CUT
-// - resq_rdy: CUT ready to handle another request
+// - resp_val: Valid request to CUT
+// - resp_msg: Pseudo-random output to drive CUT
+// - resp_rdy: CUT ready to handle another request
 // ===================================================================
 
 module lfsr#(
@@ -41,31 +41,61 @@ module lfsr#(
 (
     input logic clk,
     input logic reset,
-    
+
     //BIST-LFSR interface
     input logic req_val,
     input logic [N-1:0] req_msg,
     output logic req_rdy,
 
     //LFSR-CUT interface
-    input logic resq_rdy,
-    output logic resq_val,
-    output logic [N-1:0] resq_msg
+    input logic resp_rdy,
+    output logic resp_val,
+    output logic [N-1:0] resp_msg
 
 );
 
-    logic [1:0] IDLE = 2'b00, GEN_VAL = 2'b01, SEND_VAL = 2'b10;
-    logic [1:0] state, next_state;
 
+//============================LOCAL_PARAMETERS=================================
+    // State marcos
+    // IDLE: LFSR is waiting for a valid seed to start generating test vectors
+    // GEN_VAL: LFSR computes test vector using shifts + XORs (via taps)
+    logic [1:0] IDLE = 2'b00;
+    logic [1:0] GEN_VAL = 2'b01;
+
+    // State variables
+    logic [1:0] state;
+    logic [1:0] next_state;
+
+    // Registers to hold result of Tap/XOR logic
     logic tap1;
     logic tap2;
     logic final_tap;
 
+    // Flip Flop Chain
     logic [N-1:0] Q;
-    logic load_Q;
-    assign load_Q = (state == IDLE && next_state == GEN_VAL);
+    logic [N-1:0] next_Q;
 
+    assign final_tap = ((Q[T2]) ^ (Q[T3] ^ Q[T4])) ^ Q[T1];
+    assign next_Q = {Q[N-2:0], final_tap};
 
+    //================================DATAPATH=====================================
+    always_ff @(posedge clk) begin
+        if (reset) begin
+            state <= IDLE;
+            Q <= '0;
+        end
+        else begin
+            if( state == IDLE )          Q <= req_msg;
+            else if( state == GEN_VAL ) begin
+                if (resp_rdy) Q <= next_Q;
+            end
+            else                         Q <= Q;
+        end
+        state <= next_state;
+    end
+
+    //===============================CTRL_LOGIC====================================
+    // State Transitions
     always_comb begin
         case(state)
             IDLE: begin
@@ -76,15 +106,9 @@ module lfsr#(
 
             GEN_VAL: begin
                 if(reset) next_state = IDLE;
-                else if(req_val == 0) next_state = IDLE;
-                else if(resq_rdy) next_state = SEND_VAL;
                 else next_state = GEN_VAL;
             end
 
-            SEND_VAL: begin
-                if(reset) next_state = IDLE;
-               else next_state = GEN_VAL;
-            end
 
             default: begin
                 next_state = IDLE;
@@ -92,51 +116,27 @@ module lfsr#(
         endcase
     end
 
+    // Set Control Signals
     always_comb begin
         case(state)
             IDLE: begin
                 req_rdy = 1'b1;
-                resq_val = 1'b0;
+                resp_val = 1'b0;
+                resp_msg = '0;
             end
 
             GEN_VAL: begin
                 req_rdy = 1'b0;
-                resq_val = 1'b1; 
+                resp_val = 1'b1;
+                resp_msg = Q;
             end
 
-            SEND_VAL: begin
-                req_rdy = 1'b0;
-                resq_val = 1'b0;
-            end
             default: begin
                 req_rdy = 1'b0;
-                resq_val = 1'b0;
+                resp_val = 1'b0;
+                resp_msg = '0;
             end
         endcase
     end
-
-    always_ff @(posedge clk) begin
-        if (reset) begin
-            state <= IDLE;
-            Q <= {N{1'b0}};
-            resq_msg <= {N{1'b0}};
-        end 
-        else begin
-            if(load_Q) begin
-                Q <= req_msg;
-                final_tap <= ((Q[T2]) ^ (Q[T3] ^ Q[T4])) ^ Q[T1];
-            end
-            if(state == GEN_VAL) final_tap <= ((Q[T2]) ^ (Q[T3] ^ Q[T4])) ^ Q[T1];
-
-            if(state == SEND_VAL) begin
-                resq_msg <= Q;
-                Q <= {Q[N-2:0], final_tap};
-            end
-   
-        end 
-        state <= next_state; 
-    end
-
-    
 
 endmodule
