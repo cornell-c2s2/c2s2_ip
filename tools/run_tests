@@ -1,0 +1,266 @@
+#!/bin/bash
+# Function to display help message
+show_help() {
+    echo "Usage: run_tests [options]"
+    echo "Options:"
+    echo "  -h, -help       Show this help message"
+    echo "  -waves          Include wave data in simulation"
+    echo "  -coverage       Include coverage data in simulation"
+    echo "  -t, -test       Insert specific tests in your python file you want to run by name (As listed in the test registry)"
+}
+
+WAVES=0
+COVER=0
+DUT_NAME=""
+SOURCE=""
+SELECTED_TESTS=()
+
+# Parse command-line arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -h|-help)
+            show_help
+            exit 0
+            ;;
+        -waves)
+            WAVES=1
+            echo "Waves enabled"
+            shift
+            ;;
+        -coverage)
+            COVER=1
+            echo "Coverage enabled"
+            shift
+            ;;
+        -t|-tests)
+            shift
+            if [[ $# -eq 0 || $1 == -* ]]; then
+                echo "Error: Missing arguments for -tests flag."
+                show_help
+                exit 1
+            fi
+            while [[ $# -gt 0 && $1 != -* ]]; do
+                SELECTED_TESTS+=("$1")
+                shift
+            done
+            ;;
+        *)
+            echo "Unknown option: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+done
+
+# Automatically find Verilog file and prompt the user if there are multiple
+SOURCES=$(find .. -type f -name "*.v")
+
+#Prompt user to choose the Verilog file that contains the DUT
+if [ -z "$SOURCES" ]; then
+    echo "Error: No valid Verilog files found."
+    exit 1
+elif [ $(echo "$SOURCES" | wc -l) -gt 1 ]; then
+    echo "Multiple Verilog files found:"
+    echo "$SOURCES" | nl -w2 -s") "
+    
+    while true; do
+        echo -n "Please select the Verilog file that contains the DUT by number: "
+        read -r CHOICE
+
+        # Validate input
+        if [[ "$CHOICE" =~ ^[0-9]+$ ]] && [ "$CHOICE" -ge 1 ] && [ "$CHOICE" -le $(echo "$SOURCES" | wc -l) ]; then
+            SOURCE=$(echo "$SOURCES" | sed -n "${CHOICE}p")
+            break
+        else
+            echo "Invalid selection. Please choose a number between 1 and $(echo "$SOURCES" | wc -l)."
+        fi
+    done
+else
+    SOURCE="$SOURCES"
+fi
+
+echo "Selected Verilog file: $SOURCE"
+
+#Python script to extract the names of modules in Verilog file
+DUTS=$(grep -Eo "\bmodule\s+[a-zA-Z_][a-zA-Z0-9_]*" $SOURCE | awk '{print $2}')
+
+#Prompt user to choose the DUT
+if [ -z "$DUTS" ]; then
+    echo "Error: No Verilog modules found in $SOURCE."
+    exit 1
+elif [ $(echo "$DUTS" | wc -l) -gt 1 ]; then
+    echo "Multiple Verilog modules found:"
+    echo "$DUTS" | nl -w2 -s") "
+    
+    while true; do
+        echo -n "Please select the Verilog module to use as DUT by number: "
+        read -r CHOICE
+
+        # Validate input
+        if [[ "$CHOICE" =~ ^[0-9]+$ ]] && [ "$CHOICE" -ge 1 ] && [ "$CHOICE" -le $(echo "$DUTS" | wc -l) ]; then
+            DUT_NAME=$(echo "$DUTS" | sed -n "${CHOICE}p")
+            break
+        else
+            echo "Invalid selection. Please choose a number between 1 and $(echo "$DUTS" | wc -l)."
+        fi
+    done
+else
+    DUT_NAME="$DUTS"
+fi
+
+echo "Selected DUT: $DUT_NAME"
+
+#Automatically find the name of all Python test modules in your working directory
+TEST_MODULES=$(find . -type f -name "*test*.py" ! -name "*physical*" | grep -v '__pycache__' | sed 's|^\./||' | sed 's|/|.|g' | sed 's|\.py$||')
+
+#Validate the test module
+if [ -z "$TEST_MODULES" ]; then
+    echo "Error: No valid test module found (containing 'test' and not 'physical')."
+    exit 1
+elif [ $(echo "$TEST_MODULES" | wc -l) -gt 1 ]; then
+    echo "Multiple test modules found:"
+    echo "$TEST_MODULES" | nl -w2 -s") "
+    
+    while true; do
+        echo -n "Please select the test module by number: "
+        read -r CHOICE
+
+        # Validate input
+        if [[ "$CHOICE" =~ ^[0-9]+$ ]] && [ "$CHOICE" -ge 1 ] && [ "$CHOICE" -le $(echo "$TEST_MODULES" | wc -l) ]; then
+            MODULE=$(echo "$TEST_MODULES" | sed -n "${CHOICE}p")
+            break
+        else
+            echo "Invalid selection. Please choose a number between 1 and $(echo "$TEST_MODULES" | wc -l)."
+        fi
+    done
+else
+    MODULE="$TEST_MODULES"
+fi
+
+echo "Selected test module: $MODULE"
+
+
+# Python script to extract test names from the cocotb registry
+export PYTHONPATH=$PWD:$PYTHONPATH
+export PYTHONPATH=$C2S2_PATH:$PYTHONPATH
+
+PYTHON_SCRIPT="
+import inspect
+import importlib
+import cocotb
+
+# Import the test module
+module = importlib.import_module('$MODULE')
+
+# Discover all cocotb tests
+test_names = [
+    name for name, obj in inspect.getmembers(module)
+    if isinstance(obj, cocotb.regression.Test)
+]
+
+print(' '.join(test_names))
+"
+
+
+# Extract test names using Python
+TESTS=$(python3 -c "$PYTHON_SCRIPT")
+
+# Check if any tests were found
+if [ -z "$TESTS" ]; then
+    echo "No tests found in the cocotb registry."
+    exit 1
+fi
+
+#Filter for selected tests if specified
+if [[ ${#SELECTED_TESTS[@]} -gt 0 ]]; then
+    echo "Selected tests: ${SELECTED_TESTS[@]}"
+
+    # Validate selected tests
+    for TEST in "${SELECTED_TESTS[@]}"; do
+        if [[ ! " $TESTS " =~ " $TEST " ]]; then
+            echo "Error: Invalid test specified: $TEST"
+            exit 1
+        fi
+    done
+
+    # Use only the selected tests
+    TESTS="${SELECTED_TESTS[@]}"
+fi
+
+echo "Found tests: $TESTS"
+
+#Terminate all compilations and simulations after Ctrl+C
+trap "echo 'Terminating...'; kill 0" SIGINT SIGTERM
+
+#Clean the environment
+echo "Cleaning environment..."
+make clean >/dev/null
+
+START_TIME=$(date +%s)
+
+#Make the logs directory
+mkdir -p obj_dir logs
+
+if [[ $WAVES -eq 1 ]]; then 
+    mkdir -p waves
+fi
+
+# Run each test in parallel
+for TEST in $TESTS; do
+    (
+        # Check if the test matches the naming convention {test name}_###
+        if [[ "$TEST" =~ ^([a-zA-Z0-9_]+)_([0-9]{3})$ ]]; then
+            TEST_NAME=${BASH_REMATCH[1]} # Extract the part before _###
+            TEST_SUFFIX=${BASH_REMATCH[2]} # Extract the ### part
+        else
+            TEST_NAME="individual" # For individual tests without _###
+            TEST_SUFFIX=$TEST
+        fi
+        
+        # Create a unique directory for the test
+        TEST_DIR="obj_dir/$TEST_NAME/$TEST_SUFFIX"
+        LOG_DIR="logs/$TEST_NAME/$TEST_SUFFIX"
+        WAVEFORM_DIR="waves/$TEST_NAME/$TEST_SUFFIX"
+        mkdir -p "$TEST_DIR" "$LOG_DIR" 
+        
+        if [[ $WAVES -eq 1 ]]; then 
+            mkdir -p "$WAVEFORM_DIR"
+        fi
+
+        # Change to the test's unique directory
+        cd "$TEST_DIR" || exit 1
+
+        # Run the test with a unique working directory
+        echo "Running test: $TEST"
+        SOURCE=$SOURCE TOPLEVEL=$DUT_NAME MODULE=$MODULE WAVES=$WAVES COVER=$COVER WAVEFORM_DIR=$WAVEFORM_DIR TESTCASE=$TEST TESTNAME=$TEST_NAME TESTSUFFIX=$TEST_SUFFIX make -C ../../../ > ../../../$LOG_DIR/$TEST.log 2>&1
+
+        # Return to the original directory
+        cd - >/dev/null
+
+        # Check if the log contains a line with "PASS "
+        if grep -A 10 "TEST" $LOG_DIR/$TEST.log | grep -E "PASS " >/dev/null; then
+            echo "Test $TEST PASSED"
+        else
+            echo "Test $TEST FAILED"
+        fi
+    ) &
+done
+
+# Wait for all background processes to complete
+wait
+
+# Record the end time
+END_TIME=$(date +%s)
+
+# Calculate the elapsed time
+ELAPSED_TIME=$((END_TIME - START_TIME))
+
+# Convert elapsed time to a human-readable format
+HOURS=$((ELAPSED_TIME / 3600))
+MINUTES=$(((ELAPSED_TIME % 3600) / 60))
+SECONDS=$((ELAPSED_TIME % 60))
+
+# rm -rf sim_build
+
+echo "All tests completed."
+printf "Total runtime: %02d:%02d:%02d (HH:MM:SS)\n" $HOURS $MINUTES $SECONDS
