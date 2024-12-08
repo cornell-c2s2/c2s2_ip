@@ -57,17 +57,23 @@ module misr #(
     output logic                      lbist_resp_val,
     output logic [SIGNATURE_BITS-1:0] lbist_resp_msg,
     input  logic                      lbist_resp_rdy
+
+    // MISR to CUT
+    // output logic                      cut
   );
 
 //============================LOCAL_PARAMETERS=================================
 
   logic [1:0]  state;
   logic [1:0]  next_state;
+  logic [$clog2(MAX_OUTPUTS_TO_HASH):0] next_outputs_hashed;
   logic [$clog2(MAX_OUTPUTS_TO_HASH):0] outputs_hashed;   // Counts number of inputs hashed
   logic [$clog2(MAX_OUTPUTS_TO_HASH):0] outputs_to_hash;  // Number of outputs to be hashed for one signature
 
   logic [SIGNATURE_BITS - 1:0] signature;                     // Initialized to "SEED" parameter
   logic [SIGNATURE_BITS - 1:0] next_signature;
+
+  logic done_hashing;
 
   // State macros
   localparam [1:0]  IDLE = 2'b00;
@@ -76,6 +82,11 @@ module misr #(
 
 //================================DATAPATH=====================================
   assign next_signature = (signature^cut_req_msg);
+  // assign done_hashing = (outputs_hashed < (outputs_to_hash - 1));
+  assign done_hashing = (outputs_hashed < (outputs_to_hash));
+  assign next_outputs_hashed = outputs_hashed + 1;
+  // assign cut = done_hashing;
+
   always_ff @(posedge clk) begin
     if( reset ) begin
       outputs_hashed  <= '0;
@@ -89,10 +100,11 @@ module misr #(
       end
       else if( cut_req_val && state == HASH ) begin
         signature       <= {next_signature[SIGNATURE_BITS-2:0],next_signature[SIGNATURE_BITS-1]};
-        outputs_hashed  <= outputs_hashed + 1;
+        outputs_hashed  <= next_outputs_hashed;
       end
       else if (state == DONE) begin
         outputs_hashed  <= 0;
+        // signature       <= SEED;
       end
     end
   end
@@ -110,10 +122,11 @@ module misr #(
   // State transition logic
   always_comb begin
   case ( state )
-    IDLE: if( lbist_req_val ) next_state = HASH;
+    // Changed
+    IDLE: if( cut_req_val && lbist_req_val ) next_state = HASH;
           else next_state = IDLE;
 
-    HASH: if( outputs_hashed < outputs_to_hash - 1) next_state = HASH;
+    HASH: if( done_hashing ) next_state = HASH;
           else next_state = DONE;
 
     DONE: if( lbist_resp_rdy ) next_state = IDLE;
