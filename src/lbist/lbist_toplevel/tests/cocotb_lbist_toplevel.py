@@ -21,7 +21,7 @@ async def lbist_test_gen(dut):
         await Timer(1, units="ns")
         
         # if dut.lfsr.state.value == 2:
-        dut._log.info(f"lfsr output: {dut.lfsr_cut_resp_msg}")
+        # dut._log.info(f"lfsr output: {dut.lfsr_cut_resp_msg}")
 
         # if dut.lbist_controller.state == 2:
         #     dut._log.info(f"hash: {dut.lbist_controller.misr_resp_msg}")

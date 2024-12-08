@@ -16,11 +16,12 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 VERILOG_SOURCES = $(PWD)/../lbist_toplevel.v
 
 #Step 2: Add all include directories referenced in the verilog source file
-COMPILE_ARGS += +incdir+/home/ars437/c2s2/c2s2_ip/src 
+COMPILE_ARGS += +incdir+/home/jjm469/c2s2/demo_fa24/src
 
 #Step 3: Set top level module and corresponding python test module
 TOPLEVEL = lbist_toplevel 
-MODULE = cocotb_lbist_toplevel 
+# MODULE = cocotb_lbist_toplevel 
+MODULE = demo
 
 # send test build outputs to build folder
 # SIM_BUILD = ../../build/convolution_block/iterative
