@@ -47,6 +47,8 @@ if {$make_assignments} {
 	set_global_assignment -name TOP_LEVEL_ENTITY FPGA_top
 	set_global_assignment -name VERILOG_FILE FPGA_top.v
 	set_global_assignment -name VERILOG_FILE interconnect_fpga.v
+	set_global_assignment -name SDC_FILE timing.sdc
+  set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 	set_global_assignment -name ORIGINAL_QUARTUS_VERSION 18.1.0
 	set_global_assignment -name PROJECT_CREATION_TIME_DATE "17:28:04  DECEMBER 05, 2024"
 	set_global_assignment -name LAST_QUARTUS_VERSION "23.1std.1 Lite Edition"
@@ -72,7 +74,6 @@ if {$make_assignments} {
 	# Commit assignments
 	export_assignments
 
-	# Close project
 	#if {$need_to_close_project} {
 	#	project_close
 	#}
@@ -80,11 +81,23 @@ if {$make_assignments} {
 
 execute_flow -compile
 
-set USB_num [lindex $argv 0]
-set device_name [lindex $argv 1]
+#set USB_num [lindex $argv 0]
+#set device_name [lindex $argv 1]
 
-#report_device_info
+set fileout [open "emulation_sp24_tapein2.cdf" "w"]
 
-#puts [quartus_pgm -m JTAG -o "p;emulation_sp24_tapein2.sof@1"]
+puts $fileout "/* Quartus Prime Version 23.1std.1 Build 993 05/14/2024 SC Lite Edition */"
+puts $fileout "JedecChain;"
+puts $fileout "\tFileRevision(JESD32A);"
+puts $fileout "\tDefaultMfr(6E);"
+puts $fileout ""
+puts $fileout "\tP ActionCode(Cfg)"
+puts $fileout "\t\tDevicePartName(EP4CE115F29) Path(\"/home/c2/c2s2_ip/fpga_emulation/output_files/\") File(\"emulation_sp24_tapein2.sof\") MfrSpec(OpMask(1));"
+puts $fileout ""
+puts $fileout "ChainEnd;"
+puts $fileout ""
+puts $fileout "AlteraBegin;"
+puts $fileout "\tChainType(JTAG);"
+puts $fileout "AlteraEnd;"
 
-#puts "what's kickin motherfuckers"
+close $fileout
