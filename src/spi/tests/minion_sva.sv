@@ -108,8 +108,9 @@ module spi_Minion_sva #(
   // Additional coverage points
   PARITY_ONE_CVR:    cover property(@(posedge clk) minion_parity == 1'b1);
   PARITY_ZERO_CVR:   cover property(@(posedge clk) minion_parity == 1'b0);
-  MSB_CONTROL_CVR:   cover property(@(posedge clk) send_val && (|send_msg[BIT_WIDTH-1:BIT_WIDTH-2]));
-  
+  MSB_CONTROL_CVR:   cover property(@(posedge clk) send_val &&
+                      (|send_msg[BIT_WIDTH-1:BIT_WIDTH-2]));
+
 endmodule
 
 bind spi_Minion spi_Minion_sva tb(.*);
