@@ -34,6 +34,20 @@ async def lbist_top_simple(dut):
 
     dut._log.info(f"TEST OUTPUT: {dut.lbist_resp_msg.value}")
 
+    # Ensure all tests passed!
+    result = str(dut.lbist_resp_msg.value)
+    passed = 0
+    failed = 0
+    total = len(result)
+    for i in range(dut.NUM_SEEDS.value):
+        if result[i] == '1':
+            passed += 1
+        else:
+            failed += 1
+    
+    assert passed == total, f"Passed tests: {passed}, Total tests: {total}"
+
+
 
 
 

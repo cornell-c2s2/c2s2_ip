@@ -20,7 +20,7 @@
 module lbist_toplevel #(
   parameter int SEED_BITS = 32,
   parameter int SIGNATURE_BITS = 16,
-  parameter int NUM_SEEDS = 11,
+  parameter int NUM_SEEDS = 12,           // Increment if addind new seed
   parameter int NUM_HASHES = 20,
   parameter int MAX_OUTPUTS_TO_HASH = 25,
   parameter int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH),
@@ -35,7 +35,8 @@ module lbist_toplevel #(
     32'b10000000000011110101111010101011,
     32'b00000000000000000000000000000000,
     32'b11111111111111111111111111111111,
-    32'b11111111111111100000000000000000
+    32'b11111111111111100000000000000000,
+    32'b01101101100011101010111010101111
   },
   parameter [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
     16'b1100110100000101,
@@ -48,7 +49,8 @@ module lbist_toplevel #(
     16'b1011100111000010,
     16'b0000000000000000,
     16'b0000100111000010,
-    16'b1110010000010110
+    16'b1110010000010110,
+    16'b0011010111111100
   }
   )(
   input logic clk,
