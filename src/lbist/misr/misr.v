@@ -60,26 +60,31 @@ module misr #(
   );
 
 //============================LOCAL_PARAMETERS=================================
+  // - outputs_hashed: Counts number of inputs hashed
+  // - outputs_to_hash: Number of outputs to be hashed for one signature
+  // - signature: Holds the current signature (i.e. FF chain)
+  // - done_hashing: High when all CUT outputs have been hashed
 
-  logic [1:0]  state;
-  logic [1:0]  next_state;
+  logic [1:0]                           state;
+  logic [1:0]                           next_state;
   logic [$clog2(MAX_OUTPUTS_TO_HASH):0] next_outputs_hashed;
-  logic [$clog2(MAX_OUTPUTS_TO_HASH):0] outputs_hashed;   // Counts number of inputs hashed
-  logic [$clog2(MAX_OUTPUTS_TO_HASH):0] outputs_to_hash;  // Number of outputs to be hashed for one signature
-
-  logic [SIGNATURE_BITS - 1:0] signature;                     // Initialized to "SEED" parameter
-  logic [SIGNATURE_BITS - 1:0] next_signature;
-
-  logic done_hashing;
+  logic [$clog2(MAX_OUTPUTS_TO_HASH):0] outputs_hashed;
+  logic [$clog2(MAX_OUTPUTS_TO_HASH):0] outputs_to_hash;
+  logic [SIGNATURE_BITS - 1:0]          signature;
+  logic [SIGNATURE_BITS - 1:0]          next_signature;
+  logic                                 done_hashing;
 
   // State macros
+  // - IDLE: Waiting on valid message from LBIST Controller (number of CUT outputs to hash)
+  // - HASH: Hashing CUT outputs when cut_req_val is asserted high
+  // - DONE: Done hashing CUT outputs, waiting for LBIST Controller to take generated signature
   localparam [1:0]  IDLE = 2'b00;
   localparam [1:0]  HASH = 2'b01;
   localparam [1:0]  DONE = 2'b10;
 
 //================================DATAPATH=====================================
   assign next_signature = (signature^cut_req_msg);
-  assign done_hashing = (outputs_hashed < (outputs_to_hash));
+  assign done_hashing = ~(outputs_hashed < (outputs_to_hash));
   assign next_outputs_hashed = outputs_hashed + 1;
 
   always_ff @(posedge clk) begin
@@ -89,7 +94,7 @@ module misr #(
       signature       <= '0;
     end
     else begin
-      if( state == IDLE) begin
+      if( state == IDLE && lbist_req_val) begin
         signature       <= SEED;
         outputs_to_hash <= lbist_req_msg;
       end
@@ -98,13 +103,13 @@ module misr #(
         outputs_hashed  <= next_outputs_hashed;
       end
       else if (state == DONE) begin
-        outputs_hashed  <= 0;
-        // signature       <= SEED;
+        outputs_hashed  <= '0;
       end
     end
   end
 
 //===============================CTRL_LOGIC====================================
+  // Forward the state
   always_ff @(posedge clk) begin
     if( reset ) begin
       state <= IDLE;
@@ -117,11 +122,10 @@ module misr #(
   // State transition logic
   always_comb begin
   case ( state )
-    // Changed
-    IDLE: if( cut_req_val && lbist_req_val ) next_state = HASH;
+    IDLE: if( lbist_req_val ) next_state = HASH;
           else next_state = IDLE;
 
-    HASH: if( done_hashing ) next_state = HASH;
+    HASH: if( ~done_hashing ) next_state = HASH;
           else next_state = DONE;
 
     DONE: if( lbist_resp_rdy ) next_state = IDLE;
