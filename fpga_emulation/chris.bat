@@ -1,9 +1,20 @@
 @echo off
 
+rem File that converts all files to Quartus compatible, compiles the program, and programs
+rem the FPGA, all without the need of the Quartus GUI. Also cleans up all generated files if needed.
+
+rem Summary of commands:
+rem `convert` - converts all Verilog files used in the design to Quartus compatible
+rem `compile` - compiles the current project
+rem `program` - programs the current project onto the FPGA
+rem `setup`   - compiles and programs the current project onto the FPGA. Helpful if no conversion necessary.
+rem `all`     - executes conversion, compilation, and programming (performs all generation actions)
+rem `clean`   - deletes all files created from conversion, project creation, and compilation
+
 set CONVERT=0
 set COMPILE=0
 set PROGRAM=0
-set TEST=0
+set CLEAN=0
 set ARG_PASS=0
 
 IF "%1"=="convert" (
@@ -18,23 +29,21 @@ IF "%1"=="program" (
     set PROGRAM=1
     set ARG_PASS=1
 ) 
-IF "%1"=="test" (
-    set TEST=1
+IF "%1"=="setup" (
+    set COMPILE=1
+    set PROGRAM=1
     set ARG_PASS=1
 ) 
-IF "%1"=="create" (
+IF "%1"=="all" (
     set CONVERT=1
     set COMPILE=1
     set PROGRAM=1
     set ARG_PASS=1
 ) 
-IF "%1"=="full" (
-    set CONVERT=1
-    set COMPILE=1
-    set PROGRAM=1
-    set TEST=1
+IF "%1"=="clean" (
+    set CLEAN=1
     set ARG_PASS=1
-) 
+)
 IF %ARG_PASS%==0 (
     echo Error: missing an argument. Aborting.
     exit /b 1
@@ -114,8 +123,14 @@ IF %PROGRAM% == 1 (
     echo:
 )
 
-
-rem 4: Run the tests
-IF %TEST% == 1 (
-    pytest C:\Users\smich\c2s2\c2s2_ip\src_fpga\tapeins\sp24\fpga_emulation2\tests\test_interconnect_physical.py %2 %3 %4 %5 %6 %7 %8 %9
+rem 4: Completely clear out all generated files
+IF %CLEAN% == 1 (
+    del "%FPGA_DIR%\interconnect_fpga.v"
+    del "%FPGA_DIR%\*.qpf"
+    del "%FPGA_DIR%\*.qsf"
+    rmdir /s /q "%FPGA_DIR%\build"
+    rmdir /s /q "%FPGA_DIR%\db"
+    rmdir /s /q "%FPGA_DIR%\incremental_db"
+    rmdir /s /q "%FPGA_DIR%\log"
+    rmdir /s /q "%FPGA_DIR%\output_files"
 )

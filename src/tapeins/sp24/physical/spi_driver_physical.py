@@ -2,7 +2,9 @@ from pymtl3 import *
 from spidriver import SPIDriver
 import time
 
-s = SPIDriver("/dev/ttyUSB1")
+# set `tests_on_c2` to `True` if operating physical tests on c2
+tests_on_c2 = False
+s = SPIDriver("/dev/ttyUSB1") if tests_on_c2 else SPIDriver("COM7")
 
 
 def spi_write_physical(dut, src_msg):
