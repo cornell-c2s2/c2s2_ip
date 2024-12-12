@@ -91,11 +91,7 @@ def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
 
 # Makes a new interconnect dut
 def make_interconnect(cmdline_opts):
-    dut = Interconnect_Fpga()
-    dut = config_model_with_cmdline_opts(dut, cmdline_opts, duts=[])
-    dut.apply(DefaultPassGroup(linetrace=False))
-    dut.sim_reset()
-    return dut
+    return None
 
 
 class InXbarCfg(int):

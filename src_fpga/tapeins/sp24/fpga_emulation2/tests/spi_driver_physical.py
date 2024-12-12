@@ -2,7 +2,7 @@ from pymtl3 import *
 from spidriver import SPIDriver
 import time
 
-s = SPIDriver("/dev/ttyUSB1")
+s = SPIDriver("COM7")
 
 
 def spi_write_physical(dut, src_msg):
