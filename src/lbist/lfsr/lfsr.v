@@ -11,10 +11,10 @@
 //
 // VERY IMPORTANT: Must have 4 taps!!!! Check documentation for bit widths
 // that support 4 taps. Common ones include: 8, 16, 24, 30, 32.
-// IMPORTANT: Do not specify a starting width N of < 4. 
+// IMPORTANT: Do not specify a starting width LFSR_MSG_BITS of < 4. 
 //
 // PARAMETERS --------------------------------------------------------
-// - N: Bitwidth of LFSR starting seed/LFSR outputs
+// - LFSR_MSG_BITS: Bitwidth of LFSR starting seed/LFSR outputs
 // - T1: Tap #1. For a 32-bit LFSR, T1 = 1
 // - T2: Tap #2. For a 32-bit LFSR, T2 = 5
 // - T3: Tap #3. For a 32-bit LFSR, T3 = 6
@@ -32,7 +32,7 @@
 // ===================================================================
 
 module lfsr#(
-    parameter N = 32,
+    parameter LFSR_MSG_BITS = 32,
     parameter T1 = 1,
     parameter T2 = 5,
     parameter T3 = 6,
@@ -42,21 +42,21 @@ module lfsr#(
     input logic clk,
     input logic reset,
 
-    //BIST-LFSR interface
+    //BIST-LFSR interface 
+    input logic [LFSR_MSG_BITS-1:0] req_msg,
     input logic req_val,
-    input logic [N-1:0] req_msg,
     output logic req_rdy,
 
     //LFSR-CUT interface
     input logic resp_rdy,
     output logic resp_val,
-    output logic [N-1:0] resp_msg
+    output logic [LFSR_MSG_BITS-1:0] resp_msg
 
 );
 
 
 //============================LOCAL_PARAMETERS=================================
-    // State marcos
+    // State macros
     // IDLE: LFSR is waiting for a valid seed to start generating test vectors
     // GEN_VAL: LFSR computes test vector using shifts + XORs (via taps)
     logic [1:0] IDLE = 2'b00;
@@ -72,11 +72,11 @@ module lfsr#(
     logic final_tap;
 
     // Flip Flop Chain
-    logic [N-1:0] Q;
-    logic [N-1:0] next_Q;
+    logic [LFSR_MSG_BITS-1:0] Q;
+    logic [LFSR_MSG_BITS-1:0] next_Q;
 
     assign final_tap = ((Q[T2]) ^ (Q[T3] ^ Q[T4])) ^ Q[T1];
-    assign next_Q = {Q[N-2:0], final_tap};
+    assign next_Q = {Q[LFSR_MSG_BITS-2:0], final_tap};
 
     //================================DATAPATH=====================================
     always_ff @(posedge clk) begin
