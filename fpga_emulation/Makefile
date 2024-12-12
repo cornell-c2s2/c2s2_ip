@@ -5,8 +5,8 @@ BUILD_DIR=$(FPGA_DIR)/build
 SCRIPT_DIR=$(FPGA_DIR)/scripts
 
 # Conversion
-
-interconnect_file = $(SRC_DIR)/tapeins/sp24/fpga_emulation2/interconnect_fpga.v
+src_emulation_dir = $(SRC_DIR)/tapeins/sp24/fpga_emulation2
+interconnect_file = $(src_emulation_dir)/interconnect_fpga.v
 
 pickled_file = $(BUILD_DIR)/Interconnect_Fpga_pickled.v
 lookup_file = $(BUILD_DIR)/sine_wave_lookup_16_8_32.v
@@ -32,6 +32,6 @@ compile:
 	@$(QTS_SH) -t emulation_sp24_tapein2.tcl
 
 program:
-	@$(QTS_PGM) -m JTAG -o "p;emulation_sp24_tapein2.sof@1"
+	@$(QTS_PGM) -m JTAG -o "p;output_files/emulation_sp24_tapein2.sof@1"
 
 all: convert compile program

@@ -1,6 +1,3 @@
 interconnect_fpga.v
-*_description.txt
-*.done
-*.rpt
-*.summary
+tests
 incremental_db/

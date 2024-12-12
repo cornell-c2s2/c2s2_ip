@@ -81,23 +81,4 @@ if {$make_assignments} {
 
 execute_flow -compile
 
-#set USB_num [lindex $argv 0]
-#set device_name [lindex $argv 1]
-
-set fileout [open "emulation_sp24_tapein2.cdf" "w"]
-
-puts $fileout "/* Quartus Prime Version 23.1std.1 Build 993 05/14/2024 SC Lite Edition */"
-puts $fileout "JedecChain;"
-puts $fileout "\tFileRevision(JESD32A);"
-puts $fileout "\tDefaultMfr(6E);"
-puts $fileout ""
-puts $fileout "\tP ActionCode(Cfg)"
-puts $fileout "\t\tDevicePartName(EP4CE115F29) Path(\"/home/c2/c2s2_ip/fpga_emulation/output_files/\") File(\"emulation_sp24_tapein2.sof\") MfrSpec(OpMask(1));"
-puts $fileout ""
-puts $fileout "ChainEnd;"
-puts $fileout ""
-puts $fileout "AlteraBegin;"
-puts $fileout "\tChainType(JTAG);"
-puts $fileout "AlteraEnd;"
-
 close $fileout

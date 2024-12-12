@@ -1,5 +1,0 @@
-load_package flow
-
-project_open emulation_sp24_tapein2
-execute_flow -convert_pof
-project_close
