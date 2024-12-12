@@ -62,26 +62,32 @@ module lbist_toplevel #(
   input  logic                   lbist_resp_rdy
   );
 
+  // Controller to LFSR, sends seed
   logic                      ctrl_lfsr_resp_val;
   logic [SEED_BITS-1:0]      ctrl_lfsr_resp_msg;
   logic                      ctrl_lfsr_resp_rdy;
 
+  // Controller to MISR, sends number of outputs to hash
   logic                      ctrl_misr_req_val;
   logic [MISR_MSG_BITS:0]    ctrl_misr_req_msg;
   logic                      ctrl_misr_req_rdy;
 
+  // MISR to controller, sends hash
   logic                      misr_ctrl_resp_val;
   logic [SIGNATURE_BITS-1:0] misr_ctrl_resp_msg;
   logic                      misr_ctrl_resp_rdy;
 
+  // LFSR to CUT, sends random inputs
   logic                      lfsr_cut_resp_val;
   logic [SEED_BITS-1:0]      lfsr_cut_resp_msg;
   logic                      lfsr_cut_resp_rdy;
 
+  // CUT to MISR, sends outputs of CUT
   logic                      cut_misr_resp_val;
   logic [SIGNATURE_BITS-1:0] cut_misr_resp_msg;
   logic                      cut_misr_resp_rdy;
 
+  // Controller to LFSR and CUT, sends reset signal once outputs have been hashed
   logic                      lfsr_cut_reset;
 
   lbist_controller #(

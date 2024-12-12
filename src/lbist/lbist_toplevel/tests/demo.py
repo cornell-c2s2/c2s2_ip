@@ -20,17 +20,19 @@ async def lbist_top_simple(dut):
     dut.reset.value = 1
 
     #Start clock
-    await ClockCycles(dut.clk, 1)
+    await ClockCycles(dut.clk, 2)
 
     # Reset to 0
     dut.reset.value = 0
-    await ClockCycles(dut.clk, 1)
+    await ClockCycles(dut.clk, 2)
 
+    # Start LBIST
     dut.lbist_req_val.value = 1
-    await ClockCycles(dut.clk, 1)
+    await ClockCycles(dut.clk, 2)
 
+    # Wait until LBIST is finished
     while dut.lbist_resp_val.value != 1:
-        await ClockCycles(dut.clk, 1)
+        await ClockCycles(dut.clk, 2)
 
     dut._log.info(f"TEST OUTPUT: {dut.lbist_resp_msg.value}")
 

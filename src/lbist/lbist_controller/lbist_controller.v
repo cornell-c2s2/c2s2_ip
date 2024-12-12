@@ -40,13 +40,12 @@
 `define LBIST_CONTROLLER_V
 
 module lbist_controller #(
-    parameter int SEED_BITS = 32,
-    parameter int SIGNATURE_BITS = 32,
+    parameter int SEED_BITS = 32,            // Number of bits for each seed
+    parameter int SIGNATURE_BITS = 32,       // Number of bits for each hash
     parameter int NUM_SEEDS = 8,             // Number of seeds to iterate over
-    parameter int NUM_HASHES = 8,          // Number of outputs from CUT misr should hash
+    parameter int NUM_HASHES = 8,            // Number of outputs from CUT misr should hash
     parameter int MAX_OUTPUTS_TO_HASH = 32,  // Max number of outputs from CUT misr should hash
     parameter int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH),
-    // Avoid unpacked arrays...
     parameter [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
       32'h0a89687e,
       32'ha87ded5f,
@@ -84,7 +83,6 @@ module lbist_controller #(
     output logic                      lfsr_resp_val,
     output logic [SEED_BITS-1:0]      lfsr_resp_msg,
     input  logic                      lfsr_resp_rdy,
-    output logic                      lfsr_cut_reset,
 
     // LBIST CONTROLLER to MISR
     output logic                      misr_req_val,
@@ -94,14 +92,17 @@ module lbist_controller #(
     // MISR to LBIST CONTROLLER
     input  logic                      misr_resp_val,
     input  logic [SIGNATURE_BITS-1:0] misr_resp_msg,
-    output logic                      misr_resp_rdy
+    output logic                      misr_resp_rdy,
+
+    // LBIST CONTROLLER to LFSR and CUT
+    output logic                      lfsr_cut_reset
   );
 
 //============================LOCAL_PARAMETERS=================================
 
-  localparam [1:0] IDLE     = 2'd0;
-  localparam START          = 2'd1;
-  localparam COMP_SIG       = 2'd2;
+  localparam [1:0] IDLE = 2'd0;
+  localparam [1:0] START = 2'd1;
+  localparam [1:0] COMP_SIG = 2'd2;
   logic [1:0] state;
   logic [1:0] next_state;
   logic [$clog2(NUM_SEEDS)-1:0] counter;
@@ -111,7 +112,7 @@ module lbist_controller #(
   always_comb begin
     case (state)
       IDLE: begin
-        lbist_req_rdy  = 1;
+        lbist_req_rdy  = 1;                  // Ready to start LBIST
         lfsr_resp_val  = 0;
         lfsr_resp_msg  = 0;
         misr_req_val   = 0;
@@ -121,10 +122,10 @@ module lbist_controller #(
       end
       START: begin
         lbist_req_rdy  = 0;
-        lfsr_resp_val  = 1;
-        lfsr_resp_msg  = LFSR_SEEDS[counter];
-        misr_req_val   = 1;
-        misr_req_msg   = NUM_HASHES;   // Corrected by johnny
+        lfsr_resp_val  = 1;                   // Message to LFSR is valid
+        lfsr_resp_msg  = LFSR_SEEDS[counter]; // Send seed to LFSR
+        misr_req_val   = 1;                   // Message to MISR is valid
+        misr_req_msg   = NUM_HASHES;          // Send number of outputs to hash to MISR
         misr_resp_rdy  = 0;
         lfsr_cut_reset = 0;
       end
@@ -134,10 +135,19 @@ module lbist_controller #(
         lfsr_resp_msg  = 0;
         misr_req_val   = 0;
         misr_req_msg   = 0;
-        misr_resp_rdy  = 1;
-        lfsr_cut_reset = 1;
+        misr_resp_rdy  = 1;                   // Ready to receive hash from MISR
+        lfsr_cut_reset = 1;                   // Send reset signal to LFSR and CUT
       end
+
+      // Same as IDLE
       default: begin
+        lbist_req_rdy  = 1;
+        lfsr_resp_val  = 0;
+        lfsr_resp_msg  = 0;
+        misr_req_val   = 0;
+        misr_req_msg   = 0;
+        misr_resp_rdy  = 0;
+        lfsr_cut_reset = 0;
       end
     endcase
   end
@@ -160,6 +170,7 @@ module lbist_controller #(
         else next_state = COMP_SIG;
       end
       default: begin
+        next_state = IDLE;
       end
     endcase
   end
@@ -199,13 +210,18 @@ module lbist_controller #(
         lbist_resp_val <= counter == (NUM_SEEDS - 1);
         for (int i = 0; i < NUM_SEEDS; i++) begin
           if (i == counter && misr_resp_val) begin
+            // Assign the bit that corresponds to the current test
             lbist_resp_msg[i] <= misr_resp_msg == EXPECTED_SIGNATURES[i];
           end else begin
             lbist_resp_msg[i] <= lbist_resp_msg[i];
           end
         end
       end
+
+      // Same as IDLE
       default: begin
+        lbist_resp_val <= 0;
+        lbist_resp_msg <= '0;
       end
     endcase
   end
