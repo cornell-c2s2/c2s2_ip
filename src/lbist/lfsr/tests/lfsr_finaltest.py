@@ -7,7 +7,8 @@ import subprocess
 from pathlib import Path
 import cocotb
 import numpy as np
-from cocotb.triggers import Timer, RisingEdge
+from cocotb.triggers import Timer, RisingEdge, FallingEdge, ClockCycles
+from cocotb.clock import Clock
 from cocotb.runner import get_runner
 from cocotb.binary import BinaryValue
 
@@ -110,14 +111,14 @@ async def lfsr_output_test(dut, NUM_SEEDS, SEED, MODEL_OUTPUTS, num_outputs):
     dut.reset.value = 1
 
     #Start clock
-    await cocotb.start(generate_clock(dut))
-    await RisingEdge(dut.clk)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await ClockCycles(dut.clk, 1)
 
     for i in range(NUM_SEEDS): 
         # Initialize: STATE = IDLE
         dut.reset.value = 1
-        await RisingEdge(dut.clk)
-        await RisingEdge(dut.clk)
+        await ClockCycles(dut.clk, 1)
+        await ClockCycles(dut.clk, 1)
 
         # IDLE -> GEN_VAL
         dut.reset.value = 0
@@ -130,8 +131,8 @@ async def lfsr_output_test(dut, NUM_SEEDS, SEED, MODEL_OUTPUTS, num_outputs):
         inputbinary = binaryarray_to_binaryvalue(inputseedlist[0])
         dut.req_msg.value = inputbinary
         dut.resp_rdy.value = 1
-        await RisingEdge(dut.clk)
-        await RisingEdge(dut.clk)
+        await ClockCycles(dut.clk, 1)
+        await ClockCycles(dut.clk, 1)
         
         # Checks that model outputs are equal to LFSR RTL outputs. 
         # If resp_rdy is LOW, then the LFSR should stall and continue to output the same value.
@@ -144,7 +145,7 @@ async def lfsr_output_test(dut, NUM_SEEDS, SEED, MODEL_OUTPUTS, num_outputs):
             else:
                 assert dut.resp_msg.value == MODEL_OUTPUTS[i][j]
             dut.resp_rdy.value = not dut.resp_rdy.value
-            await RisingEdge(dut.clk)
+            await ClockCycles(dut.clk, 1)
         
 # Tests FSM transitions. Singles out specific values to enter certain states.
 async def lfsr_FSM_test(dut, BIT_WIDTH):
@@ -152,14 +153,14 @@ async def lfsr_FSM_test(dut, BIT_WIDTH):
     dut.reset.value = 1
 
     #Start clock
-    await cocotb.start(generate_clock(dut))
-    await RisingEdge(dut.clk)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await ClockCycles(dut.clk, 1)
 
     # Initialize: STATE = IDLE
     dut.reset.value = 1
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     assert dut.next_state.value == dut.IDLE
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     assert dut.state.value == dut.IDLE
     assert(dut.resp_val.value == 0)
     assert(dut.req_rdy.value == 1)
@@ -169,10 +170,10 @@ async def lfsr_FSM_test(dut, BIT_WIDTH):
     dut.reset.value = 0
     dut.req_val.value = 1
     dut.resp_rdy.value = 1
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     assert dut.state.value == dut.IDLE
     assert dut.next_state.value == dut.GEN_VAL
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     assert dut.state.value == dut.GEN_VAL
     assert(dut.req_rdy.value == 0)
     assert(dut.resp_val.value == 1)
@@ -181,10 +182,10 @@ async def lfsr_FSM_test(dut, BIT_WIDTH):
     # GEN_VAL -> GEN_VAL
     dut.reset.value = 0
     dut.req_val.value = 1
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     assert dut.state.value == dut.GEN_VAL
     assert dut.next_state.value == dut.GEN_VAL
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     assert dut.state.value == dut.GEN_VAL
     assert dut.state.value == dut.GEN_VAL
     assert(dut.req_rdy.value == 0)
@@ -193,10 +194,10 @@ async def lfsr_FSM_test(dut, BIT_WIDTH):
 
     # GEN_VAL -> IDLE
     dut.reset.value = 1
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     assert dut.state.value == dut.GEN_VAL
     assert dut.next_state.value == dut.IDLE
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     assert dut.state.value == dut.IDLE
     assert(dut.resp_val.value == 0)
     assert(dut.req_rdy.value == 1)
@@ -222,12 +223,12 @@ async def lfsr_manual_test(dut):
     dut.reset.value = 1
 
     #Start clock
-    await cocotb.start(generate_clock(dut))
-    await RisingEdge(dut.clk)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await ClockCycles(dut.clk, 1)
 
     # Initialize: STATE = IDLE
     dut.reset.value = 1
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     assert dut.next_state.value == dut.IDLE
 
 
@@ -241,10 +242,10 @@ async def lfsr_manual_test(dut):
     dut.reset.value = 0
     dut.req_val.value = 1
     dut.resp_rdy.value = 1
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     assert dut.state.value == dut.IDLE
     assert dut.next_state.value == dut.GEN_VAL
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     assert dut.state.value == dut.GEN_VAL
     assert dut.next_state.value == dut.GEN_VAL
     assert dut.resp_msg.value == inputbinary
@@ -252,7 +253,7 @@ async def lfsr_manual_test(dut):
     assert(dut.resp_val.value == 1)
 
     # Cycle & Shift
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     inputseed = ['11001110010110001000111000110110']
     inputseedlist = convert_binary_strings_to_lists(inputseed)
     inputbinary = binaryarray_to_binaryvalue(inputseedlist[0])
@@ -263,7 +264,7 @@ async def lfsr_manual_test(dut):
     assert dut.next_state.value == dut.GEN_VAL
 
     # Cycle & Shift
-    await RisingEdge(dut.clk)
+    await ClockCycles(dut.clk, 1)
     inputseed = ['10011100101100010001110001101101']
     inputseedlist = convert_binary_strings_to_lists(inputseed)
     inputbinary = binaryarray_to_binaryvalue(inputseedlist[0])
