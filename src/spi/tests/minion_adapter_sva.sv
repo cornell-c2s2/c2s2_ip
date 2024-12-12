@@ -123,9 +123,12 @@ SEND_TO_PUSH : assert property (send_to_push);
 reg [nbits-3:0] pushed_msg;
 reg push_matches_send;
 always_ff @(posedge clk) begin: compare_push_send
-    if (reset)
+    if (reset) begin
+        pushed_msg <= '0;
+        push_matches_send <= 0;
+    end
     if (push_msg_val_wrt && push_en) begin
-      pushed_msg = push_msg_data;
+      pushed_msg <= push_msg_data;
     end
     if (send_val) begin
       push_matches_send <= (pushed_msg == send_msg);
@@ -134,15 +137,34 @@ end
 
 property push_to_send_msg;
     @(posedge clk) disable iff(reset)
-      (push_msg_val_rd && pull_en && recv_val && recv_rdy) |-> ##[0:$] (push_matches_send);
+      $rose(send_val) |-> ##1 (push_matches_send);
 endproperty
 
 PUSH_TO_SEND_PARITY : assert property (push_to_send_msg);
 
-// val/rdy checks
 
+// checks that the message sent is the same as the message received
+reg [nbits-3:0] recved_msg;
+reg recv_matches_pull;
+always_ff @(posedge clk) begin: compare_recv_pull
+    if (reset) begin
+        recved_msg <= '0;
+        recv_matches_pull <= 0;
+    end
+    if (recv_val && recv_rdy) begin
+      recved_msg <= recv_msg;
+    end
+    if (cm_q_send_val) begin
+      recv_matches_pull <= (recved_msg == pull_msg_data);
+    end
+end
 
-// push/pull checks
+property recv_to_pull;
+    @(posedge clk) disable iff(reset)
+      $rose(pull_msg_val) |-> ##1 (recv_matches_pull);
+endproperty
+
+RECV_TO_PULL_PARITY : assert property (recv_to_pull);
 
 endmodule
 bind spi_helpers_Minion_Adapter spi_helpers_Minion_Adapter_sva tb(.*);
