@@ -57,9 +57,6 @@ module misr #(
     output logic                      lbist_resp_val,
     output logic [SIGNATURE_BITS-1:0] lbist_resp_msg,
     input  logic                      lbist_resp_rdy
-
-    // MISR to CUT
-    // output logic                      cut
   );
 
 //============================LOCAL_PARAMETERS=================================
@@ -82,10 +79,8 @@ module misr #(
 
 //================================DATAPATH=====================================
   assign next_signature = (signature^cut_req_msg);
-  // assign done_hashing = (outputs_hashed < (outputs_to_hash - 1));
   assign done_hashing = (outputs_hashed < (outputs_to_hash));
   assign next_outputs_hashed = outputs_hashed + 1;
-  // assign cut = done_hashing;
 
   always_ff @(posedge clk) begin
     if( reset ) begin
