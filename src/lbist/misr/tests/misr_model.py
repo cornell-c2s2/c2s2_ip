@@ -37,12 +37,19 @@ def binaryarray_to_binaryvalue(binary_list):
 
 # Generates an array of random positive integers with a maximum value of 4294967294.
 # - size (int): The number of random integers to generate.
-# - number of bits of each input
-def generate_random_array(size, num_bits):
-    random.seed(TB_SEED)
-    max_value = 2**num_bits -1
-    return [random.randint(1, max_value) for _ in range(size)]
+# - seed_value (int, optional): The seed for the random number generator.
+def generate_random_array(size):
+    max_value = 4294967294
+    arr = [random.randint(1, max_value) for _ in range(size)]
+    # print(arr)
+    return arr
 
 
-def test_misr(num_entries, num_bits, seed_length):
-    pass
+
+# # Generates an array of random positive integers with a maximum value of 4294967294.
+# # - size (int): The number of random integers to generate.
+# # - number of bits of each input
+# def generate_random_array(size, num_bits):
+#     random.seed(TB_SEED)
+#     max_value = 2**num_bits -1
+#     return [random.randint(1, max_value) for _ in range(size)]
