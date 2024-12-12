@@ -66,8 +66,7 @@ module spi_helpers_Minion_Adapter #(
     .enq_val(mc_q_recv_val),
     .deq_msg(send_msg),
     .deq_rdy(send_rdy),
-    .deq_val(send_val)
-  );
+    .deq_val(send_val));
 
   assign parity = (^send_msg) & send_val;
 
@@ -79,7 +78,5 @@ module spi_helpers_Minion_Adapter #(
     pull_msg_val  = cm_q_send_rdy & cm_q_send_val;
     pull_msg_data = cm_q_send_msg & {(nbits - 2) {pull_msg_val}};
   end
-
 endmodule
-
 `endif

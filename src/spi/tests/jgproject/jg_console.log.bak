@@ -1,0 +1,44 @@
+2024-12-08 12:15:57.467390 (2717109) main____ INFO    ----------------------------------------
+2024-12-08 12:15:57.467433 (2717109) main____ INFO    Jasper version info
+2024-12-08 12:15:57.467440 (2717109) main____ INFO      tool      : Jasper 2024.09
+2024-12-08 12:15:57.467445 (2717109) main____ INFO      version   : 2024.09 FCS 64 bits
+2024-12-08 12:15:57.467449 (2717109) main____ INFO      build date: 2024.09.26 14:35:17 UTC
+2024-12-08 12:15:57.467452 (2717109) main____ INFO    ----------------------------------------
+2024-12-08 12:15:57.467454 (2717109) main____ INFO    Runtime info:
+2024-12-08 12:15:57.467456 (2717109) main____ INFO      platform  : Linux 4.18.0-553.27.1.el8_10.x86_64 x86_64
+2024-12-08 12:15:57.467462 (2717109) main____ INFO      hostname  : ecelinux-06.ece.cornell.edu
+2024-12-08 12:15:57.467466 (2717109) main____ INFO      pid       : 2717109
+2024-12-08 12:15:57.467468 (2717109) main____ INFO      arguments : '-style' 'windows' '-fpv'
+2024-12-08 12:15:57.467471 (2717109) main____ INFO      locale    : UTF-8
+2024-12-08 12:15:57.467473 (2717109) main____ INFO    ----------------------------------------
+2024-12-08 12:15:57.467475 (2717109) main____ INFO    System resource limits info:
+2024-12-08 12:15:57.467482 (2717109) main____ INFO      virtual memory: unlimited
+2024-12-08 12:15:57.467490 (2717109) main____ INFO      cpu time      : 43200 s
+2024-12-08 12:15:57.468049 (2717109) main____ INFO      processes     : 127201
+2024-12-08 12:15:57.468055 (2717109) main____ INFO      stack size    : 8388608 B
+2024-12-08 12:15:57.468059 (2717109) main____ INFO      core file size: 10485760 B
+2024-12-08 12:15:57.468062 (2717109) main____ INFO      open files    : 1024
+2024-12-08 12:15:57.468065 (2717109) main____ INFO      file size     : unlimited
+2024-12-08 12:15:57.468067 (2717109) main____ INFO    ----------------------------------------
+2024-12-08 12:15:57.468069 (2717109) main____ INFO    Memory statistics:
+2024-12-08 12:15:57.468072 (2717109) main____ INFO      total physical memory  : 32621684 kB
+2024-12-08 12:15:57.468075 (2717109) main____ INFO      free physical memory   : 6288496 kB
+2024-12-08 12:15:57.468078 (2717109) main____ INFO      committed address space: 141616028 kB
+2024-12-08 12:15:57.468080 (2717109) main____ INFO    ----------------------------------------
+2024-12-08 12:15:57.468519 (2717109) main____ INFO    Important environment variables:
+2024-12-08 12:15:57.468531 (2717109) main____ INFO      DISPLAY            : 'localhost:10.0'
+2024-12-08 12:15:57.468535 (2717109) main____ INFO      JASPER_CPU_CHECK   : '1'
+2024-12-08 12:15:57.468537 (2717109) main____ INFO      JASPER_INSTALL_DIR : '/opt/cadence/jasper_2024.09'
+2024-12-08 12:15:57.468540 (2717109) main____ INFO      JASPER_KERNEL_CHECK: '1'
+2024-12-08 12:15:57.468543 (2717109) main____ INFO      JASPER_OS_CHECK    : '1'
+2024-12-08 12:15:57.468545 (2717109) main____ INFO      JASPER_PLATFORM    : 'Linux64'
+2024-12-08 12:15:57.468548 (2717109) main____ INFO      LANG               : 'en_US.UTF-8'
+2024-12-08 12:15:57.468550 (2717109) main____ INFO    ----------------------------------------
+2024-12-08 12:15:57.468896 (2717109) lic_core INFO    Initializing license system ...
+2024-12-08 12:15:57.472492 (2717109) lic_core ERROR   ... failed to initialize license system (status: -902) ("The license server search path is defined as <none>. Can't find license file. Run 'lic_error LMC-01902' for more information.")
+2024-12-08 12:15:57.472511 (2717109) lic_core ERROR   Detailed license error message (4 lines):
+2024-12-08 12:15:57.472515 (2717109) lic_core ERROR     ERROR (LMC-01902): License call failed.
+2024-12-08 12:15:57.472517 (2717109) lic_core ERROR     The license server search path is defined as <none>.
+2024-12-08 12:15:57.472519 (2717109) lic_core ERROR     Can't find license file.
+2024-12-08 12:15:57.472522 (2717109) lic_core ERROR     Run 'lic_error LMC-01902' for more information.
+2024-12-08 12:15:57.472687 (2717109) main____ INFO    Exiting with status 2.

@@ -1,0 +1,498 @@
+2024-12-10 14:24:11.853481 (884824) main____ INFO    ----------------------------------------
+2024-12-10 14:24:11.853533 (884824) main____ INFO    Jasper version info
+2024-12-10 14:24:11.853541 (884824) main____ INFO      tool      : Jasper 2024.09
+2024-12-10 14:24:11.853547 (884824) main____ INFO      version   : 2024.09 FCS 64 bits
+2024-12-10 14:24:11.853552 (884824) main____ INFO      build date: 2024.09.26 14:35:17 UTC
+2024-12-10 14:24:11.853554 (884824) main____ INFO    ----------------------------------------
+2024-12-10 14:24:11.853557 (884824) main____ INFO    Runtime info:
+2024-12-10 14:24:11.853559 (884824) main____ INFO      platform  : Linux 4.18.0-553.27.1.el8_10.x86_64 x86_64
+2024-12-10 14:24:11.853565 (884824) main____ INFO      hostname  : ecelinux-18.ece.cornell.edu
+2024-12-10 14:24:11.853570 (884824) main____ INFO      pid       : 884824
+2024-12-10 14:24:11.853991 (884824) main____ INFO      arguments : '-style' 'windows' '-fpv'
+2024-12-10 14:24:11.853998 (884824) main____ INFO      locale    : UTF-8
+2024-12-10 14:24:11.854001 (884824) main____ INFO    ----------------------------------------
+2024-12-10 14:24:11.854004 (884824) main____ INFO    System resource limits info:
+2024-12-10 14:24:11.854009 (884824) main____ INFO      virtual memory: unlimited
+2024-12-10 14:24:11.854020 (884824) main____ INFO      cpu time      : 43200 s
+2024-12-10 14:24:11.854027 (884824) main____ INFO      processes     : 127201
+2024-12-10 14:24:11.854030 (884824) main____ INFO      stack size    : 8388608 B
+2024-12-10 14:24:11.854034 (884824) main____ INFO      core file size: 10485760 B
+2024-12-10 14:24:11.854038 (884824) main____ INFO      open files    : 1024
+2024-12-10 14:24:11.854041 (884824) main____ INFO      file size     : unlimited
+2024-12-10 14:24:11.854043 (884824) main____ INFO    ----------------------------------------
+2024-12-10 14:24:11.854045 (884824) main____ INFO    Memory statistics:
+2024-12-10 14:24:11.854048 (884824) main____ INFO      total physical memory  : 32621684 kB
+2024-12-10 14:24:11.854051 (884824) main____ INFO      free physical memory   : 2524092 kB
+2024-12-10 14:24:11.854054 (884824) main____ INFO      committed address space: 152783688 kB
+2024-12-10 14:24:11.854056 (884824) main____ INFO    ----------------------------------------
+2024-12-10 14:24:11.854510 (884824) main____ INFO    Important environment variables:
+2024-12-10 14:24:11.854521 (884824) main____ INFO      CDS_LIC_FILE         : '5280@flex.ece.cornell.edu'
+2024-12-10 14:24:11.854525 (884824) main____ INFO      CDS_LIC_FILE_modshare: '5280@flex.ece.cornell.edu:1'
+2024-12-10 14:24:11.854527 (884824) main____ INFO      DISPLAY              : 'localhost:10.0'
+2024-12-10 14:24:11.854530 (884824) main____ INFO      JASPER_CPU_CHECK     : '1'
+2024-12-10 14:24:11.854533 (884824) main____ INFO      JASPER_INSTALL_DIR   : '/opt/cadence/jasper_2024.09'
+2024-12-10 14:24:11.854535 (884824) main____ INFO      JASPER_KERNEL_CHECK  : '1'
+2024-12-10 14:24:11.854538 (884824) main____ INFO      JASPER_OS_CHECK      : '1'
+2024-12-10 14:24:11.854540 (884824) main____ INFO      JASPER_PLATFORM      : 'Linux64'
+2024-12-10 14:24:11.854543 (884824) main____ INFO      LANG                 : 'en_US.UTF-8'
+2024-12-10 14:24:11.854545 (884824) main____ INFO    ----------------------------------------
+2024-12-10 14:24:11.855369 (884824) lic_core INFO    Initializing license system ...
+2024-12-10 14:24:11.916619 (884824) lic_core INFO    ... license system initialized.
+2024-12-10 14:24:11.954891 (884824) lic__man INFO    Claim 'main' for <ui>.
+2024-12-10 14:24:11.954937 (884824) lic_core INFO    (1) checking out 'jasper_interactive' ...
+2024-12-10 14:24:12.007382 (884824) lic_core INFO    ... (1) checkout succeeded
+2024-12-10 14:24:12.007437 (884824) lic__man INFO    Claim 'fpv' for <ui>.
+2024-12-10 14:24:12.007453 (884824) lic_core INFO    (2) checking out 'jasper_fpv' ...
+2024-12-10 14:24:12.024748 (884824) lic_core INFO    ... (2) checkout failed (error: -5) ("FLEXnet ERROR(-5, 0, 0): No such feature exists.")
+2024-12-10 14:24:12.024789 (884824) lic_core INFO    (3) checking out 'jasper_fao' ...
+2024-12-10 14:24:12.035664 (884824) lic_core INFO    ... (3) checkout succeeded
+2024-12-10 14:24:12.054427 (884824) main____ INFO    Tool inactivity delay is 480000 ms.
+2024-12-10 14:24:12.607462 (884824) lic__man INFO    Claim 'fpv' for <ui>.
+2024-12-10 14:24:12.882942 (884824) lic__man INFO    Unclaim 'fpv' for <ui>.
+2024-12-10 14:24:12.882994 (884824) lic__man INFO    Claim 'fpv' for <ui>.
+2024-12-10 14:24:12.890081 (884824) session_ INFO    Starting analysis session with session id 'session_0' (launcher: <local>) ...
+2024-12-10 14:24:12.892691 (884824) session_ INFO    Analysis session with session id 'session_0' started (pid: 884856)
+2024-12-10 14:24:20.393422 (884824) session_ INFO    Analysis session 'session_0' connected to the console (host: 127.0.0.1:46296)
+2024-12-10 14:26:21.043644 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 14:26:21.044007 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 14:27:06.895322 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 14:27:06.895453 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 14:47:03.476733 (884824) lic__man INFO    Entering idle state.
+2024-12-10 14:47:41.823506 (884824) lic__man INFO    Leaving idle state.
+2024-12-10 14:51:21.636550 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 14:51:21.636649 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 14:51:42.556865 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 14:51:42.556913 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 14:51:55.076128 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 14:51:55.076191 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 14:51:55.705554 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 14:51:57.810802 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 14:51:57.810892 (884824) lic_core INFO    (4) checking out 'jasper_coverage' ...
+2024-12-10 14:51:57.817081 (884824) lic_core INFO    ... (4) checkout failed (error: -5) ("FLEXnet ERROR(-5, 0, 0): No such feature exists.")
+2024-12-10 14:51:57.817117 (884824) lic_core INFO    (5) checking out 'jasper_pcov' ...
+2024-12-10 14:51:57.828226 (884824) lic_core INFO    ... (5) checkout succeeded
+2024-12-10 14:51:57.829949 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 14:51:57.829978 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 14:51:59.809692 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 14:51:59.809736 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 14:51:59.809748 (884824) lic_core INFO    (6) checking out 'jasper_fpv' ...
+2024-12-10 14:51:59.809755 (884824) lic_core INFO    ... (6) checkout failed (error: -1000000008) ("License feature excluded by previous fatal license checkout attempt")
+2024-12-10 14:51:59.809762 (884824) lic_core INFO    (7) checking out 'jasper_fao' ...
+2024-12-10 14:51:59.821603 (884824) lic_core INFO    ... (7) checkout succeeded
+2024-12-10 14:51:59.828336 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 14:51:59.887149 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 14:52:00.327245 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 14:52:00.428954 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 14:52:00.834965 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 14:52:00.891409 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 14:52:00.984146 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 14:52:01.863673 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 14:52:04.709613 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 14:53:01.661426 (884824) lic_core INFO    (7) checkin jasper_fao
+2024-12-10 15:00:35.661768 (884824) lic__man INFO    Entering idle state.
+2024-12-10 15:13:13.092234 (884824) lic__man INFO    Leaving idle state.
+2024-12-10 15:13:13.404011 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:13:13.404205 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:13:14.230150 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:13:15.433500 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:13:15.434606 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:13:15.435077 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:13:15.646704 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:13:15.646731 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:13:15.646742 (884824) lic_core INFO    (8) checking out 'jasper_fpv' ...
+2024-12-10 15:13:15.646748 (884824) lic_core INFO    ... (8) checkout failed (error: -1000000008) ("License feature excluded by previous fatal license checkout attempt")
+2024-12-10 15:13:15.646755 (884824) lic_core INFO    (9) checking out 'jasper_fao' ...
+2024-12-10 15:13:15.660247 (884824) lic_core INFO    ... (9) checkout succeeded
+2024-12-10 15:13:15.960068 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:13:17.193117 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:13:17.195461 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:13:17.197693 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:13:17.197758 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:13:17.199013 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:13:17.257264 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:13:17.544032 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:13:24.414221 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:14:17.661608 (884824) lic_core INFO    (9) checkin jasper_fao
+2024-12-10 15:16:26.764447 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:16:26.764687 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:16:27.547508 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:16:27.843524 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:16:27.844352 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:16:27.844370 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:16:28.830961 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:16:28.830997 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:16:28.831013 (884824) lic_core INFO    (10) checking out 'jasper_fpv' ...
+2024-12-10 15:16:28.831022 (884824) lic_core INFO    ... (10) checkout failed (error: -1000000008) ("License feature excluded by previous fatal license checkout attempt")
+2024-12-10 15:16:28.831029 (884824) lic_core INFO    (11) checking out 'jasper_fao' ...
+2024-12-10 15:16:28.842697 (884824) lic_core INFO    ... (11) checkout succeeded
+2024-12-10 15:16:29.010735 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:16:29.869080 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:16:29.869465 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:16:29.870483 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:16:29.870561 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:16:29.873819 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:16:30.567462 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:16:30.755934 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:16:32.827280 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:17:30.661490 (884824) lic_core INFO    (11) checkin jasper_fao
+2024-12-10 15:19:00.134386 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:19:00.136389 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:19:01.679140 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:19:02.706610 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:19:02.707489 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:19:02.707513 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:19:03.800822 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:19:03.800862 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:19:03.800886 (884824) lic_core INFO    (12) checking out 'jasper_fpv' ...
+2024-12-10 15:19:03.800893 (884824) lic_core INFO    ... (12) checkout failed (error: -1000000008) ("License feature excluded by previous fatal license checkout attempt")
+2024-12-10 15:19:03.800900 (884824) lic_core INFO    (13) checking out 'jasper_fao' ...
+2024-12-10 15:19:03.814459 (884824) lic_core INFO    ... (13) checkout succeeded
+2024-12-10 15:19:03.901430 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:19:04.291761 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:19:04.392508 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:19:04.701102 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:19:04.713994 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:19:04.835786 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:19:05.635340 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:19:05.704141 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:19:21.865733 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:19:21.865891 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:19:22.722056 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:19:23.080646 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:19:23.081343 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:19:23.081361 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:19:24.073487 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:19:24.073521 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:19:24.205405 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:19:24.305789 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:19:24.528588 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:19:24.779916 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:19:25.061001 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:19:25.081559 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:19:25.778479 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:19:25.994329 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:19:59.439544 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:19:59.439649 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:20:00.259663 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:20:00.654494 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:20:00.655611 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:20:00.655639 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:20:01.640496 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:20:01.640531 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:20:01.790122 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:20:02.022455 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:20:02.167542 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:20:02.291096 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:20:02.638072 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:20:02.659515 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:20:03.289692 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:20:03.562624 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:20:04.989906 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:20:47.024375 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:20:47.024847 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:20:47.769034 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:20:47.997167 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:20:47.997994 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:20:47.998018 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:20:48.970731 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:20:48.970758 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:20:49.108570 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:20:49.233699 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:20:49.493008 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:20:49.788721 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:20:49.970530 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:20:49.992204 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:20:50.787439 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:20:50.892856 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:20:52.933204 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:21:15.858132 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:21:15.858302 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:21:16.711690 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:21:17.058968 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:21:17.059828 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:21:17.059852 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:21:18.101510 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:21:18.101543 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:21:18.271651 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:21:18.404447 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:21:18.541826 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:21:18.731647 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:21:19.098730 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:21:19.120541 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:21:19.730320 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:21:19.996755 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:22:19.661717 (884824) lic_core INFO    (13) checkin jasper_fao
+2024-12-10 15:24:33.236474 (884824) lic__man INFO    Unclaim 'fpv' for <ui>.
+2024-12-10 15:24:33.236537 (884824) lic__man INFO    Claim 'cov' for <ui>.
+2024-12-10 15:40:51.629765 (884824) lic__man INFO    Unclaim 'cov' for <ui>.
+2024-12-10 15:40:51.629830 (884824) lic__man INFO    Claim 'fpv' for <ui>.
+2024-12-10 15:40:56.268705 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:40:56.270062 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:41:23.138349 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:41:23.138693 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:41:24.354430 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:41:25.515474 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:41:25.516284 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:41:25.516304 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:41:25.630339 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:41:25.630365 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:41:25.630377 (884824) lic_core INFO    (14) checking out 'jasper_fpv' ...
+2024-12-10 15:41:25.630383 (884824) lic_core INFO    ... (14) checkout failed (error: -1000000008) ("License feature excluded by previous fatal license checkout attempt")
+2024-12-10 15:41:25.630390 (884824) lic_core INFO    (15) checking out 'jasper_fao' ...
+2024-12-10 15:41:25.643346 (884824) lic_core INFO    ... (15) checkout succeeded
+2024-12-10 15:41:25.825146 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:41:26.083179 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:41:26.188792 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:41:26.378539 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:41:26.630309 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:41:26.728743 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:41:27.377174 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:41:27.551628 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:42:06.924910 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:42:06.925042 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:42:07.744144 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:42:08.156761 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:42:08.158620 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:42:08.158669 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:42:08.845312 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:42:08.845372 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:42:08.853266 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:42:08.853422 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:42:09.359960 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:42:09.444516 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:42:09.821715 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:42:09.934070 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:42:10.277159 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:42:11.203270 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:42:13.278410 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:43:11.661682 (884824) lic_core INFO    (15) checkin jasper_fao
+2024-12-10 15:44:04.637698 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:44:04.637850 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:44:05.453246 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:44:05.780505 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:44:05.781430 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:44:05.781454 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:44:06.742698 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:44:06.742737 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:44:06.742751 (884824) lic_core INFO    (16) checking out 'jasper_fpv' ...
+2024-12-10 15:44:06.742757 (884824) lic_core INFO    ... (16) checkout failed (error: -1000000008) ("License feature excluded by previous fatal license checkout attempt")
+2024-12-10 15:44:06.742764 (884824) lic_core INFO    (17) checking out 'jasper_fao' ...
+2024-12-10 15:44:06.754721 (884824) lic_core INFO    ... (17) checkout succeeded
+2024-12-10 15:44:06.933926 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:44:07.228906 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:44:07.286919 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:44:07.482496 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:44:07.738330 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:44:07.760645 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:44:08.480903 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:44:08.662433 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:44:53.558885 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:44:53.558956 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:44:54.371980 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:44:54.736509 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:44:54.737738 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:44:54.737765 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:44:55.778304 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:44:55.778340 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:44:55.950970 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:44:56.340482 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:44:56.343781 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:44:56.406613 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:44:56.777639 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:44:56.809839 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:44:57.405144 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:44:57.697151 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:45:02.175690 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:45:57.661529 (884824) lic_core INFO    (17) checkin jasper_fao
+2024-12-10 15:52:55.357580 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:52:55.358018 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:52:56.118439 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:52:56.486077 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:52:56.487752 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:52:56.487780 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:52:57.397140 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:52:57.397193 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:52:57.397207 (884824) lic_core INFO    (18) checking out 'jasper_fpv' ...
+2024-12-10 15:52:57.397213 (884824) lic_core INFO    ... (18) checkout failed (error: -1000000008) ("License feature excluded by previous fatal license checkout attempt")
+2024-12-10 15:52:57.397221 (884824) lic_core INFO    (19) checking out 'jasper_fao' ...
+2024-12-10 15:52:57.409880 (884824) lic_core INFO    ... (19) checkout succeeded
+2024-12-10 15:52:57.418746 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:52:57.418911 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:52:57.983668 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:52:57.991883 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:52:58.140150 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:52:58.479420 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:52:58.602567 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:52:59.525004 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:53:55.758426 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:53:55.762145 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:53:56.577466 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:53:56.941180 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:53:56.942791 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:53:56.942827 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:53:58.017562 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:53:58.017601 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:53:58.165490 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:53:58.514149 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:53:58.562716 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:53:58.640562 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:53:59.410254 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:53:59.410363 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:53:59.638833 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:53:59.940799 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:54:01.513172 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:54:29.858523 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:54:29.858633 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:54:53.511918 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:54:53.511954 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:54:53.988849 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:54:54.271331 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:54:54.272769 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:54:54.272803 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:54:55.286205 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:54:55.286253 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:54:55.292029 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:54:55.292180 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:54:57.239185 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:54:57.240648 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:54:57.243016 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:54:57.416153 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:54:57.502396 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:54:58.310997 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:54:58.552815 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:55:21.980051 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:55:21.980238 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:55:23.677561 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:55:24.723003 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:55:24.724375 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:55:24.724414 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:55:26.218487 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:55:26.218539 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:55:26.225164 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:55:26.708712 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:55:26.744779 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:55:26.780651 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:55:26.795034 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:55:27.372634 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:55:27.750541 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:55:27.751980 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:55:29.281136 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:55:46.621507 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:55:46.621612 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:55:48.123157 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:55:49.156666 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:55:49.158179 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:55:49.158225 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:55:50.853995 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:55:50.854065 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:55:50.858391 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:55:51.150222 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:55:51.422321 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:55:51.485676 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:55:51.923111 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:55:52.109178 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:55:52.150369 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:55:53.031969 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:55:53.191654 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:56:39.059529 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:56:39.059854 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:56:39.997110 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:56:40.294283 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:56:40.295626 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:56:40.295655 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:56:41.155184 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:56:41.155250 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:56:41.161319 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:56:41.161475 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:56:41.652483 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:56:41.720734 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:56:42.021053 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:56:42.193268 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:56:42.413373 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:56:43.335424 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:56:53.601260 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:56:53.601452 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:56:54.509919 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:56:54.831674 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:56:54.832925 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:56:54.832959 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:56:56.266718 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:56:56.266760 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:56:56.527565 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:56:56.575119 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:56:56.766517 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:56:56.821471 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:56:57.266423 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:56:57.286947 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:56:57.552369 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:56:58.194587 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:56:59.947766 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:57:58.661739 (884824) lic_core INFO    (19) checkin jasper_fao
+2024-12-10 15:59:47.737631 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 15:59:47.737988 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:59:48.546225 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 15:59:48.822515 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 15:59:48.823582 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:59:48.823609 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 15:59:49.769548 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 15:59:49.769576 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 15:59:49.769588 (884824) lic_core INFO    (20) checking out 'jasper_fpv' ...
+2024-12-10 15:59:49.769601 (884824) lic_core INFO    ... (20) checkout failed (error: -1000000008) ("License feature excluded by previous fatal license checkout attempt")
+2024-12-10 15:59:49.769608 (884824) lic_core INFO    (21) checking out 'jasper_fao' ...
+2024-12-10 15:59:49.781735 (884824) lic_core INFO    ... (21) checkout succeeded
+2024-12-10 15:59:49.907961 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 15:59:50.021300 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 15:59:50.949329 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 15:59:50.950310 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 15:59:50.950431 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 15:59:50.950752 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 15:59:51.567928 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 15:59:51.692923 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 15:59:55.898582 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 16:00:47.503618 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 16:00:47.503960 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 16:00:48.304931 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 16:00:48.627038 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 16:00:48.629032 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 16:00:48.629065 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 16:00:49.566206 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 16:00:49.566235 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 16:00:49.729380 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 16:00:49.805740 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 16:00:50.013868 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 16:00:50.362754 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 16:00:50.566293 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 16:00:50.586377 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 16:00:51.360793 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 16:00:51.464023 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 16:00:51.840685 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 16:01:51.661267 (884824) lic_core INFO    (21) checkin jasper_fao
+2024-12-10 16:03:01.536160 (884824) main____ INFO    Releasing console memory by request of analysis session 'session_0'.
+2024-12-10 16:03:01.536472 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 16:03:02.300175 (884824) lic__man INFO    Unclaim everything for 'session_0'.
+2024-12-10 16:03:02.736367 (884824) lic__man INFO    Claim 'cov' for 'session_0'.
+2024-12-10 16:03:02.738315 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 16:03:02.738348 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-1'.
+2024-12-10 16:03:03.978125 (884824) lic__man INFO    Claim 'fpv' for 'session_0'.
+2024-12-10 16:03:03.978158 (884824) lic__man INFO    Claim 'fpv' for 'session_0/prove-3'.
+2024-12-10 16:03:03.978172 (884824) lic_core INFO    (22) checking out 'jasper_fpv' ...
+2024-12-10 16:03:03.978180 (884824) lic_core INFO    ... (22) checkout failed (error: -1000000008) ("License feature excluded by previous fatal license checkout attempt")
+2024-12-10 16:03:03.978189 (884824) lic_core INFO    (23) checking out 'jasper_fao' ...
+2024-12-10 16:03:03.991518 (884824) lic_core INFO    ... (23) checkout succeeded
+2024-12-10 16:03:04.219667 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-2'.
+2024-12-10 16:03:04.241561 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-7'.
+2024-12-10 16:03:04.359072 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-1'.
+2024-12-10 16:03:04.430279 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-5'.
+2024-12-10 16:03:04.978018 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-4'.
+2024-12-10 16:03:04.999792 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-6'.
+2024-12-10 16:03:05.358966 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-0'.
+2024-12-10 16:03:05.906067 (884824) lic__man INFO    Unclaim everything for 'session_0/prove-3'.
+2024-12-10 16:04:05.661738 (884824) lic_core INFO    (23) checkin jasper_fao
+2024-12-10 16:11:24.661993 (884824) lic__man INFO    Entering idle state.
+2024-12-10 16:27:13.034280 (884824) lic__man INFO    Leaving idle state.
+2024-12-10 16:27:18.636057 (884824) main____ INFO    About to exit: requested from GUI
+2024-12-10 16:27:18.822017 (884824) session_ INFO    Analysis session 'session_0' disconnected.
+2024-12-10 16:27:18.833207 (884824) lic_core INFO    (1) checkin jasper_interactive
+2024-12-10 16:27:18.838482 (884824) lic_core INFO    (3) checkin jasper_fao
+2024-12-10 16:27:18.844141 (884824) lic_core INFO    (5) checkin jasper_pcov
+2024-12-10 16:27:18.849734 (884824) main____ INFO    Exiting with status 0.
