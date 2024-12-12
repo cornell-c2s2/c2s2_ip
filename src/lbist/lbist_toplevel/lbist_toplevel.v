@@ -20,17 +20,35 @@
 module lbist_toplevel #(
   parameter int SEED_BITS = 32,
   parameter int SIGNATURE_BITS = 16,
-  parameter int NUM_SEEDS = 2,
-  parameter int NUM_HASHES = 2,
-  parameter int MAX_OUTPUTS_TO_HASH = 5,
+  parameter int NUM_SEEDS = 11,
+  parameter int NUM_HASHES = 20,
+  parameter int MAX_OUTPUTS_TO_HASH = 25,
   parameter int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH),
   parameter [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
+    32'b01010101000111000101101111111011,
     32'b10000111001110100111100001011100,
-    32'b11101101011001111010101100101101    // First tested
+    32'b11101101011001111010101100101101,
+    32'b00110011001100110011001100110011,
+    32'b10101010101010101010101010101010,
+    32'b11001100110011001100110011001100,
+    32'b10101010101010111111111000110101,
+    32'b10000000000011110101111010101011,
+    32'b00000000000000000000000000000000,
+    32'b11111111111111111111111111111111,
+    32'b11111111111111100000000000000000
   },
   parameter [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
-    16'b0110010110100011,
-    16'b1100110111100010     // First tested
+    16'b1100110100000101,
+    16'b1110000010110100,
+    16'b1111101100111111,
+    16'b0101011101001011,
+    16'b0011100111110000,
+    16'b1011001010111000,
+    16'b0100110011101011,
+    16'b1011100111000010,
+    16'b0000000000000000,
+    16'b0000100111000010,
+    16'b1110010000010110
   }
   )(
   input logic clk,
@@ -41,8 +59,6 @@ module lbist_toplevel #(
 
   output logic                   lbist_resp_val,
   output logic [NUM_SEEDS-1:0]   lbist_resp_msg,
-  // output logic [NUM_HASHES-1:0]   lbist_resp_msg,
-
   input  logic                   lbist_resp_rdy
   );
 
@@ -66,7 +82,7 @@ module lbist_toplevel #(
   logic [SIGNATURE_BITS-1:0] cut_misr_resp_msg;
   logic                      cut_misr_resp_rdy;
 
-  logic                      lfsr_reset;
+  logic                      lfsr_cut_reset;
 
   lbist_controller #(
     .SEED_BITS          (SEED_BITS),
@@ -88,7 +104,7 @@ module lbist_toplevel #(
     .lfsr_resp_val (ctrl_lfsr_resp_val),
     .lfsr_resp_msg (ctrl_lfsr_resp_msg),
     .lfsr_resp_rdy (ctrl_lfsr_resp_rdy),
-    .lfsr_cut_reset(lfsr_reset),
+    .lfsr_cut_reset(lfsr_cut_reset),
     .misr_req_val  (ctrl_misr_req_val),
     .misr_req_msg  (ctrl_misr_req_msg),
     .misr_req_rdy  (ctrl_misr_req_rdy),
@@ -101,8 +117,7 @@ module lbist_toplevel #(
     .N(SEED_BITS)
   ) lfsr (
     .clk     (clk),
-    // .reset   (reset),
-    .reset   (reset || lfsr_reset),
+    .reset   (reset || lfsr_cut_reset),
     .req_val (ctrl_lfsr_resp_val),
     .req_msg (ctrl_lfsr_resp_msg),
     .req_rdy (ctrl_lfsr_resp_rdy),
@@ -137,8 +152,7 @@ module lbist_toplevel #(
     .sign(0)
   ) cut (
     .clk     (clk),
-    // .reset   (reset),
-    .reset   (reset || lfsr_reset),
+    .reset   (reset || lfsr_cut_reset),
     .recv_rdy(lfsr_cut_resp_rdy),
     .recv_val(lfsr_cut_resp_val),
     .a       (lfsr_cut_resp_msg[31:16]),

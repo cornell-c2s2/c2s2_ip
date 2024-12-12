@@ -27,7 +27,7 @@
 // - lfsr_cut_reset: Ensures the LFSR generates test vectors for the most up-to-date seed and that
 //   the CUT uses the most up-to-date values from the LFSR. VERY IMPORTANT, this signal needs to be
 //   ORed with the standard reset. For example, the reset of the CUT and LFSR should look as follows:
-//   .reset   (reset || lfsr_reset)
+//   .reset   (reset || lfsr_cut_reset)
 // - misr_req_val: Valid number of outputs from CUT to hash
 // - misr_req_msg: Number of outputs from CUT to hash
 // - misr_req_rdy: MISR ready to service new request
@@ -84,7 +84,7 @@ module lbist_controller #(
     output logic                      lfsr_resp_val,
     output logic [SEED_BITS-1:0]      lfsr_resp_msg,
     input  logic                      lfsr_resp_rdy,
-    output logic                      lfsr_cut_reset,  // Added
+    output logic                      lfsr_cut_reset,
 
     // LBIST CONTROLLER to MISR
     output logic                      misr_req_val,
@@ -99,10 +99,13 @@ module lbist_controller #(
 
 //============================LOCAL_PARAMETERS=================================
 
-  localparam [1:0] IDLE = 2'd0, START = 2'd1, COMP_SIG = 2'd2;
-  logic [1:0] state, next_state;
+  localparam [1:0] IDLE     = 2'd0;
+  localparam START          = 2'd1;
+  localparam COMP_SIG       = 2'd2;
+  logic [1:0] state;
+  logic [1:0] next_state;
   logic [$clog2(NUM_SEEDS)-1:0] counter;
-  
+
 //================================DATAPATH=====================================
 
   always_comb begin
@@ -169,7 +172,7 @@ module lbist_controller #(
       state <= next_state;
     end
   end
-  
+
   // counter logic
   always_ff @(posedge clk) begin
     if (reset || state == IDLE) begin
@@ -180,17 +183,13 @@ module lbist_controller #(
       counter <= counter;
     end
   end
-  
+
   // lbist_resp_msg and lbist_resp_val logic
   always_ff @(posedge clk) begin
     case (state)
       IDLE: begin
         lbist_resp_val <= 0;
         lbist_resp_msg <= '0;
-        // Above code does what the for loop below does
-        // for (int i = 0; i < NUM_HASHES; i++) begin
-        //   lbist_resp_msg[i] <= 0;
-        // end
       end
       START: begin
         lbist_resp_val <= 0;
