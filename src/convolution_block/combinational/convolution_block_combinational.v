@@ -9,9 +9,6 @@ module convolution_block_combinational_ConvolutionBlock #(
   parameter int BIT_WIDTH = 32,
   parameter int ARRAY_LENGTH = 8
 ) (
-  input logic clk,
-  input logic reset,
-
   // input array
   input  logic [BIT_WIDTH - 1:0] req1_msg[ARRAY_LENGTH - 1:0],
 
@@ -25,9 +22,7 @@ module convolution_block_combinational_ConvolutionBlock #(
   // perform array convolution: output[i] = input[i] * filter[n - i]
   generate
     for (genvar i = 0; i < ARRAY_LENGTH; i++) begin
-      always @(posedge clk) begin
-        resp_msg[i] <= reset ? 0 : req1_msg[i] * req2_msg[ARRAY_LENGTH-i-1];
-      end
+        assign resp_msg[i] = req1_msg[i] * req2_msg[ARRAY_LENGTH-i-1];
     end
   endgenerate
 endmodule
