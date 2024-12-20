@@ -6,7 +6,9 @@
 // integer where each bit is the result of each signature comparison.
 // 
 // PARAMETERS --------------------------------------------------------
+// - SEED_BITS: Number of bits for each seed
 // - SIGNATURE_BITS: Max number of bits of seed
+// - NUM_SEEDS: Number of seeds to iterate over
 // - NUM_HASHES: Number of hashes to test
 // - MAX_OUTPUTS_TO_HASH: Number of hashes to test 
 // - MISR_MSG_BITS: Size of message sent to MISR

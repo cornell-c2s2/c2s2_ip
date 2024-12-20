@@ -3,10 +3,23 @@
 // Date: 11/21/24
 // Spec:
 // PARAMETERS --------------------------------------------------------
+// - SEED_BITS: Number of bits for each seed
+// - SIGNATURE_BITS: Max number of bits of seed
+// - NUM_SEEDS: Number of seeds to iterate over
+// - NUM_HASHES: Number of hashes to test
+// - MAX_OUTPUTS_TO_HASH: Number of hashes to test 
+// - MISR_MSG_BITS: Size of message sent to MISR
+// - LFSR_SEEDS: Seeds to be sent to LFSR
+// - EXPECTED_SIGNATURES: Expected signature values from MISR
 //
 // I/O ---------------------------------------------------------------
 // - clk
 // - reset
+// - lbist_req_val: Valid request to init LBIST
+// - lbist_req_rdy: LBIST ready to service new LBIST request
+// - lbist_resp_val: Valid output
+// - lbist_resp_msg: Binary number where each bit represents a test sequence. 1 means test passed zero otherwise
+// - lbist_resp_rdy: Requestor ready for lbist output
 // ===================================================================
 
 `ifndef LBIST_TOPLEVEL_V
