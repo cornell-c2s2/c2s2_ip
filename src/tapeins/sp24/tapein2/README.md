@@ -10,9 +10,11 @@ Running the following command in this directory runs all the tests in RTL simula
 
 ## FPGA Testing
 
-> In the works, will be added soon.
+<img width="1315" alt="image" src="https://github.com/user-attachments/assets/12d67843-6a22-49da-84b1-76acc1325bd4" />
 
 ## Tapeout Testing
+
+<img width="1416" alt="image" src="https://github.com/user-attachments/assets/6256bfc6-777e-4365-8f6d-b11a8679682b" />
 
 For tapeout testing, there are three main steps:
 - Connecting devices
