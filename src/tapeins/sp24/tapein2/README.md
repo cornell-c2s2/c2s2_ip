@@ -2,15 +2,17 @@
 
 > This folder contains the simulation and physical tests for the sp24 tapeout/tape-in2.
 
+This README contains all the documentation related to the testing of the 24 digital chip (Puffin). 
+This README and all files in this directory aim to provide an easy-to-use, uniform framework for testing on chips and FPGAs. 
+This README will walk you through the entire process of post-silicon testing, including how to connect the boards and chips, how to flash the caravel board, and how to run tests.
+
+For any questions related to post-silicon testing, contact Barry Lyu (fl327).
+
 ## Simulation
 
 Running the following command in this directory runs all the tests in RTL simulation through pymtl and pytest:
 
 `pytest tests/test_interconnect.py`
-
-## FPGA Testing
-
-<img width="1315" alt="image" src="https://github.com/user-attachments/assets/12d67843-6a22-49da-84b1-76acc1325bd4" />
 
 ## Tapeout Testing
 
@@ -30,8 +32,8 @@ We need four devices for the tests:
 - Either the C2 workstation or a separate computer
 
 #### A.1. Setup software on the computer
-Below is the testing enviroment already setup C2. Jump to A.2 if you are using C2. 
-For your own computer you have to install these packages:
+Below is the testing environment already setup C2. Jump to A.2 if you are using C2. 
+For your own computer, you have to install these packages:
 ```
 python 3.11.5
 pytest 8.0.1
@@ -47,9 +49,9 @@ Otherwise install other required packages accordingly.
 > the compiled programs are uploaded to this repo. Just flashing the board with the precompiled board does not require the toolchain.
 
 #### A.2. SPI Driver
-Connect an SPI Driver to the computer with the micro-usb cable. Its LED should lightup and display the pin names.
+Connect an SPI Driver to the computer with the micro-USB cable. Its LED should light up and display the pin names.
 
-We then need to identify the port name of SPI-driver on the computer.
+We then need to identify the port name of SPI driver on the computer.
 
   - For Linux: run `ls -l /dev | grep "USB"`, you should be presented with a list of devices with names like `ttyUSB0`, 
 pick the device which has a timestamp that matches the time when you plugged the SPI Driver in. Your path to the port should look like `/dev/ttyUSBX`.
@@ -73,7 +75,7 @@ s = SPIDriver(<path to the port>)
 `
 
 #### A.3. Putting Chip On Caravel Board
-Now we have to put the chip on the caravel board. Use one of the black boards. **Leave the board unplugged!**
+Now we have to put the chip on the caravel board. Use one of the blackboards. **Leave the board unplugged!**
 
 The chip on the board should be the C3 chip, to identify it, squint real hard at the black square packaging on the chip and observe that the faint text on it starts with C3. If its not C3, or if the board doesn't have a chip on it, take out a C3 chip, then plug and screw in the chip (just to keep it in place, don't screw it too tight as it will damage the PCB)
 
@@ -90,12 +92,12 @@ Now we have to connect the SPI and the Caravel board. There are 5 pins that you 
 | cs              | IO[7]             |
 | GND             | GND               | 
 
-There are several pins labeled as GND on the Caravel board, use the one that is in the column of gpio (the one directly above vdda1 and IO[0]).
+There are several pins labeled as GND on the Caravel board, use the one that is in the column of GPIO (the one directly above vdda1 and IO[0]).
 
-After you plugin the GND pin, the power indicator LED might light up faintly because its being semi-powered by the GPIOs.
+After you plugin the GND pin, the power indicator LED might light up faintly because it's being semi-powered by the GPIOs.
 
 #### A.5. Connecting the Caravel Board
-Finally, you can plug the Caravel Board to the computer with another micro-usb cable. Observe that the power indicator LED becomes fully on and is brighter than it was in A.4.
+Finally, you can plug the Caravel Board to the computer with another micro-USB cable. Observe that the power indicator LED becomes fully on and is brighter than it was in A.4.
 
 ### B. Flashing The Caravel Board
 
