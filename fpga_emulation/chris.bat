@@ -128,6 +128,8 @@ IF %CLEAN% == 1 (
     del "%FPGA_DIR%\interconnect_fpga.v"
     del "%FPGA_DIR%\*.qpf"
     del "%FPGA_DIR%\*.qsf"
+    del "%FPGA_DIR%\*.qws"
+    del "%FPGA_DIR%\*.bak"
     rmdir /s /q "%FPGA_DIR%\build"
     rmdir /s /q "%FPGA_DIR%\db"
     rmdir /s /q "%FPGA_DIR%\incremental_db"

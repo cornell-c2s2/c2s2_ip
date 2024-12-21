@@ -80,5 +80,3 @@ if {$make_assignments} {
 }
 
 execute_flow -compile
-
-#close $fileout
