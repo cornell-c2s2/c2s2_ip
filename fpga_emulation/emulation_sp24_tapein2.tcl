@@ -74,9 +74,10 @@ if {$make_assignments} {
 	# Commit assignments
 	export_assignments
 
-	#if {$need_to_close_project} {
-	#	project_close
-	#}
-}
+	# Compile the design
+	execute_flow -compile
 
-execute_flow -compile
+	if {$need_to_close_project} {
+		project_close
+	}
+}
