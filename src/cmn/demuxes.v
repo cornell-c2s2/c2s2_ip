@@ -19,9 +19,8 @@ module cmn_DemuxN
   output logic                [nbits-1:0]   out   [0:noutputs-1] 
 ); 
 
-  
+  genvar i;
   generate
-    genvar i;
     for (i = 0; i < noutputs; i = i + 1) begin : output_gen
       assign out[i] = (i == sel) ? in : {nbits{1'b0}};
     end

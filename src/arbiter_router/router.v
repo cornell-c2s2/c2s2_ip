@@ -84,8 +84,7 @@ module arbiter_router_Router #(
   );
 
   generate
-    genvar i;
-    for (i = 0; i < noutputs; i = i + 1) begin : output_gen
+    for (genvar i = 0; i < noutputs; i = i + 1) begin : output_gen
       assign ostream_msg[i] = payload_msg;
     end
   endgenerate

@@ -78,4 +78,3 @@ module cmn_BasicCounter #(
 endmodule
 
 `endif  /* CMN_COUNTER_V */
-

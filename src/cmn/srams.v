@@ -131,8 +131,8 @@ module cmn_CombinationalSRAM_1rw #(
 
   // Inspired by http://www.xilinx.com/support/documentation/sw_manuals/xilinx11/xst.pdf, page 159
 
+  genvar i;
   generate
-    genvar i;
     for (i = 0; i < c_data_nbytes; i = i + 1) begin : test
       always_ff @(posedge clk) begin
         if (write_en && write_byte_en[i])
@@ -252,4 +252,3 @@ module cmn_SynchronousSRAM_1rw #(
 endmodule
 
 `endif  /* CMN_SRAMS_V */
-

@@ -200,4 +200,3 @@ module cmn_RightLogicalShifter #(
 endmodule
 
 `endif  /* CMN_ARITHMETIC_V */
-

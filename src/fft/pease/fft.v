@@ -66,8 +66,7 @@ module fft_pease_FFT #(
   logic [BIT_WIDTH - 1:0] wc           [$clog2(N_SAMPLES)] [N_SAMPLES/2];
 
   generate
-    genvar i;
-    for ( i = 0; i < $clog2(N_SAMPLES); i++) begin : for_loop
+    for (genvar i = 0; i < $clog2(N_SAMPLES); i++) begin
       fft_pease_helpers_TwiddleGenerator #(
         .BIT_WIDTH (BIT_WIDTH),
         .DECIMAL_PT(DECIMAL_PT),
@@ -100,7 +99,7 @@ module fft_pease_FFT #(
   logic [BIT_WIDTH - 1:0] dc[N_SAMPLES/2];
 
   generate
-    for (i = 0; i < N_SAMPLES / 2; i++) begin : for_loop_0
+    for (genvar i = 0; i < N_SAMPLES / 2; i++) begin
       assign ar[i] = in_butterfly[i*2][BIT_WIDTH-1:0];
       assign ac[i] = in_butterfly[i*2][2*BIT_WIDTH-1:BIT_WIDTH];
       assign br[i] = in_butterfly[i*2+1][BIT_WIDTH-1:0];
@@ -113,7 +112,7 @@ module fft_pease_FFT #(
   endgenerate
 
   generate
-    for ( i = 0; i < N_SAMPLES; i++) begin : for_loop_1
+    for (genvar i = 0; i < N_SAMPLES; i++) begin
       assign send_msg[i] = in_butterfly[i][BIT_WIDTH-1:0];
     end
   endgenerate
@@ -165,7 +164,7 @@ module fft_pease_FFT #(
   end
 
   generate
-    for ( i = 0; i < N_SAMPLES; i++) begin : for_loop_2
+    for (genvar i = 0; i < N_SAMPLES; i++) begin
       always_ff @(posedge clk) begin
         if (reset) begin
           in_butterfly[i] <= 0;

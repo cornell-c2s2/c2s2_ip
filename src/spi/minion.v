@@ -1,9 +1,6 @@
 `include "spi/helpers/minion_adapter.v"
 `include "spi/helpers/minion_pushpull.v"
 
-`ifndef SPI_MINION
-`define SPI_MINION
-
 /*
 NOTE: Minion requires 4 cycles of delay between messages.
 */
@@ -76,5 +73,3 @@ module spi_Minion #(
   );
 
 endmodule
-
-`endif /* SPI_MINION */

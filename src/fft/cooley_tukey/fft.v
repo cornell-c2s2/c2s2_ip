@@ -38,8 +38,7 @@ module fft_cooley_tukey_FFT #(
   assign rdy_in[$clog2(N_SAMPLES)] = send_rdy;
 
   generate
-    genvar i;
-    for (i = 0; i < N_SAMPLES; i++) begin
+    for (genvar i = 0; i < N_SAMPLES; i++) begin
       assign complex_msg[0][i] = 0;
     end
   endgenerate
@@ -61,7 +60,7 @@ module fft_cooley_tukey_FFT #(
   );
 
   generate
-    for (i = 0; i < $clog2(N_SAMPLES); i++) begin
+    for (genvar i = 0; i < $clog2(N_SAMPLES); i++) begin
       fft_cooley_tukey_helpers_Stage #(
         .BIT_WIDTH (BIT_WIDTH),
         .DECIMAL_PT(DECIMAL_PT),
@@ -87,7 +86,7 @@ module fft_cooley_tukey_FFT #(
   endgenerate
 
   generate
-    for (i = 0; i < N_SAMPLES; i++) begin
+    for (genvar i = 0; i < N_SAMPLES; i++) begin
       assign send_msg[i] = real_msg[$clog2(N_SAMPLES)][i];
     end
   endgenerate

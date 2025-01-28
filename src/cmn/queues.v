@@ -490,4 +490,3 @@ module cmn_Queue #(
 endmodule
 
 `endif  /* CMN_QUEUES_V */
-

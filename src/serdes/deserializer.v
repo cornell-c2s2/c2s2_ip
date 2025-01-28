@@ -46,8 +46,7 @@ module serdes_Deserializer #(
         .en_sel(en_sel)
       );
 
-      genvar i;
-      for (i = 0; i < N_SAMPLES; i++) begin : l_regs
+      for (genvar i = 0; i < N_SAMPLES; i++) begin : l_regs
         cmn_EnResetReg #(BIT_WIDTH) register (
           .clk(clk),
           .reset(reset),

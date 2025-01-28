@@ -20,8 +20,8 @@
 
 module arbiter_router_Arbiter #(
   parameter int nbits = 32,
-  parameter int ninputs = 3
-  
+  parameter int ninputs = 3,
+  localparam int addr_nbits = $clog2(ninputs)
 ) (
   input logic clk,
   input logic reset,
@@ -36,9 +36,6 @@ module arbiter_router_Arbiter #(
   input  logic                        ostream_rdy,
   output logic [addr_nbits+nbits-1:0] ostream_msg
 );
-
-  localparam int addr_nbits = $clog2(ninputs);
-
   logic [addr_nbits-1:0] grants_index;  // which input is granted access to send to SPI
   logic [addr_nbits-1:0] old_grants_index;
   logic [addr_nbits-1:0] encoder_out;
@@ -64,15 +61,13 @@ module arbiter_router_Arbiter #(
   end
 
   generate
-    genvar i;
-    for (i = 0; i < ninputs; i++) begin : input_assign
+    for (genvar i = 0; i < ninputs; i++) begin : input_assign
       // Only tell one input that the arbitrator is ready for it
       assign istream_rdy[i] = (grants_index == i[addr_nbits-1:0]) ? ostream_rdy : 1'b0;
     end
   endgenerate
 
   generate
-
     // hooks up a chain of muxes to create a
     // priority encoder that gives highest priority to the LSB and lowest to MSB
     // Disable unoptflat because there isn't actually circular logic as different
@@ -81,7 +76,7 @@ module arbiter_router_Arbiter #(
     logic [addr_nbits-1:0] encoder_outs[ninputs+1];
     /* verilator lint_on UNOPTFLAT */
     assign encoder_outs[ninputs] = 0;
-    for (i = 0; i < ninputs; i++) begin : for_loop
+    for (genvar i = 0; i < ninputs; i++) begin
       // if this input is valid, then it is the highest priority. Otherwise, use the result of the next index
       assign encoder_outs[i] = istream_val[i] ? i : encoder_outs[i+1];
     end

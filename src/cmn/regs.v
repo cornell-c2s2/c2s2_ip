@@ -85,4 +85,3 @@ module cmn_EnResetReg #(
 endmodule
 
 `endif  /* CMN_REGS_V */
-

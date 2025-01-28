@@ -13,8 +13,7 @@ module magnitude_Magnitude #(
   output logic [BIT_WIDTH - 1:0] send_msg[N_SAMPLES]
 );
   generate
-    genvar i;
-    for (i = 0; i < N_SAMPLES; i = i + 1) begin : for_loop
+    for (genvar i = 0; i < N_SAMPLES; i = i + 1) begin
       assign send_msg[i] = (recv_msg[i] < 0) ? -recv_msg[i] : recv_msg[i];
     end
   endgenerate
