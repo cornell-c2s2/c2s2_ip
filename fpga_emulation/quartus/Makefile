@@ -8,8 +8,18 @@ SCRIPT_DIR=$(FPGA_DIR)/scripts
 src_emulation_dir = $(SRC_DIR)/tapeins/sp24/fpga_emulation2
 interconnect_file = $(src_emulation_dir)/interconnect_fpga.v
 
+# Output files
 pickled_file = $(BUILD_DIR)/Interconnect_Fpga_pickled.v
 lookup_file = $(BUILD_DIR)/sine_wave_lookup_16_8_32.v
+interconnect_out = $(FPGA_DIR)/interconnect_fpga.v
+
+# Quartus output files/directories
+qpf_out = $(FPGA_DIR)/*.qpf
+qsf_out = $(FPGA_DIR)/*.qsf
+db_dir = $(FPGA_DIR)/db
+incr_db_dir = $(FPGA_DIR)/incremental_db
+log_dir = $(FPGA_DIR)/log
+output_files_dir = $(FPGA_DIR)/output_files
 
 # Quartus Programming: Requires updating depending on the installation path
 
@@ -24,7 +34,7 @@ convert:
 	@python $(SCRIPT_DIR)/pickel.py --src $(SRC_DIR) \
 					--interconnect $(interconnect_file) --out $(pickled_file)
 	@python $(SCRIPT_DIR)/convert.py --vfile $(pickled_file) --lookup $(lookup_file) \
-					--out $(FPGA_DIR)/interconnect_fpga.v
+					--out $(interconnect_out)
 
 	@echo "Done"
 
@@ -33,5 +43,12 @@ compile:
 
 program:
 	@$(QTS_PGM) -m JTAG -o "p;output_files/emulation_sp24_tapein2.sof@1"
+
+clean:
+	@echo "Cleaning up..."
+	@rm -rf $(BUILD_DIR)
+	@rm -f $(interconnect_out)
+	@rm -f $(qpf_out) $(qsf_out) $(db_dir) 
+	@rm -rf $(incr_db_dir) $(log_dir) $(output_files_dir)
 
 all: convert compile program

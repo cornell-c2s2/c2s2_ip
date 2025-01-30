@@ -14,22 +14,16 @@ module fft_pease_helpers_TwiddleGenerator #(
   output logic [BIT_WIDTH - 1:0] twiddle_imaginary[SIZE_FFT/2]
 );
   generate
-    genvar i;
     if (STAGE_FFT == 0) begin
-      for ( i = 0; i < SIZE_FFT / 2; i = i + 1) begin : for_loop
+      for (genvar i = 0; i < SIZE_FFT / 2; i = i + 1) begin
         assign twiddle_real[i] = {{BIT_WIDTH - DECIMAL_PT - 1{1'b0}}, 1'b1, {DECIMAL_PT{1'b0}}};
         assign twiddle_imaginary[i] = 0;
       end
-      //logic unused = &sine_wave_in; <- relpaced with for_loop_unused
-		logic unused = 1'b1;
-		for (i=0; i<SIZE_FFT; ++i) begin : for_loop_unused
-			assign unused = unused & (&sine_wave_in[i]);
-		end
+      logic unused = &sine_wave_in;
     end else begin
-      genvar m;
-		genvar j;
-      for (m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin : for_loop
-        for (j = 0; j < 2 ** ($clog2(SIZE_FFT) - STAGE_FFT - 1); j = j + 1) begin : for_loop
+
+      for (genvar m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin
+        for (genvar j = 0; j < 2 ** ($clog2(SIZE_FFT) - STAGE_FFT - 1); j = j + 1) begin
           localparam int stageLeft = $clog2(SIZE_FFT) - STAGE_FFT - 1;
           localparam int idx = m * (2 ** stageLeft);
           localparam int si = idx + j;

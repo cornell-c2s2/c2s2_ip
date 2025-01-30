@@ -42,8 +42,7 @@ module fft_cooley_tukey_helpers_Stage #(
 
   logic [N_SAMPLES-1:0] imm;
   generate
-    genvar i;
-    for (i = 0; i < N_SAMPLES; i++) begin
+    for (genvar i = 0; i < N_SAMPLES; i++) begin
       assign val_in[i] = recv_val;
       assign imm[i] = rdy_in[i];
     end
@@ -84,8 +83,7 @@ module fft_cooley_tukey_helpers_Stage #(
   );
 
   generate
-    genvar b;
-    for (b = 0; b < N_SAMPLES / 2; b++) begin
+    for (genvar b = 0; b < N_SAMPLES / 2; b++) begin
       localparam int IX = (b % (1 << STAGE_FFT)) * (N_SAMPLES / (2 * (1 << STAGE_FFT)));
 
       localparam byte MMC = (
@@ -157,7 +155,7 @@ module fft_cooley_tukey_helpers_Stage #(
 
   logic [N_SAMPLES - 1:0] imm2;
   generate
-    for (i = 0; i < N_SAMPLES; i++) begin
+    for (genvar i = 0; i < N_SAMPLES; i++) begin
       assign imm2[i] = val_out[i];
       assign rdy_out[i] = send_rdy & send_val;
     end

@@ -51,4 +51,3 @@
   if (1)
 
 `endif  /* CMN_ASSERT_V */
-
