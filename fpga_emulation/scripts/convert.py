@@ -433,7 +433,7 @@ def extract_module(content : List[str], lookup_file : str):
     output_content = add_for_loop_names(output_content)
     output_content = clean_function_from_all(output_content, lookup_file)
     output_content = replace_sine_with_lookup(output_content, lookup_file)
-    # output_content = remove_unused_declarations(output_content)
+    output_content = remove_unused_declarations(output_content)
 
     return output_content
 

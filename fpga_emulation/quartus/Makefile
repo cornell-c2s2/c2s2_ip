@@ -2,7 +2,7 @@ TOP_DIR=$(shell git rev-parse --show-toplevel)
 SRC_DIR=$(TOP_DIR)/src
 FPGA_DIR=$(PWD)
 BUILD_DIR=$(FPGA_DIR)/build
-SCRIPT_DIR=$(FPGA_DIR)/scripts
+SCRIPT_DIR=$(TOP_DIR)/fpga_emulation/scripts
 
 # Conversion
 src_emulation_dir = $(SRC_DIR)/tapeins/sp24/fpga_emulation2
@@ -31,7 +31,7 @@ QTS_PGM = $(qts_bin)/quartus_pgm
 convert:
 	@mkdir -p $(BUILD_DIR)
 	@python $(SCRIPT_DIR)/sine_wave_lookup_generator.py 16 8 32 $(lookup_file)
-	@python $(SCRIPT_DIR)/pickel.py --src $(SRC_DIR) \
+	@python $(SCRIPT_DIR)/pickle.py --src $(SRC_DIR) \
 					--interconnect $(interconnect_file) --out $(pickled_file)
 	@python $(SCRIPT_DIR)/convert.py --vfile $(pickled_file) --lookup $(lookup_file) \
 					--out $(interconnect_out)
