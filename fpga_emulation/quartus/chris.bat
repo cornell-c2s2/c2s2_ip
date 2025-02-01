@@ -78,7 +78,7 @@ IF %CONVERT% == 1 (
     mkdir "%BUILD_DIR%"
     python %SCRIPT_DIR%\sine_wave_lookup_generator.py 16 8 32 %lookup_file%
     python %SCRIPT_DIR%\pickle.py --src %SRC_DIR% --interconnect %interconnect_file% --out %pickled_file%
-    python %SCRIPT_DIR%\convert.py --vfile %pickled_file% --lookup %lookup_file% --out %FPGA_DIR%\interconnect_fpga.v
+    python %SCRIPT_DIR%\convert.py --vfile %pickled_file% --lookup %lookup_file% --out %QUARTUS_DIR%\interconnect_fpga.v
 
     echo:
     echo File conversion attempt finished.
@@ -115,11 +115,11 @@ IF %PROGRAM% == 1 (
 
 rem 4: Completely clear out all generated files
 IF %CLEAN% == 1 (
-    del "%QUARUTS_DIR%\interconnect_fpga.v"
-    del "%QUARUTS_DIR%\*.qpf"
-    del "%QUARUTS_DIR%\*.qsf"
-    del "%QUARUTS_DIR%\*.qws"
-    del "%QUARUTS_DIR%\*.bak"
+    del "%QUARTUS_DIR%\interconnect_fpga.v"
+    del "%QUARTUS_DIR%\*.qpf"
+    del "%QUARTUS_DIR%\*.qsf"
+    del "%QUARTUS_DIR%\*.qws"
+    del "%QUARTUS_DIR%\*.bak"
     rmdir /s /q "%QUARTUS_DIR%\build"
     rmdir /s /q "%QUARTUS_DIR%\db"
     rmdir /s /q "%QUARTUS_DIR%\incremental_db"
