@@ -1,26 +1,27 @@
+`include "../src/tapeins/sp24/fpga_emulation2/interconnect_fpga.v"
+
 module FPGA_top (
-	input logic CLOCK_50,
-	inout logic GPIO0,
-	input logic GPIO1,
-	inout logic GPIO2,
-	inout logic GPIO4,
-	inout logic GPIO6,
-	output logic LEDR0,
-	output logic LEDR1
+	input logic        clk,
+	inout logic        JD1,
+  inout logic        JD2,
+  inout logic        JD3,
+  inout logic        JD4,
+  inout logic        JD7, // reset GPIO
+	output logic [1:0] LED
 );
 
-assign LEDR0 = GPIO1;
-assign LEDR1 = ~GPIO1;
+assign LED[0] = JD7;
+assign LED[1] = ~JD7;
 
 tapeins_sp24_fpga_emulation2_Interconnect_Fpga dut(
-  .clk(CLOCK_50),
-  .reset(GPIO1),
-  .cs(GPIO6),
-  .mosi(GPIO4),
-  .miso(GPIO2),
-  .sclk(GPIO0),
-  .minion_parity(),
-  .adapter_parity()
+  .clk            (clk),
+  .reset          (JD7),
+  .cs             (JD4),
+  .mosi           (JD3),
+  .miso           (JD2),
+  .sclk           (JD1),
+  .minion_parity  (),
+  .adapter_parity ()
 );
 
 endmodule
