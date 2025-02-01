@@ -46,7 +46,7 @@ set SCRIPT_DIR=%TOP_DIR%\fpga_emulation\scripts
 
 rem CONVERSION
 set src_emulation_dir=%SRC_DIR%\tapeins\sp24\fpga_emulation2
-set interconnect_file=%src_emulation_dir%\interconnect_fpga.sv
+set interconnect_file=%src_emulation_dir%\interconnect_fpga.v
 
 set pickled_file=%BUILD_DIR%\Interconnect_Fpga_pickled.sv
 set lookup_file=%BUILD_DIR%\sine_wave_lookup_16_8_32.sv

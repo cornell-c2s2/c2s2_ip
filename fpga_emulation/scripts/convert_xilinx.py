@@ -10,8 +10,9 @@
 #
 # Converts the interconnect file to a format that can be used in Quartus
 #
-# Author : Anjelica Bian (adopted from Christopher Batten)
-# Date   : Nov 17, 2024
+# Author      : Anjelica Bian (adopted from Christopher Batten)
+# Modified by : Simeon Turner
+# Date        : Nov 17, 2024
 #
 
 import os
@@ -270,7 +271,7 @@ def clean_localparams_from_module(content : List[str]):
     for idx in localparams[::-1]:
         if "," in result[idx]:
             comma_idx = result[idx].find(",")
-            print(f"Found comma in localparam: {result[idx][:comma_idx]}")
+            # print(f"Found comma in localparam: {result[idx][:comma_idx]}")
             result.insert(header_end[0], result.pop(idx)[:comma_idx]+"; \n")
         else:
             result.insert(header_end[0], result.pop(idx)[:-1]+"; \n")
@@ -428,7 +429,6 @@ def logic_to_wire(content : List[str]):
         line = result[idx]
         if re.match(r"\s+input", line):
             index = line.find('logic')
-            print("index:" + str(index))
             if (index >= 0):
                 result[idx] = line[:index] + "wire " + line[index+5:]
     
