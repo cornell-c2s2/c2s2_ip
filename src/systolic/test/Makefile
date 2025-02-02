@@ -4,12 +4,12 @@ SIM := vcs
 PWD=$(shell pwd)
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
 
-VERILOG_SOURCES=$(C2S2_PATH)/src/systolic/MatrixMultiplier_PE.v
+VERILOG_SOURCES=$(C2S2_PATH)/src/systolic/SystolicMMPE.v
 
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
 
-TOPLEVEL=MatrixMultiplier_PE
-MODULE=MatrixMultiplier_PE_test
+TOPLEVEL=SystolicMMPE
+MODULE=SystolicMMPE_test
 
 WAVES=1
 COVER=1
