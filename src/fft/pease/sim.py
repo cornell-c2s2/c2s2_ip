@@ -1,7 +1,47 @@
-from fixedpt import CFixed
-from src.fft.sim import sine_wave, bit_reverse
-from src.fixed_point.sim import butterfly
+from fixedpt import CFixed, Fixed
 import math
+
+# Implements bit reverse
+def bit_reverse(rev_in: list, n_samples: int):
+    out = [0] * n_samples
+
+    n = math.ceil(math.log2(n_samples))
+
+    for m in range(0, n_samples):
+        m_rev = format(m, f"0{n}b")[::-1]
+        reversed_index = int(m_rev, 2)
+        out[reversed_index] = rev_in[m]
+
+    return out
+
+
+# Sine wave generator for the twiddle factors
+def sine_wave(n_samples: int, bit_width: int, decimal_pt: int) -> list[Fixed]:
+    return [
+        Fixed(
+            round((math.sin(2 * math.pi * i / n_samples)) * (1 << decimal_pt)),
+            1,
+            bit_width,
+            decimal_pt,
+            True,
+        )
+        for i in range(n_samples)
+    ]
+
+# Performs the butterfly operation on two complex numbers
+# Used to generate the expected output
+def butterfly(a: CFixed, b: CFixed, w: CFixed) -> tuple[CFixed, CFixed]:
+    assert a.real._n == b.real._n
+    assert a.real._d == b.real._d
+    assert a.real._n == w.real._n
+    assert a.real._d == w.real._d
+
+    n = a.real._n
+    d = a.real._d
+
+    # t = complex_multiply(b, w)
+    t = b.__mul__(w)
+    return ((a + t).resize(n, d), (a - t).resize(n, d))
 
 
 def stride_permutation(n_samples: int, cbar_in: list[any]) -> list[any]:
