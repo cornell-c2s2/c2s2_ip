@@ -1,12 +1,10 @@
-`include "../src/tapeins/sp24/fpga_emulation2/interconnect_fpga.v"
-
 module FPGA_top (
-	input logic        clk,
-	inout logic        JD1,
-  inout logic        JD2,
-  inout logic        JD3,
-  inout logic        JD4,
-  inout logic        JD7, // reset GPIO
+	input wire         clk,
+	inout wire         JD1,
+  inout wire         JD2,
+  inout wire         JD3,
+  inout wire         JD4,
+  inout wire         JD7, // reset GPIO
 	output logic [1:0] LED
 );
 
