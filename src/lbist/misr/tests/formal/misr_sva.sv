@@ -41,9 +41,61 @@ property unique_hashes;
   @(posedge clk)
   disable iff (!reset)
   (lbist_resp_val && lbist_resp_rdy) |-> 
+  (hashes[lbist_req_msg] != lbist_resp_msg);
+endproperty
+
+// Val/Rdy Properties
+  // CUT interface
+  property cut_val_rdy_stable;
+    @(posedge clk) disable iff (reset)
+    cut_req_val && !cut_req_rdy |=> $stable(cut_req_val) && $stable(cut_req_msg);
+  endproperty
+
+  property cut_msg_stable;
+    @(posedge clk) disable iff (reset)
+    cut_req_val |-> $stable(cut_req_msg);
+  endproperty
+
+  // LBIST Controller request interface
+  property lbist_req_val_rdy_stable;
+    @(posedge clk) disable iff (reset)
+    lbist_req_val && !lbist_req_rdy |=> $stable(lbist_req_val) && $stable(lbist_req_msg);
+  endproperty
+
+  property lbist_req_msg_stable;
+    @(posedge clk) disable iff (reset)
+    lbist_req_val |-> $stable(lbist_req_msg);
+  endproperty
+
+  // LBIST Controller response interface
+  property lbist_resp_val_rdy_stable;
+    @(posedge clk) disable iff (reset)
+    lbist_resp_val && !lbist_resp_rdy |=> $stable(lbist_resp_val) && $stable(lbist_resp_msg);
+  endproperty
+
+  property lbist_resp_msg_stable;
+    @(posedge clk) disable iff (reset)
+    lbist_resp_val |-> $stable(lbist_resp_msg);
+  endproperty
+
+  // No backpressure on response path when in DONE state
+  property lbist_resp_rdy_in_done;
+    @(posedge clk) disable iff (reset)
+    (misr_inst.state == misr_inst.DONE) |-> lbist_resp_rdy;
+  endproperty
+
+  // Assertions
+  unique_hashes_assert:         assert property(unique_hashes);
+  cut_val_rdy_handshake:        assert property(cut_val_rdy_stable);
+  cut_msg_stable_assert:        assert property(cut_msg_stable);
+  lbist_req_val_rdy_handshake:  assert property(lbist_req_val_rdy_stable);
+  lbist_req_msg_stable_assert:  assert property(lbist_req_msg_stable);
+  lbist_resp_val_rdy_handshake: assert property(lbist_resp_val_rdy_stable);
+  lbist_resp_msg_stable_assert: assert property(lbist_resp_msg_stable);
+  lbist_resp_rdy_done_assert:   assert property(lbist_resp_rdy_in_done);
 
 endmodule
- 
+
 bind misr_sva misr misr_inst (
     .clk(clk),
     .reset(reset),
