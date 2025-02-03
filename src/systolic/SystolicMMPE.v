@@ -30,11 +30,11 @@ module SystolicMMPE
 
   logic [n-1:0] prod;
 
-  fixed_point_combinational_Multiplier #( n, d, sign ) multiplier
+  fixed_point_combinational_Multiplier #(n, d, sign) multiplier
   (
-    .a ( x_in ),
-    .b ( w_in ),
-    .c ( prod )
+    .a (x_in),
+    .b (w_in),
+    .c (prod)
   );
 
   // Summation
@@ -46,35 +46,35 @@ module SystolicMMPE
     sum_next = sum + prod;
   end
 
-  cmn_EnResetReg #( n, 0 ) sum_reg
+  cmn_EnResetReg #(n, 0) sum_reg
   (
-    .clk   ( clk ),
-    .reset ( rst ),
-    .en    ( en ),
-    .d     ( sum_next ),
-    .q     ( sum )
+    .clk   (clk),
+    .reset (rst),
+    .en    (en),
+    .d     (sum_next),
+    .q     (sum)
   );
 
   assign s_out = sum;
 
   // Tensor & Weight Propagation
 
-  cmn_EnResetReg #( n, 0 ) x_reg
+  cmn_EnResetReg #(n, 0) x_reg
   (
-    .clk   ( clk ),
-    .reset ( rst ),
-    .en    ( en ),
-    .d     ( x_in ),
-    .q     ( x_out )
+    .clk   (clk),
+    .reset (rst),
+    .en    (en),
+    .d     (x_in),
+    .q     (x_out)
   );
 
-  cmn_EnResetReg #( n, 0 ) w_reg
+  cmn_EnResetReg #(n, 0) w_reg
   (
-    .clk   ( clk ),
-    .reset ( rst ),
-    .en    ( en ),
-    .d     ( w_in ),
-    .q     ( w_out )
+    .clk   (clk),
+    .reset (rst),
+    .en    (en),
+    .d     (w_in),
+    .q     (w_out)
   );
 
 endmodule
