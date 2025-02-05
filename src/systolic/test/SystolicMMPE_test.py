@@ -1,9 +1,19 @@
+import math
+import random
 import cocotb
 import subprocess
 from cocotb.triggers import *
 from cocotb.clock import Clock
 
 X = 'xxxxxxxxxxxxxxxx'
+
+#====================================================================================
+# SIGN_EXTEND
+#====================================================================================
+
+def SIGN_EXTEND(value, bits):
+  sign_bit = (1 << (bits - 1))
+  return (value & (sign_bit - 1)) - (value & sign_bit)
 
 #====================================================================================
 # SystolicMMPE_CHECK_EQ
@@ -43,14 +53,56 @@ async def SystolicMMPE_RESET(dut):
 async def test_simple(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start())
 
-  # 1.0 = 00000001.00000000 (Q8.8) = 0x0100
   # 0.0 = 00000000.00000000 (Q8.8) = 0x0000
+  # 1.0 = 00000001.00000000 (Q8.8) = 0x0100
 
-  x = [0x0100, 0x0100]
-  w = [0x0000, 0x0100]
+  await SystolicMMPE_RESET(dut)
+  
+  #                                rst en  x_in    w_in    x_out   w_out   s_out
+  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0x0100, 0x0000, 0x0000, 0x0000, 0x0000 )
+  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0x0100, 0x0100, 0x0100, 0x0000, 0x0000 )
+  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0x0000, 0x0000, 0x0100, 0x0100, 0x0100 )
 
-  size = 2
+#====================================================================================
+# test_directed_enable
+#====================================================================================
 
+@cocotb.test()
+async def test_directed_enable(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start())
+
+  # 0.0 = 00000000.00000000 (Q8.8) = 0x0000
+  # 1.0 = 00000001.00000000 (Q8.8) = 0x0100
+  # 2.0 = 00000010.00000000 (Q8.8) = 0x0200
+
+  await SystolicMMPE_RESET(dut)
+
+  #                                rst en  x_in    w_in    x_out   w_out   s_out
+  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0x0100, 0x0100, 0x0000, 0x0000, 0x0000 )
+  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0x0100, 0x0100, 0x0000, 0x0000, 0x0000 )
+  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0x0000, 0x0000, 0x0100, 0x0100, 0x0100 )
+  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0x0000, 0x0000, 0x0100, 0x0100, 0x0100 )
+  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0x0100, 0x0100, 0x0000, 0x0000, 0x0100 )
+  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0x0100, 0x0100, 0x0000, 0x0000, 0x0100 )
+  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0x0000, 0x0000, 0x0100, 0x0100, 0x0200 )
+
+#====================================================================================
+# test_random_source
+#====================================================================================
+
+@cocotb.test()
+async def test_random_source(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start())
+
+  size = 1000000
+
+  x = []
+  w = []
+
+  for i in range(size):
+    x.append(random.randint(0,pow(2,15)))
+    w.append(random.randint(0,pow(2,15)))
+  
   await SystolicMMPE_RESET(dut)
 
   x_out = 0
@@ -60,8 +112,9 @@ async def test_simple(dut):
   for i in range(size):
     await SystolicMMPE_CHECK_EQ( dut, 0, 1, x[i], w[i], x_out, w_out, s_out )
 
-    x_out  = x[i]
-    w_out  = w[i]
-    s_out += (x[i] * w[i]) >> 8
+    x_out = x[i]
+    w_out = w[i]
+    prod  = ((SIGN_EXTEND(x[i], 16) * SIGN_EXTEND(w[i], 16)) >> 8) & 0xffff
+    s_out = (s_out + prod) & 0xffff
   
-  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0, 0, x_out, w_out, s_out )
+  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0, 0, x_out, w_out, s_out )
