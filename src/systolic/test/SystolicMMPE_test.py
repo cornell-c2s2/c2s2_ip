@@ -125,3 +125,72 @@ async def test_random_source(dut):
     x_out, w_out, s_out = SystolicMMPE(x[i], w[i], s_out)
   
   await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0, 0, x_out, w_out, s_out )
+
+#====================================================================================
+# test_random_source_enable
+#====================================================================================
+
+@cocotb.test()
+async def test_random_source_enable(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start())
+
+  size = 1000000
+
+  x = []
+  w = []
+
+  for i in range(size):
+    x.append(random.randint(0,pow(2,15)))
+    w.append(random.randint(0,pow(2,15)))
+  
+  await SystolicMMPE_RESET(dut)
+
+  x_out = 0
+  w_out = 0
+  s_out = 0
+
+  for i in range(size):
+    en = random.randint(0, 1)
+    await SystolicMMPE_CHECK_EQ( dut, 0, en, x[i], w[i], x_out, w_out, s_out )
+
+    if en:
+      x_out, w_out, s_out = SystolicMMPE(x[i], w[i], s_out)
+  
+  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0, 0, x_out, w_out, s_out )
+
+#====================================================================================
+# test_random_source_enable_reset
+#====================================================================================
+
+@cocotb.test()
+async def test_random_source_enable_reset(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start())
+
+  size = 1000000
+
+  x = []
+  w = []
+
+  for i in range(size):
+    x.append(random.randint(0,pow(2,15)))
+    w.append(random.randint(0,pow(2,15)))
+  
+  await SystolicMMPE_RESET(dut)
+
+  x_out = 0
+  w_out = 0
+  s_out = 0
+
+  for i in range(size):
+    rst = random.randint(0, 1)
+    en  = random.randint(0, 1)
+    await SystolicMMPE_CHECK_EQ( dut, rst, en, x[i], w[i], x_out, w_out, s_out )
+
+    if rst:
+      x_out = 0
+      w_out = 0
+      s_out = 0
+    elif en:
+      x_out, w_out, s_out = SystolicMMPE(x[i], w[i], s_out)
+  
+  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0, 0, x_out, w_out, s_out )
