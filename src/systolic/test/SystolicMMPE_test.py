@@ -16,6 +16,25 @@ def SIGN_EXTEND(value, bits):
   return (value & (sign_bit - 1)) - (value & sign_bit)
 
 #====================================================================================
+# SystolicMMPE
+#====================================================================================
+
+def SystolicMMPE(x, w, s):
+  x_out = x
+  w_out = w
+  prod  = ((SIGN_EXTEND(x, 16) * SIGN_EXTEND(w, 16)) >> 8) & 0xffff
+  s_out = (s + prod) & 0xffff
+  return x_out, w_out, s_out
+
+#====================================================================================
+# SystolicMMPE_RESET
+#====================================================================================
+
+async def SystolicMMPE_RESET(dut):
+  dut.rst.value = 1
+  await RisingEdge(dut.clk)
+
+#====================================================================================
 # SystolicMMPE_CHECK_EQ
 #====================================================================================
 
@@ -36,14 +55,6 @@ async def SystolicMMPE_CHECK_EQ(dut, rst, en, x_in, w_in, x_out, w_out, s_out):
   assert (dut.s_out.value == s_out),             \
     "[FAILED] dut.s_out != ref.s_out ({} != {})" \
     .format(dut.s_out.value, s_out)
-  
-#====================================================================================
-# SystolicMMPE_RESET
-#====================================================================================
-
-async def SystolicMMPE_RESET(dut):
-  dut.rst.value = 1
-  await RisingEdge(dut.clk)
 
 #====================================================================================
 # test_simple
@@ -111,10 +122,6 @@ async def test_random_source(dut):
 
   for i in range(size):
     await SystolicMMPE_CHECK_EQ( dut, 0, 1, x[i], w[i], x_out, w_out, s_out )
-
-    x_out = x[i]
-    w_out = w[i]
-    prod  = ((SIGN_EXTEND(x[i], 16) * SIGN_EXTEND(w[i], 16)) >> 8) & 0xffff
-    s_out = (s_out + prod) & 0xffff
+    x_out, w_out, s_out = SystolicMMPE(x[i], w[i], s_out)
   
   await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0, 0, x_out, w_out, s_out )
