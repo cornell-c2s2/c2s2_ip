@@ -434,6 +434,12 @@ def logic_to_wire(content : List[str]):
     
     return result
 
+"""
+Locate and accommadate all signed-unsigned incompatibilities
+"""
+def resolve_signed(content : List[str]):
+    pass
+
 #------------------------------------------------------------------------
 # Piece everything together
 #------------------------------------------------------------------------
