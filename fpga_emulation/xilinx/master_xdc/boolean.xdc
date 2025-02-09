@@ -125,3 +125,33 @@ set_property -dict {PACKAGE_PIN E12 IOSTANDARD LVCMOS33} [get_ports {JA7}]
 set_property -dict {PACKAGE_PIN D12 IOSTANDARD LVCMOS33} [get_ports {JA8}]
 set_property -dict {PACKAGE_PIN C13 IOSTANDARD LVCMOS33} [get_ports {JA9}]
 set_property -dict {PACKAGE_PIN C14 IOSTANDARD LVCMOS33} [get_ports {JA10}]
+
+# PMODB connections
+set_property -dict {PACKAGE_PIN B15 IOSTANDARD LVCMOS33} [get_ports {JB1}]
+set_property -dict {PACKAGE_PIN A15 IOSTANDARD LVCMOS33} [get_ports {JB2}]
+set_property -dict {PACKAGE_PIN B16 IOSTANDARD LVCMOS33} [get_ports {JB3}]
+set_property -dict {PACKAGE_PIN A16 IOSTANDARD LVCMOS33} [get_ports {JB4}]
+set_property -dict {PACKAGE_PIN B17 IOSTANDARD LVCMOS33} [get_ports {JB7}]
+set_property -dict {PACKAGE_PIN A17 IOSTANDARD LVCMOS33} [get_ports {JB8}]
+set_property -dict {PACKAGE_PIN C17 IOSTANDARD LVCMOS33} [get_ports {JB9}]
+set_property -dict {PACKAGE_PIN B18 IOSTANDARD LVCMOS33} [get_ports {JB10}]
+
+# PMODC connections
+set_property -dict {PACKAGE_PIN T6 IOSTANDARD LVCMOS33} [get_ports {JC1}]
+set_property -dict {PACKAGE_PIN T5 IOSTANDARD LVCMOS33} [get_ports {JC2}]
+set_property -dict {PACKAGE_PIN R5 IOSTANDARD LVCMOS33} [get_ports {JC3}]
+set_property -dict {PACKAGE_PIN T4 IOSTANDARD LVCMOS33} [get_ports {JC4}]
+set_property -dict {PACKAGE_PIN R7 IOSTANDARD LVCMOS33} [get_ports {JC7}]
+set_property -dict {PACKAGE_PIN R6 IOSTANDARD LVCMOS33} [get_ports {JC8}]
+set_property -dict {PACKAGE_PIN P6 IOSTANDARD LVCMOS33} [get_ports {JC9}]
+set_property -dict {PACKAGE_PIN P5 IOSTANDARD LVCMOS33} [get_ports {JC10}]
+
+# PMODD connections
+set_property -dict {PACKAGE_PIN R4 IOSTANDARD LVCMOS33} [get_ports {JD1}]
+set_property -dict {PACKAGE_PIN T3 IOSTANDARD LVCMOS33} [get_ports {JD2}]
+set_property -dict {PACKAGE_PIN N5 IOSTANDARD LVCMOS33} [get_ports {JD3}]
+set_property -dict {PACKAGE_PIN N4 IOSTANDARD LVCMOS33} [get_ports {JD4}]
+set_property -dict {PACKAGE_PIN L5 IOSTANDARD LVCMOS33} [get_ports {JD7}]
+set_property -dict {PACKAGE_PIN M4 IOSTANDARD LVCMOS33} [get_ports {JD8}]
+set_property -dict {PACKAGE_PIN K4 IOSTANDARD LVCMOS33} [get_ports {JD9}]
+set_property -dict {PACKAGE_PIN L4 IOSTANDARD LVCMOS33} [get_ports {JD10}]
