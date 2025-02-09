@@ -115,3 +115,13 @@ set_property -dict {PACKAGE_PIN M14 IOSTANDARD LVCMOS33} [get_ports {servo0}]
 set_property -dict {PACKAGE_PIN M16 IOSTANDARD LVCMOS33} [get_ports {servo1}]
 set_property -dict {PACKAGE_PIN L15 IOSTANDARD LVCMOS33} [get_ports {servo2}]
 set_property -dict {PACKAGE_PIN L16 IOSTANDARD LVCMOS33} [get_ports {servo3}]
+
+# PMODA connections
+set_property -dict {PACKAGE_PIN B13 IOSTANDARD LVCMOS33} [get_ports {JA1}]
+set_property -dict {PACKAGE_PIN A13 IOSTANDARD LVCMOS33} [get_ports {JA2}]
+set_property -dict {PACKAGE_PIN B14 IOSTANDARD LVCMOS33} [get_ports {JA3}]
+set_property -dict {PACKAGE_PIN A14 IOSTANDARD LVCMOS33} [get_ports {JA4}]
+set_property -dict {PACKAGE_PIN E12 IOSTANDARD LVCMOS33} [get_ports {JA7}]
+set_property -dict {PACKAGE_PIN D12 IOSTANDARD LVCMOS33} [get_ports {JA8}]
+set_property -dict {PACKAGE_PIN C13 IOSTANDARD LVCMOS33} [get_ports {JA9}]
+set_property -dict {PACKAGE_PIN C14 IOSTANDARD LVCMOS33} [get_ports {JA10}]
