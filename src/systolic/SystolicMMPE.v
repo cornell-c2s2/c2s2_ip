@@ -14,16 +14,16 @@ module SystolicMMPE
   parameter int d = 8,
   parameter bit sign = 1
 )(
-  (* keep=1 *) input  logic         clk,
-  (* keep=1 *) input  logic         rst,
-  (* keep=1 *) input  logic         en,
+  input  logic         clk,
+  input  logic         rst,
+  input  logic         en,
 
-  (* keep=1 *) input  logic [n-1:0] x_in,
-  (* keep=1 *) input  logic [n-1:0] w_in,
+  input  logic [n-1:0] x_in,
+  input  logic [n-1:0] w_in,
 
-  (* keep=1 *) output logic [n-1:0] x_out,
-  (* keep=1 *) output logic [n-1:0] w_out,
-  (* keep=1 *) output logic [n-1:0] s_out
+  output logic [n-1:0] x_out,
+  output logic [n-1:0] w_out,
+  output logic [n-1:0] s_out
 );
 
   // Multiplication

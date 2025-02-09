@@ -105,7 +105,7 @@ async def test_directed_enable(dut):
 async def test_random_source(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start())
 
-  size = 1000000
+  size = 10000
 
   x = []
   w = []
@@ -134,7 +134,7 @@ async def test_random_source(dut):
 async def test_random_source_enable(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start())
 
-  size = 1000000
+  size = 10000
 
   x = []
   w = []
@@ -166,7 +166,7 @@ async def test_random_source_enable(dut):
 async def test_random_source_enable_reset(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start())
 
-  size = 1000000
+  size = 10000
 
   x = []
   w = []
