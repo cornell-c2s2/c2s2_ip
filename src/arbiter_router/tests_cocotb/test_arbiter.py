@@ -104,6 +104,7 @@ async def priority_test_w_delays(dut, delay, nmsgs=20):
 
     expected_output = []
     cycle = 0
+    prev_pick = None
     
     for _ in range(10000):
         dut._log.info(f"starting cycle {cycle}")
@@ -123,13 +124,18 @@ async def priority_test_w_delays(dut, delay, nmsgs=20):
         await ClockCycles(dut.clk, 1)
         dut._log.info(f"istream_val = {dut.istream_val.value}")
 
+        
         for i in range(NINPUTS):
+            if prev_pick is not None and istream_val[prev_pick] and i != prev_pick:
+                continue
+
             if istream_val[i]:
 
                 # expected_output.append(construct_out(msgs[i], i))
                 expected = construct_out(msgs[i][msg_indices[i]], i)
                 assert dut.ostream_msg.value == expected, f"expected input {expected >> 32} to be picked, but input {dut.ostream_msg.value >> 32} was picked instead"
                 dut._log.info(f"arbiter picked input {i}")
+                prev_pick = i
                 msg_indices[i] += 1
                 
                 if msg_indices[i] < nmsgs:
@@ -137,6 +143,8 @@ async def priority_test_w_delays(dut, delay, nmsgs=20):
 
                 istream_val[i] = 0
                 break
+        else:
+            prev_pick = None
             
         if all(i >= nmsgs for i in msg_indices):
             break
