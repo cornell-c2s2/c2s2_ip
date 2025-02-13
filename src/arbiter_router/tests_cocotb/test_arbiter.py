@@ -128,7 +128,7 @@ async def priority_test_w_delays(dut, delay, nmsgs=20):
 
                 # expected_output.append(construct_out(msgs[i], i))
                 expected = construct_out(msgs[i][msg_indices[i]], i)
-                assert dut.ostream_msg.value == expected, f"expected {expected >> 32}, got {dut.ostream_msg.value >> 32}"
+                assert dut.ostream_msg.value == expected, f"expected input {expected >> 32} to be picked, but input {dut.ostream_msg.value >> 32} was picked instead"
                 dut._log.info(f"arbiter picked input {i}")
                 msg_indices[i] += 1
                 
