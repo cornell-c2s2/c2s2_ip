@@ -9,9 +9,10 @@ check_cov -init -type all -model {branch toggle statement} -toggle_ports_only
 analyze -sv lbist/misr/misr.v lbist/misr/tests/formal/misr_sva.sv
  
 # specify the top level module, in this case the testbench
-elaborate -top misr_sva -create_related_covers {precondition witness}
+elaborate -top misr -create_related_covers {precondition witness}
  
 # specify clock and reset signals
 clock clk
-# reset reset
+reset reset
+
 prove -bg -task {<embedded>}
