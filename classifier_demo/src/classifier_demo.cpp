@@ -19,9 +19,13 @@ SYSTEM_THREAD(ENABLED);
 // View logs with CLI using 'particle serial monitor --follow'
 SerialLogHandler logHandler(LOG_LEVEL_INFO);
 
+int MICROPHONE_PIN = A0;
+float val;
+
 // setup() runs once, when the device is first turned on
 void setup() {
   // Put initialization like pinMode and begin functions here
+  
 }
 
 // loop() runs over and over again, as quickly as it can execute.
@@ -32,4 +36,7 @@ void loop() {
   // Log.info("Sending Hello World to the cloud!");
   // Particle.publish("Hello world!");
   // delay( 10 * 1000 ); // milliseconds and blocking - see docs for more info!
+  val = analogRead(MICROPHONE_PIN);
+
+  Serial.print(val);
 }
