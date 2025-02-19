@@ -22,7 +22,8 @@ def SIGN_EXTEND(value, bits):
 def SystolicMMPE(x, w, s):
   x_out = x
   w_out = w
-  prod  = ((SIGN_EXTEND(x, 16) * SIGN_EXTEND(w, 16)) >> 8) & 0xffff
+  #prod  = ((SIGN_EXTEND(x, 16) * SIGN_EXTEND(w, 16)) >> 8) & 0xffff
+  prod = ((x * w) >> 8) & 0xffff
   s_out = (s + prod) & 0xffff
   return x_out, w_out, s_out
 
