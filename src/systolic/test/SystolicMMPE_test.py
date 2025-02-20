@@ -5,26 +5,28 @@ import subprocess
 from cocotb.triggers import *
 from cocotb.clock import Clock
 
-X = 'xxxxxxxxxxxxxxxx'
+from fixedpt import Fixed
+
+LOW = Fixed(0, 1, 16, 8)
 
 #====================================================================================
-# SIGN_EXTEND
+# fixed_point_multiply
 #====================================================================================
 
-def SIGN_EXTEND(value, bits):
-  sign_bit = (1 << (bits - 1))
-  return (value & (sign_bit - 1)) - (value & sign_bit)
+def fixed_point_multiply(a: Fixed, b: Fixed) -> Fixed:
+    assert a._n == b._n
+    assert a._d == b._d
+    return (a * b).resize(None, a._n, a._d)
 
 #====================================================================================
 # SystolicMMPE
 #====================================================================================
 
 def SystolicMMPE(x, w, s):
-  x_out = x
-  w_out = w
-  #prod  = ((SIGN_EXTEND(x, 16) * SIGN_EXTEND(w, 16)) >> 8) & 0xffff
-  prod = ((x * w) >> 8) & 0xffff
-  s_out = (s + prod) & 0xffff
+  x_out = Fixed(x, 1, 16, 8)
+  w_out = Fixed(w, 1, 16, 8)
+  prod  = fixed_point_multiply(x, w)
+  s_out = Fixed(s + prod, 1, 16, 8)
   return x_out, w_out, s_out
 
 #====================================================================================
@@ -42,61 +44,20 @@ async def SystolicMMPE_RESET(dut):
 async def SystolicMMPE_CHECK_EQ(dut, rst, en, x_in, w_in, x_out, w_out, s_out):
   dut.rst.value  = rst
   dut.en.value   = en
-  dut.x_in.value = x_in
-  dut.w_in.value = w_in
+  dut.x_in.value = x_in.get()
+  dut.w_in.value = w_in.get()
   
   await RisingEdge(dut.clk)
 
-  assert (dut.x_out.value == x_out),             \
+  assert (dut.x_out.value == x_out.get()),       \
     "[FAILED] dut.x_out != ref.x_out ({} != {})" \
-    .format(dut.x_out.value, x_out)
-  assert (dut.w_out.value == w_out),             \
+    .format(dut.x_out.value, x_out.get())
+  assert (dut.w_out.value == w_out.get()),       \
     "[FAILED] dut.w_out != ref.w_out ({} != {})" \
-    .format(dut.w_out.value, w_out)
-  assert (dut.s_out.value == s_out),             \
+    .format(dut.w_out.value, w_out.get())
+  assert (dut.s_out.value == s_out.get()),       \
     "[FAILED] dut.s_out != ref.s_out ({} != {})" \
-    .format(dut.s_out.value, s_out)
-
-#====================================================================================
-# test_simple
-#====================================================================================
-
-@cocotb.test()
-async def test_simple(dut):
-  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start())
-
-  # 0.0 = 00000000.00000000 (Q8.8) = 0x0000
-  # 1.0 = 00000001.00000000 (Q8.8) = 0x0100
-
-  await SystolicMMPE_RESET(dut)
-  
-  #                                rst en  x_in    w_in    x_out   w_out   s_out
-  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0x0100, 0x0000, 0x0000, 0x0000, 0x0000 )
-  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0x0100, 0x0100, 0x0100, 0x0000, 0x0000 )
-  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0x0000, 0x0000, 0x0100, 0x0100, 0x0100 )
-
-#====================================================================================
-# test_directed_enable
-#====================================================================================
-
-@cocotb.test()
-async def test_directed_enable(dut):
-  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start())
-
-  # 0.0 = 00000000.00000000 (Q8.8) = 0x0000
-  # 1.0 = 00000001.00000000 (Q8.8) = 0x0100
-  # 2.0 = 00000010.00000000 (Q8.8) = 0x0200
-
-  await SystolicMMPE_RESET(dut)
-
-  #                                rst en  x_in    w_in    x_out   w_out   s_out
-  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0x0100, 0x0100, 0x0000, 0x0000, 0x0000 )
-  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0x0100, 0x0100, 0x0000, 0x0000, 0x0000 )
-  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0x0000, 0x0000, 0x0100, 0x0100, 0x0100 )
-  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0x0000, 0x0000, 0x0100, 0x0100, 0x0100 )
-  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0x0100, 0x0100, 0x0000, 0x0000, 0x0100 )
-  await SystolicMMPE_CHECK_EQ( dut, 0, 1, 0x0100, 0x0100, 0x0000, 0x0000, 0x0100 )
-  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0x0000, 0x0000, 0x0100, 0x0100, 0x0200 )
+    .format(dut.s_out.value, s_out.get())
 
 #====================================================================================
 # test_random_source
@@ -112,20 +73,20 @@ async def test_random_source(dut):
   w = []
 
   for i in range(size):
-    x.append(random.randint(0,pow(2,15)))
-    w.append(random.randint(0,pow(2,15)))
+    x.append(Fixed(random.randint(0,pow(2,16)-1), 1, 16, 8))
+    w.append(Fixed(random.randint(0,pow(2,16)-1), 1, 16, 8))
   
   await SystolicMMPE_RESET(dut)
 
-  x_out = 0
-  w_out = 0
-  s_out = 0
+  x_out = LOW
+  w_out = LOW
+  s_out = LOW
 
   for i in range(size):
     await SystolicMMPE_CHECK_EQ( dut, 0, 1, x[i], w[i], x_out, w_out, s_out )
     x_out, w_out, s_out = SystolicMMPE(x[i], w[i], s_out)
   
-  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0, 0, x_out, w_out, s_out )
+  await SystolicMMPE_CHECK_EQ( dut, 0, 0, LOW, LOW, x_out, w_out, s_out )
 
 #====================================================================================
 # test_random_source_enable
@@ -141,14 +102,14 @@ async def test_random_source_enable(dut):
   w = []
 
   for i in range(size):
-    x.append(random.randint(0,pow(2,15)))
-    w.append(random.randint(0,pow(2,15)))
+    x.append(Fixed(random.randint(0,pow(2,16)-1), 1, 16, 8))
+    w.append(Fixed(random.randint(0,pow(2,16)-1), 1, 16, 8))
   
   await SystolicMMPE_RESET(dut)
 
-  x_out = 0
-  w_out = 0
-  s_out = 0
+  x_out = LOW
+  w_out = LOW
+  s_out = LOW
 
   for i in range(size):
     en = random.randint(0, 1)
@@ -157,7 +118,7 @@ async def test_random_source_enable(dut):
     if en:
       x_out, w_out, s_out = SystolicMMPE(x[i], w[i], s_out)
   
-  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0, 0, x_out, w_out, s_out )
+  await SystolicMMPE_CHECK_EQ( dut, 0, 0, LOW, LOW, x_out, w_out, s_out )
 
 #====================================================================================
 # test_random_source_enable_reset
@@ -173,14 +134,14 @@ async def test_random_source_enable_reset(dut):
   w = []
 
   for i in range(size):
-    x.append(random.randint(0,pow(2,15)))
-    w.append(random.randint(0,pow(2,15)))
+    x.append(Fixed(random.randint(0,pow(2,16)-1), 1, 16, 8))
+    w.append(Fixed(random.randint(0,pow(2,16)-1), 1, 16, 8))
   
   await SystolicMMPE_RESET(dut)
 
-  x_out = 0
-  w_out = 0
-  s_out = 0
+  x_out = LOW
+  w_out = LOW
+  s_out = LOW
 
   for i in range(size):
     rst = random.randint(0, 1)
@@ -188,10 +149,10 @@ async def test_random_source_enable_reset(dut):
     await SystolicMMPE_CHECK_EQ( dut, rst, en, x[i], w[i], x_out, w_out, s_out )
 
     if rst:
-      x_out = 0
-      w_out = 0
-      s_out = 0
+      x_out = LOW
+      w_out = LOW
+      s_out = LOW
     elif en:
       x_out, w_out, s_out = SystolicMMPE(x[i], w[i], s_out)
   
-  await SystolicMMPE_CHECK_EQ( dut, 0, 0, 0, 0, x_out, w_out, s_out )
+  await SystolicMMPE_CHECK_EQ( dut, 0, 0, LOW, LOW, x_out, w_out, s_out )

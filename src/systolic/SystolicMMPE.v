@@ -28,23 +28,14 @@ module SystolicMMPE
 
   // Multiplication
 
-  logic [n-1:0]    prod;
-  logic [n+d-1:0] _prod;
-  logic [d-1:0]   _prod_unused;
+  logic [n-1:0] prod;
 
-  /*fixed_point_combinational_Multiplier #(n, d, sign) multiplier
+  fixed_point_combinational_Multiplier #(n, d, sign) multiplier
   (
     .a (x_in),
     .b (w_in),
     .c (prod)
-  );*/
-
-  always_comb begin
-    _prod = (x_in * w_in);
-    prod  = _prod[n+d-1:d];
-  end
-
-  assign _prod_unused = _prod[d-1:0];
+  );
 
   // Summation
 
