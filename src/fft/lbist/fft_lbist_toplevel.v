@@ -5,21 +5,28 @@
 `include "lbist/lfsr/lfsr.v"
 `include "lbist/misr/misr.v"
 `include "fft/pease/fft.v"
+`include "serdes/deserializer.v"
+`include "serdes/serializer.v"
 
 module fft_lbist_toplevel #(
-  parameter int SEED_BITS = 64,
-  parameter int SIGNATURE_BITS = 16,
-  parameter int NUM_SEEDS = 2,           // Increment if addind new seed
+  parameter int SEED_BITS = 16,
+  parameter int SIGNATURE_BITS = 64,
+  parameter int INPUTS_PER_SEED = 4,
+  parameter int NUM_SEEDS = 4,           // Increment if addind new seed
   parameter int NUM_HASHES = 20,
   parameter int MAX_OUTPUTS_TO_HASH = 25,
   parameter int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH),
   parameter [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
-    32'b01010101000111000101101111111011,
-    32'b10000111001110100111100001011100
+    64'b1010111010010110000010111100001010101110011111000100111000000111,
+    64'b1000011100111010011110000101110010111011001011100011100011110110,
+    64'b1000111110100010011111101001011101110101000010011111110011110000,
+    64'b1011101000011011000000000011011111010000101000110101000101011110
   },
   parameter [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
-    16'b1100110100000101,
-    16'b1110000010110100
+    64'b1101100010000010100101000001001111011000100010101111011101111010,
+    64'b1111010101010100010110101110000010001101010111101101000001001101,
+    64'b1000100000101110001110000011101110110000001011100010111111011111,
+    64'b1011100010101011000100000001011011010100101010011000001000010100
   }
   )(
   input logic clk,
@@ -48,15 +55,21 @@ module fft_lbist_toplevel #(
   logic [SIGNATURE_BITS-1:0] misr_ctrl_resp_msg;
   logic                      misr_ctrl_resp_rdy;
 
-  // LFSR to CUT, sends random inputs
-  logic                      lfsr_cut_resp_val;
-  logic [SEED_BITS-1:0]      lfsr_cut_resp_msg;
-  logic                      lfsr_cut_resp_rdy;
+  logic                      lfsr_deser_resp_val;
+  logic [SEED_BITS-1:0]      lfsr_deser_resp_msg;
+  logic                      lfsr_deser_resp_rdy;
 
-  // CUT to MISR, sends outputs of CUT
-  logic                      cut_misr_resp_val;
-  logic [SIGNATURE_BITS-1:0] cut_misr_resp_msg;
-  logic                      cut_misr_resp_rdy;
+  logic                      deser_fft_resp_val;
+  logic [SIGNATURE_BITS-1:0] deser_fft_resp_msg;
+  logic                      deser_fft_resp_rdy;
+
+  logic                      fft_ser_resp_val;
+  logic [SIGNATURE_BITS-1:0] fft_ser_resp_msg;
+  logic                      fft_ser_resp_rdy;
+
+  logic                      ser_misr_resp_val;
+  logic [SEED_BITS-1:0]      ser_misr_resp_msg;
+  logic                      ser_misr_resp_rdy;
 
   // Controller to LFSR and CUT, sends reset signal once outputs have been hashed
   logic                      lfsr_cut_reset;
@@ -90,17 +103,56 @@ module fft_lbist_toplevel #(
     .misr_resp_rdy (misr_ctrl_resp_rdy)
   );
 
-  lfsr #(
-    .N(SEED_BITS)
-  ) lfsr (
+  lfsr_paramver2 #(
+    .LFSR_MSG_BITS(SEED_BITS)
+  ) lfsr_paramver2 (
     .clk     (clk),
     .reset   (reset || lfsr_cut_reset),
     .req_val (ctrl_lfsr_resp_val),
     .req_msg (ctrl_lfsr_resp_msg),
     .req_rdy (ctrl_lfsr_resp_rdy),
-    .resp_rdy(lfsr_cut_resp_rdy),
-    .resp_val(lfsr_cut_resp_val),
-    .resp_msg(lfsr_cut_resp_msg)
+    .resp_rdy(lfsr_deser_resp_rdy),
+    .resp_val(lfsr_deser_resp_val),
+    .resp_msg(lfsr_deser_resp_msg)
+  );
+ 
+  serdes_Deserializer #(
+    .N_SAMPLES(INPUTS_PER_SEED),
+    .BIT_WIDTH(SEED_BITS),
+  ) serdes_Deserializer (
+    .recv_val(lfsr_deser_resp_val),
+    .recv_rdy(lfsr_deser_resp_rdy),
+    .recv_msg(lfsr_deser_resp_msg),
+    .send_val(deser_fft_resp_val),
+    .send_rdy(deser_fft_resp_rdy),
+    .send_msg(deser_fft_resp_msg)
+  );
+
+  fft_pease_FFT #(
+    .BIT_WIDTH(SIGNATURE_BITS / INPUTS_PER_SEED),
+    .DECIMAL_PT(8),
+    .N_SAMPLES(INPUTS_PER_SEED)
+  ) fft_pease_FFT (
+    .clk     (clk),
+    .reset   (reset),
+    .recv_msg(deser_fft_resp_msg),
+    .recv_val(deser_fft_resp_val),
+    .recv_rdy(deser_fft_resp_rdy),
+    .send_msg(fft_ser_resp_msg),
+    .send_val(fft_ser_resp_val),
+    .send_rdy(fft_ser_resp_rdy)
+  );
+  
+  serdes_Serializer #(
+    .N_SAMPLES(INPUTS_PER_SEED),
+    .BIT_WIDTH(SEED_BITS),
+  ) serdes_Deserializer (
+    .recv_val(fft_ser_resp_val),
+    .recv_rdy(fft_ser_resp_rdy),
+    .recv_msg(fft_ser_resp_msg),
+    .send_val(ser_misr_resp_val),
+    .send_rdy(ser_misr_resp_rdy),
+    .send_msg(ser_misr_resp_msg)
   );
 
   misr #(
@@ -112,9 +164,9 @@ module fft_lbist_toplevel #(
   ) misr (
     .clk           (clk),
     .reset         (reset),
-    .cut_req_val   (cut_misr_resp_val),
-    .cut_req_msg   (cut_misr_resp_msg),
-    .cut_req_rdy   (cut_misr_resp_rdy),
+    .cut_req_val   (ser_misr_resp_val),
+    .cut_req_msg   (ser_misr_resp_msg),
+    .cut_req_rdy   (ser_misr_resp_rdy),
     .lbist_req_val (ctrl_misr_req_val),
     .lbist_req_msg (ctrl_misr_req_msg),
     .lbist_req_rdy (ctrl_misr_req_rdy),
@@ -122,42 +174,6 @@ module fft_lbist_toplevel #(
     .lbist_resp_msg(misr_ctrl_resp_msg),
     .lbist_resp_rdy(misr_ctrl_resp_rdy)
   );
-
-  fft_pease_FFT #(
-    .BIT_WIDTH(SIGNATURE_BITS),
-    .DECIMAL_PT(8),
-    .N_SAMPLES(4)
-  ) fft_pease_FFT (
-    .clk     (clk),
-    .reset   (reset),
-    .recv_msg({
-        lfsr_cut_resp_msg[63:48],
-        lfsr_cut_resp_msg[47:32],
-        lfsr_cut_resp_msg[31:16],
-        lfsr_cut_resp_msg[15:0]
-    }),
-    .recv_val(lfsr_cut_resp_val),
-    .recv_rdy(lfsr_cut_resp_rdy),
-    .send_msg(cut_misr_resp_msg),
-    .send_val(cut_misr_resp_val),
-    .send_rdy(cut_misr_resp_rdy)
-  );
-
-//   fixed_point_iterative_Multiplier #(
-//     .n(SIGNATURE_BITS),
-//     .d(0),
-//     .sign(0)
-//   ) cut (
-//     .clk     (clk),
-//     .reset   (reset || lfsr_cut_reset),
-//     .recv_rdy(lfsr_cut_resp_rdy),
-//     .recv_val(lfsr_cut_resp_val),
-//     .a       (lfsr_cut_resp_msg[31:16]),
-//     .b       (lfsr_cut_resp_msg[15:0]),
-//     .send_rdy(cut_misr_resp_rdy),
-//     .send_val(cut_misr_resp_val),
-//     .c       (cut_misr_resp_msg)
-//   );
 
 endmodule
 `endif /* FFT_LBIST_TOPLEVEL_V */
