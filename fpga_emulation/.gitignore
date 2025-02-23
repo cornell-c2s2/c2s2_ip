@@ -1,0 +1,13 @@
+interconnect_fpga.v
+tests
+incremental_db/
+*.cdf
+*.qpf
+*.qsf
+*.qws
+
+*.cache
+*.hw
+*.sim
+*.ip_user_files
+*.runs
