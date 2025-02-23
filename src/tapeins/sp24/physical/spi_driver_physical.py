@@ -3,7 +3,7 @@ from spidriver import SPIDriver
 import time
 
 # set `tests_on_c2` to `True` if operating physical tests on c2
-tests_on_c2 = True
+tests_on_c2 = False
 s = SPIDriver("/dev/ttyUSB0") if tests_on_c2 else SPIDriver("COM7")
 
 
