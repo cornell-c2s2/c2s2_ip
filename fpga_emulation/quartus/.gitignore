@@ -1,7 +1,0 @@
-interconnect_fpga.v
-tests
-incremental_db/
-*.cdf
-*.qpf
-*.qsf
-*.qws
