@@ -45,7 +45,7 @@ def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
     out_idx = 0
     trsns = curr_trsns + 1
 
-    spc = 0
+    spc = 0 # Initially presume that minion has no space left to take in messages
 
     print("")
 
@@ -53,29 +53,29 @@ def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
         if trsns > max_trsns:
             assert False, "Exceeded max transactions"
 
-        if in_idx < len(in_msgs) and spc == 1:
-            retmsg = spi_write(dut, write_read_msg(in_msgs[in_idx]))
-            spc = retmsg[20]
+        if in_idx < len(in_msgs) and spc == 1: # if we haven't sent everything from in_msg, and the minion has space
+            retmsg = spi_write(dut, write_read_msg(in_msgs[in_idx])) # Full duplex, send our data and receive from minion
+            spc = retmsg[20] # Take the 21st (spc) bit, and update spc
             print(
                 "Trsn" + pad(trsns) + ":",
                 valrdy_to_str(in_msgs[in_idx], 1, 1, 6),
                 ">",
                 valrdy_to_str(retmsg[0:20], retmsg[21], 1, 6),
             )
-            if retmsg[21] == 1:
+            if retmsg[21] == 1: # Take the 22nd (val) bit, if it is 1, the readout from minion was valid, so we treat it as an output, otherwise discard it
                 assert retmsg[0:20] == out_msgs[out_idx]
                 out_idx += 1
             in_idx += 1
 
-        else:
-            retmsg = spi_write(dut, read_msg())
+        else: # if the minion has no space left or we've sent everything
+            retmsg = spi_write(dut, read_msg()) # just read without sending anything
             print(
                 "Trsn" + pad(trsns) + ":",
                 valrdy_to_str(0, in_idx < len(in_msgs), spc, 6),
                 ">",
                 valrdy_to_str(retmsg[0:20], retmsg[21], 1, 6),
             )
-            spc = retmsg[20]
+            spc = retmsg[20] # Take the 21st (spc) bit, and update spc
             if retmsg[21] == 1:
                 assert retmsg[0:20] == out_msgs[out_idx]
                 out_idx += 1
