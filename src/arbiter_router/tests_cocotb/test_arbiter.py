@@ -81,14 +81,14 @@ async def priority_test_w_delays(dut, delay, nmsgs=20):
         return
     
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
-    # msgs = [
-    #     [random.randint(0, (1 << NBITS) - 1) for _ in range(nmsgs)]
-    #     for _ in range(NINPUTS)
-    # ]
     msgs = [
-        [0 for _ in range(nmsgs)]
+        [random.randint(0, (1 << NBITS) - 1) for _ in range(nmsgs)]
         for _ in range(NINPUTS)
     ]
+    # msgs = [
+    #     [0 for _ in range(nmsgs)]
+    #     for _ in range(NINPUTS)
+    # ]
 
     dut.reset.value = 1
     await ClockCycles(dut.clk, 3)
@@ -115,7 +115,7 @@ async def priority_test_w_delays(dut, delay, nmsgs=20):
             dut._log.info(f"sending inputs, cycle is {cycle}")
             for i in range(NINPUTS):
                 if msg_indices[i] < nmsgs:
-                    dut._log.info(f"updating valid, valids={istream_val}")
+                    # dut._log.info(f"updating valid, valids={istream_val}")
                     istream_val[i] = 1
 
         dut.istream_val.value = istream_val
@@ -149,6 +149,7 @@ async def priority_test_w_delays(dut, delay, nmsgs=20):
         if all(i >= nmsgs for i in msg_indices):
             break
         
+        dut._log.info(f"ostream_val = {dut.ostream_val.value}")
         dut._log.info(f"end of cycle {cycle}\n")
         cycle += 1
         # await ClockCycles(dut.clk, 1)
@@ -160,6 +161,30 @@ delay_values = [0, 1, 2, 3, 4, 8]
 factory = TestFactory(priority_test_w_delays)
 factory.add_option("delay", delay_values)
 factory.generate_tests()
+
+
+@cocotb.test()
+async def sink_delay_doesnt_work(dut):
+    if not is_default():
+        return
+    
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    msgs = [1, 2, 3]
+    dut.ostream_rdy.value = 0
+    dut.reset.value = 1
+    await ClockCycles(dut.clk, 3)
+    dut.reset.value = 0
+
+    dut.istream_msg.value = msgs
+    dut.istream_val.value = [1, 1, 1]
+
+    for _ in range(1000):
+        if dut.ostream_val.value:
+            break
+    else:
+        assert False, "Timed out, ostream_val never becomes 1"
+
+
 
 
 
