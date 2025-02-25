@@ -53,3 +53,9 @@ core.*
 
 # Ignore all .nfs files
 .nfs*
+
+# Ignore all backup files
+**/*.bak
+
+# Ignore quartus files
+**/db/
