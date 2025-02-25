@@ -110,7 +110,7 @@ def wb_loopback_outXbar_clsXbar_msg(msgs):
         [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0],
     ],
 )
-def wb_test_loopback_inXbar_clsXbar(msgs, cmdline_opts):
+def test_wb_loopback_inXbar_clsXbar(msgs, cmdline_opts):
     in_msgs, out_msgs = wb_loopback_inXbar_clsXbar_msg(msgs)
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
@@ -126,7 +126,7 @@ def wb_test_loopback_inXbar_clsXbar(msgs, cmdline_opts):
         [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0],
     ],
 )
-def wb_test_loopback_inXbar_outXbar(msgs, cmdline_opts):
+def test_wb_loopback_inXbar_outXbar(msgs, cmdline_opts):
     in_msgs, out_msgs = wb_loopback_inXbar_outXbar_msg(msgs)
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
@@ -142,7 +142,7 @@ def wb_test_loopback_inXbar_outXbar(msgs, cmdline_opts):
         [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0],
     ],
 )
-def wb_test_loopback_clsXbar_inXbar(msgs, cmdline_opts):
+def test_wb_loopback_clsXbar_inXbar(msgs, cmdline_opts):
     in_msgs, out_msgs = wb_loopback_clsXbar_inXbar_msg(msgs)
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
@@ -158,7 +158,7 @@ def wb_test_loopback_clsXbar_inXbar(msgs, cmdline_opts):
         [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0],
     ],
 )
-def wb_test_loopback_clsXbar_outXbar(msgs, cmdline_opts):
+def test_wb_loopback_clsXbar_outXbar(msgs, cmdline_opts):
     in_msgs, out_msgs = wb_loopback_clsXbar_outXbar_msg(msgs)
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
@@ -174,7 +174,7 @@ def wb_test_loopback_clsXbar_outXbar(msgs, cmdline_opts):
         [0x0, 0x1, 0x0, 0x1],
     ],
 )
-def wb_test_loopback_outXbar_inXbar(msgs, cmdline_opts):
+def test_wb_loopback_outXbar_inXbar(msgs, cmdline_opts):
     in_msgs, out_msgs = wb_loopback_outXbar_inXbar_msg(msgs)
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
@@ -190,7 +190,7 @@ def wb_test_loopback_outXbar_inXbar(msgs, cmdline_opts):
         [0x0, 0x1, 0x0, 0x1],
     ],
 )
-def wb_test_loopback_outXbar_clsXbar(msgs, cmdline_opts):
+def test_wb_loopback_outXbar_clsXbar(msgs, cmdline_opts):
     in_msgs, out_msgs = wb_loopback_outXbar_clsXbar_msg(msgs)
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
