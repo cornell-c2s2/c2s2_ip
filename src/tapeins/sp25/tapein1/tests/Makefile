@@ -4,6 +4,11 @@ TOPLEVEL_LANG ?= verilog
 #RTL Simulator (always Synopsys VCS)
 SIM := vcs
 
+ifeq ($(SIM), vcs)
+	#WAIVER_FILE = vcs_waivers.f
+	VCS_OPTIONS += +error+limit,100
+endif
+
 #Add working directory to the Python virtual environment path
 PWD=$(shell pwd)
 C2S2_PATH=$(HOME)/c2s2/sp25_tapein1
@@ -24,10 +29,9 @@ VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/fft/pease/ -type f \( -name "*.
 VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/serdes/ -type f \( -name "*.v" -o -name "*.sv" \))
 VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/classifier/ -type f \( -name "*.v" -o -name "*.sv" \))
 VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/wishbone/ -type f \( -name "*.v" -o -name "*.sv" \))
-
-
-# Appends all source verilog
-# VERILOG_SOURCES := $(shell find $(C2S2_PATH)/src -type f \( -name "*.v" -o -name "*.sv" \))
+VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/lbist/ -type f \( -name "*.v" -o -name "*.sv" \))
+VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/async_fifo/ -type f \( -name "*.v" -o -name "*.sv" \))
+VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/crossbars/ -type f \( -name "*.v" -o -name "*.sv" \))
 
 
 

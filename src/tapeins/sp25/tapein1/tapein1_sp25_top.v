@@ -7,7 +7,6 @@
 // PARAMETERS ----------------------------------------------------------------------
 // I/O -----------------------------------------------------------------------------
 // =================================================================================
-
 // Progress:
 // Need to fix compiler issues...
 
@@ -16,17 +15,7 @@
 
 
 // These includes might be doing nothing...
-`include "spi/minion.v"
-`include "arbiter_router/router.v"
-`include "fft/pease/fft.v"
-`include "serdes/deserializer.v"
-`include "serdes/serializer.v"
-`include "arbiter_router/arbiter.v"
-`include "arbiter_router/router.v"
-`include "crossbars/blocking.v"
-`include "classifier/classifier.v"
-`include "wishbone/wishbone.v"
-// TODO: add lbist and fifo includes
+// TODO: add includes back...
 
 
 module tapein1_sp25_top(
@@ -145,7 +134,7 @@ module tapein1_sp25_top(
   // - OUTPUT_XBAR_CONTROL_BITS:
   //     Bitwidth of output crossbr control bits.
 
-  localparam int OUTPUT_XBAR_INPUTS = 3;
+  localparam int OUTPUT_XBAR_INPUTS = 4;
   localparam int OUTPUT_XBAR_OUTPUTS = 2;
   localparam int OUTPUT_XBAR_BITS = 1;
   localparam int OUTPUT_XBAR_CONTROL_BITS = $clog2( OUTPUT_XBAR_INPUTS *
@@ -218,32 +207,18 @@ module tapein1_sp25_top(
   //     The expected signature values from CUT to be compared against result of
   //     MISR
   // TODO: Update!
-  localparam int SEED_BITS = 32;
-  localparam int SIGNATURE_BITS = 32;
-  localparam int NUM_SEEDS = 8;
-  localparam int NUM_HASHES = 8;
+  localparam int SEED_BITS = DATA_BITS;
+  localparam int SIGNATURE_BITS = DATA_BITS;
+  localparam int NUM_SEEDS = 1;
+  localparam int NUM_HASHES = 1;
   localparam int MAX_OUTPUTS_TO_HASH = 32;
   // TODO: Update!
   localparam [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
-    32'h0a89687e,
-    32'ha87ded5f,
-    32'h481c5077,
-    32'h81595729,
-    32'hffd39769,
-    32'h24b05d57,
-    32'h9913b1fd,
-    32'hd8df8ed2
+    16'd0
   };
   // TODO: Update!
   localparam [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
-    32'h2435b217,
-    32'hb25e4d4c,
-    32'h16307bd1,
-    32'h2ced25e0,
-    32'hc5145ccb,
-    32'h6180254b,
-    32'hc329c75c,
-    32'h89b9c2ec
+    16'd0
   };
 
   // LFSR --------------------------------------------------------------------------
@@ -444,6 +419,10 @@ module tapein1_sp25_top(
   logic                                    misr_resp_rdy;
 
   // Async FIFO --------------------------------------------------------------------
+  logic [FIFO_ENTRY_BITS-1:0]              async_fifo_recv_msg;
+  logic                                    async_fifo_recv_val;
+  logic                                    async_fifo_recv_rdy;
+
   logic [FIFO_ENTRY_BITS-1:0]              async_fifo_send_msg;
   logic                                    async_fifo_send_val;
   logic                                    async_fifo_send_rdy;
@@ -558,10 +537,7 @@ module tapein1_sp25_top(
     .send_msg                (output_xbar_send_msg),
     .send_val                (output_xbar_send_val),
     .send_rdy                (output_xbar_send_rdy),
-    // TODO: Change
-    .control({
-      output_xbar_control_msg[3:2], output_xbar_control_msg[0]
-    }),  // here, we discard the second bit (index 1) as there are only 2 outputs
+    .control                 (output_xbar_control_msg),
     .control_rdy             (output_xbar_control_rdy),
     .control_val             (output_xbar_control_val)
   );
@@ -714,9 +690,9 @@ module tapein1_sp25_top(
     .sampling_freq_rdy       (classifier_config_rdy[2]),
     .sampling_freq_val       (classifier_config_val[2]),
     .sampling_freq_msg       (classifier_config_msg[2]),
-    .send_rdy                (classifier_send_msg),
+    .send_rdy                (classifier_send_rdy),
     .send_val                (classifier_send_val),
-    .send_msg                (classifier_send_rdy)
+    .send_msg                (classifier_send_msg)
   );
 
   // Wishbone Harness --------------------------------------------------------------
@@ -784,7 +760,7 @@ module tapein1_sp25_top(
 
   // LFSR --------------------------------------------------------------------------
   lfsr #(
-    .N                       (SEED_BITS)
+    .LFSR_MSG_BITS           (SEED_BITS)
   ) lfsr (
     .clk                     (clk),
     // TODO: Ensure FFTs and their serializers also gets this reset...
@@ -826,15 +802,19 @@ module tapein1_sp25_top(
     .i_clk(),
     .o_clk                   (clk),
     .async_rst               (reset),
-
-    // TODO: Update w/ actual values
-    .istream_msg             ('0),
-    .istream_val             ('0),
-    .istream_rdy             ('0),
+    .istream_msg             (async_fifo_recv_msg),
+    .istream_val             (async_fifo_recv_val),
+    .istream_rdy             (async_fifo_recv_rdy),
     .ostream_msg             (async_fifo_send_msg),
     .ostream_val             (async_fifo_send_val),
     .ostream_rdy             (async_fifo_send_rdy)
   );
+
+
+  // TODO: Update w/ actual values
+  assign async_fifo_recv_msg = '0;
+  assign async_fifo_recv_val = 1'b0;
+
 
 
   //===============================ROUTING_LOGIC====================================
@@ -977,7 +957,7 @@ module tapein1_sp25_top(
   // Output port: 11 - Arbiter
   assign InputXbar_to_Arbiter_msg = input_xbar_send_msg[3];
   assign InputXbar_to_Arbiter_val = input_xbar_send_val[3];
-  assign input_xbar_send_rdy = InputXbar_to_Arbiter_rdy;
+  assign input_xbar_send_rdy[3] = InputXbar_to_Arbiter_rdy;
 
 
   // Classifier Xbar ---------------------------------------------------------------
@@ -1010,9 +990,9 @@ module tapein1_sp25_top(
   assign fft2_serializer_send_rdy = classifier_xbar_recv_rdy[2];
 
   // Input port: 11 - Router
-  assign classifier_xbar_recv_msg[2] = Router_to_ClassifierXbar_msg;
-  assign classifier_xbar_recv_val[2] = Router_to_ClassifierXbar_val;
-  assign Router_to_ClassifierXbar_rdy = classifier_xbar_recv_rdy[2];
+  assign classifier_xbar_recv_msg[3] = Router_to_ClassifierXbar_msg;
+  assign classifier_xbar_recv_val[3] = Router_to_ClassifierXbar_val;
+  assign Router_to_ClassifierXbar_rdy = classifier_xbar_recv_rdy[3];
 
   // Output port: 00 - Wishbone Input Port 1
   // TODO: What is being concatanated here?
@@ -1023,19 +1003,19 @@ module tapein1_sp25_top(
   assign classifier_xbar_send_rdy[0] = wishbone_ostream_rdy[1];
 
   // Output port: 01 - MISR
-  assign cut_misr_resp_msg = input_xbar_send_msg[1];
-  assign cut_misr_resp_val = input_xbar_send_val[1];
-  assign input_xbar_recv_rdy[1] = cut_misr_resp_rdy;
+  assign cut_misr_resp_msg = classifier_xbar_send_msg[1];
+  assign cut_misr_resp_val = classifier_xbar_send_val[1];
+  assign classifier_xbar_send_rdy[1] = cut_misr_resp_rdy;
 
   // Output port: 10 - Classifier Deserializer
-  assign classifier_deserializer_recv_msg = input_xbar_send_msg[2];
-  assign classifier_deserializer_recv_val = input_xbar_send_val[2];
-  assign input_xbar_recv_rdy[2] = classifier_deserializer_recv_rdy;
+  assign classifier_deserializer_recv_msg = classifier_xbar_send_msg[2];
+  assign classifier_deserializer_recv_val = classifier_xbar_send_val[2];
+  assign classifier_xbar_send_rdy[2] = classifier_deserializer_recv_rdy;
 
   // Output port: 11 - Arbiter
-  assign ClassifierXbar_to_Arbiter_msg = input_xbar_send_msg[3];
-  assign ClassifierXbar_to_Arbiter_val = input_xbar_send_val[3];
-  assign input_xbar_send_rdy = ClassifierXbar_to_Arbiter_rdy;
+  assign ClassifierXbar_to_Arbiter_msg = classifier_xbar_send_msg[3];
+  assign ClassifierXbar_to_Arbiter_val = classifier_xbar_send_val[3];
+  assign classifier_xbar_send_rdy[3] = ClassifierXbar_to_Arbiter_rdy;
 
 
   // Output Xbar -------------------------------------------------------------------
@@ -1058,7 +1038,7 @@ module tapein1_sp25_top(
   // Input port: 01 - Classifier
   assign output_xbar_recv_msg[1] = classifier_send_msg;
   assign output_xbar_recv_val[1] = classifier_send_val;
-  assign classifier_recv_rdy = output_xbar_recv_rdy[1];
+  assign classifier_send_rdy = output_xbar_recv_rdy[1];
 
 
   // Input port: 10 - Router
@@ -1067,7 +1047,7 @@ module tapein1_sp25_top(
   assign Router_to_OutputXbar_rdy = output_xbar_recv_rdy[2];
 
 
-  // Input port: 11 - Used
+  // Input port: 11 - Unused
   assign output_xbar_recv_msg[3] = '0;
   assign output_xbar_recv_val[3] = '0;
 
@@ -1138,11 +1118,11 @@ module tapein1_sp25_top(
     end
   endgenerate
 
-  wire unused_arbiter_rdy = &{
-    1'b0,
-    arbiter_rdy[4:ARBITER_SIZE-1],
-    1'b0
-  };
+  // wire unused_arbiter_rdy = &{
+  //   1'b0,
+  //   arbiter_rdy[4:ARBITER_SIZE-1],
+  //   1'b0
+  // };
 
 
 
