@@ -21,16 +21,6 @@ async def lbist_top_simple(dut):
     # Wait until LBIST is finished
     counter = 0
     while dut.lbist_resp_val.value != 1:
-        # if dut.lfsr_paramver2.state.value == 1:
-        #     print(f"LFSR OUTPUT {counter}: {dut.lfsr_paramver2.resp_msg.value}")
-        #     counter += 1
-        # if dut.fft_pease_FFT.state == 2:
-        #     print(f"FFT OUTPUT: {dut.fft_pease_FFT.send_msg.value}")
-        # if dut.lbist_controller.misr_resp_val.value == 1:
-        #     print(f"MISR output hash sent to controller")
-        # if dut.lbist_controller.state.value == 2:
-        #     counter = 0
-        #     print(f"OUTPUT HASH: {dut.lbist_controller.misr_resp_msg.value}\n")
         await ClockCycles(dut.clk, 2)
 
     dut._log.info(f"TEST OUTPUT: {dut.lbist_resp_msg.value}")

@@ -9,24 +9,24 @@
 `include "serdes/serializer.v"
 
 module fft_lbist_toplevel #(
-  parameter int SEED_BITS = 16,
-  parameter int SIGNATURE_BITS = 64,
+  parameter int SEED_BITS = 32,
+  parameter int SIGNATURE_BITS = 16,
   parameter int INPUTS_PER_SEED = 4,
-  parameter int NUM_SEEDS = 4,           // Increment if addind new seed
-  parameter int NUM_HASHES = 20,
-  parameter int MAX_OUTPUTS_TO_HASH = 25,
+  parameter int NUM_SEEDS = 4,           // Increment if adding new seed
+  parameter int NUM_HASHES = 80,
+  parameter int MAX_OUTPUTS_TO_HASH = 100,
   parameter int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH),
   parameter [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
-    64'b1010111010010110000010111100001010101110011111000100111000000111,
-    64'b1000011100111010011110000101110010111011001011100011100011110110,
-    64'b1000111110100010011111101001011101110101000010011111110011110000,
-    64'b1011101000011011000000000011011111010000101000110101000101011110
+    32'b10101110100101100000101111000010,
+    32'b10000111001110100111100001011100,
+    32'b10001111101000100111111010010111,
+    32'b10111010000110110000000000110111
   },
   parameter [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
-    64'b1101100010000010100101000001001111011000100010101111011101111010,
-    64'b1111010101010100010110101110000010001101010111101101000001001101,
-    64'b1000100000101110001110000011101110110000001011100010111111011111,
-    64'b1011100010101011000100000001011011010100101010011000001000010100
+    16'b1100111001111011,
+    16'b1100101001001101,
+    16'b1001011011010011,
+    16'b0100110110111010
   }
   )(
   input logic clk,
@@ -52,7 +52,7 @@ module fft_lbist_toplevel #(
 
   // MISR to controller, sends hash
   logic                      misr_ctrl_resp_val;
-  logic [SIGNATURE_BITS-1:0] misr_ctrl_resp_msg;
+  logic [SIGNATURE_BITS:0]   misr_ctrl_resp_msg;
   logic                      misr_ctrl_resp_rdy;
 
   logic                      lfsr_deser_resp_val;
@@ -60,11 +60,11 @@ module fft_lbist_toplevel #(
   logic                      lfsr_deser_resp_rdy;
 
   logic                      deser_fft_resp_val;
-  logic [SIGNATURE_BITS-1:0] deser_fft_resp_msg;
+  logic [SEED_BITS-1:0]      deser_fft_resp_msg [INPUTS_PER_SEED-1:0];
   logic                      deser_fft_resp_rdy;
 
   logic                      fft_ser_resp_val;
-  logic [SIGNATURE_BITS-1:0] fft_ser_resp_msg;
+  logic [SEED_BITS-1:0]      fft_ser_resp_msg [INPUTS_PER_SEED-1:0];
   logic                      fft_ser_resp_rdy;
 
   logic                      ser_misr_resp_val;
@@ -115,11 +115,13 @@ module fft_lbist_toplevel #(
     .resp_val(lfsr_deser_resp_val),
     .resp_msg(lfsr_deser_resp_msg)
   );
- 
+
   serdes_Deserializer #(
     .N_SAMPLES(INPUTS_PER_SEED),
-    .BIT_WIDTH(SEED_BITS),
+    .BIT_WIDTH(SEED_BITS)
   ) serdes_Deserializer (
+    .clk     (clk),
+    .reset   (reset || lfsr_cut_reset),
     .recv_val(lfsr_deser_resp_val),
     .recv_rdy(lfsr_deser_resp_rdy),
     .recv_msg(lfsr_deser_resp_msg),
@@ -129,12 +131,12 @@ module fft_lbist_toplevel #(
   );
 
   fft_pease_FFT #(
-    .BIT_WIDTH(SIGNATURE_BITS / INPUTS_PER_SEED),
-    .DECIMAL_PT(8),
+    .BIT_WIDTH(SEED_BITS),
+    .DECIMAL_PT(0),
     .N_SAMPLES(INPUTS_PER_SEED)
   ) fft_pease_FFT (
     .clk     (clk),
-    .reset   (reset),
+    .reset   (reset || lfsr_cut_reset),
     .recv_msg(deser_fft_resp_msg),
     .recv_val(deser_fft_resp_val),
     .recv_rdy(deser_fft_resp_rdy),
@@ -142,11 +144,13 @@ module fft_lbist_toplevel #(
     .send_val(fft_ser_resp_val),
     .send_rdy(fft_ser_resp_rdy)
   );
-  
+
   serdes_Serializer #(
     .N_SAMPLES(INPUTS_PER_SEED),
-    .BIT_WIDTH(SEED_BITS),
-  ) serdes_Deserializer (
+    .BIT_WIDTH(SEED_BITS)
+  ) serdes_Serializer (
+    .clk     (clk),
+    .reset   (reset || lfsr_cut_reset),
     .recv_val(fft_ser_resp_val),
     .recv_rdy(fft_ser_resp_rdy),
     .recv_msg(fft_ser_resp_msg),
@@ -165,7 +169,7 @@ module fft_lbist_toplevel #(
     .clk           (clk),
     .reset         (reset),
     .cut_req_val   (ser_misr_resp_val),
-    .cut_req_msg   (ser_misr_resp_msg),
+    .cut_req_msg   (ser_misr_resp_msg[SIGNATURE_BITS - 1:0]),
     .cut_req_rdy   (ser_misr_resp_rdy),
     .lbist_req_val (ctrl_misr_req_val),
     .lbist_req_msg (ctrl_misr_req_msg),

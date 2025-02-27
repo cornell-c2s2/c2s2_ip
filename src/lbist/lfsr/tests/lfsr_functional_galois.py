@@ -31,7 +31,7 @@ def generate_seeds(num_seeds, BIT_WIDTH):
             randnum = np.random.randint(0,2)
             req_msgs[i] += str(randnum)
 
-    print(req_msgs)
+    # print(req_msgs)
     return req_msgs
 
 def XOR(a,b):
@@ -172,4 +172,4 @@ TAPS = taps_dict[LFSR_MSG_BITS]
 # Generating seeds and subsequent model outputs
 SEEDS = generate_seeds(NUM_SEEDS, LFSR_MSG_BITS)
 output = lfsr_model(SEEDS, NUM_SEEDS, NUM_LFSR_OUTPUTS, TAPS)
-print(output)
+# print(output)
