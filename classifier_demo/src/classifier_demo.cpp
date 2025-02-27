@@ -31,8 +31,14 @@ MOSI => MOSI (D12)*/
 /*he user's code must control the slave-select pin with digitalWrite() before and after each SPI transfer for the desired SPI slave device. Calling SPI.end() does NOT reset the pin mode of the SPI pins.*/
 int ss = A5;
 
-uint8_t tx_buffer[3] = {1, 0, 0};
-uint8_t rx_buffer[5] = {0};
+uint8_t tx_inXbar[3] = {1, 0, 2};
+uint8_t rx_inXbar[3] = {0};
+uint8_t tx_clsXbar[3] = {3, 0, 10};
+uint8_t rx_clsXbar[3] = {0};
+uint8_t tx_outXbar[3] = {5, 0, 8};
+uint8_t rx_outXbar[3] = {0};
+uint8_t tx_data[3] = {0, 3, 3};
+uint8_t rx_data[3] = {0};
 
 // PROTOTYPE
 void transfer(const void *tx_buffer, void *rx_buffer, size_t length, wiring_spi_dma_transfercomplete_callback_t user_callback);
@@ -58,23 +64,34 @@ void setup()
   SPI_CLOCK_DIV128
   SPI_CLOCK_DIV256
   */
-  // SPI.setClockDivider(SPI_CLOCK_DIV256); //clock reference is 64 MHz.
+  SPI.setClockDivider(SPI_CLOCK_DIV256); //clock reference is 64 MHz.
 
   SPI.setDataMode(SPI_MODE0);
 
   // spi setup https://docs.particle.io/reference/device-os/api/spi/
   SPI.begin(SPI_MODE_MASTER, ss);
 
-  SPI.transfer(tx_buffer, rx_buffer, 3, NULL); // 0x10002, 0x3000A, 0x50008 (setup crossbars)
+  // 0x10002, 0x3000A, 0x50008 (setup crossbars)
+  SPI.transfer(tx_inXbar, rx_inXbar, 3, NULL);
+  SPI.transfer(tx_clsXbar, rx_clsXbar, 3, NULL);
+  SPI.transfer(tx_outXbar, rx_outXbar, 3, NULL);
   // 0x01 00 00 to configure input Xbar loopback
-  for (int i = 0; i < 90000; i++)
-  {
-  }
-  for (int i = 0; i < 3; i++)
-  {
-    Serial.print(rx_buffer[i]);
-  }
+  // for (int i = 0; i < 90000; i++)
+  // {
+  // }
   System.sleep(1000);
+  // for (int i = 0; i < 3; i++)
+  // {
+  //   Serial.print(rx_buffer2[i]);
+  // }
+  // SPI.transfer(tx_data, rx_data, 3, NULL);
+  // Serial.print("Received: ");
+  // for (int i = 0; i<3; ++i) {
+  //   Serial.print(rx_data[i]);
+  //   Serial.print(", ");
+  // }
+  // Serial.print("\n");
+  
 }
 
 // void myFunction(uint8_t state) {
@@ -83,29 +100,43 @@ void setup()
 // } //this function is called when chip is selected
 
 // loop() runs over and over again, as quickly as it can execute.
-bool freak = true;
 
-int j = 0;
 void loop()
 {
-
-  System.sleep(50000);
-  j++;
-  Serial.print(j);
-  Serial.print("\n");
-  if (freak)
-  {
-    for (int i = 0; i < 90000; i++)
-    {
-    }
-    for (int i = 0; i < 3; i++)
-    {
-      Serial.print(rx_buffer[i]);
-    }
-    freak = false;
+  SPI.transfer(tx_data, rx_data, 3, NULL);
+  Serial.print("Received: ");
+  for (int i = 0; i<3; ++i) {
+    Serial.print(rx_data[i]);
+    Serial.print(", ");
   }
+  Serial.print("\n");
+  // Serial.print("Received2: ");
+  // for (int i = 0; i<3; ++i) {
+  //   Serial.print(rx_buffer2[i]);
+  //   Serial.print(", ");
+  // }
+  // Serial.print("\n");
+  // Serial.print(rx_buffer2[0]);
+  // System.sleep(50000);
+  // j++;
+  // Serial.print(j);
+  // Serial.print("\n");
+  // if (freak)
+  // {
+  //   for (int i = 0; i < 90000; i++)
+  //   {
+  //   }
+  //   for (int i = 0; i < 3; i++)
+  //   {
+  //     Serial.print(rx_buffer2[i]);
+  //   }
+  //   freak = false;
+  //   Serial.print("Hello");
+  // }
   // Serial.print("\n");
   // Serial.print(j);
+
+
   // val = analogRead(MICROPHONE_PIN);
 
   // SPI.onSelect(myFunction);//select chip
