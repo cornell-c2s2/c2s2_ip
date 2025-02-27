@@ -6,10 +6,10 @@ clear -all
 check_cov -init -type all -model {branch toggle statement} -toggle_ports_only
  
 # you must analyze all the files in your design (source and testbench) before doing anything in jasper
-analyze -sv lbist/misr/misr.v lbist/misr/tests/formal/misr_sva.sv
+analyze -sv arbiter_router/arbiter.v arbiter_router/tests/formal/arbiter_sva.sv
  
 # specify the top level module, in this case the testbench
-elaborate -top misr -create_related_covers {precondition witness}
+elaborate -top arbiter_router_Arbiter -create_related_covers {precondition witness}
  
 # specify clock and reset signals
 clock clk
