@@ -7,8 +7,6 @@
 // PARAMETERS ----------------------------------------------------------------------
 // I/O -----------------------------------------------------------------------------
 // =================================================================================
-// Progress:
-// Need to fix compiler issues...
 
 `ifndef TAPEIN1_SP25_TOP_V
 `define TAPEIN1_SP25_TOP_V
@@ -238,6 +236,15 @@ module tapein1_sp25_top(
   localparam int FIFO_DEPTH = 10;
   localparam int FIFO_ENTRY_BITS = 8;
 
+  // FIFO Packager -----------------------------------------------------------------
+  // - PACKAGER_BITS:
+  //     Bitwidth of each packager input message
+  // - PACKAGER_CONCAT:
+  //     Number of valid inputs for the packager to concatanate
+  localparam int PACKAGER_BITS = FIFO_ENTRY_BITS;
+  localparam int PACKAGER_CONCAT = 2;
+
+
 
 
   //===================================WIRES========================================
@@ -426,6 +433,11 @@ module tapein1_sp25_top(
   logic [FIFO_ENTRY_BITS-1:0]              async_fifo_send_msg;
   logic                                    async_fifo_send_val;
   logic                                    async_fifo_send_rdy;
+
+  // FIFO Packager -----------------------------------------------------------------
+  logic [DATA_BITS-1:0]                    packager_send_msg;
+  logic                                    packager_send_val;
+  logic                                    packager_send_rdy;
 
 
 
@@ -815,6 +827,21 @@ module tapein1_sp25_top(
   assign async_fifo_recv_msg = '0;
   assign async_fifo_recv_val = 1'b0;
 
+  // FIFO Packager -----------------------------------------------------------------
+  FifoPackager #(
+    .p_bit_width             (PACKAGER_BITS),
+    .p_num_concat            (PACKAGER_CONCAT)
+  ) packager (
+    .clk                     (clk),
+    .reset                   (reset),
+    .req_msg                 (async_fifo_send_msg),
+    .req_val                 (async_fifo_send_val),
+    .req_rdy                 (async_fifo_send_rdy),
+    .resp_msg                (packager_send_msg),
+    .resp_val                (packager_send_val),
+    .resp_rdy                (packager_send_rdy)
+  );
+
 
 
   //===============================ROUTING_LOGIC====================================
@@ -906,7 +933,7 @@ module tapein1_sp25_top(
   // Inputs:
   // 00 - Wishbone Output Port 0
   // 01 - LFSR
-  // 10 - Async FIFO
+  // 10 - FIFO Packager
   // 11 - Router
   // Outputs:
   // 00 - Wishbone Input Port 0
@@ -925,11 +952,11 @@ module tapein1_sp25_top(
   assign lfsr_resp_rdy = input_xbar_recv_rdy[1];
 
 
-  // Input port: 10 - Async FIFO
+  // Input port: 10 - FIFO Packager
   // Each fifo output is 8 bits
-  assign input_xbar_recv_msg[2] = {(DATA_BITS) {16'd0, async_fifo_send_msg}};
-  assign input_xbar_recv_val[2] = async_fifo_send_val;
-  assign async_fifo_send_rdy = input_xbar_recv_rdy[2];
+  assign input_xbar_recv_msg[2] = packager_send_msg;
+  assign input_xbar_recv_val[2] = packager_send_val;
+  assign packager_send_rdy = input_xbar_recv_rdy[2];
 
   // Input port: 11 - Router
   assign input_xbar_recv_msg[3] = Router_to_InputXbar_msg;
@@ -1125,107 +1152,6 @@ module tapein1_sp25_top(
   // };
 
 
-
-
-
-
-
-  // NEED TO REMOVE OR TAKE INTO NEW CODE ============================================================
-  // config messages for the classifiers shorter than 16 bits
-  // wire unused_xbar_cfg_bits = &{
-  //   1'b0,
-  //   router_msg[1][DATA_BITS-1:XBAR_CTRL_BITS],
-  //   router_msg[3][DATA_BITS-1:XBAR_CTRL_BITS],
-  //   router_msg[5][DATA_BITS-1:XBAR_CTRL_BITS],
-  //   1'b0
-  // };
-  // // output xbar inject is 1 bit wide
-  // wire unused_output_xbar_msg = &{1'b0, router_msg[4][DATA_BITS-1:1], 1'b0};
-  // // address bits are retained by the router but we don't use them
-  // generate
-  //   for (genvar i = 0; i <= 9; i = i + 1) begin
-  //     wire unused_router_addr = &{1'b0, router_msg[i][DATA_BITS+ADDR_BITS-1:DATA_BITS], 1'b0};
-  //   end
-  // endgenerate
-  // wire unused_router_val = &{1'b0, router_val[10:ROUTER_ARBITER_SIZE-1], 1'b0};
-  // wire unused_router_msg = &{1'b0, router_msg[10:ROUTER_ARBITER_SIZE-1], 1'b0};
-
-  // // 5 outputs:
-  // // 0: input xbar output
-  // assign arbiter_msg[0] = input_xbar_send_msg[0];
-  // assign arbiter_val[0] = input_xbar_send_val[0];
-  // assign input_xbar_send_rdy[0] = arbiter_rdy[0];
-  // // 1: unused
-  // assign arbiter_msg[1] = 16'b0;
-  // assign arbiter_val[1] = 1'b0;
-
-  // // 2: classifier xbar output
-  // assign arbiter_msg[2] = classifier_xbar_send_msg[0];
-  // assign arbiter_val[2] = classifier_xbar_send_val[0];
-  // assign classifier_xbar_send_rdy[0] = arbiter_rdy[2];
-  // // 3: unused
-  // assign arbiter_msg[3] = 16'b0;
-  // assign arbiter_val[3] = 1'b0;
-
-  // // 4: output xbar output
-  // // zero extend the classifier output to 16 bits
-  // assign arbiter_msg[4] = {15'b0, output_xbar_send_msg[0]};
-  // assign arbiter_val[4] = output_xbar_send_val[0];
-  // assign output_xbar_send_rdy[0] = arbiter_rdy[4];
-  // // 5-8: unused
-  // generate
-  //   for (genvar i = 5; i <= 8; i = i + 1) begin
-  //     assign arbiter_msg[i] = 16'b0;
-  //     assign arbiter_val[i] = 1'b0;
-  //   end
-  // endgenerate
-  // // 3 WB inputs:
-  // // 0: input xbar inject
-  // assign input_xbar_recv_msg[1] = wishbone_istream_data[0][DATA_BITS-1:0];
-  // assign input_xbar_recv_val[1] = wishbone_istream_val[0];
-  // assign wishbone_istream_rdy[0] = input_xbar_recv_rdy[1];
-  // // 1: classifier xbar inject
-  // assign classifier_xbar_recv_msg[1] = wishbone_istream_data[1][DATA_BITS-1:0];
-  // assign classifier_xbar_recv_val[1] = wishbone_istream_val[1];
-  // assign wishbone_istream_rdy[1] = classifier_xbar_recv_rdy[1];
-  // // 2: output xbar inject
-  // assign output_xbar_recv_msg[1] = wishbone_istream_data[2][0];
-  // assign output_xbar_recv_val[1] = wishbone_istream_val[2];
-  // assign wishbone_istream_rdy[2] = output_xbar_recv_rdy[1];
-
-  // wire unused_wishbone_istream_bits = &{
-  //   1'b0,
-  //   wishbone_istream_data[0][31:DATA_BITS],
-  //   wishbone_istream_data[1][31:DATA_BITS],
-  //   wishbone_istream_data[2][31:1],
-  //   1'b0
-  // };
-
-  // 3 WB outputs:
-  // 0: input xbar output
-  // // sign extend the 16 bit data to 32 bits
-  // assign wishbone_ostream_data[0] = {
-  //   {(32 - DATA_BITS) {input_xbar_send_msg[1][DATA_BITS-1]}}, input_xbar_send_msg[1]
-  // };
-  // assign wishbone_ostream_val[0] = input_xbar_send_val[1];
-  // assign input_xbar_send_rdy[1] = wishbone_ostream_rdy[0];
-  // 1: classifier xbar output
-  // assign wishbone_ostream_data[1] = {
-  //   {(32 - DATA_BITS) {classifier_xbar_send_msg[1][DATA_BITS-1]}}, classifier_xbar_send_msg[1]
-  // };
-  // assign wishbone_ostream_val[1] = classifier_xbar_send_val[1];
-  // assign classifier_xbar_send_rdy[1] = wishbone_ostream_rdy[1];
-  // 2: output xbar output
-  // zero extend the classifier output to 32 bits
-  // assign wishbone_ostream_data[2] = {31'b0, output_xbar_send_msg[1]};
-  // assign wishbone_ostream_val[2] = output_xbar_send_val[1];
-  // assign output_xbar_send_rdy[1] = wishbone_ostream_rdy[2];
-  // =================================================================================================
-
-
-
-
-
   //================================ASSERTS=========================================
   // SPI Minion --------------------------------------------------------------------
   // Router ------------------------------------------------------------------------
@@ -1264,8 +1190,7 @@ module tapein1_sp25_top(
   // LFSR --------------------------------------------------------------------------
   // MISR --------------------------------------------------------------------------
   // Async FIFO --------------------------------------------------------------------
-
-
+  // FIFO Packager -----------------------------------------------------------------
 
 
 
