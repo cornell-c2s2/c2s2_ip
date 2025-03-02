@@ -11,11 +11,12 @@
 module fft_lbist_toplevel #(
   parameter int SEED_BITS = 32,
   parameter int SIGNATURE_BITS = 16,
-  parameter int INPUTS_PER_SEED = 4,
+  parameter int FFT_ARRAY_LENGTH = 4,
   parameter int NUM_SEEDS = 4,           // Increment if adding new seed
   parameter int NUM_HASHES = 80,
   parameter int MAX_OUTPUTS_TO_HASH = 100,
   parameter int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH),
+  parameter int DECIMAL_PT = 4,
   parameter [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
     32'b10101110100101100000101111000010,
     32'b10000111001110100111100001011100,
@@ -23,10 +24,10 @@ module fft_lbist_toplevel #(
     32'b10111010000110110000000000110111
   },
   parameter [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
-    16'b1100111001111011,
-    16'b1100101001001101,
-    16'b1001011011010011,
-    16'b0100110110111010
+      16'b1100111001111011,
+      16'b1100101001001101,
+      16'b1001011011010011,
+      16'b0100110110111010
   }
   )(
   input logic clk,
@@ -60,11 +61,11 @@ module fft_lbist_toplevel #(
   logic                      lfsr_deser_resp_rdy;
 
   logic                      deser_fft_resp_val;
-  logic [SEED_BITS-1:0]      deser_fft_resp_msg [INPUTS_PER_SEED-1:0];
+  logic [SEED_BITS-1:0]      deser_fft_resp_msg [FFT_ARRAY_LENGTH-1:0];
   logic                      deser_fft_resp_rdy;
 
   logic                      fft_ser_resp_val;
-  logic [SEED_BITS-1:0]      fft_ser_resp_msg [INPUTS_PER_SEED-1:0];
+  logic [SEED_BITS-1:0]      fft_ser_resp_msg [FFT_ARRAY_LENGTH-1:0];
   logic                      fft_ser_resp_rdy;
 
   logic                      ser_misr_resp_val;
@@ -117,7 +118,7 @@ module fft_lbist_toplevel #(
   );
 
   serdes_Deserializer #(
-    .N_SAMPLES(INPUTS_PER_SEED),
+    .N_SAMPLES(FFT_ARRAY_LENGTH),
     .BIT_WIDTH(SEED_BITS)
   ) serdes_Deserializer (
     .clk     (clk),
@@ -132,8 +133,8 @@ module fft_lbist_toplevel #(
 
   fft_pease_FFT #(
     .BIT_WIDTH(SEED_BITS),
-    .DECIMAL_PT(0),
-    .N_SAMPLES(INPUTS_PER_SEED)
+    .DECIMAL_PT(DECIMAL_PT),
+    .N_SAMPLES(FFT_ARRAY_LENGTH)
   ) fft_pease_FFT (
     .clk     (clk),
     .reset   (reset || lfsr_cut_reset),
@@ -146,7 +147,7 @@ module fft_lbist_toplevel #(
   );
 
   serdes_Serializer #(
-    .N_SAMPLES(INPUTS_PER_SEED),
+    .N_SAMPLES(FFT_ARRAY_LENGTH),
     .BIT_WIDTH(SEED_BITS)
   ) serdes_Serializer (
     .clk     (clk),
