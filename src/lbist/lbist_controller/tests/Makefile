@@ -13,14 +13,14 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
 #Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
-VERILOG_SOURCES = $(PWD)/../misr.v
+VERILOG_SOURCES = $(PWD)/../lbist_controller.v
 
 #Step 2: Add all include directories referenced in the verilog source file
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
 
 #Step 3: Set top level module and corresponding python test module
-TOPLEVEL = misr
-MODULE = misr_test
+TOPLEVEL = lbist_controller
+MODULE = lbist_controller_test
 
 #Step 4: Set environment variables for waveforms and coverage data to 1 if you  \
 would like either waveforms or coverage data to be produced by the simulation. You can \
@@ -59,11 +59,4 @@ clean_all:
 
 #Generate a coverage report after running a simulation
 coverage_report:
-<<<<<<< HEAD
 	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
-
-
-
-=======
-	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
->>>>>>> 7d03b13701d23f1ef312a58e0c68c436f868acb3

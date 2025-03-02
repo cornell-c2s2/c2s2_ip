@@ -27,7 +27,7 @@ def tr(
 # Writes/Reads an SPI transaction. Lowest level of abstraction.
 def spi_write(dut, src_msg: Bits) -> Bits:
 
-    packet_size = src_msg.nbits
+    packet_size = 24
     snk_msg = Bits(src_msg.nbits)
 
     tr(dut, 1, 0, 0)
@@ -49,6 +49,7 @@ def spi_write(dut, src_msg: Bits) -> Bits:
         tr(dut, 0, 1, src_msg[packet_size - i - 1])
         tr(dut, 0, 1, 0)
         snk_msg[packet_size - i - 1] = tr(dut, 0, 0, 0)
+        
 
     # pull CS high to end transaction
     tr(dut, 1, 0, 0)

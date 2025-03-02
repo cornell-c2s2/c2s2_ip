@@ -1,4 +1,5 @@
 #Cocotb imports
+import pytest
 import cocotb
 import os
 import sys

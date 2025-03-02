@@ -13,26 +13,27 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
 #Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
-VERILOG_SOURCES = $(PWD)/../misr.v
+VERILOG_SOURCES = $(PWD)/../convolution_block_iterative.v
 
 #Step 2: Add all include directories referenced in the verilog source file
-COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
+COMPILE_ARGS += +incdir+/home/ars437/c2s2/c2s2_ip/src 
 
 #Step 3: Set top level module and corresponding python test module
-TOPLEVEL = misr
-MODULE = misr_test
+TOPLEVEL = convolution_block_iterative_ConvolutionBlock 
+MODULE = cocotb_convolution_iterative
 
-#Step 4: Set environment variables for waveforms and coverage data to 1 if you  \
-would like either waveforms or coverage data to be produced by the simulation. You can \
-also set enviroment variables for model parameters and configure them in the simulation with \
-the next step.
+# send test build outputs to build folder
+# SIM_BUILD = ../../build/convolution_block/iterative
+# COCOTB_RESULTS_FILE = ../../build/convolution_block/iterative/results.xml
+
+#Step 4: Set model parameters by adding them to EXTRA_ARGS \
+using the following line as a reference:
+#EXTRA_ARGS += +MY_PARAM=42
+
+#Step 5: Set environment variables for waveforms and coverage data to 1 if you  \
+would like either waveforms or coverage data to be produced by the simulation
 WAVES = 1
 COVER = 1
-
-#Step 5: Set model parameters by appending them to EXTRA_ARGS (if neccessary)\
-#Examples (from multiplier example): \
-EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.n=$N \
-EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
 
 #Generating waveform files (Set environment variable WAVES to 1)
 #Resulting waveform will be called waves.vcd and will be in the working directory
@@ -54,16 +55,8 @@ include $(shell cocotb-config --makefiles)/Makefile.sim
 clean_all:
 	rm -f waves.vcd
 	rm -rf coverage_report
-	rm -rf results.xml
 	make clean
 
 #Generate a coverage report after running a simulation
 coverage_report:
-<<<<<<< HEAD
 	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
-
-
-
-=======
-	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
->>>>>>> 7d03b13701d23f1ef312a58e0c68c436f868acb3
