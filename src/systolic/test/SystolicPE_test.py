@@ -2,12 +2,18 @@ import math
 import random
 import cocotb
 import subprocess
+import numpy as np
 from cocotb.triggers import *
 from cocotb.clock import Clock
 
 from fixedpt import Fixed
 
 LOW = Fixed(0, 1, 16, 8)
+
+def random_fp_16b():
+  int_8b = np.random.randint(-2**7, 2**7)    # [-128, 127]
+  dec_8b = np.random.randint(0, 2**8) / 2**8 # [0, 0.996]
+  return int_8b + dec_8b
 
 #====================================================================================
 # fixed_point_multiply
@@ -73,8 +79,8 @@ async def test_random_source(dut):
   w = []
 
   for i in range(size):
-    x.append(Fixed(random.randint(0,pow(2,16)-1), 1, 16, 8))
-    w.append(Fixed(random.randint(0,pow(2,16)-1), 1, 16, 8))
+    x.append(Fixed(random_fp_16b(), 1, 16, 8))
+    w.append(Fixed(random_fp_16b(), 1, 16, 8))
   
   await SystolicMMPE_RESET(dut)
 
@@ -102,8 +108,8 @@ async def test_random_source_enable(dut):
   w = []
 
   for i in range(size):
-    x.append(Fixed(random.randint(0,pow(2,16)-1), 1, 16, 8))
-    w.append(Fixed(random.randint(0,pow(2,16)-1), 1, 16, 8))
+    x.append(Fixed(random_fp_16b(), 1, 16, 8))
+    w.append(Fixed(random_fp_16b(), 1, 16, 8))
   
   await SystolicMMPE_RESET(dut)
 
@@ -134,8 +140,8 @@ async def test_random_source_enable_reset(dut):
   w = []
 
   for i in range(size):
-    x.append(Fixed(random.randint(0,pow(2,16)-1), 1, 16, 8))
-    w.append(Fixed(random.randint(0,pow(2,16)-1), 1, 16, 8))
+    x.append(Fixed(random_fp_16b(), 1, 16, 8))
+    w.append(Fixed(random_fp_16b(), 1, 16, 8))
   
   await SystolicMMPE_RESET(dut)
 
