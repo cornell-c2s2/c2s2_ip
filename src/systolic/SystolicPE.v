@@ -1,14 +1,10 @@
-//==============================================================================
-// Systolic Matrix Multiplier Processing Element
-//==============================================================================
-
 `include "cmn/regs.v"
 `include "fixed_point/combinational/multiplier.v"
 
-`ifndef SYSTOLICMMPE_V
-`define SYSTOLICMMPE_V
+`ifndef SYSTOLICPE_V
+`define SYSTOLICPE_V
 
-module SystolicMMPE
+module SystolicPE
 #(
   parameter int n = 16,
   parameter int d = 8,
@@ -79,4 +75,4 @@ module SystolicMMPE
 
 endmodule
 
-`endif /* SYSTOLICMMPE_V */
+`endif /* SYSTOLICPE_V */
