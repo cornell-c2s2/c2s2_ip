@@ -11,7 +11,7 @@ endif
 
 #Add working directory to the Python virtual environment path
 PWD=$(shell pwd)
-C2S2_PATH=$(HOME)/c2s2/sp25_tapein1
+C2S2_PATH=$(shell git rev-parse --show-toplevel)
 
 
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
