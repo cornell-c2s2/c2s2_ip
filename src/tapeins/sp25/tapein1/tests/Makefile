@@ -23,16 +23,16 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 #Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
 VERILOG_SOURCES += $(PWD)/../tapein1_sp25_top.v
 
-VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/spi -type f \( -name "*.v" -o -name "*.sv" \))
-VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/arbiter_router -type f \( -name "*.v" -o -name "*.sv" \))
-VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/fft/pease/ -type f \( -name "*.v" -o -name "*.sv" \))
-VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/serdes/ -type f \( -name "*.v" -o -name "*.sv" \))
-VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/classifier/ -type f \( -name "*.v" -o -name "*.sv" \))
-VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/wishbone/ -type f \( -name "*.v" -o -name "*.sv" \))
-VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/lbist/ -type f \( -name "*.v" -o -name "*.sv" \))
-VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/async_fifo/ -type f \( -name "*.v" -o -name "*.sv" \))
-VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/crossbars/ -type f \( -name "*.v" -o -name "*.sv" \))
-VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/cmn/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/spi -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/arbiter_router -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/fft/pease/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/serdes/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/classifier/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/wishbone/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/lbist/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/async_fifo/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/crossbars/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/cmn/ -type f \( -name "*.v" -o -name "*.sv" \))
 
 
 
