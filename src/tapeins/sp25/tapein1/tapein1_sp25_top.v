@@ -170,18 +170,32 @@ module tapein1_sp25_top(
   //     The expected signature values from CUT to be compared against result of
   //     MISR
   // TODO: Update!
-  localparam int SEED_BITS = DATA_BITS;
+  localparam int SEED_BITS = DATA_BITS * 2; 
   localparam int SIGNATURE_BITS = DATA_BITS;
-  localparam int NUM_SEEDS = 1;
-  localparam int NUM_HASHES = 1;
-  localparam int MAX_OUTPUTS_TO_HASH = 32;
+  localparam int NUM_SEEDS = 8;
+  localparam int NUM_HASHES = 80;
+  localparam int MAX_OUTPUTS_TO_HASH = 100;
   // TODO: Update!
   localparam [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
-    16'd0
+    32'b10101110100101100000101111000010,
+    32'b10000111001110100111100001011100,
+    32'b10001111101000100111111010010111,
+    32'b10111010000110110000000000110111,
+    32'b11010011001001101011100100010101,
+    32'b01100101110011011100001001101000,
+    32'b10100011101101000101010111100011,
+    32'b11011100011010111001110000101001
   };
   // TODO: Update!
   localparam [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
-    16'd0
+      16'b1100111001111011,
+      16'b1100101001001101,
+      16'b1001011011010011,
+      16'b0100110110111010,
+      16'b1010110001010011,
+      16'b1101000101011111,
+      16'b1101010001100010,
+      16'b1000111010101101
   };
 
   // LFSR --------------------------------------------------------------------------
