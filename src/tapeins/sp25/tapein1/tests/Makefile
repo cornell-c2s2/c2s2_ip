@@ -32,6 +32,7 @@ VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/wishbone/ -type f \( -name "*.v
 VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/lbist/ -type f \( -name "*.v" -o -name "*.sv" \))
 VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/async_fifo/ -type f \( -name "*.v" -o -name "*.sv" \))
 VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/crossbars/ -type f \( -name "*.v" -o -name "*.sv" \))
+VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/cmn/ -type f \( -name "*.v" -o -name "*.sv" \))
 
 
 
