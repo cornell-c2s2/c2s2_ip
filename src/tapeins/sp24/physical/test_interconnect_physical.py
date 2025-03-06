@@ -1,7 +1,11 @@
 import pytest
-from src.tapeins.sp24.tapein2.tests.spi_driver_sim import spi_write
-from src.tapeins.sp24.tapein2.interconnect2 import Interconnect2
-from src.tapeins.sp24.tapein2.tests.spi_stream_protocol import *
+
+from src.tapeins.sp24.physical.spi_driver_physical import (
+    spi_write_physical,
+    spi_reset_a,
+)
+from src.tapeins.sp24.fpga_emulation2.interconnect_fpga import Interconnect_Fpga
+from src.tapeins.sp24.physical.spi_stream_protocol import *
 from fixedpt import Fixed, CFixed
 from tools.utils import fixed_bits, mk_test_matrices
 from src.fft.tests.fft import FFTInterface, FFTPease
@@ -45,7 +49,7 @@ def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
     out_idx = 0
     trsns = curr_trsns + 1
 
-    spc = 0 # Initially presume that minion has no space left to take in messages
+    spc = 0
 
     print("")
 
@@ -53,29 +57,29 @@ def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
         if trsns > max_trsns:
             assert False, "Exceeded max transactions"
 
-        if in_idx < len(in_msgs) and spc == 1: # if we haven't sent everything from in_msg, and the minion has space
-            retmsg = spi_write(dut, write_read_msg(in_msgs[in_idx])) # Full duplex, send our data and receive from minion
-            spc = retmsg[20] # Take the 21st (spc) bit, and update spc
+        if in_idx < len(in_msgs) and spc == 1:
+            retmsg = spi_write_physical(dut, write_read_msg(in_msgs[in_idx]))
+            spc = retmsg[20]
             print(
                 "Trsn" + pad(trsns) + ":",
                 valrdy_to_str(in_msgs[in_idx], 1, 1, 6),
                 ">",
                 valrdy_to_str(retmsg[0:20], retmsg[21], 1, 6),
             )
-            if retmsg[21] == 1: # Take the 22nd (val) bit, if it is 1, the readout from minion was valid, so we treat it as an output, otherwise discard it
+            if retmsg[21] == 1:
                 assert retmsg[0:20] == out_msgs[out_idx]
                 out_idx += 1
             in_idx += 1
 
-        else: # if the minion has no space left or we've sent everything
-            retmsg = spi_write(dut, read_msg()) # just read without sending anything
+        else:
+            retmsg = spi_write_physical(dut, read_msg())
             print(
                 "Trsn" + pad(trsns) + ":",
                 valrdy_to_str(0, in_idx < len(in_msgs), spc, 6),
                 ">",
                 valrdy_to_str(retmsg[0:20], retmsg[21], 1, 6),
             )
-            spc = retmsg[20] # Take the 21st (spc) bit, and update spc
+            spc = retmsg[20]
             if retmsg[21] == 1:
                 assert retmsg[0:20] == out_msgs[out_idx]
                 out_idx += 1
@@ -87,11 +91,7 @@ def run_interconnect(dut, in_msgs, out_msgs, max_trsns=100, curr_trsns=0):
 
 # Makes a new interconnect dut
 def make_interconnect(cmdline_opts):
-    dut = Interconnect2()
-    dut = config_model_with_cmdline_opts(dut, cmdline_opts, duts=[])
-    dut.apply(DefaultPassGroup(linetrace=False))
-    dut.sim_reset()
-    return dut
+    return None
 
 
 class InXbarCfg(int):
@@ -194,6 +194,7 @@ def loopback_outXbar_msg(msgs):
     ],
 )
 def test_loopback_inXbar(msgs, cmdline_opts):
+    spi_reset_a()
     in_msgs, out_msgs = loopback_inXbar_msg(msgs)
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
@@ -211,6 +212,7 @@ def test_loopback_inXbar(msgs, cmdline_opts):
     ],
 )
 def test_loopback_clsXbar(msgs, cmdline_opts):
+    spi_reset_a()
     in_msgs, out_msgs = loopback_clsXbar_msg(msgs)
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
@@ -228,6 +230,7 @@ def test_loopback_clsXbar(msgs, cmdline_opts):
     ],
 )
 def test_loopback_outXbar(msgs, cmdline_opts):
+    spi_reset_a()
     in_msgs, out_msgs = loopback_outXbar_msg(msgs)
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
@@ -276,6 +279,7 @@ def fixN(n):
     ],
 )
 def test_fft_manual(input, output, cmdline_opts):
+    spi_reset_a()
     in_msgs, out_msgs = fft_msg(input, output)
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
@@ -292,6 +296,7 @@ def test_fft_manual(input, output, cmdline_opts):
     )
 )
 def test_fft_random(cmdline_opts, p):
+    spi_reset_a()
     random.seed(random.random() + p.seed)
     inputs = [
         [
@@ -313,6 +318,7 @@ def test_fft_random(cmdline_opts, p):
 
 
 def test_classifier_manual(cmdline_opts):
+    spi_reset_a()
     in_msgs, out_msgs = classifer_msg([[fixN(1) for _ in range(16)]], [0x0000])
     dut = make_interconnect(cmdline_opts)
     run_interconnect(dut, in_msgs, out_msgs)
@@ -320,6 +326,7 @@ def test_classifier_manual(cmdline_opts):
 
 # Composite test that combines loopback and FFT.
 def test_compose(cmdline_opts):
+    spi_reset_a()
     xbar_in_in_msgs, xbar_in_out_msgs = loopback_inXbar_msg([0x5555, 0xAAAA])
     fft_in_msgs, fft_out_msgs = fft_msg(
         [[fixN(1) for _ in range(32)]],
@@ -346,6 +353,7 @@ def test_compose(cmdline_opts):
     )
 )
 def test_fft_classifier_random(cmdline_opts, p):
+    spi_reset_a()
     inputs = [
         [
             CFixed((random.uniform(-p.input_mag, p.input_mag), 0), 16, 8)
