@@ -17,17 +17,29 @@ tcycles = size*2-1 # throughput cycle count for driving x and w
 
 #===========================================================
 
-def random_fp_16b():
-  int_8b = np.random.randint(-2**7, 2**7)    # [-128, 127]
-  dec_8b = np.random.randint(0, 2**8) / 2**8 # [0, 0.996]
-  return int_8b + dec_8b
+def rand_fp(n, d):
+    return Fixed(random.randint(0, (1 << n) - 1), 1, n, d, raw=True)
 
-def fixed_point_multiply(a: Fixed, b: Fixed):
+def mul_fp(a: Fixed, b: Fixed):
   return (a * b).resize(None, a._n, a._d)
 
-def matmul(x:[], w:[]):
-  print(x)
-  print(w)
+def add_fp(a: Fixed, b: Fixed):
+  return (a + b).resize(None, a._n, a._d)
+
+def matmul_fp(x:[], w:[]):
+  s = []
+  for i in range(size):
+    _s = []
+    for j in range(size):
+      _s.append(Fixed(0, 1, 16, 8))
+    s.append(_s)
+
+  for i in range(size):
+    for j in range(size):
+      for k in range(size):
+        s[i][j] = add_fp(s[i][j], mul_fp(x[i][k], w[k][j]))
+  
+  return s
 
 #===========================================================
 
@@ -50,7 +62,7 @@ async def step(dut, x_in:[], w_in:[]):
   dut.rst.value = 0
   dut.en.value  = 1
   
-  for i in range(SIZE):
+  for i in range(size):
     dut.l_x_in[i].value = x_in[i].get()
     dut.t_w_in[i].value = w_in[i].get()
   
@@ -64,6 +76,8 @@ async def step(dut, x_in:[], w_in:[]):
 async def test_case_1_ideal_flow(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
+  # randomly initialize 3x3 input and weight
+
   x = []
   w = []
 
@@ -71,15 +85,15 @@ async def test_case_1_ideal_flow(dut):
     x_row = []
     w_row = []
     for j in range(size):
-      x_row.append(Fixed(random_fp_16b(), 1, 16, 8))
-      w_row.append(Fixed(random_fp_16b(), 1, 16, 8))
+      x_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+      w_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
     x.append(x_row)
     w.append(w_row)
   
-  await reset(dut)
+  # reference matmul result
+  s = matmul_fp(x, w)
 
-  # ideally flow inputs and weights with zero buffers
-
+  # initialize cycled input and weight vectors
   x_in   = []
   w_in   = []
   x_csel = []
@@ -91,20 +105,33 @@ async def test_case_1_ideal_flow(dut):
     x_csel.append(size-1)
     w_rsel.append(size-1)
 
-  for cycle in range(tcycles):
-    
+  # ideally flow x and w along with zero buffers
+
+  await reset(dut)
+  
+  for cycle in range(tcycles+1):
+    # x flow
     for r in range(size):
       if (r <= cycle) & (x_csel[r] >= 0):
         x_in[r] = x[r][x_csel[r]]
         x_csel[r] -= 1
       else:
         x_in[r] = Fixed(0, 1, 16, 8)
-    
+    # w flow
     for c in range(size):
       if (c <= cycle) & (w_rsel[c] >= 0):
         w_in[c] = w[w_rsel[c]][c]
         w_rsel[c] -= 1
       else:
         w_in[c] = Fixed(0, 1, 16, 8)
-    
-    print("x_in:{}\nw_in:{}\n" .format(x_in, w_in))
+    # drive x and w
+    await step(dut, x_in, w_in)
+  
+  # wait for last PE to finish
+  for cycle in range(size):
+    await RisingEdge(dut.clk)
+  
+  # check PE outputs individually
+  for i in range(size):
+    for j in range(size):
+      await check_output(dut, i, j, s[i][j])
