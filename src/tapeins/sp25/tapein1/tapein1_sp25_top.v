@@ -11,9 +11,21 @@
 `ifndef TAPEIN1_SP25_TOP_V
 `define TAPEIN1_SP25_TOP_V
 
-
-// These includes might be doing nothing...
-// TODO: add includes back...
+`include "spi/minion.v"
+`include "arbiter_router/router.v"
+`include "arbiter_router/arbiter.v"
+`include "fft/pease/fft.v"
+`include "serdes/deserializer.v"
+`include "serdes/serializer.v"
+`include "crossbars/blocking.v"
+`include "classifier/classifier.v"
+`include "wishbone/wishbone.v"
+`include "lbist/lbist_controller/lbist_controller.v"
+`include "lbist/lfsr/lfsr.v"
+`include "lbist/misr/misr.v"
+`include "cmn/reset_sync.v"
+`include "async_fifo/AsyncFifo.sv"
+`include "async_fifo/FifoPackager.sv"
 
 
 module tapein1_sp25_top(
@@ -169,13 +181,11 @@ module tapein1_sp25_top(
   // - EXPECTED_SIGNATURES:
   //     The expected signature values from CUT to be compared against result of
   //     MISR
-  // TODO: Update!
-  localparam int SEED_BITS = DATA_BITS * 2; 
+  localparam int SEED_BITS = DATA_BITS * 2;
   localparam int SIGNATURE_BITS = DATA_BITS;
   localparam int NUM_SEEDS = 8;
   localparam int NUM_HASHES = 80;
   localparam int MAX_OUTPUTS_TO_HASH = 100;
-  // TODO: Update!
   localparam [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
     32'b10101110100101100000101111000010,
     32'b10000111001110100111100001011100,
@@ -186,7 +196,6 @@ module tapein1_sp25_top(
     32'b10100011101101000101010111100011,
     32'b11011100011010111001110000101001
   };
-  // TODO: Update!
   localparam [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
       16'b1100111001111011,
       16'b1100101001001101,
