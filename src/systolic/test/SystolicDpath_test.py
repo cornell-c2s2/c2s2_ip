@@ -76,62 +76,62 @@ async def step(dut, x_in:[], w_in:[]):
 async def test_case_1_ideal_flow(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
-  # randomly initialize 3x3 input and weight
+  trials = 100
 
-  x = []
-  w = []
+  for t in range(trials):
+    # randomly initialize 3x3 input and weight
+    x = []
+    w = []
+    for i in range(size):
+      x_row = []
+      w_row = []
+      for j in range(size):
+        x_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+        w_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+      x.append(x_row)
+      w.append(w_row)
+    
+    # compute reference matmul
+    s_ref = matmul_fp(x, w)
 
-  for i in range(size):
-    x_row = []
-    w_row = []
-    for j in range(size):
-      x_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
-      w_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
-    x.append(x_row)
-    w.append(w_row)
-  
-  # reference matmul result
-  s = matmul_fp(x, w)
+    # initialize cycled input and weight vectors
+    x_in   = []
+    w_in   = []
+    x_csel = []
+    w_rsel = []
+    for i in range(size):
+      x_in.append(0)
+      w_in.append(0)
+      x_csel.append(size-1)
+      w_rsel.append(size-1)
 
-  # initialize cycled input and weight vectors
-  x_in   = []
-  w_in   = []
-  x_csel = []
-  w_rsel = []
+    # ideally flow x and w along with zero buffers
 
-  for i in range(size):
-    x_in.append(0)
-    w_in.append(0)
-    x_csel.append(size-1)
-    w_rsel.append(size-1)
+    await reset(dut)
 
-  # ideally flow x and w along with zero buffers
-
-  await reset(dut)
-  
-  for cycle in range(tcycles+1):
-    # x flow
-    for r in range(size):
-      if (r <= cycle) & (x_csel[r] >= 0):
-        x_in[r] = x[r][x_csel[r]]
-        x_csel[r] -= 1
-      else:
-        x_in[r] = Fixed(0, 1, 16, 8)
-    # w flow
-    for c in range(size):
-      if (c <= cycle) & (w_rsel[c] >= 0):
-        w_in[c] = w[w_rsel[c]][c]
-        w_rsel[c] -= 1
-      else:
-        w_in[c] = Fixed(0, 1, 16, 8)
-    # drive x and w
-    await step(dut, x_in, w_in)
-  
-  # wait for last PE to finish
-  for cycle in range(size):
-    await RisingEdge(dut.clk)
-  
-  # check PE outputs individually
-  for i in range(size):
-    for j in range(size):
-      await check_output(dut, i, j, s[i][j])
+    for cycle in range(tcycles+1):
+      # x flow
+      for r in range(size):
+        if (r <= cycle) & (x_csel[r] >= 0):
+          x_in[r] = x[r][x_csel[r]]
+          x_csel[r] -= 1
+        else:
+          x_in[r] = Fixed(0, 1, 16, 8)
+      # w flow
+      for c in range(size):
+        if (c <= cycle) & (w_rsel[c] >= 0):
+          w_in[c] = w[w_rsel[c]][c]
+          w_rsel[c] -= 1
+        else:
+          w_in[c] = Fixed(0, 1, 16, 8)
+      # drive x and w
+      await step(dut, x_in, w_in)
+    
+    # wait for last PE to finish
+    for cycle in range(size):
+      await RisingEdge(dut.clk)
+    
+    # check PE outputs individually
+    for i in range(size):
+      for j in range(size):
+        await check_output(dut, i, j, s_ref[i][j])
