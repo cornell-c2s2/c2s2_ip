@@ -37,8 +37,17 @@ uint8_t tx_clsXbar[3] = {3, 0, 10};
 uint8_t rx_clsXbar[3] = {0};
 uint8_t tx_outXbar[3] = {5, 0, 8};
 uint8_t rx_outXbar[3] = {0};
-uint8_t tx_data[3] = {0, 3, 3};
+uint8_t tx_data[3] = {0, 0, 0};
 uint8_t rx_data[3] = {0};
+
+uint8_t tx_inXbar_loopback[3] = {1, 0, 0};
+uint8_t rx_inXbar_loopback[3] = {0};
+uint8_t tx_clsXbar_loopback[3] = {3, 0, 0};
+uint8_t rx_clsXbar_loopback[3] = {0};
+uint8_t tx_outXbar_loopback[3] = {5, 0, 0};
+uint8_t rx_outXbar_loopback[3] = {0};
+
+bool increment = true;
 
 // PROTOTYPE
 void transfer(const void *tx_buffer, void *rx_buffer, size_t length, wiring_spi_dma_transfercomplete_callback_t user_callback);
@@ -72,9 +81,11 @@ void setup()
   SPI.begin(SPI_MODE_MASTER, ss);
 
   // 0x10002, 0x3000A, 0x50008 (setup crossbars)
-  SPI.transfer(tx_inXbar, rx_inXbar, 3, NULL);
-  SPI.transfer(tx_clsXbar, rx_clsXbar, 3, NULL);
-  SPI.transfer(tx_outXbar, rx_outXbar, 3, NULL);
+  // SPI.transfer(tx_inXbar, rx_inXbar, 3, NULL);
+  // SPI.transfer(tx_clsXbar, rx_clsXbar, 3, NULL);
+  // SPI.transfer(tx_outXbar, rx_outXbar, 3, NULL);
+  SPI.transfer(tx_inXbar_loopback, rx_inXbar_loopback, 3, NULL);
+
   // 0x01 00 00 to configure input Xbar loopback
   // for (int i = 0; i < 90000; i++)
   // {
@@ -104,12 +115,30 @@ void setup()
 void loop()
 {
   SPI.transfer(tx_data, rx_data, 3, NULL);
+  Serial.print("Transferred: ");
+  for (int i = 0; i<3; ++i) {
+    Serial.print(tx_data[i]);
+    Serial.print(", ");
+  }
+  Serial.print("     |     ");
   Serial.print("Received: ");
   for (int i = 0; i<3; ++i) {
     Serial.print(rx_data[i]);
     Serial.print(", ");
   }
   Serial.print("\n");
+  if (increment) {
+    tx_data[1] += 1;
+    tx_data[2] += 2;
+  } else {
+    tx_data[1] -= 1;
+    tx_data[2] -= 2;
+  }
+  if (tx_data[1] == 255) {
+    increment = false;
+  } else if (tx_data[1] == 0) {
+    increment = true;
+  }
   // Serial.print("Received2: ");
   // for (int i = 0; i<3; ++i) {
   //   Serial.print(rx_buffer2[i]);
