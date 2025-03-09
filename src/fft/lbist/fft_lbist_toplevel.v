@@ -9,33 +9,33 @@
 `include "serdes/serializer.v"
 
 module fft_lbist_toplevel #(
-  parameter int SEED_BITS = 32,
+  parameter int SEED_BITS = 16,
   parameter int SIGNATURE_BITS = 16,
-  parameter int FFT_ARRAY_LENGTH = 4,
+  parameter int FFT_ARRAY_LENGTH = 8,
   parameter int NUM_SEEDS = 8,           // Increment if adding new seed
   parameter int NUM_HASHES = 80,
   parameter int MAX_OUTPUTS_TO_HASH = 100,
   parameter int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH),
   parameter int DECIMAL_PT = 4,
   parameter [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
-    32'b10101110100101100000101111000010,
-    32'b10000111001110100111100001011100,
-    32'b10001111101000100111111010010111,
-    32'b10111010000110110000000000110111,
-    32'b11010011001001101011100100010101,
-    32'b01100101110011011100001001101000,
-    32'b10100011101101000101010111100011,
-    32'b11011100011010111001110000101001
+    16'b1010111010010110,
+    16'b1000011100111010,
+    16'b1000111110100010,
+    16'b1011101000011011,
+    16'b1101001100100110,
+    16'b0110010111001101,
+    16'b1010001110110100,
+    16'b1101110001101011
   },
   parameter [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
-      16'b1100111001111011,
-      16'b1100101001001101,
-      16'b1001011011010011,
-      16'b0100110110111010,
-      16'b1010110001010011,
-      16'b1101000101011111,
-      16'b1101010001100010,
-      16'b1000111010101101
+    16'b1101101000000001,
+    16'b1111000001010010,
+    16'b1001011101101101,
+    16'b1011101111001011,
+    16'b0000110101110110,
+    16'b0001000011011111,
+    16'b1101000001010111,
+    16'b1011010001010110
   }
   )(
   input logic clk,
@@ -61,7 +61,7 @@ module fft_lbist_toplevel #(
 
   // MISR to controller, sends hash
   logic                      misr_ctrl_resp_val;
-  logic [SIGNATURE_BITS:0]   misr_ctrl_resp_msg;
+  logic [SIGNATURE_BITS-1:0] misr_ctrl_resp_msg;
   logic                      misr_ctrl_resp_rdy;
 
   logic                      lfsr_deser_resp_val;
@@ -155,14 +155,14 @@ module fft_lbist_toplevel #(
   );
 
   serdes_Serializer #(
-    .N_SAMPLES(FFT_ARRAY_LENGTH),
+    .N_SAMPLES(FFT_ARRAY_LENGTH/2),
     .BIT_WIDTH(SEED_BITS)
   ) serdes_Serializer (
     .clk     (clk),
     .reset   (reset || lfsr_cut_reset),
     .recv_val(fft_ser_resp_val),
     .recv_rdy(fft_ser_resp_rdy),
-    .recv_msg(fft_ser_resp_msg),
+    .recv_msg(fft_ser_resp_msg[FFT_ARRAY_LENGTH/2-1:0]),
     .send_val(ser_misr_resp_val),
     .send_rdy(ser_misr_resp_rdy),
     .send_msg(ser_misr_resp_msg)
@@ -178,7 +178,7 @@ module fft_lbist_toplevel #(
     .clk           (clk),
     .reset         (reset),
     .cut_req_val   (ser_misr_resp_val),
-    .cut_req_msg   (ser_misr_resp_msg[SIGNATURE_BITS - 1:0]),
+    .cut_req_msg   (ser_misr_resp_msg),
     .cut_req_rdy   (ser_misr_resp_rdy),
     .lbist_req_val (ctrl_misr_req_val),
     .lbist_req_msg (ctrl_misr_req_msg),

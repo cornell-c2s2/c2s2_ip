@@ -9,12 +9,12 @@ from src.lbist.misr.tests.misr_model import misr_model
 from src.lbist.lfsr.tests.lfsr_functional_galois import lfsr_model, taps_dict
 from fixedpt import CFixed
 
-SEED_BITS = 32
-FFT_ARRAY_LENGTH = 4
-DECIMAL_BIT = 0
+SEED_BITS = 16
+FFT_ARRAY_LENGTH = 8
+DECIMAL_BIT = 4
 
 # Must be divisible by FFT_ARRAY_LENGTH
-TOTAL_FFT_INPUTS = 80
+TOTAL_FFT_INPUTS = 80 * 2
 
 def fft_model(binary_strs_in):
     # Converts 64 bit input string to 4 16 bit binary values
@@ -27,9 +27,13 @@ def fft_model(binary_strs_in):
     results = fft(inputs, SEED_BITS, DECIMAL_BIT, FFT_ARRAY_LENGTH)
     
     # Convert output complex numbers to real integers, only use half bits
-    results = [x.real.get(True) & ((1 << (SEED_BITS // 2)) - 1) for x in results]
-        
-    return results
+    results = [x.real.get(True) for x in results]
+    
+    for res in results[FFT_ARRAY_LENGTH//2:]:
+        print(hex(res))
+    print()
+    
+    return results[FFT_ARRAY_LENGTH//2:]
 
 
 # generates a set of seeds given an array of LFSR test vectors
@@ -58,7 +62,7 @@ def gen_signatures(inputs: list):
                 outputs[seed] += fft_output
         
         # Calculate the signature
-        signature = misr_model(outputs[seed],[0]*(SEED_BITS // 2))
+        signature = misr_model(outputs[seed],[0]*SEED_BITS)
         outputs[seed] = signature
     
     return outputs
@@ -71,14 +75,14 @@ def gen_lfsr_vectors(seeds, num_vectors):
 
 # ADD SEEDS HERE
 seeds = [
-    '10101110100101100000101111000010',
-    '10000111001110100111100001011100',
-    '10001111101000100111111010010111',
-    '10111010000110110000000000110111',
-    '11010011001001101011100100010101',
-    '01100101110011011100001001101000',
-    '10100011101101000101010111100011',
-    '11011100011010111001110000101001'
+    '1010111010010110',
+    '1000011100111010',
+    '1000111110100010',
+    '1011101000011011',
+    '1101001100100110',
+    '0110010111001101',
+    '1010001110110100',
+    '1101110001101011'
 ]
 
 test_vectors = gen_lfsr_vectors(seeds, TOTAL_FFT_INPUTS)

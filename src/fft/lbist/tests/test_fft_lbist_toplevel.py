@@ -4,13 +4,9 @@ from cocotb.clock import Clock
 
 # Helper tasks -------------------------------------------------------------
 async def lbist_top_simple(dut):
-    # Reset
     dut.reset.value = 1
-
-    #Start clock
     await ClockCycles(dut.clk, 2)
 
-    # Reset to 0
     dut.reset.value = 0
     await ClockCycles(dut.clk, 2)
 
