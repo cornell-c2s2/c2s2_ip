@@ -36,7 +36,7 @@ module FIFO
       w_ptr <= 0;
     else if(wen & !_full) begin
       q[w_ptr] <= d_in;
-      w_ptr <= w_ptr + 1;
+      w_ptr    <= w_ptr + 1;
     end
   end
 
