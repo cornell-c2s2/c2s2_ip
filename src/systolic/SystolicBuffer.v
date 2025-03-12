@@ -3,19 +3,18 @@
 
 module SystolicBuffer
 #(
-  parameter max_depth = 3,
-  parameter nbits     = 16
-  parameter ptr_width = $clog2(max_depth)
+  parameter depth     = 3,
+  parameter nbits     = 16,
+  parameter ptr_width = $clog2(depth)
 )(
-  input  logic               clk,
-  input  logic               rst,
-  input  logic               wen,
-  input  logic               ren,
-  input  logic [ptr_width-1] depth,
-  input  logic [nbits-1:0]   d,
-  output logic [nbits-1:0]   q,
-  output logic               full,
-  output logic               empty
+  input  logic             clk,
+  input  logic             rst,
+  input  logic             wen,
+  input  logic             ren,
+  input  logic [nbits-1:0] d,
+  output logic [nbits-1:0] q,
+  output logic             full,
+  output logic             empty
 );
 
   logic _full;
@@ -50,9 +49,6 @@ module SystolicBuffer
     end
   end
 
-  assign _full  = (w_ptr == depth);
-  assign _empty = (r_ptr == depth);
-
   // Write Logic
 
   always_ff @(posedge clk) begin
@@ -60,15 +56,18 @@ module SystolicBuffer
       for(int i = 0; i < depth; i++)
         mem[i] <= 0;
     end else begin
-      mem[wptr] <= (write_only ? d : mem[wptr]);
+      mem[w_ptr] <= (write_only ? d : mem[w_ptr]);
     end
   end
 
   // Read Logic
 
-  assign q = (read_only ? mem[rptr] : 0);
+  assign q = (read_only ? mem[r_ptr] : 0);
 
   // Status Signals
+
+  assign _full  = (w_ptr == depth);
+  assign _empty = (r_ptr == depth);
 
   assign full  = _full;
   assign empty = _empty;
