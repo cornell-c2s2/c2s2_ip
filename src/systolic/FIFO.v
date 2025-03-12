@@ -3,7 +3,7 @@
 
 module FIFO
 #(
-  parameter size  = 3
+  parameter size  = 3,
   parameter nbits = 16
 )(
   input  logic             clk,
@@ -19,11 +19,11 @@ module FIFO
   logic _full;
   logic _empty;
 
-  logic [$clog(size)-1:0] wptr;
-  logic [$clog(size)-1:0] rptr;
+  logic [$clog2(size)-1:0] wptr;
+  logic [$clog2(size)-1:0] rptr;
 
-  logic [$clog(size)-1:0] wptr_next;
-  logic [$clog(size)-1:0] rptr_next;
+  logic [$clog2(size)-1:0] wptr_next;
+  logic [$clog2(size)-1:0] rptr_next;
 
   logic [nbits-1:0] q [size];
 
@@ -42,6 +42,7 @@ module FIFO
       _full   <= (wptr_next == rptr);
     end
     else begin
+      q[wptr] <= q[wptr];
       wptr  <= wptr;
       _full <= _full;
     end
@@ -51,7 +52,7 @@ module FIFO
 
   // Read-Only Logic
 
-  assign rptr_next = ((rptr + 1) == size ? 0 : wptr + 1);
+  assign rptr_next = ((rptr + 1) == size ? 0 : rptr + 1);
 
   always_ff @(posedge clk) begin
     if(rst) begin
