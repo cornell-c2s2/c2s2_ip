@@ -32,43 +32,44 @@ module FIFO
   assign wptr_next = ((wptr + 1) == size ? 0 : wptr + 1);
 
   always_ff @(posedge clk) begin
-    if(rst)
-      wptr <= 0;
+    if(rst) begin
+      wptr  <= 0;
+      _full <= 0;
+    end
     else if(wen & ~ren & ~_full) begin
       q[wptr] <= d_in;
       wptr    <= wptr_next;
+      _full   <= (wptr_next == rptr);
+    end
+    else begin
+      wptr  <= wptr;
+      _full <= _full;
     end
   end
+
+  assign full = _full;
 
   // Read-Only Logic
 
   assign rptr_next = ((rptr + 1) == size ? 0 : wptr + 1);
 
   always_ff @(posedge clk) begin
-    if(rst)
-      rptr <= 0;
-    else if(~wen & ren & ~_empty) begin
-      q_out <= q[rptr];
-      rptr  <= rptr_next;
-    end
-    else
-      q_out <= 0;
-  end
-
-  // Status Signals
-
-  always_ff @(posedge clk) begin
     if(rst) begin
-      _full  <= 0;
+      rptr   <= 0;
       _empty <= 1;
     end
+    else if(~wen & ren & ~_empty) begin
+      q_out  <= q[rptr];
+      rptr   <= rptr_next;
+      _empty <= (wptr == rptr_next);
+    end
     else begin
-      _full  <= (wen & ~ren) & (wptr_next == rptr);
-      _empty <= (~wen & ren) & (wptr == rptr_next);
+      q_out  <= 0;
+      rptr   <= rptr;
+      _empty <= _empty;
     end
   end
 
-  assign full  = _full;
   assign empty = _empty;
 
 endmodule
