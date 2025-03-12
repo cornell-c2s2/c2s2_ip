@@ -49,6 +49,8 @@ module FIFO
       q_out <= q[r_ptr];
       r_ptr <= r_ptr + 1;
     end
+    else
+      q_out <= 0;
   end
 
   // Status Signals
