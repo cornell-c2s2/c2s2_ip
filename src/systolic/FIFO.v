@@ -49,7 +49,7 @@ module FIFO
       rptr <= 0;
     else if(~wen & ren & ~_empty) begin
       q_out <= q[rptr];
-      rptr  <= r_ptr + 1;
+      rptr  <= rptr_next;
     end
     else
       q_out <= 0;
