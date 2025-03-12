@@ -29,7 +29,7 @@ module FIFO
 
   // Write-Only Logic
 
-  assign wptr_next = ((wptr + 1) == (size - 1) ? 0 : wptr + 1);
+  assign wptr_next = ((wptr + 1) == size ? 0 : wptr + 1);
 
   always_ff @(posedge clk) begin
     if(rst)
@@ -42,7 +42,7 @@ module FIFO
 
   // Read-Only Logic
 
-  assign rptr_next = ((rptr + 1) == (size - 1) ? 0 : wptr + 1);
+  assign rptr_next = ((rptr + 1) == size ? 0 : wptr + 1);
 
   always_ff @(posedge clk) begin
     if(rst)
