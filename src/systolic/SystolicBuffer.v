@@ -3,16 +3,19 @@
 
 module SystolicBuffer
 #(
-  parameter depth     = 3,
+  parameter max_depth = 3,
   parameter nbits     = 16
-  parameter ptr_width = $clog2(depth)
+  parameter ptr_width = $clog2(max_depth)
 )(
-  input  logic             clk,
-  input  logic             rst,
-  input  logic             wen,
-  input  logic             ren,
-  input  logic [nbits-1:0] d,
-  output logic [nbits-1:0] q
+  input  logic               clk,
+  input  logic               rst,
+  input  logic               wen,
+  input  logic               ren,
+  input  logic [ptr_width-1] depth,
+  input  logic [nbits-1:0]   d,
+  output logic [nbits-1:0]   q,
+  output logic               full,
+  output logic               empty
 );
 
   logic _full;
@@ -63,7 +66,12 @@ module SystolicBuffer
 
   // Read Logic
 
-  assign q = mem[rptr];
+  assign q = (read_only ? mem[rptr] : 0);
+
+  // Status Signals
+
+  assign full  = _full;
+  assign empty = _empty;
 
 endmodule
 
