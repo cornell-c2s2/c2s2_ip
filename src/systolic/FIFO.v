@@ -10,40 +10,46 @@ module FIFO
   input  logic             rst,
   input  logic             wen,
   input  logic             ren,
-  //input  logic [nbits-1:0] d_in,
+  input  logic [nbits-1:0] d_in,
   output logic             full,
   output logic             empty,
-  //output logic [nbits-1:0] q_out
+  output logic [nbits-1:0] q_out
 );
-
-  // Status Signals
 
   logic _full;
   logic _empty;
-  logic [$clog2(size)-1:0] count;
+
+  logic [$clog(size)-1:0] wptr;
+  logic [$clog(size)-1:0] rptr;
+
+  logic [nbits-1:0] q [size];
+
+  // Write Logic
 
   always_ff @(posedge clk) begin
-    if(rst) begin
-      count  <= 0;
-      _full  <= 0;
-      _empty <= 0;
+    if(rst)
+      wptr <= 0;
+    else if(wen & !_full) begin
+      q[wptr] <= d_in;
+      wptr    <= w_ptr + 1;
     end
-    else begin
-      case(wen)
-        // read only
-        1'b0: begin
-          count  <= (count - ren);
-          _full  <= 0;
-          _empty <= ((count - ren) == 0);
-        end
-        // write only
-        1'b1: begin
-          count <= count + !ren;
-          _full <= ((count + !ren) == size);
-          _empty <= 0;
-        end
-      endcase
+  end
+
+  // Read Logic
+
+  always_ff @(posedge clk) begin
+    if(rst)
+      rptr <= 0;
+    else if(ren & !_empty) begin
+      q_out <= q[rptr];
+      rptr  <= r_ptr + 1;
     end
+  end
+
+  // Status Signals
+
+  always_ff @(posedge clk) begin
+    
   end
 
   assign full  = _full;
