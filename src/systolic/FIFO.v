@@ -29,16 +29,20 @@ module FIFO
 
   // Write-Only Logic
 
+  assign wptr_next = ((wptr + 1) == (size - 1) ? 0 : wptr + 1);
+
   always_ff @(posedge clk) begin
     if(rst)
       wptr <= 0;
     else if(wen & ~ren & ~_full) begin
       q[wptr] <= d_in;
-      wptr    <= wptr + 1;
+      wptr    <= wptr_next;
     end
   end
 
   // Read-Only Logic
+
+  assign rptr_next = ((rptr + 1) == (size - 1) ? 0 : wptr + 1);
 
   always_ff @(posedge clk) begin
     if(rst)
@@ -57,6 +61,10 @@ module FIFO
     if(rst) begin
       _full  <= 0;
       _empty <= 1;
+    end
+    else begin
+      _full  <= (wen & ~ren) & (wptr_next == rptr);
+      _empty <= (~wen & ren) & (wptr == rptr_next);
     end
   end
 
