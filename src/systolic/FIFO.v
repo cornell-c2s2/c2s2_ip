@@ -22,34 +22,42 @@ module FIFO
   logic [$clog(size)-1:0] wptr;
   logic [$clog(size)-1:0] rptr;
 
+  logic [$clog(size)-1:0] wptr_next;
+  logic [$clog(size)-1:0] rptr_next;
+
   logic [nbits-1:0] q [size];
 
-  // Write Logic
+  // Write-Only Logic
 
   always_ff @(posedge clk) begin
     if(rst)
       wptr <= 0;
-    else if(wen & !_full) begin
+    else if(wen & ~ren & ~_full) begin
       q[wptr] <= d_in;
-      wptr    <= w_ptr + 1;
+      wptr    <= wptr + 1;
     end
   end
 
-  // Read Logic
+  // Read-Only Logic
 
   always_ff @(posedge clk) begin
     if(rst)
       rptr <= 0;
-    else if(ren & !_empty) begin
+    else if(~wen & ren & ~_empty) begin
       q_out <= q[rptr];
       rptr  <= r_ptr + 1;
     end
+    else
+      q_out <= 0;
   end
 
   // Status Signals
 
   always_ff @(posedge clk) begin
-    
+    if(rst) begin
+      _full  <= 0;
+      _empty <= 1;
+    end
   end
 
   assign full  = _full;
