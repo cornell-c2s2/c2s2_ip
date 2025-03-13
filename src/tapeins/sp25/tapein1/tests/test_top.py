@@ -20,9 +20,11 @@ from cocotb.triggers import Timer, Edge, RisingEdge, FallingEdge, ClockCycles
 from cocotb.clock import Clock
 from cocotb.regression import TestFactory
 from pymtl3 import *
+# from fixedpt import Fixed, CFixed
 
 from src.tapeins.sp25.tapein1.tests.spi_driver_sim import spi_write_read, spi_write, spi_read
 # from src.tapeins.sp25.tapein1.tests.spi_stream_protocol import *
+from tools.utils import fixed_bits
 
 if cocotb.simulator.is_running():
     ADDR_BITS = int(cocotb.top.ADDR_BITS.value)
@@ -233,10 +235,28 @@ for test in [test_loopback_noXbar, test_loopback_inXbar, test_loopback_clsXbar, 
     factory.add_option("msgs", msgs_values)
     factory.generate_tests()
 
+# def fixN(n):
+#     """Shortcut for creating fixedpt numbers."""
+#     return Fixed(n, True, 16, 8)
+
+# def gen_fft_msgs(inputs: list[Fixed], outputs: list[Fixed]):
+#     """Generates input/output msgs for FFT from fixedpt inputs/outputs."""
+#     inputs = [fixed_bits(x) for sample in inputs for x in sample]
+#     outputs = [fixed_bits(x) for sample in outputs for x in sample]
+
+
 
 @cocotb.test()
-async def test_fft_direct(dut, input, output):
+async def test_fft_manual(dut, input, output):
     raise NotImplemented
+
+# input_values = [
+#     [fixN(1) for _ in range(32)]
+# ]
+
+# output_values = [
+#     [fixN(32)] + [fixN(0) for _ in range(15)]
+# ]
 
 @cocotb.test()
 async def test_fft_random(dut, input_mag, output_mag):
