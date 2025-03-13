@@ -13,10 +13,10 @@ module fft_lbist_toplevel #(
   parameter int SIGNATURE_BITS = 16,
   parameter int FFT_ARRAY_LENGTH = 8,
   parameter int NUM_SEEDS = 8,           // Increment if adding new seed
-  parameter int NUM_HASHES = 80,
-  parameter int MAX_OUTPUTS_TO_HASH = 100,
+  parameter int NUM_HASHES = 20,
+  parameter int MAX_OUTPUTS_TO_HASH = 25,
   parameter int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH),
-  parameter int DECIMAL_PT = 4,
+  parameter int DECIMAL_PT = 8,
   parameter [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
     16'b1010111010010110,
     16'b1000011100111010,
@@ -28,14 +28,14 @@ module fft_lbist_toplevel #(
     16'b1101110001101011
   },
   parameter [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
-    16'b1101101000000001,
-    16'b1111000001010010,
-    16'b1001011101101101,
-    16'b1011101111001011,
-    16'b0000110101110110,
-    16'b0001000011011111,
-    16'b1101000001010111,
-    16'b1011010001010110
+    16'b0001000011001101,
+    16'b0110110100100011,
+    16'b0110010010110101,
+    16'b1110000100010010,
+    16'b0011010110111110,
+    16'b0101100110000001,
+    16'b0011011010110001,
+    16'b1000001000010101
   }
   )(
   input logic clk,

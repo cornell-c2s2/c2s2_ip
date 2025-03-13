@@ -17,6 +17,9 @@ async def lbist_top_simple(dut):
     # Wait until LBIST is finished
     counter = 0
     while dut.lbist_resp_val.value != 1:
+
+        # print here
+
         await ClockCycles(dut.clk, 2)
 
     dut._log.info(f"TEST OUTPUT: {dut.lbist_resp_msg.value}")
