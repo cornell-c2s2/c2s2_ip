@@ -716,7 +716,7 @@ module tapein1_sp25_top(
   );
 
   // LFSR --------------------------------------------------------------------------
-  lfsr #(
+  lfsr_galois #(
     .LFSR_MSG_BITS           (SEED_BITS)
   ) lfsr (
     .clk                     (clk),
