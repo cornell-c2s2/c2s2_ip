@@ -17,57 +17,33 @@ async def tr(dut, cs: int, sclk: int, mosi: int) -> int:
     await ClockCycles(dut.clk, 1)
     return retval
 
+
+
 # Writes/Reads an SPI transaction. Lowest level of abstraction.
-async def spi_write(dut, src_msg: Bits) -> Bits:
+async def _spi_write(dut, src_msg: Bits) -> Bits:
     
     packet_size = src_msg.nbits
     snk_msg = Bits(src_msg.nbits)
 
     await tr(dut, 1, 0, 0)
 
-
-    # dut._log.info("\nspi_writing...")
     for i in range(packet_size):
         await tr(dut, 0, 0, 0)
         await tr(dut, 0, 0, int(src_msg[packet_size - i - 1]))
         await tr(dut, 0, 1, int(src_msg[packet_size - i - 1]))
         await tr(dut, 0, 1, 0)
         snk_msg[packet_size - i - 1] = await tr(dut, 0, 0, 0)
-        # dut._log.info(f"i is {i}, snk_msg became {bin(snk_msg)}")
     
     await tr(dut, 1, 0, 0)
     
-    # dut._log.info(f"snk_msg: {bin(snk_msg)}, packet_size is {packet_size}")
-    return snk_msg
-        
+    return snk_msg[packet_size-2:packet_size], snk_msg[0:packet_size-2]
 
+# TODO: need to update bits to be relative to spi_packet's size 
+async def spi_read(dut):
+    return await _spi_write(dut, concat(Bits2(0b01), Bits20(0)))
 
-# async def tr(dut, cs: int, sclk: int, mosi: int) -> int:
+async def spi_write(dut, spi_packet):
+    return await _spi_write(dut, concat(Bits2(0b10), spi_packet))
 
-#     dut.cs.value = cs
-#     dut.sclk.value = sclk
-#     dut.mosi.value = mosi
-#     retval = dut.miso.value.integer
-#     await ClockCycles(dut.clk, 1)
-#     return retval
-
-# # Writes/Reads an SPI transaction. Lowest level of abstraction.
-# async def spi_write(dut, src_msg: int, packet_size: int) -> int:
-#     await tr(dut, 1, 0, 0)
-
-#     # dut._log.info("\nspi_writing...")
-#     snk_msg = 0
-#     for i in range(packet_size - 1, -1, -1):
-#         await tr(dut, 0, 0, 0)
-#         await tr(dut, 0, 0, (src_msg >> i) & 1)
-#         await tr(dut, 0, 1, (src_msg >> i) & 1)
-#         await tr(dut, 0, 1, 0)
-#         snk_msg += (await tr(dut, 0, 0, 0)) << i
-#         # dut._log.info(f"i is {i}, snk_msg became {bin(snk_msg)}")
-    
-#     await tr(dut, 1 ,0, 0)
-    
-#     # dut._log.info(f"snk_msg: {bin(snk_msg)}, packet_size is {packet_size}")
-#     return snk_msg
-        
-
+async def spi_write_read(dut, spi_packet):
+    return await _spi_write(dut, concat(Bits2(0b11), spi_packet))
