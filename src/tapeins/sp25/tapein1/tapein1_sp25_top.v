@@ -19,9 +19,8 @@
 `include "serdes/serializer.v"
 `include "crossbars/blocking.v"
 `include "classifier/classifier.v"
-`include "wishbone/wishbone.v"
 `include "lbist/lbist_controller/lbist_controller.v"
-`include "lbist/lfsr/lfsr.v"
+`include "lbist/lfsr/lfsr_galois.v"
 `include "lbist/misr/misr.v"
 `include "cmn/reset_sync.v"
 `include "async_fifo/AsyncFifo.sv"
@@ -181,7 +180,7 @@ module tapein1_sp25_top(
   // - EXPECTED_SIGNATURES:
   //     The expected signature values from CUT to be compared against result of
   //     MISR
-  localparam int SEED_BITS = DATA_BITS * 2;
+  localparam int SEED_BITS = DATA_BITS;
   localparam int SIGNATURE_BITS = DATA_BITS;
   localparam int NUM_SEEDS = 8;
   localparam int NUM_HASHES = 80;
