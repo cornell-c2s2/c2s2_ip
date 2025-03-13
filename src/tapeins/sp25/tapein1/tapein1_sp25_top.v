@@ -20,7 +20,7 @@
 `include "crossbars/blocking.v"
 `include "classifier/classifier.v"
 `include "lbist/lbist_controller/lbist_controller.v"
-`include "lbist/lfsr/lfsr.v"
+`include "lbist/lfsr/lfsr_galois.v"
 `include "lbist/misr/misr.v"
 `include "cmn/reset_sync.v"
 `include "async_fifo/AsyncFifo.sv"
