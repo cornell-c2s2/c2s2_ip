@@ -7,12 +7,15 @@ from fixedpt import Fixed
 from cocotb.triggers import *
 from cocotb.clock import Clock
 
+depth = 4
+nbits = 16
+
 async def reset(dut):
   dut.rst.value = 1
   await RisingEdge(dut.clk)
   dut.rst.value = 0
 
-async def read_write_en_step(dut, wen, ren, full, empty):
+async def rw_ptr_step(dut, wen, ren, full, empty):
   dut.rst.value = 0
   dut.wen.value = wen
   dut.ren.value = ren
@@ -26,15 +29,23 @@ async def read_write_en_step(dut, wen, ren, full, empty):
     "FAILED: dut.empty ({}) != ref.empty ({})" \
     .format(dut.empty.value, empty)
 
+#===========================================================
+# test_case_1_simple_rw_ptr_step
+#===========================================================
+
 @cocotb.test()
-async def test_case_1_pointers(dut):
+async def test_case_1_simple_rw_ptr_step(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
   await reset(dut)
 
-  #                            wen ren full empty
-  await read_write_en_step(dut, 1,  0,  0,    1  )
-  await read_write_en_step(dut, 1,  0,  0,    0  )
-  await read_write_en_step(dut, 1,  0,  0,    0  )
-  await read_write_en_step(dut, 1,  0,  0,    0  )
-  await read_write_en_step(dut, 0,  0,  1,    0  )
+  for T in range(1000):
+    #                      wen ren full empty
+    await rw_ptr_step(dut, 1,  0,  0,    1  )
+    await rw_ptr_step(dut, 1,  0,  0,    0  )
+    await rw_ptr_step(dut, 1,  0,  0,    0  )
+    await rw_ptr_step(dut, 1,  0,  0,    0  )
+    await rw_ptr_step(dut, 0,  1,  1,    0  )
+    await rw_ptr_step(dut, 0,  1,  0,    0  )
+    await rw_ptr_step(dut, 0,  1,  0,    0  )
+    await rw_ptr_step(dut, 0,  1,  0,    0  )

@@ -1,7 +1,7 @@
-`ifndef SYSTOLICFIFO_V
-`define SYSTOLICFIFO_V
+`ifndef SYNCFIFO_V
+`define SYNCFIFO_V
 
-module SystolicFIFO
+module SyncFIFO
 #(
   parameter depth     = 4,
   parameter nbits     = 16,
@@ -41,7 +41,8 @@ module SystolicFIFO
     end
   end
 
-  assign _full  = ((w_ptr - r_ptr) == depth);
+  assign _full = (w_ptr[ptr_width-1] == ~r_ptr[ptr_width-1]) 
+                  & (w_ptr[ptr_width-2:0] == r_ptr[ptr_width-2:0]);
   assign _empty = (w_ptr == r_ptr);
 
   // Write Logic
