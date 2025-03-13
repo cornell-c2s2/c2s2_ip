@@ -14,6 +14,21 @@
 
 // These includes might be doing nothing...
 // TODO: add includes back...
+`include "spi/minion.v"
+`include "arbiter_router/router.v"
+`include "arbiter_router/arbiter.v"
+`include "fft/pease/fft.v"
+`include "serdes/deserializer.v"
+`include "serdes/serializer.v"
+`include "crossbars/blocking.v"
+`include "classifier/classifier.v"
+`include "wishbone/wishbone.v"
+`include "lbist/misr/misr.v"
+`include "lbist/lfsr/lfsr.v"
+`include "lbist/lbist_toplevel/lbist_toplevel.v"
+`include "lbist/lbist_controller/lbist_controller.v"
+`include "async_fifo/AsyncFifo.sv"
+`include "async_fifo/FifoPackager.sv"
 
 
 module tapein1_sp25_top(

@@ -24,7 +24,7 @@ from pymtl3 import *
 
 from src.tapeins.sp25.tapein1.tests.spi_driver_sim import spi_write_read, spi_write, spi_read
 # from src.tapeins.sp25.tapein1.tests.spi_stream_protocol import *
-from tools.utils import fixed_bits
+# from tools.utils import fixed_bits
 
 if cocotb.simulator.is_running():
     ADDR_BITS = int(cocotb.top.ADDR_BITS.value)
@@ -103,6 +103,9 @@ class InXbarCfg:
     Represents the message to send to the input crossbar to configure it. For 
     example, sending in 0b1111 will configure it to input from router and output
     to arbiter.
+
+    TODO: Need to add rest of config messages. Tean's note: not sure if it might
+    be better to have a function to generate the message, since 
     """
     ROUTER_ARBITER = 0b1111
 
