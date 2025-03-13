@@ -23,7 +23,7 @@
 // - resp_rdy: CUT ready to handle another request
 // ===================================================================
 
-module lfsr_paramver2#(
+module lfsr_galois#(
     parameter LFSR_MSG_BITS = 64
 )
 (
