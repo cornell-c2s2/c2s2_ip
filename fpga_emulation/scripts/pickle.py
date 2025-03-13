@@ -58,7 +58,7 @@ def add(list : List, item):
 def find_tick_include(dir, file):
     with open(file, 'r') as f:
         for line in f:
-            include = re.match(r'`include\s+"([\w/]+\.v)"', line)
+            include = re.match(r'`include\s+"([\w/]+\.(s?v))"', line)
             if include:
                 add(tick_include, include.group(1))
                 recr_file = os.path.join(dir, include.group(1))
