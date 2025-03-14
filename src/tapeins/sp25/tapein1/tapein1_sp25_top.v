@@ -128,7 +128,7 @@ module tapein1_sp25_top #(
   //     Bitwidth of output crossbar control bits.
 
   localparam int OUTPUT_XBAR_INPUTS = 2;
-  localparam int OUTPUT_XBAR_OUTPUTS = 1;
+  localparam int OUTPUT_XBAR_OUTPUTS = 2;
   localparam int OUTPUT_XBAR_BITS = 1;
   localparam int OUTPUT_XBAR_CONTROL_BITS = $clog2( OUTPUT_XBAR_INPUTS *
                                                     OUTPUT_XBAR_OUTPUTS );
@@ -931,7 +931,9 @@ module tapein1_sp25_top #(
 
   // Output Xbar -------------------------------------------------------------------
   // Addressing Scheme:
-  // **Output Xbar has 2 input ports and 1 output ports.**
+  // **Output Xbar has 2 input ports and 2 output ports.**
+  // TODO: As of 03/12/2025, the crossbar CANNOT be configured
+  // to have less than 2 output ports. We need to fix this
   // Inputs:
   // 00 - Classifier
   // 01 - Router
@@ -953,6 +955,9 @@ module tapein1_sp25_top #(
   assign OutputXbar_to_Arbiter_msg = {15'b0, output_xbar_send_msg[0]};
   assign OutputXbar_to_Arbiter_val = output_xbar_send_val[0];
   assign output_xbar_send_rdy[0] = OutputXbar_to_Arbiter_rdy;
+
+  // Output Port 2 - Unused
+  assign output_xbar_send_rdy[1] = '0;
 
   // Arbiter -----------------------------------------------------------------------
   // Addressing Scheme:
