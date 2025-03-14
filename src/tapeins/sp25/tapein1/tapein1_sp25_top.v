@@ -127,8 +127,8 @@ module tapein1_sp25_top #(
   // - OUTPUT_XBAR_CONTROL_BITS:
   //     Bitwidth of output crossbr control bits.
 
-  localparam int OUTPUT_XBAR_INPUTS = 4;
-  localparam int OUTPUT_XBAR_OUTPUTS = 2;
+  localparam int OUTPUT_XBAR_INPUTS = 2;
+  localparam int OUTPUT_XBAR_OUTPUTS = 1;
   localparam int OUTPUT_XBAR_BITS = 1;
   localparam int OUTPUT_XBAR_CONTROL_BITS = $clog2( OUTPUT_XBAR_INPUTS *
                                                     OUTPUT_XBAR_OUTPUTS );
@@ -933,11 +933,10 @@ module tapein1_sp25_top #(
 
   // Output Xbar -------------------------------------------------------------------
   // Addressing Scheme:
-  // **Output Xbar has 4 input ports and 2 output ports.**
+  // **Output Xbar has 2 input ports and 1 output ports.**
   // Inputs:
   // 00 - Classifier
   // 01 - Router
-  // 10 - Unused
   // Outputs:
   // 0 - Arbiter
 
@@ -951,11 +950,7 @@ module tapein1_sp25_top #(
   assign output_xbar_recv_val[1] = Router_to_OutputXbar_val;
   assign Router_to_OutputXbar_rdy = output_xbar_recv_rdy[1];
 
-  // Input port: 10 - Unused
-  assign output_xbar_recv_msg[2] = '0;
-  assign output_xbar_recv_val[2] = '0;
-
-
+  
   // Output Port: 1 - Arbiter
   assign OutputXbar_to_Arbiter_msg = {15'b0, output_xbar_send_msg[0]};
   assign OutputXbar_to_Arbiter_val = output_xbar_send_val[0];
