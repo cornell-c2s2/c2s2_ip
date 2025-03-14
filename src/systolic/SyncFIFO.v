@@ -1,6 +1,9 @@
 `ifndef SYNCFIFO_V
 `define SYNCFIFO_V
 
+`include "systolic/SyncFIFO_ReadPtr.v"
+`include "systolic/SyncFIFO_WritePtr.v"
+
 module SyncFIFO
 #(
   parameter depth     = 4,
@@ -17,46 +20,18 @@ module SyncFIFO
   output logic             empty
 );
 
-  logic _full;
-  logic _empty;
-
-  logic [ptr_width-1:0] w_ptr;
   logic [ptr_width-1:0] r_ptr;
+  logic [ptr_width-1:0] w_ptr;
 
-  logic [ptr_width-1:0] w_ptr_next;
-  logic [ptr_width-1:0] r_ptr_next;
+  SyncFIFO_ReadPtr #(depth) r_ptr_blk
+  (
+    .*
+  );
 
-  // R/W Pointers
-
-  assign w_ptr_next = w_ptr + (wen & ~_full);
-  assign r_ptr_next = r_ptr + (ren & ~_empty);
-
-  always_ff @(posedge clk) begin
-    if(rst) begin
-      w_ptr <= 0;
-      r_ptr <= 0;
-    end else begin
-      w_ptr <= w_ptr_next;
-      r_ptr <= r_ptr_next;
-    end
-  end
-
-  assign _full = (w_ptr[ptr_width-1] == ~r_ptr[ptr_width-1]) 
-                  & (w_ptr[ptr_width-2:0] == r_ptr[ptr_width-2:0]);
-  assign _empty = (w_ptr == r_ptr);
-
-  // Write Logic
-
-  //
-
-  // Read Logic
-
-  //
-
-  // Status Signals
-
-  assign full  = _full;
-  assign empty = _empty;
+  SyncFIFO_WritePtr #(depth) w_ptr_blk
+  (
+    .*
+  );
 
 endmodule
 
