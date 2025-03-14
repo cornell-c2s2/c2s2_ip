@@ -93,7 +93,7 @@ module tapein1_sp25_top #(
   // - INPUT_XBAR_BITS
   //     Bitwidth of data bits in input xbar input/output packets.
   // - INPUT_XBAR_CONTROL_BITS:
-  //     Bitwidth of input crossbr control bits.
+  //     Bitwidth of input crossbar control bits.
 
   localparam int INPUT_XBAR_INPUTS = 4;
   localparam int INPUT_XBAR_OUTPUTS = 4;
@@ -109,7 +109,7 @@ module tapein1_sp25_top #(
   // - CLASSIFIER_XBAR_BITS
   //     Bitwidth of data bits in classifier xbar input/output packets.
   // - CLASSIFIER_XBAR_CONTROL_BITS:
-  //     Bitwidth of classifer crossbr control bits.
+  //     Bitwidth of classifer crossbar control bits.
 
   localparam int CLASSIFIER_XBAR_INPUTS = 4;
   localparam int CLASSIFIER_XBAR_OUTPUTS = 4;
@@ -125,7 +125,7 @@ module tapein1_sp25_top #(
   // - OUTPUT_XBAR_BITS
   //     Bitwidth of data bits in output xbar input/output packets.
   // - OUTPUT_XBAR_CONTROL_BITS:
-  //     Bitwidth of output crossbr control bits.
+  //     Bitwidth of output crossbar control bits.
 
   localparam int OUTPUT_XBAR_INPUTS = 2;
   localparam int OUTPUT_XBAR_OUTPUTS = 1;
@@ -522,8 +522,6 @@ module tapein1_sp25_top #(
     .control_val             (output_xbar_control_val)
   );
 
-  wire output_xbar_control_unused = &{1'b0, output_xbar_control_msg[1], 1'b0};
-
 
   // FFT Core 1 Deserializer -------------------------------------------------------
   serdes_Deserializer #(
@@ -821,7 +819,7 @@ module tapein1_sp25_top #(
   assign router_rdy[7] = classifier_config_rdy[2];
 
   // Address: 1000 - Output Xbar
-  assign Router_to_OutputXbar_msg = router_msg[8][OUTPUT_XBAR_BITS];
+  assign Router_to_OutputXbar_msg = router_msg[8][0];
   assign Router_to_OutputXbar_val = router_val[8];
   assign router_rdy[8] = Router_to_OutputXbar_rdy;
 
@@ -950,7 +948,7 @@ module tapein1_sp25_top #(
   assign output_xbar_recv_val[1] = Router_to_OutputXbar_val;
   assign Router_to_OutputXbar_rdy = output_xbar_recv_rdy[1];
 
-  
+
   // Output Port: 1 - Arbiter
   assign OutputXbar_to_Arbiter_msg = {15'b0, output_xbar_send_msg[0]};
   assign OutputXbar_to_Arbiter_val = output_xbar_send_val[0];
