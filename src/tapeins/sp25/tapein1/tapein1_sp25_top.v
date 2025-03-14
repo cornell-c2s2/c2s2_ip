@@ -27,8 +27,9 @@
 `include "async_fifo/FifoPackager.sv"
 
 
-module tapein1_sp25_top(
-
+module tapein1_sp25_top #(
+  parameter int FIFO_ENTRY_BITS = 16
+) (
   // Clock and Reset Ports
   input  logic  clk,
   input  logic  reset,
@@ -39,7 +40,13 @@ module tapein1_sp25_top(
   output logic  miso,
   input  logic  sclk,
   output logic  minion_parity,
-  output logic  adapter_parity
+  output logic  adapter_parity,
+
+  // Async FIFO ports
+  input  logic                         ext_clk,
+  input  logic [FIFO_ENTRY_BITS-1:0]   async_fifo_recv_msg,
+  input  logic                         async_fifo_recv_val,
+  output logic                         async_fifo_recv_rdy
 );
 
   // TODO: If there are unused bits, we need to use them arbitarily somehow to avoid linter errors and such
@@ -217,19 +224,10 @@ module tapein1_sp25_top(
 
   // Async FIFO --------------------------------------------------------------------
   // - FIFO_DEPTH:
-  //     Number of FIFO Entries.
+  //     Number of FIFO Entries (top level parameter).
   // - FIFO_ENTRY_BITS:
   //     Bitwidth of each FIFO Entry
   localparam int FIFO_DEPTH = 10;
-  localparam int FIFO_ENTRY_BITS = 8;
-
-  // FIFO Packager -----------------------------------------------------------------
-  // - PACKAGER_BITS:
-  //     Bitwidth of each packager input message
-  // - PACKAGER_CONCAT:
-  //     Number of valid inputs for the packager to concatanate
-  localparam int PACKAGER_BITS = FIFO_ENTRY_BITS;
-  localparam int PACKAGER_CONCAT = 2;
 
 
 
@@ -404,18 +402,10 @@ module tapein1_sp25_top(
   logic                                    misr_resp_rdy;
 
   // Async FIFO --------------------------------------------------------------------
-  logic [FIFO_ENTRY_BITS-1:0]              async_fifo_recv_msg;
-  logic                                    async_fifo_recv_val;
-  logic                                    async_fifo_recv_rdy;
-
   logic [FIFO_ENTRY_BITS-1:0]              async_fifo_send_msg;
   logic                                    async_fifo_send_val;
   logic                                    async_fifo_send_rdy;
 
-  // FIFO Packager -----------------------------------------------------------------
-  logic [DATA_BITS-1:0]                    packager_send_msg;
-  logic                                    packager_send_val;
-  logic                                    packager_send_rdy;
 
 
 
@@ -756,7 +746,7 @@ module tapein1_sp25_top(
     .p_num_entries           (FIFO_DEPTH),
     .p_bit_width             (FIFO_ENTRY_BITS)
   ) async_fifo (
-    .i_clk(),
+    .i_clk                   (ext_clk),
     .o_clk                   (clk),
     .async_rst               (reset),
     .istream_msg             (async_fifo_recv_msg),
@@ -767,25 +757,6 @@ module tapein1_sp25_top(
     .ostream_rdy             (async_fifo_send_rdy)
   );
 
-
-  // TODO: Update w/ actual values
-  assign async_fifo_recv_msg = '0;
-  assign async_fifo_recv_val = 1'b0;
-
-  // FIFO Packager -----------------------------------------------------------------
-  FifoPackager #(
-    .p_bit_width             (PACKAGER_BITS),
-    .p_num_concat            (PACKAGER_CONCAT)
-  ) packager (
-    .clk                     (clk),
-    .reset                   (reset),
-    .req_msg                 (async_fifo_send_msg),
-    .req_val                 (async_fifo_send_val),
-    .req_rdy                 (async_fifo_send_rdy),
-    .resp_msg                (packager_send_msg),
-    .resp_val                (packager_send_val),
-    .resp_rdy                (packager_send_rdy)
-  );
 
 
 
@@ -877,7 +848,7 @@ module tapein1_sp25_top(
   // **Input Xbar has 4 input ports and 4 output ports.**
   // Inputs:
   // 00 - LFSR
-  // 01 - FIFO Packager
+  // 01 - Async FIFO
   // 10 - Router
   // Outputs:
   // 00 - FFT1 Deserializer
@@ -889,11 +860,10 @@ module tapein1_sp25_top(
   assign input_xbar_recv_val[0] = lfsr_resp_val;
   assign lfsr_resp_rdy = input_xbar_recv_rdy[0];
 
-  // Input port: 01 - FIFO Packager
-  // Each fifo output is 8 bits
-  assign input_xbar_recv_msg[1] = packager_send_msg;
-  assign input_xbar_recv_val[1] = packager_send_val;
-  assign packager_send_rdy = input_xbar_recv_rdy[1];
+  // Input port: 01 - Async FIFO
+  assign input_xbar_recv_msg[1] = async_fifo_send_msg;
+  assign input_xbar_recv_val[1] = async_fifo_send_val;
+  assign async_fifo_send_rdy = input_xbar_recv_rdy[1];
 
   // Input port: 10 - Router
   assign input_xbar_recv_msg[2] = Router_to_InputXbar_msg;
@@ -1092,7 +1062,6 @@ module tapein1_sp25_top(
   // LFSR --------------------------------------------------------------------------
   // MISR --------------------------------------------------------------------------
   // Async FIFO --------------------------------------------------------------------
-  // FIFO Packager -----------------------------------------------------------------
 
 
 
