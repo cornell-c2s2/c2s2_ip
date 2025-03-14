@@ -42,6 +42,8 @@ EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
 WAVES ?= 0
 ifeq ($(WAVES), 1)
 	EXTRA_ARGS += +vcs+dumpvars+waves.vcd
+	EXTRA_ARGS += +vcs+vcdpluson
+	EXTRA_ARGS += +vcs+vcdplusmemon
 endif
 
 #Generating line and toggle coverage data (Set environment variable COVER to 1)
