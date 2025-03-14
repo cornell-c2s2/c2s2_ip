@@ -45,7 +45,7 @@ module tapein1_sp25_top #(
   // Async FIFO ports
   input  logic                         ext_clk,
   input  logic [FIFO_ENTRY_BITS-1:0]   async_fifo_recv_msg,
-  // Might need to add a debounce here and latch on TOGGLE not val being high...
+  // TODO: Might need to add a debounce here and latch on TOGGLE not val being high...
   input  logic                         async_fifo_recv_val,
   output logic                         async_fifo_recv_rdy
 );
