@@ -20,13 +20,15 @@ module SyncFIFO
   output logic             empty
 );
 
-  // Synchronous R/W Pointers
-
   logic _full;
   logic _empty;
 
   logic [ptr_width-1:0] r_ptr;
   logic [ptr_width-1:0] w_ptr;
+
+  logic [nbits-1:0] mem [depth];
+
+  // Synchronous R/W Pointers
 
   SyncFIFO_ReadPtr #(depth) r_ptr_blk
   (
@@ -50,6 +52,15 @@ module SyncFIFO
 
   assign full  = _full;
   assign empty = _empty;
+
+  // Synchronous R/W Logic
+
+  always_ff @(posedge clk) begin
+    if(wen & ~_full)
+      mem[w_ptr[ptr_width-2:0]] <= d;
+  end
+
+  assign q = ((ren & ~_empty) ? mem[r_ptr[ptr_width-2:0]] : 0);
 
 endmodule
 
