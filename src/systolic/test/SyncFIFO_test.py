@@ -88,7 +88,7 @@ async def test_case_2_random_rw_ptr_step(dut):
   empty      = 1
   curr_depth = 0
 
-  for T in range(10000):
+  for T in range(1000000):
     wen = random.randint(0, 1)
     ren = random.randint(0, 1)
 
