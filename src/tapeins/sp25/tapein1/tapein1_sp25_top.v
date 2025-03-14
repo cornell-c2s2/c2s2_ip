@@ -24,7 +24,6 @@
 `include "lbist/misr/misr.v"
 `include "cmn/reset_sync.v"
 `include "async_fifo/AsyncFifo.sv"
-`include "async_fifo/FifoPackager.sv"
 
 
 module tapein1_sp25_top #(
