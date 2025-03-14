@@ -6,7 +6,7 @@
 
 module SyncFIFO
 #(
-  parameter depth     = 4,
+  parameter depth     = 16,
   parameter nbits     = 16,
   parameter ptr_width = $clog2(depth) + 1
 )(
@@ -20,18 +20,36 @@ module SyncFIFO
   output logic             empty
 );
 
+  // Synchronous R/W Pointers
+
+  logic _full;
+  logic _empty;
+
   logic [ptr_width-1:0] r_ptr;
   logic [ptr_width-1:0] w_ptr;
 
   SyncFIFO_ReadPtr #(depth) r_ptr_blk
   (
-    .*
+    .clk   (clk),
+    .rst   (rst),
+    .ren   (ren),
+    .w_ptr (w_ptr),
+    .r_ptr (r_ptr),
+    .empty (_empty)
   );
 
   SyncFIFO_WritePtr #(depth) w_ptr_blk
   (
-    .*
+    .clk   (clk),
+    .rst   (rst),
+    .wen   (wen),
+    .r_ptr (r_ptr),
+    .w_ptr (w_ptr),
+    .full  (_full)
   );
+
+  assign full  = _full;
+  assign empty = _empty;
 
 endmodule
 
