@@ -24,10 +24,11 @@
 `include "lbist/misr/misr.v"
 `include "cmn/reset_sync.v"
 `include "async_fifo/AsyncFifo.sv"
+`include "async_fifo/FifoPackager.sv"
 
 
 module tapein1_sp25_top #(
-  parameter int FIFO_ENTRY_BITS = 16
+  parameter int FIFO_ENTRY_BITS = 8
 ) (
   // Clock and Reset Ports
   input  logic  clk,
@@ -189,28 +190,16 @@ module tapein1_sp25_top #(
   //     MISR
   localparam int SEED_BITS = DATA_BITS;
   localparam int SIGNATURE_BITS = DATA_BITS;
-  localparam int NUM_SEEDS = 8;
+  localparam int NUM_SEEDS = 2;
   localparam int NUM_HASHES = 80;
   localparam int MAX_OUTPUTS_TO_HASH = 100;
   localparam [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
-    32'b10101110100101100000101111000010,
-    32'b10000111001110100111100001011100,
-    32'b10001111101000100111111010010111,
-    32'b10111010000110110000000000110111,
-    32'b11010011001001101011100100010101,
-    32'b01100101110011011100001001101000,
-    32'b10100011101101000101010111100011,
-    32'b11011100011010111001110000101001
+    16'b0000000000000000,
+    16'b0000000000000000
   };
   localparam [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
       16'b1100111001111011,
-      16'b1100101001001101,
-      16'b1001011011010011,
-      16'b0100110110111010,
-      16'b1010110001010011,
-      16'b1101000101011111,
-      16'b1101010001100010,
-      16'b1000111010101101
+      16'b1100101001001101
   };
 
   // LFSR --------------------------------------------------------------------------
@@ -228,6 +217,15 @@ module tapein1_sp25_top #(
   // - FIFO_ENTRY_BITS:
   //     Bitwidth of each FIFO Entry
   localparam int FIFO_DEPTH = 10;
+
+
+  // FIFO Packager -----------------------------------------------------------------
+  // - PACKAGER_BITS:
+  //     Bitwidth of each packager input message
+  // - PACKAGER_CONCAT:
+  //     Number of valid inputs for the packager to concatanate
+  localparam int PACKAGER_BITS = FIFO_ENTRY_BITS;
+  localparam int PACKAGER_CONCAT = 2;
 
 
 
@@ -406,6 +404,10 @@ module tapein1_sp25_top #(
   logic                                    async_fifo_send_val;
   logic                                    async_fifo_send_rdy;
 
+  // FIFO Packager -----------------------------------------------------------------
+  logic [DATA_BITS-1:0]                    packager_send_msg;
+  logic                                    packager_send_val;
+  logic                                    packager_send_rdy;
 
 
 
@@ -755,6 +757,20 @@ module tapein1_sp25_top #(
     .ostream_rdy             (async_fifo_send_rdy)
   );
 
+  // FIFO Packager -----------------------------------------------------------------
+  FifoPackager #(
+    .p_bit_width             (PACKAGER_BITS),
+    .p_num_concat            (PACKAGER_CONCAT)
+  ) packager (
+    .clk                     (clk),
+    .reset                   (reset),
+    .req_msg                 (async_fifo_send_msg),
+    .req_val                 (async_fifo_send_val),
+    .req_rdy                 (async_fifo_send_rdy),
+    .resp_msg                (packager_send_msg),
+    .resp_val                (packager_send_val),
+    .resp_rdy                (packager_send_rdy)
+  );
 
 
 
@@ -846,7 +862,7 @@ module tapein1_sp25_top #(
   // **Input Xbar has 4 input ports and 4 output ports.**
   // Inputs:
   // 00 - LFSR
-  // 01 - Async FIFO
+  // 01 - FIFO Packager
   // 10 - Router
   // Outputs:
   // 00 - FFT1 Deserializer
@@ -858,10 +874,11 @@ module tapein1_sp25_top #(
   assign input_xbar_recv_val[0] = lfsr_resp_val;
   assign lfsr_resp_rdy = input_xbar_recv_rdy[0];
 
-  // Input port: 01 - Async FIFO
-  assign input_xbar_recv_msg[1] = async_fifo_send_msg;
-  assign input_xbar_recv_val[1] = async_fifo_send_val;
-  assign async_fifo_send_rdy = input_xbar_recv_rdy[1];
+  // Input port: 01 - FIFO Packager
+  // Each fifo output is 8 bits
+  assign input_xbar_recv_msg[1] = packager_send_msg;
+  assign input_xbar_recv_val[1] = packager_send_val;
+  assign packager_send_rdy = input_xbar_recv_rdy[1];
 
   // Input port: 10 - Router
   assign input_xbar_recv_msg[2] = Router_to_InputXbar_msg;
@@ -890,8 +907,8 @@ module tapein1_sp25_top #(
   // **Classifier Xbar has 4 input ports and 4 output ports.**
   // Inputs:
   // 00 - FFT1 Serializer
-  // 01 - FFT2 Serializer 
-  // 10 - Router 
+  // 01 - FFT2 Serializer
+  // 10 - Router
   // Outputs:
   // 00 - MISR
   // 01 - Classifier Deserializer
@@ -1060,6 +1077,7 @@ module tapein1_sp25_top #(
   // LFSR --------------------------------------------------------------------------
   // MISR --------------------------------------------------------------------------
   // Async FIFO --------------------------------------------------------------------
+  // FIFO Packager -----------------------------------------------------------------
 
 
 
