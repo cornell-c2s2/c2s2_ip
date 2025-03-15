@@ -96,8 +96,8 @@ module tapein1_sp25_top #(
   // - INPUT_XBAR_CONTROL_BITS:
   //     Bitwidth of input crossbar control bits.
 
-  localparam int INPUT_XBAR_INPUTS = 4;
-  localparam int INPUT_XBAR_OUTPUTS = 4;
+  localparam int INPUT_XBAR_INPUTS = 3;
+  localparam int INPUT_XBAR_OUTPUTS = 3;
   localparam int INPUT_XBAR_BITS = DATA_BITS;
   localparam int INPUT_XBAR_CONTROL_BITS = $clog2( INPUT_XBAR_INPUTS *
                                                    INPUT_XBAR_OUTPUTS );
@@ -112,8 +112,8 @@ module tapein1_sp25_top #(
   // - CLASSIFIER_XBAR_CONTROL_BITS:
   //     Bitwidth of classifer crossbar control bits.
 
-  localparam int CLASSIFIER_XBAR_INPUTS = 4;
-  localparam int CLASSIFIER_XBAR_OUTPUTS = 4;
+  localparam int CLASSIFIER_XBAR_INPUTS = 3;
+  localparam int CLASSIFIER_XBAR_OUTPUTS = 3;
   localparam int CLASSIFIER_XBAR_BITS = DATA_BITS;
   localparam int CLASSIFIER_XBAR_CONTROL_BITS = $clog2( CLASSIFIER_XBAR_INPUTS *
                                                         CLASSIFIER_XBAR_OUTPUTS );
@@ -859,7 +859,7 @@ module tapein1_sp25_top #(
 
   // Input Xbar --------------------------------------------------------------------
   // Addressing Scheme:
-  // **Input Xbar has 4 input ports and 4 output ports.**
+  // **Input Xbar has 3 input ports and 3 output ports.**
   // Inputs:
   // 00 - LFSR
   // 01 - FIFO Packager
@@ -904,7 +904,7 @@ module tapein1_sp25_top #(
 
   // Classifier Xbar ---------------------------------------------------------------
   // Addressing Scheme:
-  // **Classifier Xbar has 4 input ports and 4 output ports.**
+  // **Classifier Xbar has 3 input ports and 3 output ports.**
   // Inputs:
   // 00 - FFT1 Serializer
   // 01 - FFT2 Serializer
