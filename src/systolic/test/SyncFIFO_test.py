@@ -9,6 +9,14 @@ from cocotb.clock import Clock
 
 depth = 16
 nbits = 16
+dbits = 8
+
+#===========================================================
+
+def rand_fp(n, d):
+    return Fixed(random.randint(0, (1 << n) - 1), 1, n, d, raw=True)
+
+#===========================================================
 
 async def reset(dut):
   dut.rst.value = 1
@@ -33,7 +41,19 @@ async def step(dut, wen, ren, d, q, full, empty):
   dut.rst.value = 0
   dut.wen.value = wen
   dut.ren.value = ren
-  dut.
+  dut.d.value   = d
+
+  await RisingEdge(dut.clk)
+
+  assert(dut.q.value == q),                    \
+    "FAILED: dut.q ({}) != ref.q ({})"         \
+    .format(dut.q.value, q)
+  assert (dut.full.value == full),             \
+    "FAILED: dut.full ({}) != ref.full ({})"   \
+    .format(dut.full.value, full)
+  assert (dut.empty.value == empty),           \
+    "FAILED: dut.empty ({}) != ref.empty ({})" \
+    .format(dut.empty.value, empty)
 
 #===========================================================
 # test_case_1_simple_rw_ptr_step
@@ -46,7 +66,7 @@ async def test_case_1_simple_rw_ptr_step(dut):
   await reset(dut)
 
   for T in range(10000):
-    #                      wen ren full empty
+    #                     wen ren full empty
     await rw_ptr_step(dut, 1,  0,  0,    1  )
     await rw_ptr_step(dut, 1,  0,  0,    0  )
     await rw_ptr_step(dut, 1,  0,  0,    0  )
@@ -109,3 +129,89 @@ async def test_case_2_random_rw_ptr_step(dut):
 # test_case_3_simple_rw
 #===========================================================
 
+@cocotb.test()
+async def test_case_3_simple_rw(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
+
+  istream = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+  ostream = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+
+  await reset(dut)
+
+  # istream
+  await step(dut, 1, 0, istream[0],  0, 0, 1)
+  await step(dut, 1, 0, istream[1],  0, 0, 0)
+  await step(dut, 1, 0, istream[2],  0, 0, 0)
+  await step(dut, 1, 0, istream[3],  0, 0, 0)
+  await step(dut, 1, 0, istream[4],  0, 0, 0)
+  await step(dut, 1, 0, istream[5],  0, 0, 0)
+  await step(dut, 1, 0, istream[6],  0, 0, 0)
+  await step(dut, 1, 0, istream[7],  0, 0, 0)
+  await step(dut, 1, 0, istream[8],  0, 0, 0)
+  await step(dut, 1, 0, istream[9],  0, 0, 0)
+  await step(dut, 1, 0, istream[10], 0, 0, 0)
+  await step(dut, 1, 0, istream[11], 0, 0, 0)
+  await step(dut, 1, 0, istream[12], 0, 0, 0)
+  await step(dut, 1, 0, istream[13], 0, 0, 0)
+  await step(dut, 1, 0, istream[14], 0, 0, 0)
+  await step(dut, 1, 0, istream[15], 0, 0, 0)
+
+  # check full signal
+  await step(dut, 0, 0, 0, 0, 1, 0)
+
+  # ostream
+  await step(dut, 0, 1, 0, ostream[0],  1, 0)
+  await step(dut, 0, 1, 0, ostream[1],  0, 0)
+  await step(dut, 0, 1, 0, ostream[2],  0, 0)
+  await step(dut, 0, 1, 0, ostream[3],  0, 0)
+  await step(dut, 0, 1, 0, ostream[4],  0, 0)
+  await step(dut, 0, 1, 0, ostream[5],  0, 0)
+  await step(dut, 0, 1, 0, ostream[6],  0, 0)
+  await step(dut, 0, 1, 0, ostream[7],  0, 0)
+  await step(dut, 0, 1, 0, ostream[8],  0, 0)
+  await step(dut, 0, 1, 0, ostream[9],  0, 0)
+  await step(dut, 0, 1, 0, ostream[10], 0, 0)
+  await step(dut, 0, 1, 0, ostream[11], 0, 0)
+  await step(dut, 0, 1, 0, ostream[12], 0, 0)
+  await step(dut, 0, 1, 0, ostream[13], 0, 0)
+  await step(dut, 0, 1, 0, ostream[14], 0, 0)
+  await step(dut, 0, 1, 0, ostream[15], 0, 0)
+
+  # check empty signal
+  await step(dut, 0, 0, 0, 0, 0, 1)
+
+#===========================================================
+# test_case_4_random_rw
+#===========================================================
+
+@cocotb.test()
+async def test_case_4_random_rw(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
+
+  stream     = []
+  stream_idx = 0
+  full       = 0
+  empty      = 1
+  curr_depth = 0
+
+  await reset(dut)
+
+  for T in range(1000000):
+    wen = random.randint(0, 1)
+    ren = random.randint(0, 1)
+    d   = rand_fp(nbits, dbits).get()
+    q   = 0
+
+    if (ren & (ren ^ empty)):
+      q = stream[stream_idx]
+      stream_idx += 1
+
+    await step(dut, wen, ren, d, q, full, empty)
+
+    curr_depth += int(wen & (wen ^ full)) - int(ren & (ren ^ empty))
+
+    if (wen & (wen ^ full)):
+      stream.append(d)
+
+    full  = int(curr_depth == depth)
+    empty = int(curr_depth == 0)
