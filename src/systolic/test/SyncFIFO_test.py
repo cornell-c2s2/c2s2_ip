@@ -29,6 +29,12 @@ async def rw_ptr_step(dut, wen, ren, full, empty):
     "FAILED: dut.empty ({}) != ref.empty ({})" \
     .format(dut.empty.value, empty)
 
+async def step(dut, wen, ren, d, q, full, empty):
+  dut.rst.value = 0
+  dut.wen.value = wen
+  dut.ren.value = ren
+  dut.
+
 #===========================================================
 # test_case_1_simple_rw_ptr_step
 #===========================================================
@@ -98,3 +104,8 @@ async def test_case_2_random_rw_ptr_step(dut):
 
     full  = int(curr_depth == depth)
     empty = int(curr_depth == 0)
+
+#===========================================================
+# test_case_3_simple_rw
+#===========================================================
+
