@@ -7,7 +7,7 @@ SIM := vcs
 #Sets location for sim_build directory depending on if tests are run with the Makefile or with the bash script
 ifneq ($(TESTSUFFIX),)
 	TEST_DIR = obj_dir/$(TESTNAME)/$(TESTSUFFIX)
-else 
+else
 	TEST_DIR = obj_dir/individual/$(TESTNAME)
 endif
 
@@ -21,6 +21,9 @@ COCOTB_RESULTS_FILE = logs/$(TESTNAME)/$(TESTSUFFIX)/results.xml
 
 #Add working directory to the Python virtual environment path
 PWD=$(shell pwd)
+C2S2_PATH=$(shell git rev-parse --show-toplevel)
+
+
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
 WAVEFORM_DIR ?= $(PWD)
 
@@ -33,6 +36,16 @@ VERILOG_SOURCES ?= $(PWD)/$(SOURCE)
 
 #Step 1: Add all include directories referenced in the verilog source file
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src -assert svaext
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/spi -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/arbiter_router -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/fft/pease/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/serdes/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/classifier/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/wishbone/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/lbist/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/async_fifo/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/crossbars/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/cmn/ -type f \( -name "*.v" -o -name "*.sv" \))
 
 #Step 2: Set model parameters by appending them to EXTRA_ARGS (if neccessary)\
 #Examples (from multiplier example): \
@@ -68,6 +81,3 @@ coverage_report:
 	@urg -dir $(shell find obj_dir -type d -name "*.vdb") -merge_strict -dbname coverage_data -noreport -warn none > /dev/null
 	@urg -dir coverage_data.vdb -format both -report ./coverage
 	@rm -rf coverage_data.vdb
-
-
-

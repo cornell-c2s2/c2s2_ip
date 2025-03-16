@@ -11,9 +11,6 @@
 `ifndef TAPEIN1_SP25_TOP_V
 `define TAPEIN1_SP25_TOP_V
 
-
-// These includes might be doing nothing...
-// TODO: add includes back...
 `include "spi/minion.v"
 `include "arbiter_router/router.v"
 `include "arbiter_router/arbiter.v"
@@ -27,12 +24,15 @@
 `include "lbist/lfsr/lfsr.v"
 `include "lbist/lbist_toplevel/lbist_toplevel.v"
 `include "lbist/lbist_controller/lbist_controller.v"
+`include "lbist/lfsr/lfsr_galois.v"
+`include "cmn/reset_sync.v"
 `include "async_fifo/AsyncFifo.sv"
 `include "async_fifo/FifoPackager.sv"
 
 
-module tapein1_sp25_top(
-
+module tapein1_sp25_top #(
+  parameter int FIFO_ENTRY_BITS = 8
+) (
   // Clock and Reset Ports
   input  logic  clk,
   input  logic  reset,
@@ -45,29 +45,13 @@ module tapein1_sp25_top(
   output logic  minion_parity,
   output logic  adapter_parity,
 
-  // Wishbone Slave ports (WB MI A)
-  input  logic         wbs_stb_i,
-  input  logic         wbs_cyc_i,
-  input  logic         wbs_we_i,
-  input  logic [3:0]   wbs_sel_i,
-  input  logic [31:0]  wbs_dat_i,
-  input  logic [31:0]  wbs_adr_i,
-  output logic         wbs_ack_o,
-  output logic [31:0]  wbs_dat_o,
-
-  // These outputs are necessary to set the valid
-  // io_oeb and io_out values for the gpios.
-
-  // TODO how to set GPIO?
-  output logic [22:0] io_oeb,
-  output logic [4:0] io_out
+  // Async FIFO ports
+  input  logic                         ext_clk,
+  input  logic [FIFO_ENTRY_BITS-1:0]   async_fifo_recv_msg,
+  // TODO: Might need to add a debounce here and latch on TOGGLE not val being high...
+  input  logic                         async_fifo_recv_val,
+  output logic                         async_fifo_recv_rdy
 );
-
-  // TODO: What does this do?
-  // io_oeb can always be zero as we are using inputs with nopull
-  assign io_oeb = 0;
-  // gpios 0-4 require output values to be set.
-  assign io_out = 0;
 
   // TODO: If there are unused bits, we need to use them arbitarily somehow to avoid linter errors and such
 
@@ -80,9 +64,9 @@ module tapein1_sp25_top(
   //     Bitwidth of data bits in SPI input packet.
   // SPI Packet
   //  19  18  17  16  15  14  13  12  11  10  09  08  07  06  05  04  03  02  01  00
-  // ------------------------------------------------------------------------------
-  // | ADDRESS     |                             DATA                             |
-  // ------------------------------------------------------------------------------
+  //  ------------------------------------------------------------------------------
+  // | ADDRESS       |                             DATA                             |
+  //  ------------------------------------------------------------------------------
   localparam int ADDR_BITS   = 4;
   localparam int DATA_BITS   = 16;
   localparam int SPI_PACKET_BITS = DATA_BITS + ADDR_BITS;
@@ -113,10 +97,10 @@ module tapein1_sp25_top(
   // - INPUT_XBAR_BITS
   //     Bitwidth of data bits in input xbar input/output packets.
   // - INPUT_XBAR_CONTROL_BITS:
-  //     Bitwidth of input crossbr control bits.
+  //     Bitwidth of input crossbar control bits.
 
-  localparam int INPUT_XBAR_INPUTS = 4;
-  localparam int INPUT_XBAR_OUTPUTS = 4;
+  localparam int INPUT_XBAR_INPUTS = 3;
+  localparam int INPUT_XBAR_OUTPUTS = 3;
   localparam int INPUT_XBAR_BITS = DATA_BITS;
   localparam int INPUT_XBAR_CONTROL_BITS = $clog2( INPUT_XBAR_INPUTS *
                                                    INPUT_XBAR_OUTPUTS );
@@ -129,10 +113,10 @@ module tapein1_sp25_top(
   // - CLASSIFIER_XBAR_BITS
   //     Bitwidth of data bits in classifier xbar input/output packets.
   // - CLASSIFIER_XBAR_CONTROL_BITS:
-  //     Bitwidth of classifer crossbr control bits.
+  //     Bitwidth of classifer crossbar control bits.
 
-  localparam int CLASSIFIER_XBAR_INPUTS = 4;
-  localparam int CLASSIFIER_XBAR_OUTPUTS = 4;
+  localparam int CLASSIFIER_XBAR_INPUTS = 3;
+  localparam int CLASSIFIER_XBAR_OUTPUTS = 3;
   localparam int CLASSIFIER_XBAR_BITS = DATA_BITS;
   localparam int CLASSIFIER_XBAR_CONTROL_BITS = $clog2( CLASSIFIER_XBAR_INPUTS *
                                                         CLASSIFIER_XBAR_OUTPUTS );
@@ -145,9 +129,9 @@ module tapein1_sp25_top(
   // - OUTPUT_XBAR_BITS
   //     Bitwidth of data bits in output xbar input/output packets.
   // - OUTPUT_XBAR_CONTROL_BITS:
-  //     Bitwidth of output crossbr control bits.
+  //     Bitwidth of output crossbar control bits.
 
-  localparam int OUTPUT_XBAR_INPUTS = 4;
+  localparam int OUTPUT_XBAR_INPUTS = 2;
   localparam int OUTPUT_XBAR_OUTPUTS = 2;
   localparam int OUTPUT_XBAR_BITS = 1;
   localparam int OUTPUT_XBAR_CONTROL_BITS = $clog2( OUTPUT_XBAR_INPUTS *
@@ -187,18 +171,6 @@ module tapein1_sp25_top(
   localparam int CLASSIFIER_BITS = 16;
   localparam int CLASSIFIER_DECIMAL_PT = 8;
 
-  // Wishbone Harness --------------------------------------------------------------
-  // Docs: https://confluence.cornell.edu/display/c2s2/Wishbone+Wrapper
-  // - WISHBONE_INPUTS
-  //     Number of ports for istream message
-  // - WISHBONE_OUTPUTS
-  //     Number of ports for ostream message
-  // - WISHBONE_QUEUE_DEPTH
-  //     Depth of istream and ostream queues
-  localparam int WISHBONE_INPUTS = 3;
-  localparam int WISHBONE_OUTPUTS = 3;
-  localparam int WISHBONE_QUEUE_DEPTH = 3;
-
   // LBIST Controller --------------------------------------------------------------
   // - SEED_BITS:
   //     Number of bits for each seed; number of bits for each test vector generated by
@@ -219,19 +191,18 @@ module tapein1_sp25_top(
   // - EXPECTED_SIGNATURES:
   //     The expected signature values from CUT to be compared against result of
   //     MISR
-  // TODO: Update!
   localparam int SEED_BITS = DATA_BITS;
   localparam int SIGNATURE_BITS = DATA_BITS;
-  localparam int NUM_SEEDS = 1;
-  localparam int NUM_HASHES = 1;
-  localparam int MAX_OUTPUTS_TO_HASH = 32;
-  // TODO: Update!
+  localparam int NUM_SEEDS = 2;
+  localparam int NUM_HASHES = 80;
+  localparam int MAX_OUTPUTS_TO_HASH = 100;
   localparam [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
-    16'd0
+    16'b0000000000000000,
+    16'b0000000000000000
   };
-  // TODO: Update!
   localparam [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
-    16'd0
+      16'b1100111001111011,
+      16'b1100101001001101
   };
 
   // LFSR --------------------------------------------------------------------------
@@ -245,11 +216,11 @@ module tapein1_sp25_top(
 
   // Async FIFO --------------------------------------------------------------------
   // - FIFO_DEPTH:
-  //     Number of FIFO Entries.
+  //     Number of FIFO Entries (top level parameter).
   // - FIFO_ENTRY_BITS:
   //     Bitwidth of each FIFO Entry
   localparam int FIFO_DEPTH = 10;
-  localparam int FIFO_ENTRY_BITS = 8;
+
 
   // FIFO Packager -----------------------------------------------------------------
   // - PACKAGER_BITS:
@@ -400,15 +371,6 @@ module tapein1_sp25_top(
   logic                                    classifier_send_val;
   logic                                    classifier_send_rdy;
 
-  // Wishbone Harness --------------------------------------------------------------
-  logic [31:0]                             wishbone_ostream_data [WISHBONE_OUTPUTS];
-  logic                                    wishbone_ostream_val  [WISHBONE_OUTPUTS];
-  logic                                    wishbone_ostream_rdy  [WISHBONE_OUTPUTS];
-
-  logic [31:0]                             wishbone_istream_data [WISHBONE_INPUTS];
-  logic                                    wishbone_istream_val  [WISHBONE_INPUTS];
-  logic                                    wishbone_istream_rdy  [WISHBONE_INPUTS];
-
   // LBIST Controller --------------------------------------------------------------
   logic                                    lbist_req_val;
   logic                                    lbist_req_rdy;
@@ -441,10 +403,6 @@ module tapein1_sp25_top(
   logic                                    misr_resp_rdy;
 
   // Async FIFO --------------------------------------------------------------------
-  logic [FIFO_ENTRY_BITS-1:0]              async_fifo_recv_msg;
-  logic                                    async_fifo_recv_val;
-  logic                                    async_fifo_recv_rdy;
-
   logic [FIFO_ENTRY_BITS-1:0]              async_fifo_send_msg;
   logic                                    async_fifo_send_val;
   logic                                    async_fifo_send_rdy;
@@ -568,8 +526,6 @@ module tapein1_sp25_top(
     .control_rdy             (output_xbar_control_rdy),
     .control_val             (output_xbar_control_val)
   );
-
-  wire output_xbar_control_unused = &{1'b0, output_xbar_control_msg[1], 1'b0};
 
 
   // FFT Core 1 Deserializer -------------------------------------------------------
@@ -722,39 +678,6 @@ module tapein1_sp25_top(
     .send_msg                (classifier_send_msg)
   );
 
-  // Wishbone Harness --------------------------------------------------------------
-  wishbone_Wishbone #(
-    .p_num_msgs              (WISHBONE_QUEUE_DEPTH),
-    .p_num_istream           (WISHBONE_INPUTS),
-    .p_num_ostream           (WISHBONE_OUTPUTS)
-  ) wishbone (
-    .clk                     (clk),
-    .reset                   (reset),
-    .wbs_stb_i               (wbs_stb_i),
-    .wbs_cyc_i               (wbs_cyc_i),
-    .wbs_we_i                (wbs_we_i),
-    .wbs_sel_i               (wbs_sel_i),
-    .wbs_dat_i               (wbs_dat_i),
-    .wbs_adr_i               (wbs_adr_i),
-    .wbs_ack_o               (wbs_ack_o),
-    .wbs_dat_o               (wbs_dat_o),
-    .istream_rdy             (wishbone_istream_rdy),
-    .istream_val             (wishbone_istream_val),
-    .ostream_rdy             (wishbone_ostream_rdy),
-    .ostream_val             (wishbone_ostream_val),
-    .ostream_data            (wishbone_ostream_data),
-    .istream_data            (wishbone_istream_data)
-  );
-
-  wire unused_wishbone_istream_bits = &{
-    1'b0,
-    wishbone_istream_data[0][31:DATA_BITS],
-    wishbone_istream_data[1][31:DATA_BITS],
-    wishbone_istream_data[2][31:1],
-    1'b0
-  };
-
-
   // LBIST Controller --------------------------------------------------------------
   lbist_controller #(
     .SEED_BITS               (SEED_BITS),
@@ -786,7 +709,7 @@ module tapein1_sp25_top(
   );
 
   // LFSR --------------------------------------------------------------------------
-  lfsr #(
+  lfsr_galois #(
     .LFSR_MSG_BITS           (SEED_BITS)
   ) lfsr (
     .clk                     (clk),
@@ -826,7 +749,7 @@ module tapein1_sp25_top(
     .p_num_entries           (FIFO_DEPTH),
     .p_bit_width             (FIFO_ENTRY_BITS)
   ) async_fifo (
-    .i_clk(),
+    .i_clk                   (ext_clk),
     .o_clk                   (clk),
     .async_rst               (reset),
     .istream_msg             (async_fifo_recv_msg),
@@ -836,11 +759,6 @@ module tapein1_sp25_top(
     .ostream_val             (async_fifo_send_val),
     .ostream_rdy             (async_fifo_send_rdy)
   );
-
-
-  // TODO: Update w/ actual values
-  assign async_fifo_recv_msg = '0;
-  assign async_fifo_recv_val = 1'b0;
 
   // FIFO Packager -----------------------------------------------------------------
   FifoPackager #(
@@ -920,7 +838,7 @@ module tapein1_sp25_top(
   assign router_rdy[7] = classifier_config_rdy[2];
 
   // Address: 1000 - Output Xbar
-  assign Router_to_OutputXbar_msg = router_msg[8][OUTPUT_XBAR_BITS];
+  assign Router_to_OutputXbar_msg = router_msg[8][0];
   assign Router_to_OutputXbar_val = router_val[8];
   assign router_rdy[8] = Router_to_OutputXbar_rdy;
 
@@ -944,165 +862,122 @@ module tapein1_sp25_top(
 
   // Input Xbar --------------------------------------------------------------------
   // Addressing Scheme:
-  // **Input Xbar has 4 input ports and 4 output ports.**
+  // **Input Xbar has 3 input ports and 3 output ports.**
   // Inputs:
-  // 00 - Wishbone Output Port 0
-  // 01 - LFSR
-  // 10 - FIFO Packager
-  // 11 - Router
+  // 00 - LFSR
+  // 01 - FIFO Packager
+  // 10 - Router
   // Outputs:
-  // 00 - Wishbone Input Port 0
-  // 01 - FFT1 Deserializer
-  // 10 - FFT2 Deserializer
-  // 11 - Arbiter
+  // 00 - FFT1 Deserializer
+  // 01 - FFT2 Deserializer
+  // 10 - Arbiter
 
-  // Input port: 00 - Wishbone Output Port 0
-  assign input_xbar_recv_msg[0] = wishbone_istream_data[0][DATA_BITS-1:0];
-  assign input_xbar_recv_val[0] = wishbone_istream_val[0];
-  assign wishbone_istream_rdy[0] = input_xbar_recv_rdy[0];
+  // Input port: 00 - LFSR
+  assign input_xbar_recv_msg[0] = lfsr_resp_msg;
+  assign input_xbar_recv_val[0] = lfsr_resp_val;
+  assign lfsr_resp_rdy = input_xbar_recv_rdy[0];
 
-  // Input port: 01 - LFSR
-  assign input_xbar_recv_msg[1] = lfsr_resp_msg;
-  assign input_xbar_recv_val[1] = lfsr_resp_val;
-  assign lfsr_resp_rdy = input_xbar_recv_rdy[1];
-
-
-  // Input port: 10 - FIFO Packager
+  // Input port: 01 - FIFO Packager
   // Each fifo output is 8 bits
-  assign input_xbar_recv_msg[2] = packager_send_msg;
-  assign input_xbar_recv_val[2] = packager_send_val;
-  assign packager_send_rdy = input_xbar_recv_rdy[2];
+  assign input_xbar_recv_msg[1] = packager_send_msg;
+  assign input_xbar_recv_val[1] = packager_send_val;
+  assign packager_send_rdy = input_xbar_recv_rdy[1];
 
-  // Input port: 11 - Router
-  assign input_xbar_recv_msg[3] = Router_to_InputXbar_msg;
-  assign input_xbar_recv_val[3] = Router_to_InputXbar_val;
-  assign Router_to_InputXbar_rdy = input_xbar_recv_rdy[3];
+  // Input port: 10 - Router
+  assign input_xbar_recv_msg[2] = Router_to_InputXbar_msg;
+  assign input_xbar_recv_val[2] = Router_to_InputXbar_val;
+  assign Router_to_InputXbar_rdy = input_xbar_recv_rdy[2];
 
-  // Output port: 00 - Wishbone Input Port 0
-  // **Need to extend to 32 bits
-  assign wishbone_ostream_data[0] = {
-    {(32 - DATA_BITS) {input_xbar_send_msg[0][DATA_BITS-1]}}, input_xbar_send_msg[1]
-  };
-  assign wishbone_ostream_val[0] = input_xbar_send_val[0];
-  assign input_xbar_send_rdy[0] = wishbone_ostream_rdy[0];
 
-  // Output port: 01 - FFT1 Deserializer
-  assign fft1_deserializer_recv_msg = input_xbar_send_msg[1];
-  assign fft1_deserializer_recv_val = input_xbar_send_val[1];
-  assign input_xbar_send_rdy[1] = fft1_deserializer_recv_rdy;
+  // Output port: 00 - FFT1 Deserializer
+  assign fft1_deserializer_recv_msg = input_xbar_send_msg[0];
+  assign fft1_deserializer_recv_val = input_xbar_send_val[0];
+  assign input_xbar_send_rdy[0] = fft1_deserializer_recv_rdy;
 
-  // Output port: 10 - FFT2 Deserializer
-  assign fft2_deserializer_recv_msg = input_xbar_send_msg[2];
-  assign fft2_deserializer_recv_val = input_xbar_send_val[2];
-  assign input_xbar_send_rdy[2] = fft2_deserializer_recv_rdy;
+  // Output port: 01 - FFT2 Deserializer
+  assign fft2_deserializer_recv_msg = input_xbar_send_msg[1];
+  assign fft2_deserializer_recv_val = input_xbar_send_val[1];
+  assign input_xbar_send_rdy[1] = fft2_deserializer_recv_rdy;
 
-  // Output port: 11 - Arbiter
-  assign InputXbar_to_Arbiter_msg = input_xbar_send_msg[3];
-  assign InputXbar_to_Arbiter_val = input_xbar_send_val[3];
-  assign input_xbar_send_rdy[3] = InputXbar_to_Arbiter_rdy;
+  // Output port: 10 - Arbiter
+  assign InputXbar_to_Arbiter_msg = input_xbar_send_msg[2];
+  assign InputXbar_to_Arbiter_val = input_xbar_send_val[2];
+  assign input_xbar_send_rdy[2] = InputXbar_to_Arbiter_rdy;
 
 
   // Classifier Xbar ---------------------------------------------------------------
   // Addressing Scheme:
-  // **Classifier Xbar has 4 input ports and 4 output ports.**
+  // **Classifier Xbar has 3 input ports and 3 output ports.**
   // Inputs:
-  // 00 - Wishbone Output Port 1
-  // 01 - FFT1 Serializer
-  // 10 - FFT2 Serializer
-  // 11 - Router
+  // 00 - FFT1 Serializer
+  // 01 - FFT2 Serializer
+  // 10 - Router
   // Outputs:
-  // 00 - Wishbone Input Port 1
-  // 01 - MISR
-  // 10 - Classifier Deserializer
-  // 11 - Arbiter
+  // 00 - MISR
+  // 01 - Classifier Deserializer
+  // 10 - Arbiter
 
-  // Input port: 00 - Wishbone Output Port 1
-  assign classifier_xbar_recv_msg[0] = wishbone_istream_data[1][DATA_BITS-1:0];
-  assign classifier_xbar_recv_val[0] = wishbone_istream_val[1];
-  assign wishbone_istream_rdy[1] = classifier_xbar_recv_rdy[0];
+  // Input port: 00 - FFT1 Serializer
+  assign classifier_xbar_recv_msg[0] = fft1_serializer_send_msg;
+  assign classifier_xbar_recv_val[0] = fft1_serializer_send_val;
+  assign fft1_serializer_send_rdy = classifier_xbar_recv_rdy[0];
 
-  // Input port: 01 - FFT1 Serializer
-  assign classifier_xbar_recv_msg[1] = fft1_serializer_send_msg;
-  assign classifier_xbar_recv_val[1] = fft1_serializer_send_val;
-  assign fft1_serializer_send_rdy = classifier_xbar_recv_rdy[1];
+  // Input port: 01 - FFT2 Serializer
+  assign classifier_xbar_recv_msg[1] = fft2_serializer_send_msg;
+  assign classifier_xbar_recv_val[1] = fft2_serializer_send_val;
+  assign fft2_serializer_send_rdy = classifier_xbar_recv_rdy[1];
 
-  // Input port: 10 - FFT2 Serializer
-  assign classifier_xbar_recv_msg[2] = fft2_serializer_send_msg;
-  assign classifier_xbar_recv_val[2] = fft2_serializer_send_val;
-  assign fft2_serializer_send_rdy = classifier_xbar_recv_rdy[2];
+  // Input port: 10 - Router
+  assign classifier_xbar_recv_msg[2] = Router_to_ClassifierXbar_msg;
+  assign classifier_xbar_recv_val[2] = Router_to_ClassifierXbar_val;
+  assign Router_to_ClassifierXbar_rdy = classifier_xbar_recv_rdy[2];
 
-  // Input port: 11 - Router
-  assign classifier_xbar_recv_msg[3] = Router_to_ClassifierXbar_msg;
-  assign classifier_xbar_recv_val[3] = Router_to_ClassifierXbar_val;
-  assign Router_to_ClassifierXbar_rdy = classifier_xbar_recv_rdy[3];
 
-  // Output port: 00 - Wishbone Input Port 1
-  // TODO: What is being concatanated here?
-  assign wishbone_ostream_data[1] = {
-    {(32 - DATA_BITS) {classifier_xbar_send_msg[0][DATA_BITS-1]}}, classifier_xbar_send_msg[1]
-  };
-  assign wishbone_ostream_val[1] = classifier_xbar_send_val[0];
-  assign classifier_xbar_send_rdy[0] = wishbone_ostream_rdy[1];
+  // Output port: 00 - MISR
+  assign cut_misr_resp_msg = classifier_xbar_send_msg[0];
+  assign cut_misr_resp_val = classifier_xbar_send_val[0];
+  assign classifier_xbar_send_rdy[0] = cut_misr_resp_rdy;
 
-  // Output port: 01 - MISR
-  assign cut_misr_resp_msg = classifier_xbar_send_msg[1];
-  assign cut_misr_resp_val = classifier_xbar_send_val[1];
-  assign classifier_xbar_send_rdy[1] = cut_misr_resp_rdy;
+  // Output port: 01 - Classifier Deserializer
+  assign classifier_deserializer_recv_msg = classifier_xbar_send_msg[1];
+  assign classifier_deserializer_recv_val = classifier_xbar_send_val[1];
+  assign classifier_xbar_send_rdy[1] = classifier_deserializer_recv_rdy;
 
-  // Output port: 10 - Classifier Deserializer
-  assign classifier_deserializer_recv_msg = classifier_xbar_send_msg[2];
-  assign classifier_deserializer_recv_val = classifier_xbar_send_val[2];
-  assign classifier_xbar_send_rdy[2] = classifier_deserializer_recv_rdy;
-
-  // Output port: 11 - Arbiter
-  assign ClassifierXbar_to_Arbiter_msg = classifier_xbar_send_msg[3];
-  assign ClassifierXbar_to_Arbiter_val = classifier_xbar_send_val[3];
-  assign classifier_xbar_send_rdy[3] = ClassifierXbar_to_Arbiter_rdy;
+  // Output port: 10 - Arbiter
+  assign ClassifierXbar_to_Arbiter_msg = classifier_xbar_send_msg[2];
+  assign ClassifierXbar_to_Arbiter_val = classifier_xbar_send_val[2];
+  assign classifier_xbar_send_rdy[2] = ClassifierXbar_to_Arbiter_rdy;
 
 
   // Output Xbar -------------------------------------------------------------------
   // Addressing Scheme:
-  // **Output Xbar has 4 input ports and 2 output ports.**
+  // **Output Xbar has 2 input ports and 2 output ports.**
+  // TODO: As of 03/12/2025, the crossbar CANNOT be configured
+  // to have less than 2 output ports. We need to fix this
   // Inputs:
-  // 00 - Wishbone
-  // 01 - Classifier
-  // 10 - Router
-  // 11 - Unused
+  // 00 - Classifier
+  // 01 - Router
   // Outputs:
-  // 0 - Wishbone
-  // 1 - Arbiter
+  // 0 - Arbiter
 
-  // Input port: 00 - Wishbone
-  assign output_xbar_recv_msg[0] = wishbone_istream_data[2][0];
-  assign output_xbar_recv_val[0] = wishbone_istream_val[2];
-  assign wishbone_istream_rdy[2] = output_xbar_recv_rdy[0];
+  // Input port: 00 - Classifier
+  assign output_xbar_recv_msg[0] = classifier_send_msg;
+  assign output_xbar_recv_val[0] = classifier_send_val;
+  assign classifier_send_rdy = output_xbar_recv_rdy[0];
 
-  // Input port: 01 - Classifier
-  assign output_xbar_recv_msg[1] = classifier_send_msg;
-  assign output_xbar_recv_val[1] = classifier_send_val;
-  assign classifier_send_rdy = output_xbar_recv_rdy[1];
+  // Input port: 01 - Router
+  assign output_xbar_recv_msg[1] = Router_to_OutputXbar_msg;
+  assign output_xbar_recv_val[1] = Router_to_OutputXbar_val;
+  assign Router_to_OutputXbar_rdy = output_xbar_recv_rdy[1];
 
-
-  // Input port: 10 - Router
-  assign output_xbar_recv_msg[2] = Router_to_OutputXbar_msg;
-  assign output_xbar_recv_val[2] = Router_to_OutputXbar_val;
-  assign Router_to_OutputXbar_rdy = output_xbar_recv_rdy[2];
-
-
-  // Input port: 11 - Unused
-  assign output_xbar_recv_msg[3] = '0;
-  assign output_xbar_recv_val[3] = '0;
-
-  // Output Port: 0 - Wishbone
-  // **zero extend the classifier output to 32 bits
-  assign wishbone_ostream_data[2] = {31'b0, output_xbar_send_msg[0]};
-  assign wishbone_ostream_val[2] = output_xbar_send_val[0];
-  assign output_xbar_send_rdy[0] = wishbone_ostream_rdy[2];
 
   // Output Port: 1 - Arbiter
-  assign OutputXbar_to_Arbiter_msg = {15'b0, output_xbar_send_msg[1]};
-  assign OutputXbar_to_Arbiter_val = output_xbar_send_val[1];
-  assign output_xbar_send_rdy[1] = OutputXbar_to_Arbiter_rdy;
+  assign OutputXbar_to_Arbiter_msg = {15'b0, output_xbar_send_msg[0]};
+  assign OutputXbar_to_Arbiter_val = output_xbar_send_val[0];
+  assign output_xbar_send_rdy[0] = OutputXbar_to_Arbiter_rdy;
+
+  // Output Port 2 - Unused
+  assign output_xbar_send_rdy[1] = '0;
 
   // Arbiter -----------------------------------------------------------------------
   // Addressing Scheme:
