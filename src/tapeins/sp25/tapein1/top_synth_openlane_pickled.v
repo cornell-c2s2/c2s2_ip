@@ -1186,6 +1186,7 @@ module arbiter_router_Arbiter (
 		end
 	endgenerate
 	wire [addr_nbits - 1:0] encoder_outs [0:ninputs + 0];
+	
 	assign encoder_outs[ninputs] = 0;
 	generate
 		for (i = 0; i < ninputs; i = i + 1) begin : genblk2
@@ -1627,17 +1628,17 @@ module fft_pease_helpers_TwiddleGenerator (
 				reg [(0 + (SIZE_FFT * BIT_WIDTH)) - 1:0] _sv2v_strm_3A5FA_inp;
 				reg [(0 + (SIZE_FFT * BIT_WIDTH)) - 1:0] _sv2v_strm_3A5FA_out;
 				integer _sv2v_strm_3A5FA_idx;
-				begin
-					_sv2v_strm_3A5FA_inp = {inp};
-					for (_sv2v_strm_3A5FA_idx = 0; _sv2v_strm_3A5FA_idx <= ((0 + (SIZE_FFT * BIT_WIDTH)) - SIZE_FFT); _sv2v_strm_3A5FA_idx = _sv2v_strm_3A5FA_idx + SIZE_FFT)
-						_sv2v_strm_3A5FA_out[((0 + (SIZE_FFT * BIT_WIDTH)) - 1) - _sv2v_strm_3A5FA_idx-:SIZE_FFT] = _sv2v_strm_3A5FA_inp[_sv2v_strm_3A5FA_idx+:SIZE_FFT];
-					if (((0 + (SIZE_FFT * BIT_WIDTH)) % SIZE_FFT) > 0)
-						_sv2v_strm_3A5FA_out[0+:(0 + (SIZE_FFT * BIT_WIDTH)) % SIZE_FFT] = _sv2v_strm_3A5FA_inp[_sv2v_strm_3A5FA_idx+:(0 + (SIZE_FFT * BIT_WIDTH)) % SIZE_FFT];
-					_sv2v_strm_FCE0D = ((0 + (SIZE_FFT * BIT_WIDTH)) <= (BIT_WIDTH * SIZE_FFT) ? _sv2v_strm_3A5FA_out << ((BIT_WIDTH * SIZE_FFT) - (0 + (SIZE_FFT * BIT_WIDTH))) : _sv2v_strm_3A5FA_out >> ((0 + (SIZE_FFT * BIT_WIDTH)) - (BIT_WIDTH * SIZE_FFT)));
-				end
+				// begin
+				// 	_sv2v_strm_3A5FA_inp = {inp};
+				// 	for (_sv2v_strm_3A5FA_idx = 0; _sv2v_strm_3A5FA_idx <= ((0 + (SIZE_FFT * BIT_WIDTH)) - SIZE_FFT); _sv2v_strm_3A5FA_idx = _sv2v_strm_3A5FA_idx + SIZE_FFT)
+				// 		_sv2v_strm_3A5FA_out[((0 + (SIZE_FFT * BIT_WIDTH)) - 1) - _sv2v_strm_3A5FA_idx-:SIZE_FFT] = _sv2v_strm_3A5FA_inp[_sv2v_strm_3A5FA_idx+:SIZE_FFT];
+				// 	if (((0 + (SIZE_FFT * BIT_WIDTH)) % SIZE_FFT) > 0)
+				// 		_sv2v_strm_3A5FA_out[0+:(0 + (SIZE_FFT * BIT_WIDTH)) % SIZE_FFT] = _sv2v_strm_3A5FA_inp[_sv2v_strm_3A5FA_idx+:(0 + (SIZE_FFT * BIT_WIDTH)) % SIZE_FFT];
+				// 	_sv2v_strm_FCE0D = ((0 + (SIZE_FFT * BIT_WIDTH)) <= (BIT_WIDTH * SIZE_FFT) ? _sv2v_strm_3A5FA_out << ((BIT_WIDTH * SIZE_FFT) - (0 + (SIZE_FFT * BIT_WIDTH))) : _sv2v_strm_3A5FA_out >> ((0 + (SIZE_FFT * BIT_WIDTH)) - (BIT_WIDTH * SIZE_FFT)));
+				// end
 			endfunction
-			assign packed_sine_wave_in = _sv2v_strm_FCE0D({sine_wave_in});
-			reg unused = &packed_sine_wave_in;
+			// assign packed_sine_wave_in = _sv2v_strm_FCE0D({sine_wave_in});
+			reg unused = sine_wave_in;
 		end
 		else begin : genblk1
 			genvar m;
