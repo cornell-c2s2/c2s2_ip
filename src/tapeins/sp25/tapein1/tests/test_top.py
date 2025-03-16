@@ -20,9 +20,11 @@ from cocotb.triggers import Timer, Edge, RisingEdge, FallingEdge, ClockCycles
 from cocotb.clock import Clock
 from cocotb.regression import TestFactory
 from pymtl3 import *
-# from fixedpt import Fixed, CFixed
+from fixedpt import Fixed, CFixed
 
 from src.tapeins.sp25.tapein1.tests.spi_driver_sim import spi_write_read, spi_write, spi_read
+from src.classifier.sim import classify
+from tools.utils import fixed_bits
 # from src.tapeins.sp25.tapein1.tests.spi_stream_protocol import *
 # from tools.utils import fixed_bits
 
@@ -41,9 +43,9 @@ async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, cu
     dut: model for top
     in_msgs: a list of input messages
     out_msgs: a list of expected output messages
-    max_trsns: the maximum number of transactions to run. test will fail if 
+    max_trsns: the maximum number of transactions to run. test will fail if
       simulations take too long
-    curr_trsns: the current transaction number (note from Tean: I've ported this 
+    curr_trsns: the current transaction number (note from Tean: I've ported this
       over from previous testbenches for now, but I'm thinking of possibly removing it)
     """
     mk = mk_bits(SPI_PACKET_BITS)
@@ -68,18 +70,18 @@ async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, cu
             # spi_status, retmsg = await spi_write(dut, write_read_msg(in_msgs[in_idx]))
             spi_status, retmsg = await spi_write_read(dut, in_msgs[in_idx])
 
-            dut._log.info(f"Trns {trsns}: {spc} | {hex(retmsg)}, sending in {hex(in_msgs[in_idx])}")
+            dut._log.info(f"Trns {trsns}: {bin(spi_status)} | {hex(retmsg)}, sending in {hex(in_msgs[in_idx])}")
             spc = spi_status[0]
-            
+
             if spi_status[1] == 1:
                 assert retmsg == out_msgs[out_idx]
                 out_idx += 1
             in_idx += 1
-        
+
         else:
             # spi_status, retmsg = await spi_write(dut, read_msg())
             spi_status, retmsg = await spi_read(dut)
-            dut._log.info(f"Trns {trsns}: {spc} | {hex(retmsg)}")
+            dut._log.info(f"Trns {trsns}: {bin(spi_status)} | {hex(retmsg)}")
             spc = spi_status[0]
             if spi_status[1] == 1:
                 assert retmsg == out_msgs[out_idx]
@@ -89,7 +91,6 @@ async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, cu
 
     return trsns - 1
 
-        
 
 @cocotb.test()
 async def basic_test(dut):
@@ -100,12 +101,12 @@ async def basic_test(dut):
 
 class InXbarCfg:
     """
-    Represents the message to send to the input crossbar to configure it. For 
+    Represents the message to send to the input crossbar to configure it. For
     example, sending in 0b1111 will configure it to input from router and output
     to arbiter.
 
     TODO: Need to add rest of config messages. Tean's note: not sure if it might
-    be better to have a function to generate the message, since 
+    be better to have a function to generate the message, since
     """
     ROUTER_ARBITER = 0b1111
 
@@ -113,6 +114,7 @@ class ClsXbarCfg:
     """
     Serves a similar purpose as InXbarCfg, but for the classifier crossbar
     """
+    ROUTER_CLS = 0b1110
     ROUTER_ARBITER = 0b1111
 
 class OutXbarCfg:
@@ -121,21 +123,22 @@ class OutXbarCfg:
     crossbar.
     """
     # ROUTER_ARBITER = 0b110
+    CLS_ARBITER = 0b011
     ROUTER_ARBITER = 0b101
 
 
 class RouterOut:
     """
-    The router has several outputs to different blocks. These enums represent 
-    which output they are to the router. 
+    The router has several outputs to different blocks. These enums represent
+    which output they are to the router.
     """
     LBIST_CTRL             = 0b0000
     IN_XBAR                = 0b0001
     IN_XBAR_CTRL           = 0b0010
     CLS_XBAR               = 0b0011
     CLS_XBAR_CTRL          = 0b0100
-    CLS_XBAR_CUT_FREQ_CTRL = 0b0101
-    CLS_XBAR_MAG_CTRL      = 0b0110
+    CLS_CUT_FREQ_CTRL      = 0b0101
+    CLS_MAG_CTRL           = 0b0110
     OUT_XBAR               = 0b1000
     OUT_XBAR_CTRL          = 0b1001
     ARBITER                = 0b1010
@@ -144,7 +147,7 @@ class RouterOut:
 class ArbiterIn:
     """
     The arbiter has several inputs from different blocks. These enums represent
-    which input they are to the arbiter. 
+    which input they are to the arbiter.
     """
     ROUTER     = 0
     IN_XBAR    = 1
@@ -171,10 +174,10 @@ def mk_spi_pkt(addr: int, data: int) -> int:
 
 async def test_loopback_noXbar(dut, msgs):
     """
-    Tests loopback route: spi -> router -> arbiter -> spi. 
+    Tests loopback route: spi -> router -> arbiter -> spi.
 
-    We expect the outputs' data to be the same as the inputs', their address 
-    bits might differ. 
+    We expect the outputs' data to be the same as the inputs', their address
+    bits might differ.
     """
     in_msgs = [mk_spi_pkt(RouterOut.ARBITER, msg) for msg in msgs]
     out_msgs = [mk_spi_pkt(ArbiterIn.ROUTER, msg) for msg in msgs]
@@ -187,7 +190,7 @@ async def test_loopback_inXbar(dut, msgs):
     """
     Tests loopback route: spi -> router -> input xbar -> arbiter -> spi.
 
-    We expect the outputs to be the same as the inputs. We also prepend a 
+    We expect the outputs to be the same as the inputs. We also prepend a
     message to inputs to configure the crossbar.
     """
     config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_ARBITER)
@@ -231,16 +234,18 @@ msgs_values = [
         [0xDEAD, 0xBEEF, 0xCAFE, 0xBABE],
         [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0]
 ]
-for test in [test_loopback_noXbar, test_loopback_inXbar, test_loopback_clsXbar, test_loopback_outXbar]:
-# for test in [test_loopback_outXbar]:
-# for test in [test_loopback_noXbar]:
+# for test in [test_loopback_noXbar, test_loopback_inXbar, test_loopback_clsXbar, test_loopback_outXbar]:
+# for test in [test_loopback_clsXbar]:
+# for test in []:
+# # for test in [test_loopback_outXbar]:
+for test in [test_loopback_inXbar, test_loopback_clsXbar]:
     factory = TestFactory(test)
     factory.add_option("msgs", msgs_values)
     factory.generate_tests()
 
-# def fixN(n):
-#     """Shortcut for creating fixedpt numbers."""
-#     return Fixed(n, True, 16, 8)
+def fixN(n):
+    """Shortcut for creating fixedpt numbers."""
+    return Fixed(n, True, 16, 8)
 
 # def gen_fft_msgs(inputs: list[Fixed], outputs: list[Fixed]):
 #     """Generates input/output msgs for FFT from fixedpt inputs/outputs."""
@@ -261,11 +266,57 @@ async def test_fft_manual(dut, input, output):
 #     [fixN(32)] + [fixN(0) for _ in range(15)]
 # ]
 
-@cocotb.test()
-async def test_fft_random(dut, input_mag, output_mag):
-    raise NotImplemented
+# @cocotb.test()
+# async def test_fft_random(dut, input_mag, output_mag):
+#     raise NotImplemented
+
+# @cocotb.test()
+# async def test_fft_to_classifier_random(
+#         dut, input_mag, input_num, cutoff_freq, cutoff_mag, sampling_freq):
+#     raise NotImplemented
+
+
+"""
+CLASSIFIER TESTS
+"""
+def classifier_msg(inputs: list[Fixed], outputs: list[int]):
+
+    inputs = [int(fixed_bits(x)) for sample in inputs for x in sample]
+    assert all(type(x) == int for x in inputs)
+
+    in_msgs = [
+        mk_spi_pkt(RouterOut.CLS_XBAR_MAG_CTRL, ClsXbarCfg.ROUTER_CLS),
+        mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.CLS_ARBITER)
+    ] + [mk_spi_pkt(RouterOut.CLS_XBAR, x) for x in inputs]
+
+    out_msgs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, x) for x in inputs]
+
+    return in_msgs, out_msgs
+
+
+def test():
+    global DATA_BITS, ADDR_BITS
+    DATA_BITS = 16
+    ADDR_BITS = 4
+
+    inputs = [[fixN(1) for _ in range(DATA_BITS)]]
+    inputs = [int(fixed_bits(x)) for sample in inputs for x in sample]
+
+    for x in inputs:
+        print(hex(x))
+
+    inputs = [
+        mk_spi_pkt(RouterOut.CLS_XBAR_MAG_CTRL, ClsXbarCfg.ROUTER_CLS),
+        mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.CLS_ARBITER)
+    ] + [mk_spi_pkt(RouterOut.CLS_XBAR, x) for x in inputs]
+
+
 
 @cocotb.test()
-async def test_fft_to_classifier_random(
-        dut, input_mag, input_num, cutoff_freq, cutoff_mag, sampling_freq):
-    raise NotImplemented
+async def test_classifier_manual(dut):
+    # in_msgs, out_msgs = classifier_msgj
+    # in_msgs, out_msgs = [], []
+    in_msgs, out_msgs = classifier_msg([[fixN(1) for _ in range(16)]], [0x0000])
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, in_msgs, out_msgs)
