@@ -108,14 +108,14 @@ class InXbarCfg:
     TODO: Need to add rest of config messages. Tean's note: not sure if it might
     be better to have a function to generate the message, since
     """
-    ROUTER_ARBITER = 0b1111
+    ROUTER_ARBITER = 0b1010
 
 class ClsXbarCfg:
     """
     Serves a similar purpose as InXbarCfg, but for the classifier crossbar
     """
-    ROUTER_CLS = 0b1110
-    ROUTER_ARBITER = 0b1111
+    ROUTER_CLS = 0b1001
+    ROUTER_ARBITER = 0b1010
 
 class OutXbarCfg:
     """
@@ -123,8 +123,8 @@ class OutXbarCfg:
     crossbar.
     """
     # ROUTER_ARBITER = 0b110
-    CLS_ARBITER = 0b011
-    ROUTER_ARBITER = 0b101
+    CLS_ARBITER = 0b000
+    ROUTER_ARBITER = 0b010
 
 
 class RouterOut:
@@ -215,7 +215,7 @@ async def test_loopback_outXbar(dut, msgs):
 
     config_msg = mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.ROUTER_ARBITER)
     in_msgs = [config_msg] + [mk_spi_pkt(RouterOut.OUT_XBAR, msg) for msg in msgs]
-    out_msgs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, msg) for msg in msgs]
+    out_msgs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, msg & 1) for msg in msgs]  # output xbar only takes first bit
 
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
@@ -234,11 +234,11 @@ msgs_values = [
         [0xDEAD, 0xBEEF, 0xCAFE, 0xBABE],
         [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0]
 ]
-# for test in [test_loopback_noXbar, test_loopback_inXbar, test_loopback_clsXbar, test_loopback_outXbar]:
+for test in [test_loopback_noXbar, test_loopback_inXbar, test_loopback_clsXbar, test_loopback_outXbar]:
 # for test in [test_loopback_clsXbar]:
 # for test in []:
 # # for test in [test_loopback_outXbar]:
-for test in [test_loopback_inXbar, test_loopback_clsXbar]:
+# for test in [test_loopback_inXbar, test_loopback_clsXbar]:
     factory = TestFactory(test)
     factory.add_option("msgs", msgs_values)
     factory.generate_tests()
