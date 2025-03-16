@@ -50,8 +50,6 @@ module tapein1_sp25_top #(
   output logic                         async_fifo_recv_rdy
 );
 
-  // TODO: If there are unused bits, we need to use them arbitarily somehow to avoid linter errors and such
-
   //============================LOCAL_PARAMETERS====================================
   // SPI Minion --------------------------------------------------------------------
   // - ADDR_BITS:
@@ -531,7 +529,7 @@ module tapein1_sp25_top #(
     .BIT_WIDTH               (DATA_BITS)
   ) fft1_deserializer (
     .clk                     (clk),
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .recv_val                (fft1_deserializer_recv_val),
     .recv_rdy                (fft1_deserializer_recv_rdy),
     .recv_msg                (fft1_deserializer_recv_msg),
@@ -548,7 +546,7 @@ module tapein1_sp25_top #(
     .BIT_WIDTH               (DATA_BITS)
   ) fft1_serializer (
     .clk                     (clk),
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .send_val                (fft1_serializer_send_val),
     .send_rdy                (fft1_serializer_send_rdy),
     .send_msg                (fft1_serializer_send_msg),
@@ -570,7 +568,7 @@ module tapein1_sp25_top #(
     .DECIMAL_PT              (FFT1_DECIMAL_PT),
     .N_SAMPLES               (FFT1_SAMPLES)
   ) fft1 (
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .clk                     (clk),
     .recv_msg                (fft1_recv_msg),
     .recv_val                (fft1_recv_val),
@@ -588,7 +586,7 @@ module tapein1_sp25_top #(
     .BIT_WIDTH               (DATA_BITS)
   ) fft2_deserializer (
     .clk                     (clk),
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .recv_val                (fft2_deserializer_recv_val),
     .recv_rdy                (fft2_deserializer_recv_rdy),
     .recv_msg                (fft2_deserializer_recv_msg),
@@ -603,7 +601,7 @@ module tapein1_sp25_top #(
     .BIT_WIDTH               (DATA_BITS)
   ) fft2_serializer (
     .clk                     (clk),
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .send_val                (fft2_serializer_send_val),
     .send_rdy                (fft2_serializer_send_rdy),
     .send_msg                (fft2_serializer_send_msg),
@@ -625,7 +623,7 @@ module tapein1_sp25_top #(
     .DECIMAL_PT              (FFT2_DECIMAL_PT),
     .N_SAMPLES               (FFT2_SAMPLES)
   ) fft2 (
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .clk                     (clk),
     .recv_msg                (fft2_recv_msg),
     .recv_val                (fft2_recv_val),
@@ -710,7 +708,6 @@ module tapein1_sp25_top #(
     .LFSR_MSG_BITS           (SEED_BITS)
   ) lfsr (
     .clk                     (clk),
-    // TODO: Ensure FFTs and their serializers also gets this reset...
     .reset                   (reset || lfsr_cut_reset),
     .req_val                 (ctrl_lfsr_resp_val),
     .req_msg                 (ctrl_lfsr_resp_msg),
