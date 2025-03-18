@@ -181,11 +181,134 @@ async def test_case_3_simple_rw(dut):
   await step(dut, 0, 0, 0, 0, 0, 1)
 
 #===========================================================
-# test_case_4_random_rw
+# test_case_4_read_empty
 #===========================================================
 
 @cocotb.test()
-async def test_case_4_random_rw(dut):
+async def test_case_4_read_empty(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
+
+  await reset(dut)
+
+  # FIFO output should always be zero if empty
+  await step(dut, 0, 1, 0, 0, 0, 1)
+  await step(dut, 0, 1, 0, 0, 0, 1)
+  await step(dut, 0, 1, 0, 0, 0, 1)
+
+#===========================================================
+# test_case_5_read_enable
+#===========================================================
+
+@cocotb.test()
+async def test_case_5_read_enable(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
+
+  await reset(dut)
+
+  # write FIFO with some values  
+  await step(dut, 1, 0, 0xAA, 0, 0, 1)
+  await step(dut, 1, 0, 0xBB, 0, 0, 0)
+  await step(dut, 1, 0, 0xCC, 0, 0, 0)
+
+  # read some values in FIFO
+  await step(dut, 0, 1, 0, 0xAA, 0, 0)
+  await step(dut, 0, 1, 0, 0xBB, 0, 0)
+
+  # FIFO should always output zero if read is not enabled
+  await step(dut, 0, 0, 0, 0, 0, 0)
+  await step(dut, 0, 0, 0, 0, 0, 0)
+  await step(dut, 0, 0, 0, 0, 0, 0)
+
+#===========================================================
+# test_case_6_write_full
+#===========================================================
+
+@cocotb.test()
+async def test_case_6_write_full(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
+
+  istream = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+  ostream = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+
+  await reset(dut)
+
+  # istream
+  await step(dut, 1, 0, istream[0],  0, 0, 1)
+  await step(dut, 1, 0, istream[1],  0, 0, 0)
+  await step(dut, 1, 0, istream[2],  0, 0, 0)
+  await step(dut, 1, 0, istream[3],  0, 0, 0)
+  await step(dut, 1, 0, istream[4],  0, 0, 0)
+  await step(dut, 1, 0, istream[5],  0, 0, 0)
+  await step(dut, 1, 0, istream[6],  0, 0, 0)
+  await step(dut, 1, 0, istream[7],  0, 0, 0)
+  await step(dut, 1, 0, istream[8],  0, 0, 0)
+  await step(dut, 1, 0, istream[9],  0, 0, 0)
+  await step(dut, 1, 0, istream[10], 0, 0, 0)
+  await step(dut, 1, 0, istream[11], 0, 0, 0)
+  await step(dut, 1, 0, istream[12], 0, 0, 0)
+  await step(dut, 1, 0, istream[13], 0, 0, 0)
+  await step(dut, 1, 0, istream[14], 0, 0, 0)
+  await step(dut, 1, 0, istream[15], 0, 0, 0)
+
+  # check full signal
+  await step(dut, 0, 0, 0, 0, 1, 0)
+
+  # check FIFO is not being overwritten when full
+  await step(dut, 1, 0, rand_fp(nbits, dbits).get(), 0, 1, 0)
+  await step(dut, 1, 0, rand_fp(nbits, dbits).get(), 0, 1, 0)
+  await step(dut, 1, 0, rand_fp(nbits, dbits).get(), 0, 1, 0)
+  await step(dut, 1, 0, rand_fp(nbits, dbits).get(), 0, 1, 0)
+  await step(dut, 1, 0, rand_fp(nbits, dbits).get(), 0, 1, 0)
+
+  # ostream
+  await step(dut, 0, 1, 0, ostream[0],  1, 0)
+  await step(dut, 0, 1, 0, ostream[1],  0, 0)
+  await step(dut, 0, 1, 0, ostream[2],  0, 0)
+  await step(dut, 0, 1, 0, ostream[3],  0, 0)
+  await step(dut, 0, 1, 0, ostream[4],  0, 0)
+  await step(dut, 0, 1, 0, ostream[5],  0, 0)
+  await step(dut, 0, 1, 0, ostream[6],  0, 0)
+  await step(dut, 0, 1, 0, ostream[7],  0, 0)
+  await step(dut, 0, 1, 0, ostream[8],  0, 0)
+  await step(dut, 0, 1, 0, ostream[9],  0, 0)
+  await step(dut, 0, 1, 0, ostream[10], 0, 0)
+  await step(dut, 0, 1, 0, ostream[11], 0, 0)
+  await step(dut, 0, 1, 0, ostream[12], 0, 0)
+  await step(dut, 0, 1, 0, ostream[13], 0, 0)
+  await step(dut, 0, 1, 0, ostream[14], 0, 0)
+  await step(dut, 0, 1, 0, ostream[15], 0, 0)
+
+  # check empty signal
+  await step(dut, 0, 0, 0, 0, 0, 1)
+
+#===========================================================
+# test_case_7_write_enable
+#===========================================================
+
+@cocotb.test()
+async def test_case_7_write_enable(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
+
+  await reset(dut)
+
+  # FIFO should only be written when write is enabled
+  await step(dut, 1, 0, 0xAA, 0, 0, 1)
+  await step(dut, 0, 0, 0xBB, 0, 0, 0)
+  await step(dut, 1, 0, 0xCC, 0, 0, 0)
+
+  await step(dut, 0, 1, 0, 0xAA, 0, 0)
+  await step(dut, 0, 1, 0, 0xCC, 0, 0)
+
+  await step(dut, 0, 1, 0, 0x00, 0, 1)
+  await step(dut, 0, 1, 0, 0x00, 0, 1)
+  await step(dut, 0, 1, 0, 0x00, 0, 1)
+
+#===========================================================
+# test_case_8_random_rw
+#===========================================================
+
+@cocotb.test()
+async def test_case_8_random_rw(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
   stream     = []
