@@ -23,8 +23,7 @@ module SystolicDpath
   output logic                    x_fifo_full  [size],
   output logic                    x_fifo_empty [size],
   output logic                    w_fifo_full  [size],
-  output logic                    w_fifo_empty [size],
-  output logic                    mac_done
+  output logic                    w_fifo_empty [size]
 );
 
   genvar i, j;
@@ -106,10 +105,6 @@ module SystolicDpath
   // Output Logic
 
   assign b_s_out = s[out_rsel][out_csel];
-
-  // Done Logic
-
-  
 
 endmodule
 
