@@ -1,7 +1,7 @@
 import pymtl3
-import src.tapeins.sp24.physical.spi_stream_protocol as spis
-import src.tapeins.sp24.physical.spi_driver_physical as spid
-import src.tapeins.sp24.physical.test_interconnect_physical as testphy
+import spi_stream_protocol as spis
+import spi_driver_physical as spid
+# import src.tapeins.sp24.physical.test_interconnect_physical as testphy
 
 from pymtl3.stdlib.stream.ifcs import valrdy_to_str
 
@@ -55,16 +55,43 @@ def run_interaction(dut, in_msgs, out_len, max_trsns=100, curr_trsns=0):
 
     trsns += 1
 
-  return trsns - 1
+  return retmsg
+
+
+def send(dut, input):
+  in_msg = pymtl3.mk_bits(20)(input)
+
+  retmsg = spid.spi_write_physical(dut, spis.write_read_msg(in_msg))
+  retmsg2 = spid.spi_write_physical(dut, spis.read_msg())
+  print(retmsg)
+  print(retmsg2)
+  return retmsg2
 
 
 def config(msg):
   # input = [msg]
   # run_interaction(None, input, 1)
-  spid.spi_write_physical(None, spis.write_read_msg(pymtl3.mk_bits(20)(msg)))
+  # spid.spi_write_physical(None, spis.write_read_msg(pymtl3.mk_bits(20)(msg)))
+  send(None, msg)
+
 
 def inject(in_msgs, max=100):
-  run_interaction(None, in_msgs, len(in_msgs), max_trsns=max)
+  # return send(None, in_msgs, len(in_msgs), max_trsns=max)
+  return send(None, in_msgs)
+
+
+def fft_inj(in_msgs, max=100):
+  assert len(in_msgs) == 32
+
+  for i in range(32):
+    retmsg = spid.spi_write_physical(None, spis.write_read_msg(pymtl3.mk_bits(20)(in_msgs[i])))
+    # print("injected: ", valrdy_to_str(retmsg[0:20], 1, 1))
+    print("injected: ", retmsg[0:20])
+  for i in range(16):
+    retmsg2 = spid.spi_write_physical(None, spis.read_msg())
+    # print("received: ", valrdy_to_str(retmsg2[0:20], 1, 1))\
+    print("received: ", retmsg2[0:20])
+
 
 def gen_wav(amp, freq, n):
   assert amp <= 0x0ffff
