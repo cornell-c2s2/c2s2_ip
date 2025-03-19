@@ -20,6 +20,11 @@ module SystolicDpath
   input  logic [$clog2(size)-1:0] out_rsel,
   input  logic [$clog2(size)-1:0] out_csel,
   output logic [nbits-1:0]        b_s_out
+  output logic                    x_fifo_full  [size],
+  output logic                    x_fifo_empty [size],
+  output logic                    w_fifo_full  [size],
+  output logic                    w_fifo_empty [size],
+  output logic                    mac_done
 );
 
   genvar i, j;
@@ -32,8 +37,8 @@ module SystolicDpath
 
   // Tensor FIFO
 
-  logic tensor_fifo_full  [size];
-  logic tensor_fifo_empty [size];
+  logic _x_fifo_full  [size];
+  logic _x_fifo_empty [size];
 
   generate
     for(i = 0; i < size; i++) begin : g_tensor_fifo
@@ -45,16 +50,19 @@ module SystolicDpath
         .ren   (fifo_ren[i]),
         .d     (l_x_in[i]),
         .q     (x[i][0]),
-        .full  (tensor_fifo_full[i]),
-        .empty (tensor_fifo_empty[i])
+        .full  (_x_fifo_full[i]),
+        .empty (_x_fifo_empty[i])
       );
     end
   endgenerate
 
+  assign x_fifo_full  = _x_fifo_full;
+  assign x_fifo_empty = _x_fifo_empty;
+
   // Weight FIFO
 
-  logic weight_fifo_full  [size];
-  logic weight_fifo_empty [size];
+  logic _w_fifo_full  [size];
+  logic _w_fifo_empty [size];
 
   generate
     for(j = 0; j < size; j++) begin : g_weight_fifo
@@ -66,11 +74,14 @@ module SystolicDpath
         .ren   (fifo_ren[j]),
         .d     (t_w_in[j]),
         .q     (w[0][j]),
-        .full  (weight_fifo_full[j]),
-        .empty (weight_fifo_empty[j])
+        .full  (_w_fifo_full[j]),
+        .empty (_w_fifo_empty[j])
       );
     end
   endgenerate
+
+  assign w_fifo_full  = _w_fifo_full;
+  assign w_fifo_empty = _w_fifo_empty;
 
   // Systolic Array
 
@@ -95,6 +106,10 @@ module SystolicDpath
   // Output Logic
 
   assign b_s_out = s[out_rsel][out_csel];
+
+  // Done Logic
+
+  
 
 endmodule
 
