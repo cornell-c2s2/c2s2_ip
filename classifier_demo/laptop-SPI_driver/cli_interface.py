@@ -225,9 +225,9 @@ def show_classifier(message):
   """
   if message[16:20] == mk_bits(4)(0x4):
     if message[0] == mk_bits(1)(0x1):
-      print("Classifier said: BIRD DETECTED")
+      print("Classifier said: BIRD DETECTED !!!")
     else:
-      print("Classifier said: no bird")
+      print("Classifier said: No bird...")
 
 
 def printer(send, recv):
