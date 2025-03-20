@@ -19,7 +19,7 @@ module SystolicDpath
   input  logic                    mac_en,
   input  logic [$clog2(size)-1:0] out_rsel,
   input  logic [$clog2(size)-1:0] out_csel,
-  output logic [nbits-1:0]        b_s_out
+  output logic [nbits-1:0]        b_s_out,
   output logic                    x_fifo_full  [size],
   output logic                    x_fifo_empty [size],
   output logic                    w_fifo_full  [size],
@@ -91,7 +91,7 @@ module SystolicDpath
         (
           .clk   (clk),
           .rst   (rst),
-          .en    (en),
+          .en    (mac_en),
           .x_in  (x[i][j]),
           .w_in  (w[i][j]),
           .x_out (x[i][j+1]),
