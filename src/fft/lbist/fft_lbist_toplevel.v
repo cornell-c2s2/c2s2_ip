@@ -11,7 +11,7 @@
 module fft_lbist_toplevel #(
   parameter int SEED_BITS = 16,
   parameter int SIGNATURE_BITS = 16,
-  parameter int FFT_ARRAY_LENGTH = 8,
+  parameter int FFT_ARRAY_LENGTH = 32,
   parameter int NUM_SEEDS = 8,           // Increment if adding new seed
   parameter int NUM_HASHES = 80,
   parameter int MAX_OUTPUTS_TO_HASH = 100,
@@ -28,14 +28,14 @@ module fft_lbist_toplevel #(
     16'b1101110001101011
   },
   parameter [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
-    16'b1101001011100111,
-    16'b1000111110001010,
-    16'b0110110101100001,
-    16'b1001000101011100,
-    16'b1001101000101000,
-    16'b0110111101111011,
-    16'b1011101000110101,
-    16'b0011101110101111
+    16'b0010000111000111,
+    16'b0000000010011110,
+    16'b0101100000100101,
+    16'b0110101101000110,
+    16'b1010010011010111,
+    16'b0110010100111001,
+    16'b0101001101010101,
+    16'b1101010001100010
   }
   )(
   input logic clk,
@@ -69,11 +69,11 @@ module fft_lbist_toplevel #(
   logic                      lfsr_deser_resp_rdy;
 
   logic                      deser_fft_resp_val;
-  logic [SEED_BITS-1:0]      deser_fft_resp_msg [FFT_ARRAY_LENGTH-1:0];
+  logic [SEED_BITS-1:0]      deser_fft_resp_msg [FFT_ARRAY_LENGTH];
   logic                      deser_fft_resp_rdy;
 
   logic                      fft_ser_resp_val;
-  logic [SEED_BITS-1:0]      fft_ser_resp_msg [FFT_ARRAY_LENGTH-1:0];
+  logic [SEED_BITS-1:0]      fft_ser_resp_msg [FFT_ARRAY_LENGTH];
   logic                      fft_ser_resp_rdy;
 
   logic                      ser_misr_resp_val;
@@ -162,7 +162,7 @@ module fft_lbist_toplevel #(
     .reset   (reset || lfsr_cut_reset),
     .recv_val(fft_ser_resp_val),
     .recv_rdy(fft_ser_resp_rdy),
-    .recv_msg(fft_ser_resp_msg[FFT_ARRAY_LENGTH/2-1:0]),
+    .recv_msg(fft_ser_resp_msg[0:FFT_ARRAY_LENGTH/2-1]),
     .send_val(ser_misr_resp_val),
     .send_rdy(ser_misr_resp_rdy),
     .send_msg(ser_misr_resp_msg)

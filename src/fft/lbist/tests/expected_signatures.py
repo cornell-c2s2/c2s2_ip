@@ -10,7 +10,7 @@ from src.lbist.lfsr.tests.lfsr_functional_galois import lfsr_model, taps_dict
 from fixedpt import CFixed
 
 SEED_BITS = 16
-FFT_ARRAY_LENGTH = 8
+FFT_ARRAY_LENGTH = 32
 DECIMAL_BIT = 8
 
 # NUM_HASHES * 2
@@ -35,12 +35,14 @@ def fft_model(binary_strs_in):
     results = [x.real.get(True) for x in results]
     
     # print("FFT OUTPUT:")
-    # for res in results[FFT_ARRAY_LENGTH//2:]:
+    # for res in results:
     #     print(hex(res))
     # print()
     # print()
     
-    return results[FFT_ARRAY_LENGTH//2:]
+    out = results[:FFT_ARRAY_LENGTH//2]
+    # out.reverse()
+    return out
 
 
 # generates a set of seeds given an array of LFSR test vectors
@@ -60,7 +62,14 @@ def gen_signatures(inputs: list):
                 seed = str_array[entry_index]
 
             # Get the fft output
-            fft_output = fft_model(str_array[entry_index: entry_index + FFT_ARRAY_LENGTH])
+            fft_in = str_array[entry_index: entry_index + FFT_ARRAY_LENGTH]
+            # fft_in.reverse()
+            fft_output = fft_model(fft_in)
+            # fft_output.reverse()
+
+            # for i in fft_output:
+            #     print(hex(i))
+            # print()
 
             # If the seed is not in the outputs dict, add it 
             if seed not in outputs:
