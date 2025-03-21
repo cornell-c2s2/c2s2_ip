@@ -105,13 +105,15 @@ async def basic_test(dut):
 class InXbarCfg:
     """
     Represents the message to send to the input crossbar to configure it. For
-    example, sending in 0b1111 will configure it to input from router and output
+    example, sending in 0b1010 will configure it to input from router and output
     to arbiter.
 
     TODO: Need to add rest of config messages. Tean's note: not sure if it might
     be better to have a function to generate the message, since
     """
     ROUTER_ARBITER = 0b1010
+    ROUTER_FFT1 = 0b1000
+    ROUTER_FFT2 = 0b1001
 
 class ClsXbarCfg:
     """
@@ -119,6 +121,8 @@ class ClsXbarCfg:
     """
     ROUTER_CLS = 0b1001
     ROUTER_ARBITER = 0b1010
+    FFT1_ARBITER = 0b0010
+    FFT2_ARBITER = 0b0110
 
 class OutXbarCfg:
     """
@@ -246,28 +250,55 @@ for test in [test_loopback_noXbar, test_loopback_inXbar, test_loopback_clsXbar, 
     factory.add_option("msgs", msgs_values)
     factory.generate_tests()
 
+"""
+FFT TESTS
+"""
 def fixN(n):
-    """Shortcut for creating fixedpt numbers."""
+    """Shortcut for creating fixed-point numbers."""
     return Fixed(n, True, 16, 8)
+
+
+def fft_msg(inputs: list[Fixed], outputs: list[Fixed]):
+    """Generate SPI packets for FFT input/output from fixed-point numbers."""
+    
+    inputs = [fixed_bits(sample) for sample in inputs[0]]
+    outputs = [fixed_bits(sample) for sample in outputs[0]]
+
+    in_xbar_config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT1)
+    out_xbar_config_msg = mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_ARBITER)
+    input_msgs = [mk_spi_pkt(RouterOut.IN_XBAR, int(x)) for x in inputs]
+
+    in_msgs = [in_xbar_config_msg, out_xbar_config_msg] + input_msgs
+    out_msgs = [ mk_spi_pkt(ArbiterIn.CLS_XBAR, int(x)) for x in outputs]
+    
+    return in_msgs, out_msgs
+
+async def test_fft_manual(dut, input, output):
+    in_msgs, out_msgs = fft_msg(input, output)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, in_msgs, out_msgs, max_trsns=100)
+
+# Test Data
+input_values = [
+    [[fixN(1) for _ in range(32)]]
+]
+
+output_values = [
+    [[fixN(32)] + [fixN(0) for _ in range(15)]]
+]
+
+# Register test factory
+factory = TestFactory(test_fft_manual)
+factory.add_option("input", input_values)
+factory.add_option("output", output_values)
+factory.generate_tests()
+
 
 # def gen_fft_msgs(inputs: list[Fixed], outputs: list[Fixed]):
 #     """Generates input/output msgs for FFT from fixedpt inputs/outputs."""
 #     inputs = [fixed_bits(x) for sample in inputs for x in sample]
 #     outputs = [fixed_bits(x) for sample in outputs for x in sample]
-
-
-
-@cocotb.test()
-async def test_fft_manual(dut, input, output):
-    raise NotImplemented
-
-# input_values = [
-#     [fixN(1) for _ in range(32)]
-# ]
-
-# output_values = [
-#     [fixN(32)] + [fixN(0) for _ in range(15)]
-# ]
 
 # @cocotb.test()
 # async def test_fft_random(dut, input_mag, output_mag):
