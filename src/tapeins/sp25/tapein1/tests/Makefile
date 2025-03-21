@@ -74,13 +74,9 @@ EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
 #Resulting waveform will be called waves.vcd and will be in the working directory
 WAVES ?= 0
 ifeq ($(WAVES), 1)
-<<<<<<< HEAD
-	EXTRA_ARGS += +vcs+dumpvars+$(WAVEFORM_DIR)/waves.vcd
-=======
 	EXTRA_ARGS += +vcs+dumpvars+waves.vcd
 	EXTRA_ARGS += +vcs+vcdpluson
 	EXTRA_ARGS += +vcs+vcdplusmemon
->>>>>>> dd78aa3e3df3a54666cf954134e030af6f0ac89d
 endif
 
 #Generating line and toggle coverage data (Set environment variable COVER to 1)
