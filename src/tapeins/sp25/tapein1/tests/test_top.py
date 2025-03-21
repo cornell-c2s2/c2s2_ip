@@ -65,6 +65,9 @@ async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, cu
         dut._log.info("\nnew loop!")
         dut._log.info(f"in_idx is {in_idx}, out_idx is {out_idx}")
         dut._log.info(f"spc = {spc}")
+        dut._log.info(f"router_2_clsxbar_val = {dut.Router_to_ClassifierXbar_val.value}")
+        dut._log.info(f"router_2_clsxbar_rdy = {dut.Router_to_ClassifierXbar_rdy.value}")
+
 
         if in_idx < len(in_msgs) and spc == 1:
             # spi_status, retmsg = await spi_write(dut, write_read_msg(in_msgs[in_idx]))
@@ -172,6 +175,12 @@ def mk_spi_pkt(addr: int, data: int) -> int:
     assert not addr >> ADDR_BITS
     return (addr << DATA_BITS) | data
 
+"""
+================================================================================
+LOOPBACK TESTS
+================================================================================
+"""
+
 async def test_loopback_noXbar(dut, msgs):
     """
     Tests loopback route: spi -> router -> arbiter -> spi.
@@ -203,7 +212,7 @@ async def test_loopback_inXbar(dut, msgs):
 
 async def test_loopback_clsXbar(dut, msgs):
     config_msg = mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.ROUTER_ARBITER)
-    in_msgs = [config_msg] + [mk_spi_pkt(RouterOut.CLS_XBAR, x) for x in msgs]
+    in_msgs = [config_msg] + [mk_spi_pkt(RouterOut.CLS_XBAR, msg) for msg in msgs]
     out_msgs = [mk_spi_pkt(ArbiterIn.CLS_XBAR, msg) for msg in msgs]
 
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
@@ -211,8 +220,6 @@ async def test_loopback_clsXbar(dut, msgs):
     await run_top(dut, in_msgs, out_msgs)
 
 async def test_loopback_outXbar(dut, msgs):
-    # TODO this test needs to be revisited -- was awaiting some changes to the RTL
-
     config_msg = mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.ROUTER_ARBITER)
     in_msgs = [config_msg] + [mk_spi_pkt(RouterOut.OUT_XBAR, msg) for msg in msgs]
     out_msgs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, msg & 1) for msg in msgs]  # output xbar only takes first bit
@@ -225,7 +232,6 @@ async def test_loopback_outXbar(dut, msgs):
 Generate tests here using test factory to test for different messages, kind of
 like with pytest parameters
 """
-# Test Input Crossbar Loopback
 msgs_values = [
         [0xFFFF],
         [0x0000],
@@ -234,11 +240,8 @@ msgs_values = [
         [0xDEAD, 0xBEEF, 0xCAFE, 0xBABE],
         [0xABCD, 0x1234, 0x5678, 0x9ABC, 0xDEF0]
 ]
-for test in [test_loopback_noXbar, test_loopback_inXbar, test_loopback_clsXbar, test_loopback_outXbar]:
-# for test in [test_loopback_clsXbar]:
 # for test in []:
-# # for test in [test_loopback_outXbar]:
-# for test in [test_loopback_inXbar, test_loopback_clsXbar]:
+for test in [test_loopback_noXbar, test_loopback_inXbar, test_loopback_clsXbar, test_loopback_outXbar]:
     factory = TestFactory(test)
     factory.add_option("msgs", msgs_values)
     factory.generate_tests()
@@ -277,7 +280,9 @@ async def test_fft_manual(dut, input, output):
 
 
 """
+================================================================================
 CLASSIFIER TESTS
+================================================================================
 """
 def classifier_msg(inputs: list[Fixed], outputs: list[int]):
 
@@ -285,31 +290,13 @@ def classifier_msg(inputs: list[Fixed], outputs: list[int]):
     assert all(type(x) == int for x in inputs)
 
     in_msgs = [
-        mk_spi_pkt(RouterOut.CLS_XBAR_MAG_CTRL, ClsXbarCfg.ROUTER_CLS),
+        mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.ROUTER_CLS),
         mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.CLS_ARBITER)
     ] + [mk_spi_pkt(RouterOut.CLS_XBAR, x) for x in inputs]
 
-    out_msgs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, x) for x in inputs]
+    out_msgs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, x) for x in outputs]
 
     return in_msgs, out_msgs
-
-
-def test():
-    global DATA_BITS, ADDR_BITS
-    DATA_BITS = 16
-    ADDR_BITS = 4
-
-    inputs = [[fixN(1) for _ in range(DATA_BITS)]]
-    inputs = [int(fixed_bits(x)) for sample in inputs for x in sample]
-
-    for x in inputs:
-        print(hex(x))
-
-    inputs = [
-        mk_spi_pkt(RouterOut.CLS_XBAR_MAG_CTRL, ClsXbarCfg.ROUTER_CLS),
-        mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.CLS_ARBITER)
-    ] + [mk_spi_pkt(RouterOut.CLS_XBAR, x) for x in inputs]
-
 
 
 @cocotb.test()
