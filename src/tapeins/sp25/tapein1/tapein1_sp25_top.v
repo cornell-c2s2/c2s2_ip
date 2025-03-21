@@ -25,6 +25,7 @@
 `include "cmn/reset_sync.v"
 `include "async_fifo/AsyncFifo.sv"
 `include "async_fifo/FifoPackager.sv"
+`include "async_fifo/PosedgeDetector.sv"
 
 
 module tapein1_sp25_top #(
@@ -45,7 +46,7 @@ module tapein1_sp25_top #(
   // Async FIFO ports
   input  logic                         ext_clk,
   input  logic [FIFO_ENTRY_BITS-1:0]   async_fifo_recv_msg,
-  // TODO: Might need to add a debounce here and latch on TOGGLE not val being high...
+  // TODO: Might need to add a debounce here
   input  logic                         async_fifo_recv_val,
   output logic                         async_fifo_recv_rdy
 );
@@ -225,6 +226,8 @@ module tapein1_sp25_top #(
   localparam int PACKAGER_BITS = FIFO_ENTRY_BITS;
   localparam int PACKAGER_CONCAT = 2;
 
+
+  // Posedge Detector --------------------------------------------------------------
 
 
 
@@ -407,7 +410,8 @@ module tapein1_sp25_top #(
   logic                                    packager_send_val;
   logic                                    packager_send_rdy;
 
-
+  // Posedge Detector --------------------------------------------------------------
+  logic                                    toggle_val;
 
 
 
@@ -747,7 +751,7 @@ module tapein1_sp25_top #(
     .o_clk                   (clk),
     .async_rst               (reset),
     .istream_msg             (async_fifo_recv_msg),
-    .istream_val             (async_fifo_recv_val),
+    .istream_val             (toggle_val),
     .istream_rdy             (async_fifo_recv_rdy),
     .ostream_msg             (async_fifo_send_msg),
     .ostream_val             (async_fifo_send_val),
@@ -769,6 +773,13 @@ module tapein1_sp25_top #(
     .resp_rdy                (packager_send_rdy)
   );
 
+  // Posedge Detector --------------------------------------------------------------
+  PosedgeDetector posedge_detector (
+    .clk(ext_clk),
+    .reset(reset),
+    .req_val(async_fifo_recv_val),
+    .resp_val(toggle_val)
+  );
 
 
   //===============================ROUTING_LOGIC====================================
@@ -809,7 +820,7 @@ module tapein1_sp25_top #(
   // Address: 0011 - Classifier Xbar
   assign Router_to_ClassifierXbar_msg = router_msg[3][ROUTER_PACKET_BITS-1:0];
   assign Router_to_ClassifierXbar_val = router_val[3];
-  assign router_rdy[3] = Router_to_Arbiter_rdy;
+  assign router_rdy[3] = Router_to_ClassifierXbar_rdy;
 
   // Address: 0100 - Classifier Xbar Ctrl
   assign classifier_xbar_control_msg = router_msg[4][CLASSIFIER_XBAR_CONTROL_BITS-1:0];
@@ -1029,12 +1040,6 @@ module tapein1_sp25_top #(
     end
   endgenerate
 
-  // wire unused_arbiter_rdy = &{
-  //   1'b0,
-  //   arbiter_rdy[4:ARBITER_SIZE-1],
-  //   1'b0
-  // };
-
 
   //================================ASSERTS=========================================
   // SPI Minion --------------------------------------------------------------------
@@ -1075,6 +1080,8 @@ module tapein1_sp25_top #(
   // MISR --------------------------------------------------------------------------
   // Async FIFO --------------------------------------------------------------------
   // FIFO Packager -----------------------------------------------------------------
+  // Posedge Detector --------------------------------------------------------------
+
 
 
 
