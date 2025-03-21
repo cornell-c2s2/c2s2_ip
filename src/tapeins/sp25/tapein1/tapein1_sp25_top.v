@@ -188,16 +188,28 @@ module tapein1_sp25_top #(
   //     MISR
   localparam int SEED_BITS = DATA_BITS;
   localparam int SIGNATURE_BITS = DATA_BITS;
-  localparam int NUM_SEEDS = 2;
+  localparam int NUM_SEEDS = 8;
   localparam int NUM_HASHES = 80;
   localparam int MAX_OUTPUTS_TO_HASH = 100;
   localparam [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
-    16'b0000000000000000,
-    16'b0000000000000000
+    16'b1010111010010110,
+    16'b1000011100111010,
+    16'b1000111110100010,
+    16'b1011101000011011,
+    16'b1101001100100110,
+    16'b0110010111001101,
+    16'b1010001110110100,
+    16'b1101110001101011
   };
   localparam [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
-      16'b1100111001111011,
-      16'b1100101001001101
+    16'b0010000111000111,
+    16'b0000000010011110,
+    16'b0101100000100101,
+    16'b0110101101000110,
+    16'b1010010011010111,
+    16'b0110010100111001,
+    16'b0101001101010101,
+    16'b1101010001100010
   };
 
   // LFSR --------------------------------------------------------------------------
@@ -552,7 +564,7 @@ module tapein1_sp25_top #(
     .send_msg                (fft1_serializer_send_msg),
     .recv_val                (fft1_send_val),
     .recv_rdy                (fft1_send_rdy),
-    .recv_msg                (fft1_send_msg[0:15])
+    .recv_msg                (fft1_send_msg[0:FFT1_SAMPLES/2-1])
   );
 
   // TODO: Update bounds w/ parameters
@@ -607,7 +619,7 @@ module tapein1_sp25_top #(
     .send_msg                (fft2_serializer_send_msg),
     .recv_val                (fft2_send_val),
     .recv_rdy                (fft2_send_rdy),
-    .recv_msg                (fft2_send_msg[0:15])
+    .recv_msg                (fft2_send_msg[0:FFT2_SAMPLES/2-1])
   );
 
   // TODO: Update bounds w/ parameters
