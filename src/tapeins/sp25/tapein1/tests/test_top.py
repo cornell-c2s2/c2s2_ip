@@ -9,6 +9,22 @@ The tests are laid out in the following order:
   - spi -> router -> input xbar -> arbiter -> spi
   - spi -> router -> classifier xbar -> arbiter -> spi
   - spi -> router -> output xbar -> arbiter -> spi
+2. FFT tests
+3. Classifier tests
+4. FFT -> Classifier tests
+
+The tests are intended to be run with the run_tests script located in the tools/
+directory. This script parallelizes the tests, otherwise running all the tests 
+at once would take a long time.
+
+When writing tests, you can follow this general framework:
+- Figure out what the intended inputs and outputs are for the test
+- Configure the crossbars and any other necessary components
+  - InXbarCfg, ClsXbarCfg, and OutXbarCfg are useful for this
+- Convert the inputs into SPI packets using the correct address bits
+  - RouterOut is useful for this
+- Convert the outputs into SPI packets using the correct address bits
+  - ArbiterIn is useful for this
 
 Author: Tean Lai
 """
@@ -24,6 +40,7 @@ from fixedpt import Fixed, CFixed
 
 from src.tapeins.sp25.tapein1.tests.spi_driver_sim import spi_write_read, spi_write, spi_read
 from src.classifier.sim import classify
+from src.fft.tests.fft import FFTInterface, FFTPease
 from tools.utils import fixed_bits
 
 if cocotb.simulator.is_running():
@@ -60,6 +77,8 @@ async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, cu
         if trsns > max_trsns:
             assert False, "Exceeded max transactions"
 
+        # The following logging statements are for debugging purposes. Feel free
+        # to modify them as needed.
         dut._log.info("\nnew loop!")
         dut._log.info(f"in_idx is {in_idx}, out_idx is {out_idx}")
         dut._log.info(f"spc = {spc}")
@@ -68,7 +87,6 @@ async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, cu
 
 
         if in_idx < len(in_msgs) and spc == 1:
-            # spi_status, retmsg = await spi_write(dut, write_read_msg(in_msgs[in_idx]))
             spi_status, retmsg = await spi_write_read(dut, in_msgs[in_idx])
 
             dut._log.info(f"Trns {trsns}: {bin(spi_status)} | {hex(retmsg)}, sending in {hex(in_msgs[in_idx])}")
@@ -80,7 +98,6 @@ async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, cu
             in_idx += 1
 
         else:
-            # spi_status, retmsg = await spi_write(dut, read_msg())
             spi_status, retmsg = await spi_read(dut)
             dut._log.info(f"Trns {trsns}: {bin(spi_status)} | {hex(retmsg)}")
             spc = spi_status[0]
@@ -110,32 +127,38 @@ class InXbarCfg:
     be better to have a function to generate the message, since
     """
     ROUTER_ARBITER = 0b1010
-    ROUTER_FFT1 = 0b1000
-    ROUTER_FFT2 = 0b1001
+    ROUTER_FFT1    = 0b1000
+    ROUTER_FFT2    = 0b1001
 
 class ClsXbarCfg:
     """
     Serves a similar purpose as InXbarCfg, but for the classifier crossbar
     """
-    ROUTER_CLS = 0b1001
+    ROUTER_CLS     = 0b1001
     ROUTER_ARBITER = 0b1010
-    FFT1_ARBITER = 0b0010
-    FFT2_ARBITER = 0b0110
+    FFT1_ARBITER   = 0b0010
+    FFT2_ARBITER   = 0b0110
+    FFT1_CLS       = 0b0001
+    FFT2_CLS       = 0b0101
 
 class OutXbarCfg:
     """
     Serves a similar purpose as InXbarCfg and ClsXbarCfg, but for the output
     crossbar.
+
+    This should correspond with the Output  addressing scheme in the RTL.
     """
-    # ROUTER_ARBITER = 0b110
-    CLS_ARBITER = 0b000
+    CLS_ARBITER    = 0b000
     ROUTER_ARBITER = 0b010
 
 
 class RouterOut:
     """
     The router has several outputs to different blocks. These enums represent
-    which output they are to the router.
+    which output they are to the router. This is intended to be used as the 
+    address bits for the SPI packet sent to the router. 
+
+    This should correspond with the Router addressing scheme in the RTL.
     """
     LBIST_CTRL             = 0b0000
     IN_XBAR                = 0b0001
@@ -144,6 +167,7 @@ class RouterOut:
     CLS_XBAR_CTRL          = 0b0100
     CLS_CUT_FREQ_CTRL      = 0b0101
     CLS_MAG_CTRL           = 0b0110
+    CLS_SAMP_FREQ_CTRL     = 0b0111
     OUT_XBAR               = 0b1000
     OUT_XBAR_CTRL          = 0b1001
     ARBITER                = 0b1010
@@ -152,7 +176,10 @@ class RouterOut:
 class ArbiterIn:
     """
     The arbiter has several inputs from different blocks. These enums represent
-    which input they are to the arbiter.
+    which input they are to the arbiter. This is intended to be used as the
+    address bits for the SPI packet sent to the arbiter.
+
+    This should correspond with the Arbiter addressing scheme in the RTL.
     """
     ROUTER     = 0
     IN_XBAR    = 1
@@ -244,6 +271,7 @@ msgs_values = [
 ]
 # for test in []:
 for test in [test_loopback_noXbar, test_loopback_inXbar, test_loopback_clsXbar, test_loopback_outXbar]:
+# for test in [test_loopback_noXbar, test_loopback_outXbar]:
     factory = TestFactory(test)
     factory.add_option("msgs", msgs_values)
     factory.generate_tests()
@@ -315,10 +343,75 @@ def classifier_msg(inputs: list[Fixed], outputs: list[int]):
 
     return in_msgs, out_msgs
 
-
 @cocotb.test()
 async def test_classifier_manual(dut):
     in_msgs, out_msgs = classifier_msg([[fixN(1) for _ in range(16)]], [0x0000])
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
     await run_top(dut, in_msgs, out_msgs)
+
+
+"""
+================================================================================
+FFT -> CLASSIFIER TESTS
+Tests for:
+- spi -> router -> input xbar -> fft -> classifier xbar -> classifier -> output xbar -> arbiter -> spi
+================================================================================
+"""
+async def test_fft_classifier_random(dut, input_mag, input_num, cutoff_freq, cutoff_mag, sampling_freq):
+    inputs = [
+        [
+            CFixed((random.uniform(-input_mag, input_mag), 0), 16, 8)
+            for i in range(32)
+        ]
+        for _ in range(input_num)
+    ]
+
+    model: FFTInterface = FFTPease(16, 8, 32)
+    outputs = [model.transform(x) for x in inputs]
+
+    fft_inputs = [[x.real for x in sample] for sample in inputs]
+    fft_outputs = [[x.real for x in sample][:16] for sample in outputs]
+
+    cutoff_mag = Fixed(cutoff_mag, True, 16, 8)
+
+    classifier_outputs = [
+        classify(x, cutoff_freq, cutoff_mag, sampling_freq) for x in fft_outputs
+    ]
+
+    inputs = (
+        [  # First, configure the crossbars
+            mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT1),
+            mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_CLS),
+            mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.CLS_ARBITER),
+        ]
+        + [  # Next, configure the classifier
+            mk_spi_pkt(RouterOut.CLS_CUT_FREQ_CTRL, cutoff_freq),
+            mk_spi_pkt(RouterOut.CLS_MAG_CTRL, int(cutoff_mag)),
+            mk_spi_pkt(RouterOut.CLS_SAMP_FREQ_CTRL, sampling_freq),
+        ]
+        + [  # Finally, send the fft inputs
+            mk_spi_pkt(RouterOut.IN_XBAR, int(fixed_bits(x))) for sample in fft_inputs for x in sample
+            # int(fixed_bits(x)) for sample in fft_inputs for x in sample
+        ]
+    )
+
+    outputs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, x) for x in classifier_outputs]
+
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, inputs, outputs, max_trsns=1000)
+
+input_mag_values =[1, 10]
+input_num_values =[1, 10]
+cutoff_freq_values = [0, 2000]
+cutoff_mag_values = [0.7, 2.3]
+sampling_freq_values = [44800, 44100, 25000]
+
+factory = TestFactory(test_fft_classifier_random)
+factory.add_option("input_mag", input_mag_values)
+factory.add_option("input_num", input_num_values)
+factory.add_option("cutoff_freq", cutoff_freq_values)
+factory.add_option("cutoff_mag", cutoff_mag_values)
+factory.add_option("sampling_freq", sampling_freq_values)
+factory.generate_tests()
