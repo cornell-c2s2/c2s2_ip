@@ -1186,7 +1186,6 @@ module arbiter_router_Arbiter (
 		end
 	endgenerate
 	wire [addr_nbits - 1:0] encoder_outs [0:ninputs + 0];
-	
 	assign encoder_outs[ninputs] = 0;
 	generate
 		for (i = 0; i < ninputs; i = i + 1) begin : genblk2
@@ -1638,7 +1637,7 @@ module fft_pease_helpers_TwiddleGenerator (
 				// end
 			endfunction
 			// assign packed_sine_wave_in = _sv2v_strm_FCE0D({sine_wave_in});
-			reg unused = sine_wave_in;
+			// reg unused = &packed_sine_wave_in;
 		end
 		else begin : genblk1
 			genvar m;
@@ -3508,7 +3507,7 @@ module tapein1_sp25_top (
 		.BIT_WIDTH(DATA_BITS)
 	) fft1_deserializer(
 		.clk(clk),
-		.reset(reset),
+		.reset(reset || lfsr_cut_reset),
 		.recv_val(fft1_deserializer_recv_val),
 		.recv_rdy(fft1_deserializer_recv_rdy),
 		.recv_msg(fft1_deserializer_recv_msg),
@@ -3521,7 +3520,7 @@ module tapein1_sp25_top (
 		.BIT_WIDTH(DATA_BITS)
 	) fft1_serializer(
 		.clk(clk),
-		.reset(reset),
+		.reset(reset || lfsr_cut_reset),
 		.send_val(fft1_serializer_send_val),
 		.send_rdy(fft1_serializer_send_rdy),
 		.send_msg(fft1_serializer_send_msg),
@@ -3540,7 +3539,7 @@ module tapein1_sp25_top (
 		.DECIMAL_PT(FFT1_DECIMAL_PT),
 		.N_SAMPLES(FFT1_SAMPLES)
 	) fft1(
-		.reset(reset),
+		.reset(reset || lfsr_cut_reset),
 		.clk(clk),
 		.recv_msg(fft1_recv_msg),
 		.recv_val(fft1_recv_val),
@@ -3554,7 +3553,7 @@ module tapein1_sp25_top (
 		.BIT_WIDTH(DATA_BITS)
 	) fft2_deserializer(
 		.clk(clk),
-		.reset(reset),
+		.reset(reset || lfsr_cut_reset),
 		.recv_val(fft2_deserializer_recv_val),
 		.recv_rdy(fft2_deserializer_recv_rdy),
 		.recv_msg(fft2_deserializer_recv_msg),
@@ -3567,7 +3566,7 @@ module tapein1_sp25_top (
 		.BIT_WIDTH(DATA_BITS)
 	) fft2_serializer(
 		.clk(clk),
-		.reset(reset),
+		.reset(reset || lfsr_cut_reset),
 		.send_val(fft2_serializer_send_val),
 		.send_rdy(fft2_serializer_send_rdy),
 		.send_msg(fft2_serializer_send_msg),
@@ -3585,7 +3584,7 @@ module tapein1_sp25_top (
 		.DECIMAL_PT(FFT2_DECIMAL_PT),
 		.N_SAMPLES(FFT2_SAMPLES)
 	) fft2(
-		.reset(reset),
+		.reset(reset || lfsr_cut_reset),
 		.clk(clk),
 		.recv_msg(fft2_recv_msg),
 		.recv_val(fft2_recv_val),
@@ -3831,11 +3830,10 @@ endmodule
 module top_synth (
 	clk,
 	reset,
-	// Clock and Reset Ports
-    `ifdef USE_POWER_PINS
-        inout vccd1, // User area 1 1.8V supply
-        inout vssd1, // User area 1 digital ground
-    `endif
+	`ifdef USE_POWER_PINS
+		inout vccd1, // User area 1 1.8V supply
+		inout vssd1, // User area 1 digital ground
+	`endif
 	cs,
 	mosi,
 	miso,

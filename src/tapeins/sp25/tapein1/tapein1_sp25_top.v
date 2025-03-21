@@ -28,6 +28,7 @@
 `include "cmn/reset_sync.v"
 `include "async_fifo/AsyncFifo.sv"
 `include "async_fifo/FifoPackager.sv"
+`include "async_fifo/PosedgeDetector.sv"
 
 
 module tapein1_sp25_top #(
@@ -48,12 +49,10 @@ module tapein1_sp25_top #(
   // Async FIFO ports
   input  logic                         ext_clk,
   input  logic [FIFO_ENTRY_BITS-1:0]   async_fifo_recv_msg,
-  // TODO: Might need to add a debounce here and latch on TOGGLE not val being high...
+  // TODO: Might need to add a debounce here
   input  logic                         async_fifo_recv_val,
   output logic                         async_fifo_recv_rdy
 );
-
-  // TODO: If there are unused bits, we need to use them arbitarily somehow to avoid linter errors and such
 
   //============================LOCAL_PARAMETERS====================================
   // SPI Minion --------------------------------------------------------------------
@@ -193,16 +192,28 @@ module tapein1_sp25_top #(
   //     MISR
   localparam int SEED_BITS = DATA_BITS;
   localparam int SIGNATURE_BITS = DATA_BITS;
-  localparam int NUM_SEEDS = 2;
+  localparam int NUM_SEEDS = 8;
   localparam int NUM_HASHES = 80;
   localparam int MAX_OUTPUTS_TO_HASH = 100;
   localparam [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
-    16'b0000000000000000,
-    16'b0000000000000000
+    16'b1010111010010110,
+    16'b1000011100111010,
+    16'b1000111110100010,
+    16'b1011101000011011,
+    16'b1101001100100110,
+    16'b0110010111001101,
+    16'b1010001110110100,
+    16'b1101110001101011
   };
   localparam [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
-      16'b1100111001111011,
-      16'b1100101001001101
+    16'b0010000111000111,
+    16'b0000000010011110,
+    16'b0101100000100101,
+    16'b0110101101000110,
+    16'b1010010011010111,
+    16'b0110010100111001,
+    16'b0101001101010101,
+    16'b1101010001100010
   };
 
   // LFSR --------------------------------------------------------------------------
@@ -230,6 +241,8 @@ module tapein1_sp25_top #(
   localparam int PACKAGER_BITS = FIFO_ENTRY_BITS;
   localparam int PACKAGER_CONCAT = 2;
 
+
+  // Posedge Detector --------------------------------------------------------------
 
 
 
@@ -412,7 +425,8 @@ module tapein1_sp25_top #(
   logic                                    packager_send_val;
   logic                                    packager_send_rdy;
 
-
+  // Posedge Detector --------------------------------------------------------------
+  logic                                    toggle_val;
 
 
 
@@ -534,7 +548,7 @@ module tapein1_sp25_top #(
     .BIT_WIDTH               (DATA_BITS)
   ) fft1_deserializer (
     .clk                     (clk),
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .recv_val                (fft1_deserializer_recv_val),
     .recv_rdy                (fft1_deserializer_recv_rdy),
     .recv_msg                (fft1_deserializer_recv_msg),
@@ -551,13 +565,13 @@ module tapein1_sp25_top #(
     .BIT_WIDTH               (DATA_BITS)
   ) fft1_serializer (
     .clk                     (clk),
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .send_val                (fft1_serializer_send_val),
     .send_rdy                (fft1_serializer_send_rdy),
     .send_msg                (fft1_serializer_send_msg),
     .recv_val                (fft1_send_val),
     .recv_rdy                (fft1_send_rdy),
-    .recv_msg                (fft1_send_msg[0:15])
+    .recv_msg                (fft1_send_msg[0:FFT1_SAMPLES/2-1])
   );
 
   // TODO: Update bounds w/ parameters
@@ -573,7 +587,7 @@ module tapein1_sp25_top #(
     .DECIMAL_PT              (FFT1_DECIMAL_PT),
     .N_SAMPLES               (FFT1_SAMPLES)
   ) fft1 (
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .clk                     (clk),
     .recv_msg                (fft1_recv_msg),
     .recv_val                (fft1_recv_val),
@@ -591,7 +605,7 @@ module tapein1_sp25_top #(
     .BIT_WIDTH               (DATA_BITS)
   ) fft2_deserializer (
     .clk                     (clk),
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .recv_val                (fft2_deserializer_recv_val),
     .recv_rdy                (fft2_deserializer_recv_rdy),
     .recv_msg                (fft2_deserializer_recv_msg),
@@ -606,13 +620,13 @@ module tapein1_sp25_top #(
     .BIT_WIDTH               (DATA_BITS)
   ) fft2_serializer (
     .clk                     (clk),
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .send_val                (fft2_serializer_send_val),
     .send_rdy                (fft2_serializer_send_rdy),
     .send_msg                (fft2_serializer_send_msg),
     .recv_val                (fft2_send_val),
     .recv_rdy                (fft2_send_rdy),
-    .recv_msg                (fft2_send_msg[0:15])
+    .recv_msg                (fft2_send_msg[0:FFT2_SAMPLES/2-1])
   );
 
   // TODO: Update bounds w/ parameters
@@ -628,7 +642,7 @@ module tapein1_sp25_top #(
     .DECIMAL_PT              (FFT2_DECIMAL_PT),
     .N_SAMPLES               (FFT2_SAMPLES)
   ) fft2 (
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .clk                     (clk),
     .recv_msg                (fft2_recv_msg),
     .recv_val                (fft2_recv_val),
@@ -713,7 +727,6 @@ module tapein1_sp25_top #(
     .LFSR_MSG_BITS           (SEED_BITS)
   ) lfsr (
     .clk                     (clk),
-    // TODO: Ensure FFTs and their serializers also gets this reset...
     .reset                   (reset || lfsr_cut_reset),
     .req_val                 (ctrl_lfsr_resp_val),
     .req_msg                 (ctrl_lfsr_resp_msg),
@@ -753,7 +766,7 @@ module tapein1_sp25_top #(
     .o_clk                   (clk),
     .async_rst               (reset),
     .istream_msg             (async_fifo_recv_msg),
-    .istream_val             (async_fifo_recv_val),
+    .istream_val             (toggle_val),
     .istream_rdy             (async_fifo_recv_rdy),
     .ostream_msg             (async_fifo_send_msg),
     .ostream_val             (async_fifo_send_val),
@@ -775,6 +788,13 @@ module tapein1_sp25_top #(
     .resp_rdy                (packager_send_rdy)
   );
 
+  // Posedge Detector --------------------------------------------------------------
+  PosedgeDetector posedge_detector (
+    .clk(ext_clk),
+    .reset(reset),
+    .req_val(async_fifo_recv_val),
+    .resp_val(toggle_val)
+  );
 
 
   //===============================ROUTING_LOGIC====================================
@@ -815,7 +835,7 @@ module tapein1_sp25_top #(
   // Address: 0011 - Classifier Xbar
   assign Router_to_ClassifierXbar_msg = router_msg[3][ROUTER_PACKET_BITS-1:0];
   assign Router_to_ClassifierXbar_val = router_val[3];
-  assign router_rdy[3] = Router_to_Arbiter_rdy;
+  assign router_rdy[3] = Router_to_ClassifierXbar_rdy;
 
   // Address: 0100 - Classifier Xbar Ctrl
   assign classifier_xbar_control_msg = router_msg[4][CLASSIFIER_XBAR_CONTROL_BITS-1:0];
@@ -1035,12 +1055,6 @@ module tapein1_sp25_top #(
     end
   endgenerate
 
-  // wire unused_arbiter_rdy = &{
-  //   1'b0,
-  //   arbiter_rdy[4:ARBITER_SIZE-1],
-  //   1'b0
-  // };
-
 
   //================================ASSERTS=========================================
   // SPI Minion --------------------------------------------------------------------
@@ -1081,6 +1095,8 @@ module tapein1_sp25_top #(
   // MISR --------------------------------------------------------------------------
   // Async FIFO --------------------------------------------------------------------
   // FIFO Packager -----------------------------------------------------------------
+  // Posedge Detector --------------------------------------------------------------
+
 
 
 

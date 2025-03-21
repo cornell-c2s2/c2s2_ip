@@ -47,7 +47,25 @@ COMPILE_ARGS += +incdir+$(C2S2_PATH)/src -assert svaext
 # VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/crossbars/ -type f \( -name "*.v" -o -name "*.sv" \))
 # VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/cmn/ -type f \( -name "*.v" -o -name "*.sv" \))
 
-#Step 2: Set model parameters by appending them to EXTRA_ARGS (if neccessary)\
+
+
+#Step 2: Add all include directories referenced in the verilog source file
+COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
+COMPILE_ARGS += -sverilog
+
+
+#Step 3: Set top level module and corresponding python test module
+TOPLEVEL = tapein1_sp25_top
+MODULE = test_top
+
+#Step 4: Set environment variables for waveforms and coverage data to 1 if you  \
+would like either waveforms or coverage data to be produced by the simulation. You can \
+also set enviroment variables for model parameters and configure them in the simulation with \
+the next step.
+WAVES = 1
+COVER = 1
+
+#Step 5: Set model parameters by appending them to EXTRA_ARGS (if neccessary)\
 #Examples (from multiplier example): \
 EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.n=$N \
 EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
@@ -56,7 +74,13 @@ EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
 #Resulting waveform will be called waves.vcd and will be in the working directory
 WAVES ?= 0
 ifeq ($(WAVES), 1)
+<<<<<<< HEAD
 	EXTRA_ARGS += +vcs+dumpvars+$(WAVEFORM_DIR)/waves.vcd
+=======
+	EXTRA_ARGS += +vcs+dumpvars+waves.vcd
+	EXTRA_ARGS += +vcs+vcdpluson
+	EXTRA_ARGS += +vcs+vcdplusmemon
+>>>>>>> dd78aa3e3df3a54666cf954134e030af6f0ac89d
 endif
 
 #Generating line and toggle coverage data (Set environment variable COVER to 1)

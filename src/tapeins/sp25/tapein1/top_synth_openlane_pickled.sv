@@ -7259,9 +7259,6 @@ module tapein1_sp25_top #(
 
 `line 53 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
-
-`line 55 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
-   
    
    
    
@@ -7277,7 +7274,7 @@ module tapein1_sp25_top #(
   localparam int DATA_BITS   = 16;
   localparam int SPI_PACKET_BITS = DATA_BITS + ADDR_BITS;
 
-`line 71 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 69 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7287,7 +7284,7 @@ module tapein1_sp25_top #(
   localparam int ROUTER_PACKET_BITS = DATA_BITS + ADDR_BITS;
 
 
-`line 80 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 78 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7297,7 +7294,7 @@ module tapein1_sp25_top #(
   localparam int ARBITER_PACKET_BITS = DATA_BITS;
 
 
-`line 89 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 87 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7308,14 +7305,14 @@ module tapein1_sp25_top #(
    
    
 
-`line 99 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 97 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   localparam int INPUT_XBAR_INPUTS = 3;
   localparam int INPUT_XBAR_OUTPUTS = 3;
   localparam int INPUT_XBAR_BITS = DATA_BITS;
   localparam int INPUT_XBAR_CONTROL_BITS = $clog2( INPUT_XBAR_INPUTS *
                                                    INPUT_XBAR_OUTPUTS );
 
-`line 105 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 103 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7326,14 +7323,14 @@ module tapein1_sp25_top #(
    
    
 
-`line 115 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 113 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   localparam int CLASSIFIER_XBAR_INPUTS = 3;
   localparam int CLASSIFIER_XBAR_OUTPUTS = 3;
   localparam int CLASSIFIER_XBAR_BITS = DATA_BITS;
   localparam int CLASSIFIER_XBAR_CONTROL_BITS = $clog2( CLASSIFIER_XBAR_INPUTS *
                                                         CLASSIFIER_XBAR_OUTPUTS );
 
-`line 121 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 119 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7344,14 +7341,14 @@ module tapein1_sp25_top #(
    
    
 
-`line 131 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 129 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   localparam int OUTPUT_XBAR_INPUTS = 2;
   localparam int OUTPUT_XBAR_OUTPUTS = 2;
   localparam int OUTPUT_XBAR_BITS = 1;
   localparam int OUTPUT_XBAR_CONTROL_BITS = $clog2( OUTPUT_XBAR_INPUTS *
                                                     OUTPUT_XBAR_OUTPUTS );
 
-`line 137 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 135 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7363,7 +7360,7 @@ module tapein1_sp25_top #(
   localparam int FFT1_DECIMAL_PT = 8;
 
 
-`line 148 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 146 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7374,7 +7371,7 @@ module tapein1_sp25_top #(
   localparam int FFT2_SAMPLES = 32;
   localparam int FFT2_DECIMAL_PT = 8;
 
-`line 158 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 156 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7388,7 +7385,7 @@ module tapein1_sp25_top #(
   localparam int CLASSIFIER_BITS = 16;
   localparam int CLASSIFIER_DECIMAL_PT = 8;
 
-`line 171 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 169 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7423,7 +7420,7 @@ module tapein1_sp25_top #(
       16'b1100101001001101
   };
 
-`line 205 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 203 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7433,7 +7430,7 @@ module tapein1_sp25_top #(
   localparam int MISR_SEED = '0;
   localparam int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH);
 
-`line 214 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 212 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7442,7 +7439,7 @@ module tapein1_sp25_top #(
   localparam int FIFO_DEPTH = 10;
 
 
-`line 222 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 220 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7454,7 +7451,7 @@ module tapein1_sp25_top #(
 
 
 
-`line 233 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 231 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
   logic [ADDR_BITS+DATA_BITS-1:0]          spi_recv_msg;
@@ -7464,114 +7461,114 @@ module tapein1_sp25_top #(
   logic                                    spi_send_rdy;
   logic                                    spi_send_val;
 
-`line 242 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 240 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [ROUTER_PACKET_BITS - 1:0]         router_msg  [ROUTER_SIZE];
   logic                                    router_rdy  [ROUTER_SIZE];
   logic                                    router_val  [ROUTER_SIZE];
 
-`line 247 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 245 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic [INPUT_XBAR_BITS-1:0]       Router_to_InputXbar_msg;
   logic                                    Router_to_InputXbar_val;
   logic                                    Router_to_InputXbar_rdy;
 
-`line 251 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 249 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic [CLASSIFIER_XBAR_BITS-1:0]         Router_to_ClassifierXbar_msg;
   logic                                    Router_to_ClassifierXbar_val;
   logic                                    Router_to_ClassifierXbar_rdy;
 
-`line 255 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 253 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic [OUTPUT_XBAR_BITS-1:0]             Router_to_OutputXbar_msg;
   logic                                    Router_to_OutputXbar_rdy;
   logic                                    Router_to_OutputXbar_val;
 
-`line 259 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 257 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic [ARBITER_PACKET_BITS-1:0]          Router_to_Arbiter_msg;
   logic                                    Router_to_Arbiter_val;
   logic                                    Router_to_Arbiter_rdy;
 
-`line 263 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 261 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [ARBITER_PACKET_BITS-1:0]          arbiter_msg [ARBITER_SIZE];
   logic                                    arbiter_rdy [ARBITER_SIZE];
   logic                                    arbiter_val [ARBITER_SIZE];
 
-`line 268 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 266 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [INPUT_XBAR_BITS-1:0]              input_xbar_recv_msg [INPUT_XBAR_INPUTS];
   logic                                    input_xbar_recv_rdy [INPUT_XBAR_INPUTS];
   logic                                    input_xbar_recv_val [INPUT_XBAR_INPUTS];
 
-`line 273 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 271 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic [INPUT_XBAR_BITS-1:0]              input_xbar_send_msg [INPUT_XBAR_OUTPUTS];
   logic                                    input_xbar_send_rdy [INPUT_XBAR_OUTPUTS];
   logic                                    input_xbar_send_val [INPUT_XBAR_OUTPUTS];
 
-`line 277 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 275 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic [INPUT_XBAR_CONTROL_BITS-1:0]      input_xbar_control_msg;
   logic                                    input_xbar_control_rdy;
   logic                                    input_xbar_control_val;
 
-`line 281 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 279 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic [ARBITER_PACKET_BITS-1:0]          InputXbar_to_Arbiter_msg;
   logic                                    InputXbar_to_Arbiter_val;
   logic                                    InputXbar_to_Arbiter_rdy;
 
-`line 285 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 283 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [CLASSIFIER_XBAR_BITS-1:0]         classifier_xbar_recv_msg [CLASSIFIER_XBAR_INPUTS];
   logic                                    classifier_xbar_recv_val [CLASSIFIER_XBAR_INPUTS];
   logic                                    classifier_xbar_recv_rdy [CLASSIFIER_XBAR_INPUTS];
 
-`line 290 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 288 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic [CLASSIFIER_XBAR_BITS-1:0]         classifier_xbar_send_msg [CLASSIFIER_XBAR_OUTPUTS];
   logic                                    classifier_xbar_send_val [CLASSIFIER_XBAR_OUTPUTS];
   logic                                    classifier_xbar_send_rdy [CLASSIFIER_XBAR_OUTPUTS];
 
-`line 294 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 292 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic [CLASSIFIER_XBAR_CONTROL_BITS-1:0] classifier_xbar_control_msg;
   logic                                    classifier_xbar_control_rdy;
   logic                                    classifier_xbar_control_val;
 
-`line 298 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 296 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic [ARBITER_PACKET_BITS-1:0]          ClassifierXbar_to_Arbiter_msg;
   logic                                    ClassifierXbar_to_Arbiter_val;
   logic                                    ClassifierXbar_to_Arbiter_rdy;
 
-`line 302 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 300 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic                                    output_xbar_recv_msg [OUTPUT_XBAR_INPUTS];
   logic                                    output_xbar_recv_rdy [OUTPUT_XBAR_INPUTS];
   logic                                    output_xbar_recv_val [OUTPUT_XBAR_INPUTS];
 
-`line 307 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 305 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic                                    output_xbar_send_msg [OUTPUT_XBAR_OUTPUTS];
   logic                                    output_xbar_send_rdy [OUTPUT_XBAR_OUTPUTS];
   logic                                    output_xbar_send_val [OUTPUT_XBAR_OUTPUTS];
 
-`line 311 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 309 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic [OUTPUT_XBAR_CONTROL_BITS-1:0]     output_xbar_control_msg;
   logic                                    output_xbar_control_rdy;
   logic                                    output_xbar_control_val;
 
-`line 315 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 313 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic  [ARBITER_PACKET_BITS-1:0]         OutputXbar_to_Arbiter_msg;
   logic                                    OutputXbar_to_Arbiter_val;
   logic                                    OutputXbar_to_Arbiter_rdy;
 
-`line 319 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 317 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [DATA_BITS-1:0]                    fft1_deserializer_recv_msg;
   logic                                    fft1_deserializer_recv_val;
   logic                                    fft1_deserializer_recv_rdy;
 
-`line 324 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 322 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [DATA_BITS-1:0]                    fft1_serializer_send_msg;
   logic                                    fft1_serializer_send_val;
   logic                                    fft1_serializer_send_rdy;
 
-`line 329 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 327 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [DATA_BITS-1:0]                    fft1_recv_msg [FFT1_SAMPLES];
   logic                                    fft1_recv_val;
@@ -7580,19 +7577,19 @@ module tapein1_sp25_top #(
   logic                                    fft1_send_val;
   logic                                    fft1_send_rdy;
 
-`line 337 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 335 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [DATA_BITS-1:0]                    fft2_deserializer_recv_msg;
   logic                                    fft2_deserializer_recv_val;
   logic                                    fft2_deserializer_recv_rdy;
 
-`line 342 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 340 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [DATA_BITS-1:0]                    fft2_serializer_send_msg;
   logic                                    fft2_serializer_send_val;
   logic                                    fft2_serializer_send_rdy;
 
-`line 347 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 345 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [DATA_BITS-1:0]                    fft2_recv_msg [FFT2_SAMPLES];
   logic                                    fft2_recv_val;
@@ -7601,13 +7598,13 @@ module tapein1_sp25_top #(
   logic                                    fft2_send_val;
   logic                                    fft2_send_rdy;
 
-`line 355 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 353 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [DATA_BITS-1:0]                    classifier_deserializer_recv_msg;
   logic                                    classifier_deserializer_recv_val;
   logic                                    classifier_deserializer_recv_rdy;
 
-`line 360 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 358 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [DATA_BITS-1:0]                    classifier_recv_msg [CLASSIFIER_SAMPLES];
   logic                                    classifier_recv_val;
@@ -7619,30 +7616,30 @@ module tapein1_sp25_top #(
   logic                                    classifier_send_val;
   logic                                    classifier_send_rdy;
 
-`line 371 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 369 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic                                    lbist_req_val;
   logic                                    lbist_req_rdy;
 
-`line 375 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 373 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic                                    lbist_resp_val;
   logic [NUM_SEEDS-1:0]                    lbist_resp_msg;
   logic                                    lbist_resp_rdy;
 
-`line 379 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 377 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic                                    ctrl_lfsr_resp_val;
   logic [SEED_BITS-1:0]                    ctrl_lfsr_resp_msg;
   logic                                    ctrl_lfsr_resp_rdy;
 
-`line 383 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 381 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic                                    ctrl_misr_req_val;
   logic [MISR_MSG_BITS:0]                  ctrl_misr_req_msg;
   logic                                    ctrl_misr_req_rdy;
 
-`line 387 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 385 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic                                    lfsr_cut_reset;
 
-`line 389 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 387 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic                                    lfsr_resp_val;
   logic [SEED_BITS-1:0]                    lfsr_resp_msg;
@@ -7652,18 +7649,18 @@ module tapein1_sp25_top #(
   logic [SIGNATURE_BITS-1:0]               cut_misr_resp_msg;
   logic                                    cut_misr_resp_rdy;
 
-`line 398 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 396 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   logic                                    misr_resp_val;
   logic [SIGNATURE_BITS-1:0]               misr_resp_msg;
   logic                                    misr_resp_rdy;
 
-`line 402 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 400 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [FIFO_ENTRY_BITS-1:0]              async_fifo_send_msg;
   logic                                    async_fifo_send_val;
   logic                                    async_fifo_send_rdy;
 
-`line 407 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 405 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   logic [DATA_BITS-1:0]                    packager_send_msg;
   logic                                    packager_send_val;
@@ -7675,7 +7672,7 @@ module tapein1_sp25_top #(
 
 
 
-`line 418 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 416 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
   spi_Minion #(
@@ -7698,7 +7695,7 @@ module tapein1_sp25_top #(
     .adapter_parity          (adapter_parity)
   );
 
-`line 440 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 438 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   arbiter_router_Router #(
     .nbits                   (ROUTER_PACKET_BITS),
@@ -7714,7 +7711,7 @@ module tapein1_sp25_top #(
     .ostream_rdy             (router_rdy)
   );
 
-`line 455 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 453 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   arbiter_router_Arbiter #(
     .nbits                   (ARBITER_PACKET_BITS),
@@ -7730,7 +7727,7 @@ module tapein1_sp25_top #(
     .ostream_rdy             (spi_recv_rdy)
   );
 
-`line 470 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 468 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   crossbars_Blocking #(
     .BIT_WIDTH               (INPUT_XBAR_BITS),
@@ -7750,7 +7747,7 @@ module tapein1_sp25_top #(
     .control_val             (input_xbar_control_val)
   );
 
-`line 489 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 487 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   crossbars_Blocking #(
     .BIT_WIDTH               (CLASSIFIER_XBAR_BITS),
@@ -7770,7 +7767,7 @@ module tapein1_sp25_top #(
     .control_val             (classifier_xbar_control_val)
   );
 
-`line 508 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 506 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   crossbars_Blocking #(
     .BIT_WIDTH               (OUTPUT_XBAR_BITS),
@@ -7791,14 +7788,14 @@ module tapein1_sp25_top #(
   );
 
 
-`line 528 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 526 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   serdes_Deserializer #(
     .N_SAMPLES               (FFT1_SAMPLES),
     .BIT_WIDTH               (DATA_BITS)
   ) fft1_deserializer (
     .clk                     (clk),
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .recv_val                (fft1_deserializer_recv_val),
     .recv_rdy                (fft1_deserializer_recv_rdy),
     .recv_msg                (fft1_deserializer_recv_msg),
@@ -7807,7 +7804,7 @@ module tapein1_sp25_top #(
     .send_msg                (fft1_recv_msg)
   );
 
-`line 543 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 541 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -7816,7 +7813,7 @@ module tapein1_sp25_top #(
     .BIT_WIDTH               (DATA_BITS)
   ) fft1_serializer (
     .clk                     (clk),
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .send_val                (fft1_serializer_send_val),
     .send_rdy                (fft1_serializer_send_rdy),
     .send_msg                (fft1_serializer_send_msg),
@@ -7825,7 +7822,7 @@ module tapein1_sp25_top #(
     .recv_msg                (fft1_send_msg[0:15])
   );
 
-`line 560 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 558 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   generate
     for (genvar i = 16; i < 32; i = i + 1) begin
@@ -7833,14 +7830,14 @@ module tapein1_sp25_top #(
     end
   endgenerate
 
-`line 567 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 565 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   fft_pease_FFT #(
     .BIT_WIDTH               (DATA_BITS),
     .DECIMAL_PT              (FFT1_DECIMAL_PT),
     .N_SAMPLES               (FFT1_SAMPLES)
   ) fft1 (
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .clk                     (clk),
     .recv_msg                (fft1_recv_msg),
     .recv_val                (fft1_recv_val),
@@ -7851,16 +7848,16 @@ module tapein1_sp25_top #(
   );
 
 
-`line 584 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 582 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
 
-`line 586 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 584 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
   serdes_Deserializer #(
     .N_SAMPLES               (FFT2_SAMPLES),
     .BIT_WIDTH               (DATA_BITS)
   ) fft2_deserializer (
     .clk                     (clk),
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .recv_val                (fft2_deserializer_recv_val),
     .recv_rdy                (fft2_deserializer_recv_rdy),
     .recv_msg                (fft2_deserializer_recv_msg),
@@ -7869,14 +7866,14 @@ module tapein1_sp25_top #(
     .send_msg                (fft2_recv_msg)
   );
 
-`line 600 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 598 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   serdes_Serializer #(
     .N_SAMPLES               (FFT2_SAMPLES/2),
     .BIT_WIDTH               (DATA_BITS)
   ) fft2_serializer (
     .clk                     (clk),
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .send_val                (fft2_serializer_send_val),
     .send_rdy                (fft2_serializer_send_rdy),
     .send_msg                (fft2_serializer_send_msg),
@@ -7885,7 +7882,7 @@ module tapein1_sp25_top #(
     .recv_msg                (fft2_send_msg[0:15])
   );
 
-`line 615 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 613 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   generate
     for (genvar i = 16; i < 32; i = i + 1) begin
@@ -7893,14 +7890,14 @@ module tapein1_sp25_top #(
     end
   endgenerate
 
-`line 622 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 620 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   fft_pease_FFT #(
     .BIT_WIDTH               (DATA_BITS),
     .DECIMAL_PT              (FFT2_DECIMAL_PT),
     .N_SAMPLES               (FFT2_SAMPLES)
   ) fft2 (
-    .reset                   (reset),
+    .reset                   (reset || lfsr_cut_reset),
     .clk                     (clk),
     .recv_msg                (fft2_recv_msg),
     .recv_val                (fft2_recv_val),
@@ -7910,7 +7907,7 @@ module tapein1_sp25_top #(
     .send_rdy                (fft2_send_rdy)
   );
 
-`line 638 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 636 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   serdes_Deserializer #(
     .N_SAMPLES               (CLASSIFIER_SAMPLES),
@@ -7926,7 +7923,7 @@ module tapein1_sp25_top #(
     .send_msg                (classifier_recv_msg)
   );
 
-`line 653 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 651 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   classifier_Classifier #(
     .BIT_WIDTH               (CLASSIFIER_BITS),
@@ -7952,7 +7949,7 @@ module tapein1_sp25_top #(
     .send_msg                (classifier_send_msg)
   );
 
-`line 678 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 676 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   lbist_controller #(
     .SEED_BITS               (SEED_BITS),
@@ -7983,13 +7980,12 @@ module tapein1_sp25_top #(
     .misr_resp_rdy           (misr_resp_rdy)
   );
 
-`line 708 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 706 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   lfsr_galois #(
     .LFSR_MSG_BITS           (SEED_BITS)
   ) lfsr (
     .clk                     (clk),
-     
     .reset                   (reset || lfsr_cut_reset),
     .req_val                 (ctrl_lfsr_resp_val),
     .req_msg                 (ctrl_lfsr_resp_msg),
@@ -7999,7 +7995,7 @@ module tapein1_sp25_top #(
     .resp_msg                (lfsr_resp_msg)
   );
 
-`line 723 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 720 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   misr #(
     .CUT_MSG_BITS            (SIGNATURE_BITS),
@@ -8021,7 +8017,7 @@ module tapein1_sp25_top #(
     .lbist_resp_rdy          (misr_resp_rdy)
   );
 
-`line 744 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 741 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   AsyncFifo #(
     .p_num_entries           (FIFO_DEPTH),
@@ -8038,7 +8034,7 @@ module tapein1_sp25_top #(
     .ostream_rdy             (async_fifo_send_rdy)
   );
 
-`line 760 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 757 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   FifoPackager #(
     .p_bit_width             (PACKAGER_BITS),
@@ -8056,7 +8052,7 @@ module tapein1_sp25_top #(
 
 
 
-`line 777 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 774 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -8078,72 +8074,72 @@ module tapein1_sp25_top #(
    
    
 
-`line 798 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 795 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign lbist_req_val = router_val[0];
   assign router_rdy[0] = lbist_req_rdy;
 
-`line 802 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 799 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign Router_to_InputXbar_msg = router_msg[1][ROUTER_PACKET_BITS-1:0];
   assign Router_to_InputXbar_val = router_val[1];
   assign router_rdy[1] = Router_to_InputXbar_rdy;
 
-`line 807 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 804 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign input_xbar_control_msg = router_msg[2][INPUT_XBAR_CONTROL_BITS-1:0];
   assign input_xbar_control_val = router_val[2];
   assign router_rdy[2] = input_xbar_control_rdy;
 
-`line 812 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 809 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign Router_to_ClassifierXbar_msg = router_msg[3][ROUTER_PACKET_BITS-1:0];
   assign Router_to_ClassifierXbar_val = router_val[3];
   assign router_rdy[3] = Router_to_Arbiter_rdy;
 
-`line 817 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 814 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign classifier_xbar_control_msg = router_msg[4][CLASSIFIER_XBAR_CONTROL_BITS-1:0];
   assign classifier_xbar_control_val = router_val[4];
   assign router_rdy[4] = classifier_xbar_control_rdy;
 
-`line 822 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 819 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign classifier_config_msg[0] = router_msg[5][DATA_BITS-1:0];
   assign classifier_config_val[0] = router_val[5];
   assign router_rdy[5] = classifier_config_rdy[0];
 
-`line 827 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 824 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign classifier_config_msg[1] = router_msg[6][DATA_BITS-1:0];
   assign classifier_config_val[1] = router_val[6];
   assign router_rdy[6] = classifier_config_rdy[1];
 
-`line 832 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 829 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign classifier_config_msg[2] = router_msg[7][DATA_BITS-1:0];
   assign classifier_config_val[2] = router_val[7];
   assign router_rdy[7] = classifier_config_rdy[2];
 
-`line 837 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 834 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign Router_to_OutputXbar_msg = router_msg[8][0];
   assign Router_to_OutputXbar_val = router_val[8];
   assign router_rdy[8] = Router_to_OutputXbar_rdy;
 
-`line 842 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 839 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign output_xbar_control_msg = router_msg[9][OUTPUT_XBAR_CONTROL_BITS-1:0];
   assign output_xbar_control_val = router_val[9];
   assign router_rdy[9] = output_xbar_control_rdy;
 
-`line 847 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 844 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign Router_to_Arbiter_msg = router_msg[10][ARBITER_PACKET_BITS-1:0];
   assign Router_to_Arbiter_val = router_val[10];
   assign router_rdy[10] = Router_to_Arbiter_rdy;
 
-`line 852 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 849 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   generate
     for (genvar i = 11; i < ROUTER_SIZE; i = i + 1) begin
@@ -8152,7 +8148,7 @@ module tapein1_sp25_top #(
   endgenerate
 
 
-`line 860 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 857 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -8165,46 +8161,46 @@ module tapein1_sp25_top #(
    
    
 
-`line 872 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 869 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign input_xbar_recv_msg[0] = lfsr_resp_msg;
   assign input_xbar_recv_val[0] = lfsr_resp_val;
   assign lfsr_resp_rdy = input_xbar_recv_rdy[0];
 
-`line 877 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 874 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
   assign input_xbar_recv_msg[1] = packager_send_msg;
   assign input_xbar_recv_val[1] = packager_send_val;
   assign packager_send_rdy = input_xbar_recv_rdy[1];
 
-`line 883 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 880 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign input_xbar_recv_msg[2] = Router_to_InputXbar_msg;
   assign input_xbar_recv_val[2] = Router_to_InputXbar_val;
   assign Router_to_InputXbar_rdy = input_xbar_recv_rdy[2];
 
 
-`line 889 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 886 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign fft1_deserializer_recv_msg = input_xbar_send_msg[0];
   assign fft1_deserializer_recv_val = input_xbar_send_val[0];
   assign input_xbar_send_rdy[0] = fft1_deserializer_recv_rdy;
 
-`line 894 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 891 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign fft2_deserializer_recv_msg = input_xbar_send_msg[1];
   assign fft2_deserializer_recv_val = input_xbar_send_val[1];
   assign input_xbar_send_rdy[1] = fft2_deserializer_recv_rdy;
 
-`line 899 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 896 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign InputXbar_to_Arbiter_msg = input_xbar_send_msg[2];
   assign InputXbar_to_Arbiter_val = input_xbar_send_val[2];
   assign input_xbar_send_rdy[2] = InputXbar_to_Arbiter_rdy;
 
 
-`line 905 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 902 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -8217,45 +8213,45 @@ module tapein1_sp25_top #(
    
    
 
-`line 917 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 914 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign classifier_xbar_recv_msg[0] = fft1_serializer_send_msg;
   assign classifier_xbar_recv_val[0] = fft1_serializer_send_val;
   assign fft1_serializer_send_rdy = classifier_xbar_recv_rdy[0];
 
-`line 922 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 919 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign classifier_xbar_recv_msg[1] = fft2_serializer_send_msg;
   assign classifier_xbar_recv_val[1] = fft2_serializer_send_val;
   assign fft2_serializer_send_rdy = classifier_xbar_recv_rdy[1];
 
-`line 927 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 924 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign classifier_xbar_recv_msg[2] = Router_to_ClassifierXbar_msg;
   assign classifier_xbar_recv_val[2] = Router_to_ClassifierXbar_val;
   assign Router_to_ClassifierXbar_rdy = classifier_xbar_recv_rdy[2];
 
 
-`line 933 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 930 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign cut_misr_resp_msg = classifier_xbar_send_msg[0];
   assign cut_misr_resp_val = classifier_xbar_send_val[0];
   assign classifier_xbar_send_rdy[0] = cut_misr_resp_rdy;
 
-`line 938 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 935 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign classifier_deserializer_recv_msg = classifier_xbar_send_msg[1];
   assign classifier_deserializer_recv_val = classifier_xbar_send_val[1];
   assign classifier_xbar_send_rdy[1] = classifier_deserializer_recv_rdy;
 
-`line 943 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 940 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign ClassifierXbar_to_Arbiter_msg = classifier_xbar_send_msg[2];
   assign ClassifierXbar_to_Arbiter_val = classifier_xbar_send_val[2];
   assign classifier_xbar_send_rdy[2] = ClassifierXbar_to_Arbiter_rdy;
 
 
-`line 949 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 946 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -8267,30 +8263,30 @@ module tapein1_sp25_top #(
    
    
 
-`line 960 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 957 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign output_xbar_recv_msg[0] = classifier_send_msg;
   assign output_xbar_recv_val[0] = classifier_send_val;
   assign classifier_send_rdy = output_xbar_recv_rdy[0];
 
-`line 965 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 962 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign output_xbar_recv_msg[1] = Router_to_OutputXbar_msg;
   assign output_xbar_recv_val[1] = Router_to_OutputXbar_val;
   assign Router_to_OutputXbar_rdy = output_xbar_recv_rdy[1];
 
 
-`line 971 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 968 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign OutputXbar_to_Arbiter_msg = {15'b0, output_xbar_send_msg[0]};
   assign OutputXbar_to_Arbiter_val = output_xbar_send_val[0];
   assign output_xbar_send_rdy[0] = OutputXbar_to_Arbiter_rdy;
 
-`line 976 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 973 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign output_xbar_send_rdy[1] = '0;
 
-`line 979 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 976 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -8314,37 +8310,37 @@ module tapein1_sp25_top #(
    
    
 
-`line 1002 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 999 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign arbiter_msg[0] = Router_to_Arbiter_msg;
   assign arbiter_val[0] = Router_to_Arbiter_val;
   assign Router_to_Arbiter_rdy = arbiter_rdy[0];
 
-`line 1007 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 1004 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign arbiter_msg[1] = InputXbar_to_Arbiter_msg;
   assign arbiter_val[1] = InputXbar_to_Arbiter_val;
   assign InputXbar_to_Arbiter_rdy = arbiter_rdy[1];
 
-`line 1012 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 1009 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign arbiter_msg[2] = ClassifierXbar_to_Arbiter_msg;
   assign arbiter_val[2] = ClassifierXbar_to_Arbiter_val;
   assign ClassifierXbar_to_Arbiter_rdy = arbiter_rdy[2];
 
-`line 1017 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 1014 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign arbiter_msg[3] = OutputXbar_to_Arbiter_msg;
   assign arbiter_val[3] = OutputXbar_to_Arbiter_val;
   assign OutputXbar_to_Arbiter_rdy = arbiter_rdy[3];
 
-`line 1022 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 1019 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   assign arbiter_msg[4] = lbist_resp_msg;
   assign arbiter_val[4] = lbist_resp_val;
   assign lbist_resp_rdy = arbiter_rdy[4];
 
-`line 1027 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 1024 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   generate
     for (genvar i = 5; i < ARBITER_SIZE; i = i + 1) begin
@@ -8353,7 +8349,7 @@ module tapein1_sp25_top #(
     end
   endgenerate
 
-`line 1035 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 1032 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -8361,7 +8357,7 @@ module tapein1_sp25_top #(
    
 
 
-`line 1042 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 1039 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -8373,7 +8369,7 @@ module tapein1_sp25_top #(
     end
   endgenerate
 
-`line 1053 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 1050 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   generate
     if (CLASSIFIER_XBAR_CONTROL_BITS > DATA_BITS) begin
@@ -8381,7 +8377,7 @@ module tapein1_sp25_top #(
     end
   endgenerate
 
-`line 1060 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 1057 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
   generate
     if (OUTPUT_XBAR_CONTROL_BITS > DATA_BITS) begin
@@ -8389,7 +8385,7 @@ module tapein1_sp25_top #(
     end
   endgenerate
 
-`line 1067 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 1064 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
    
    
    
@@ -8407,12 +8403,12 @@ module tapein1_sp25_top #(
 
 
 
-`line 1084 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
+`line 1081 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 0
 endmodule
 
 
 
-`line 1088 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 2
+`line 1085 "/home/jjm469/c2s2/sp25_tapein1/src/tapeins/sp25/tapein1/tapein1_sp25_top.v" 2
 `line 2 "top_synth_openlane.sv" 0
 
 
