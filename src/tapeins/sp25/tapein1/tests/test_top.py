@@ -25,8 +25,6 @@ from fixedpt import Fixed, CFixed
 from src.tapeins.sp25.tapein1.tests.spi_driver_sim import spi_write_read, spi_write, spi_read
 from src.classifier.sim import classify
 from tools.utils import fixed_bits
-# from src.tapeins.sp25.tapein1.tests.spi_stream_protocol import *
-# from tools.utils import fixed_bits
 
 if cocotb.simulator.is_running():
     ADDR_BITS = int(cocotb.top.ADDR_BITS.value)
@@ -251,7 +249,9 @@ for test in [test_loopback_noXbar, test_loopback_inXbar, test_loopback_clsXbar, 
     factory.generate_tests()
 
 """
+================================================================================
 FFT TESTS
+================================================================================
 """
 def fixN(n):
     """Shortcut for creating fixed-point numbers."""
@@ -295,20 +295,6 @@ factory.add_option("output", output_values)
 factory.generate_tests()
 
 
-# def gen_fft_msgs(inputs: list[Fixed], outputs: list[Fixed]):
-#     """Generates input/output msgs for FFT from fixedpt inputs/outputs."""
-#     inputs = [fixed_bits(x) for sample in inputs for x in sample]
-#     outputs = [fixed_bits(x) for sample in outputs for x in sample]
-
-# @cocotb.test()
-# async def test_fft_random(dut, input_mag, output_mag):
-#     raise NotImplemented
-
-# @cocotb.test()
-# async def test_fft_to_classifier_random(
-#         dut, input_mag, input_num, cutoff_freq, cutoff_mag, sampling_freq):
-#     raise NotImplemented
-
 
 """
 ================================================================================
@@ -332,8 +318,6 @@ def classifier_msg(inputs: list[Fixed], outputs: list[int]):
 
 @cocotb.test()
 async def test_classifier_manual(dut):
-    # in_msgs, out_msgs = classifier_msgj
-    # in_msgs, out_msgs = [], []
     in_msgs, out_msgs = classifier_msg([[fixN(1) for _ in range(16)]], [0x0000])
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
