@@ -236,8 +236,8 @@ async def test_loopback_inXbar(dut, msgs):
     """
     Tests loopback route: spi -> router -> input xbar -> arbiter -> spi.
 
-    We expect the outputs to be the same as the inputs. We also prepend a
-    message to inputs to configure the crossbar.
+    We expect the outputs' data to be the same as the inputs', their address bits
+    might differ. We also prepend a message to inputs to configure the crossbar.
     """
     config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_ARBITER)
     in_msgs = [config_msg] + [mk_spi_pkt(RouterOut.IN_XBAR, msg) for msg in msgs]
@@ -248,6 +248,12 @@ async def test_loopback_inXbar(dut, msgs):
     await run_top(dut, in_msgs, out_msgs)
 
 async def test_loopback_clsXbar(dut, msgs):
+    """
+    Tests loopback route: spi -> router -> classifier xbar -> arbiter -> spi.
+
+    We expect the outputs' data to be the same as the inputs', their address
+    bits might differ. We also prepend a message to inputs to configure the crossbar.
+    """
     config_msg = mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.ROUTER_ARBITER)
     in_msgs = [config_msg] + [mk_spi_pkt(RouterOut.CLS_XBAR, msg) for msg in msgs]
     out_msgs = [mk_spi_pkt(ArbiterIn.CLS_XBAR, msg) for msg in msgs]
@@ -257,6 +263,14 @@ async def test_loopback_clsXbar(dut, msgs):
     await run_top(dut, in_msgs, out_msgs)
 
 async def test_loopback_outXbar(dut, msgs):
+    """
+    Tests loopback route: spi -> router -> output xbar -> arbiter -> spi.
+
+    We DON'T expect the outputs' data to be the same as the inputs'. We only 
+    extract the least significant bit from the message since the output crossbar
+    has an output bitwidth of 1. As usual, we also prepend a message to inputs to 
+    configure the crossbar.
+    """
     config_msg = mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.ROUTER_ARBITER)
     in_msgs = [config_msg] + [mk_spi_pkt(RouterOut.OUT_XBAR, msg) for msg in msgs]
     out_msgs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, msg & 1) for msg in msgs]  # output xbar only takes first bit
@@ -388,6 +402,17 @@ CLASSIFIER TESTS
 ================================================================================
 """
 def classifier_msg(inputs: list[Fixed], outputs: list[int]):
+    """
+    Generate SPI packets for classifier input/output from fixed-point numbers.
+
+    Args
+    - inputs: A list of lists of fixed-point numbers representing the input samples.
+    - outputs: A list of integers representing the expected output samples.
+
+    Returns a tuple of two lists:
+    - The first list contains the input messages to be sent
+    - The second list contains the output messages to be received
+    """
 
     inputs = [int(fixed_bits(x)) for sample in inputs for x in sample]
     assert all(type(x) == int for x in inputs)
