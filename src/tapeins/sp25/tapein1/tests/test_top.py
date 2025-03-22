@@ -21,10 +21,18 @@ When writing tests, you can follow this general framework:
 - Figure out what the intended inputs and outputs are for the test
 - Configure the crossbars and any other necessary components
   - InXbarCfg, ClsXbarCfg, and OutXbarCfg are useful for this
-- Convert the inputs into SPI packets using the correct address bits
+  - Make sure to prepend the configuration messages to the input messages
+- Convert the inputs into SPI packets using the correct address bits with mk_addr_bits
   - RouterOut is useful for this
 - Convert the outputs into SPI packets using the correct address bits
   - ArbiterIn is useful for this
+- Run the test using the run_top function, which takes care of sending the
+  inputs and checking the outputs
+- Note: you generally shouldn't need to interact with the DUT directly, as the
+  run_top function handles that for you
+
+Since we are using cocotb with Makefiles, we can use the TestFactory to generate 
+tests for different input values. This is similar to how pytest parameters work.
 
 Author: Tean Lai
 """
