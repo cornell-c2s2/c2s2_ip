@@ -34,7 +34,7 @@ When writing tests, you can follow this general framework:
 Since we are using cocotb with Makefiles, we can use the TestFactory to generate 
 tests for different input values. This is similar to how pytest parameters work.
 
-Author: Tean Lai
+Author: Tean Lai, Akshati Vaishnav
 """
 import random
 from enum import Enum
@@ -287,34 +287,83 @@ for test in [test_loopback_noXbar, test_loopback_inXbar, test_loopback_clsXbar, 
 """
 ================================================================================
 FFT TESTS
+Tests for:
+- spi -> router -> input xbar -> fft -> classifier xbar -> arbiter -> spi
 ================================================================================
 """
 def fixN(n):
     """Shortcut for creating fixed-point numbers."""
     return Fixed(n, True, 16, 8)
 
-
-def fft_msg(inputs: list[Fixed], outputs: list[Fixed]):
+"""
+-----------
+FFT1 TESTS
+-----------
+"""
+def fft1_msg(inputs: list[Fixed], outputs: list[Fixed]):
     """Generate SPI packets for FFT input/output from fixed-point numbers."""
     
+    #ensure that input and output samples are converted from fixed to bits
     inputs = [fixed_bits(sample) for sample in inputs[0]]
     outputs = [fixed_bits(sample) for sample in outputs[0]]
 
+    #configure input and output crossbars to send messages to/receive messages from FFT1
     in_xbar_config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT1)
     out_xbar_config_msg = mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_ARBITER)
-    input_msgs = [mk_spi_pkt(RouterOut.IN_XBAR, int(x)) for x in inputs]
+    
+    # send fft inputs to router and fft outputs to Arbiter from XBar
+    fft_input_msgs = [mk_spi_pkt(RouterOut.IN_XBAR, int(x)) for x in inputs]
+    fft_output_msgs = [mk_spi_pkt(ArbiterIn.CLS_XBAR, int(x)) for x in outputs]
 
-    in_msgs = [in_xbar_config_msg, out_xbar_config_msg] + input_msgs
-    out_msgs = [ mk_spi_pkt(ArbiterIn.CLS_XBAR, int(x)) for x in outputs]
+    #complete input and output message configurations
+    in_msgs = [in_xbar_config_msg, out_xbar_config_msg] + fft_input_msgs
+    out_msgs =  fft_output_msgs
     
     return in_msgs, out_msgs
 
-async def test_fft_manual(dut, input, output):
-    in_msgs, out_msgs = fft_msg(input, output)
+async def test_fft1_manual(dut, input, output):
+    in_msgs, out_msgs = fft1_msg(input, output)
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
     await run_top(dut, in_msgs, out_msgs, max_trsns=100)
 
+"""
+-----------
+FFT2 TESTS
+-----------
+"""
+def fft2_msg(inputs: list[Fixed], outputs: list[Fixed]):
+    """Generate SPI packets for FFT input/output from fixed-point numbers."""
+    
+    #ensure that input and output samples are converted from fixed to bits
+    inputs = [fixed_bits(sample) for sample in inputs[0]]
+    outputs = [fixed_bits(sample) for sample in outputs[0]]
+
+    #configure input and output crossbars to send messages to/receive messages from FFT2
+    in_xbar_config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT2)
+    out_xbar_config_msg = mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT2_ARBITER)
+    
+    # send fft inputs to router and fft outputs to Arbiter from XBar
+    fft_input_msgs = [mk_spi_pkt(RouterOut.IN_XBAR, int(x)) for x in inputs]
+    fft_output_msgs = [mk_spi_pkt(ArbiterIn.CLS_XBAR, int(x)) for x in outputs]
+
+    #complete input and output message configurations
+    in_msgs = [in_xbar_config_msg, out_xbar_config_msg] + fft_input_msgs
+    out_msgs =  fft_output_msgs
+    
+    return in_msgs, out_msgs
+
+async def test_fft2_manual(dut, input, output):
+    in_msgs, out_msgs = fft2_msg(input, output)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, in_msgs, out_msgs, max_trsns=100)
+
+"""
+-----------
+RUN FFT TESTS
+-----------
+"""
 # Test Data
 input_values = [
     [[fixN(1) for _ in range(32)]]
@@ -325,10 +374,11 @@ output_values = [
 ]
 
 # Register test factory
-factory = TestFactory(test_fft_manual)
-factory.add_option("input", input_values)
-factory.add_option("output", output_values)
-factory.generate_tests()
+for test in [test_fft1_manual, test_fft2_manual]:
+    factory = TestFactory(test)
+    factory.add_option("input", input_values)
+    factory.add_option("output", output_values)
+    factory.generate_tests()
 
 
 
