@@ -36,9 +36,6 @@ module SystolicDpath
 
   // Tensor FIFO
 
-  logic _x_fifo_full  [size];
-  logic _x_fifo_empty [size];
-
   generate
     for(i = 0; i < size; i++) begin : g_tensor_fifo
       SyncFIFO #(size, nbits) TensorFIFO
@@ -49,19 +46,13 @@ module SystolicDpath
         .ren   (fifo_ren[i]),
         .d     (l_x_in[i]),
         .q     (x[i][0]),
-        .full  (_x_fifo_full[i]),
-        .empty (_x_fifo_empty[i])
+        .full  (x_fifo_full[i]),
+        .empty (x_fifo_empty[i])
       );
     end
   endgenerate
 
-  assign x_fifo_full  = _x_fifo_full;
-  assign x_fifo_empty = _x_fifo_empty;
-
   // Weight FIFO
-
-  logic _w_fifo_full  [size];
-  logic _w_fifo_empty [size];
 
   generate
     for(j = 0; j < size; j++) begin : g_weight_fifo
@@ -73,14 +64,11 @@ module SystolicDpath
         .ren   (fifo_ren[j]),
         .d     (t_w_in[j]),
         .q     (w[0][j]),
-        .full  (_w_fifo_full[j]),
-        .empty (_w_fifo_empty[j])
+        .full  (w_fifo_full[j]),
+        .empty (w_fifo_empty[j])
       );
     end
   endgenerate
-
-  assign w_fifo_full  = _w_fifo_full;
-  assign w_fifo_empty = _w_fifo_empty;
 
   // Systolic Array
 
