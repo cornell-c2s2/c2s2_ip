@@ -12,8 +12,8 @@ module SystolicArray
 )(
   input logic             clk,
   input logic             rst,
-  input logic [nbits-1:0] x_in,
-  input logic [nbits-1:0] w_in
+  input logic [nbits-1:0] x_col_in,
+  input logic [nbits-1:0] w_row_in
 );
 
   
