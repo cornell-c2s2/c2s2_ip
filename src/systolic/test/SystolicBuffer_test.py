@@ -69,7 +69,7 @@ async def test_case_1_directed_x_buffer(dut):
 
   for sel in range(size):
     ren[sel] = 1
-    await step(dut, d, sel, wen, ren, full, empty, out)
+    await step(dut, 0, sel, wen, ren, full, empty, out)
     for i in range(sel+1):
       full[i]  = 0
       empty[i] = (_out[i] >= size-1)
@@ -81,7 +81,61 @@ async def test_case_1_directed_x_buffer(dut):
         out[i] = _out[i]
 
   for t in range(size):
+    await step(dut, 0, sel, wen, ren, full, empty, out)
+    for i in range(size):
+      full[i]  = 0
+      empty[i] = (_out[i] >= size-1)
+      _out[i] += 1
+
+      if empty[i]:
+        out[i] = 0
+      else:
+        out[i] = _out[i]
+
+  await step(dut, d, sel, wen, ren, full, empty, out)
+
+@cocotb.test()
+async def test_case_2_directed_w_buffer(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
+
+  await reset(dut)
+
+  # sel:   [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] [A] [B] [C] [D] [E] [F]
+  wen   = [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
+  ren   = [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
+  full  = [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
+  empty = [ 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1 ]
+  out   = [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
+  _out  = [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 ]
+
+  # simulate weight buffer write-data flow
+
+  for d in range(size):
+    for sel in range(size):
+      wen[sel] = 1
+      await step(dut, d, sel, wen, ren, full, empty, out)
+      wen[sel]   = 0
+      full[sel]  = (d == size-1)
+      empty[sel] = 0
     await step(dut, d, sel, wen, ren, full, empty, out)
+  
+  # simulate weight buffer read-data flow
+
+  for sel in range(size):
+    ren[sel] = 1
+    await step(dut, 0, sel, wen, ren, full, empty, out)
+    for i in range(sel+1):
+      full[i]  = 0
+      empty[i] = (_out[i] >= size-1)
+      _out[i] += 1
+
+      if empty[i]:
+        out[i] = 0
+      else:
+        out[i] = _out[i]
+
+  for t in range(size):
+    await step(dut, 0, sel, wen, ren, full, empty, out)
     for i in range(size):
       full[i]  = 0
       empty[i] = (_out[i] >= size-1)
