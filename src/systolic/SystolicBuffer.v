@@ -1,10 +1,10 @@
 `include "cmn/demuxes.v"
 `include "systolic/SyncFIFO.v"
 
-`ifndef DEMUXBUFFERFIFO_V
-`define DEMUXBUFFERFIFO_V
+`ifndef SYSTOLICBUFFER_V
+`define SYSTOLICBUFFER_V
 
-module DemuxBufferFIFO
+module SystolicBuffer
 #(
   parameter size  = 16,
   parameter nbits = 16
