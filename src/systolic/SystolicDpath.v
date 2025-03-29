@@ -12,22 +12,25 @@ module SystolicDpath
 )(
   input  logic                    clk,
   input  logic                    rst,
+  input  logic                    mac_en,
+
   input  logic [nbits-1:0]        l_x_in,
   input  logic [$clog2(size)-1:0] x_fifo_sel,
   input  logic                    x_fifo_wen   [size],
   input  logic                    x_fifo_ren   [size],
+  output logic                    x_fifo_full  [size],
+  output logic                    x_fifo_empty [size],
+
   input  logic [nbits-1:0]        t_w_in,
   input  logic [$clog2(size)-1:0] w_fifo_sel,
   input  logic                    w_fifo_wen   [size],
   input  logic                    w_fifo_ren   [size],
-  input  logic                    mac_en,
+  output logic                    w_fifo_full  [size],
+  output logic                    w_fifo_empty [size],
+
   input  logic [$clog2(size)-1:0] out_rsel,
   input  logic [$clog2(size)-1:0] out_csel,
-  output logic [nbits-1:0]        b_s_out,
-  output logic                    x_fifo_full  [size],
-  output logic                    x_fifo_empty [size],
-  output logic                    w_fifo_full  [size],
-  output logic                    w_fifo_empty [size]
+  output logic [nbits-1:0]        b_s_out
 );
 
   // Interal Data Flow Wires
