@@ -27,7 +27,6 @@ module SystolicArray
 );
 
   logic mac_en;
-  logic sys_rst;
 
   logic [$clog2(size)-1:0] x_fifo_sel;
   logic                    x_fifo_wen   [size];
