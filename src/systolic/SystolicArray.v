@@ -1,4 +1,4 @@
-`include "serdes/deseriaizer.v"
+`include "serdes/deserializer.v"
 `include "systolic/SystolicDpath.v"
 
 `ifndef SYSTOLICARRAY_V
@@ -10,13 +10,12 @@ module SystolicArray
   parameter nbits = 16,
   parameter dbits = 8
 )(
-  input logic             clk,
-  input logic             rst,
-  input logic [nbits-1:0] x_col_in,
-  input logic [nbits-1:0] w_row_in
+  input  logic                    clk,
+  input  logic                    rst,
+
 );
 
-  
+
 
 endmodule
 
