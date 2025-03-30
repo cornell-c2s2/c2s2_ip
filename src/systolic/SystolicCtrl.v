@@ -16,7 +16,7 @@ module SystolicCtrl
   input logic x_fifo_empty [size],
 
   input logic w_fifo_full  [size],
-  input logic w_fifo_empty [size],
+  input logic w_fifo_empty [size]
 );
 
   // Buffer Status
@@ -52,7 +52,7 @@ module SystolicCtrl
 
   // Output Logic
 
-  
+
 
 endmodule
 

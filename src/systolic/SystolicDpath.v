@@ -1,5 +1,5 @@
+`include "systolic/SyncFIFO.v"
 `include "systolic/SystolicPE.v"
-`include "systolic/SystolicBuffer.v"
 
 `ifndef SYSTOLICDPATH_V
 `define SYSTOLICDPATH_V
