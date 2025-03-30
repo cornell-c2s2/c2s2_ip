@@ -14,15 +14,13 @@ module SystolicDpath
   input  logic                    rst,
   input  logic                    mac_en,
 
-  input  logic [nbits-1:0]        l_x_in,
-  input  logic [$clog2(size)-1:0] x_fifo_sel,
+  input  logic [nbits-1:0]        l_x_col_in   [size],
   input  logic                    x_fifo_wen   [size],
   input  logic                    x_fifo_ren   [size],
   output logic                    x_fifo_full  [size],
   output logic                    x_fifo_empty [size],
 
-  input  logic [nbits-1:0]        t_w_in,
-  input  logic [$clog2(size)-1:0] w_fifo_sel,
+  input  logic [nbits-1:0]        t_w_row_in   [size],
   input  logic                    w_fifo_wen   [size],
   input  logic                    w_fifo_ren   [size],
   output logic                    w_fifo_full  [size],
@@ -33,58 +31,52 @@ module SystolicDpath
   output logic [nbits-1:0]        b_s_out
 );
 
-  // Interal Data Flow Wires
+  genvar i, j;
 
-  logic [nbits-1:0] x_buffer_out [size];
-  logic [nbits-1:0] w_buffer_out [size];
+  // Interal Data Flow Wires
 
   logic [nbits-1:0] w [size+1][size];
   logic [nbits-1:0] x [size][size+1];
   logic [nbits-1:0] s [size][size];
 
-  // Tensor Buffer
+  // Tensor FIFO
 
-  SystolicBuffer #(size, nbits) x_buffer
-  (
-    .clk   (clk),
-    .rst   (rst),
-    .d     (l_x_in),
-    .sel   (x_fifo_sel),
-    .wen   (x_fifo_wen),
-    .ren   (x_fifo_ren),
-    .full  (x_fifo_full),
-    .empty (x_fifo_empty),
-    .out   (x_buffer_out)
-  );
+  generate
+    for(i = 0; i < size; i++) begin : g_tensor_fifo
+      SyncFIFO #(size, nbits) TensorFIFO
+      (
+        .clk   (clk),
+        .rst   (rst),
+        .wen   (x_fifo_wen[i]),
+        .ren   (x_fifo_ren[i]),
+        .d     (l_x_col_in[i]),
+        .q     (x[i][0]),
+        .full  (x_fifo_full[i]),
+        .empty (x_fifo_empty[i])
+      );
+    end
+  endgenerate
 
-  always_comb begin
-    for(int k = 0; k < size; k++)
-      x[k][0] = x_buffer_out[k];
-  end
+  // Weight FIFO
 
-  // Weight Buffer
-
-  SystolicBuffer #(size, nbits) w_buffer
-  (
-    .clk   (clk),
-    .rst   (rst),
-    .d     (t_w_in),
-    .sel   (w_fifo_sel),
-    .wen   (w_fifo_wen),
-    .ren   (w_fifo_ren),
-    .full  (w_fifo_full),
-    .empty (w_fifo_empty),
-    .out   (w_buffer_out)
-  );
-
-  always_comb begin
-    for(int k = 0; k < size; k++)
-      w[0][k] = w_buffer_out[k];
-  end
+  generate
+    for(j = 0; j < size; j++) begin : g_weight_fifo
+      SyncFIFO #(size, nbits) WeightFIFO
+      (
+        .clk   (clk),
+        .rst   (rst),
+        .wen   (w_fifo_wen[i]),
+        .ren   (w_fifo_ren[i]),
+        .d     (t_w_row_in[i]),
+        .q     (w[0][j]),
+        .full  (w_fifo_full[j]),
+        .empty (w_fifo_empty[j])
+      );
+    end
+  endgenerate
 
   // Systolic Array
 
-  genvar i, j;
   generate
     for (i = 0; i < size; i++) begin : g_pe_rows
       for (j = 0; j < size; j++) begin : g_pe_cols
