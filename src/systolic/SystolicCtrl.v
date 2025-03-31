@@ -9,14 +9,26 @@ module SystolicCtrl
 #(
   parameter size = 16
 )(
-  input logic clk,
-  input logic rst,
+  input  logic clk,
+  input  logic rst,
+  
+  output logic mac_en,
 
-  input logic x_fifo_full  [size],
-  input logic x_fifo_empty [size],
+  input  logic x_send_val,
+  output logic x_send_rdy,
 
-  input logic w_fifo_full  [size],
-  input logic w_fifo_empty [size]
+  input  logic w_send_val,
+  output logic w_send_rdy,
+
+  input  logic x_fifo_full  [size],
+  input  logic x_fifo_empty [size],
+  output logic x_fifo_wen   [size],
+  output logic x_fifo_ren   [size],
+
+  input  logic w_fifo_full  [size],
+  input  logic w_fifo_empty [size],
+  output logic w_fifo_wen   [size],
+  output logic w_fifo_ren   [size]
 );
 
   // Buffer Status
@@ -52,7 +64,27 @@ module SystolicCtrl
 
   // Output Logic
 
+  always_comb begin
+    for(int i = 0; i < size; i++) begin
+      x_fifo_wen[i] = (state == `LOAD ? x_send_val : 0);
+      w_fifo_wen[i] = (state == `LOAD ? w_send_val : 0);
+    end
+    x_send_rdy = (state == `LOAD ? x_send_val : 0);
+    w_send_rdy = (state == `LOAD ? w_send_val : 0);
+  end
 
+  always_comb begin
+    mac_en        = (state == `MAC);
+    x_fifo_ren[0] = (state == `MAC);
+    w_fifo_ren[0] = (state == `MAC);
+  end
+  
+  always_ff @(posedge clk) begin
+    for(int i = 1; i < size; i++) begin
+      x_fifo_ren[i] <= (rst ? 0 : ((state == `MAC) & x_fifo_ren[i-1]));
+      w_fifo_ren[i] <= (rst ? 0 : ((state == `MAC) & w_fifo_ren[i-1]));
+    end
+  end
 
 endmodule
 

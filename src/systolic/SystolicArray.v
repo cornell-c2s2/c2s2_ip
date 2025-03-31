@@ -16,9 +16,11 @@ module SystolicArray
 
   input  logic [nbits-1:0]        l_x_in,
   input  logic                    x_recv_val,
+  output logic                    x_recv_rdy,
 
   input  logic [nbits-1:0]        t_w_in,
   input  logic                    w_recv_val,
+  output logic                    w_recv_rdy,
 
   input  logic [$clog2(size)-1:0] out_rsel,
   input  logic [$clog2(size)-1:0] out_csel,
@@ -29,7 +31,6 @@ module SystolicArray
   // Tensor Deserializer (CMO)
   //================================================
 
-  logic x_recv_rdy;
   logic x_send_val;
   logic x_send_rdy;
 
@@ -53,7 +54,6 @@ module SystolicArray
   // Weight Deserializer (RMO)
   //================================================
 
-  logic w_recv_rdy;
   logic w_send_val;
   logic w_send_rdy;
 
