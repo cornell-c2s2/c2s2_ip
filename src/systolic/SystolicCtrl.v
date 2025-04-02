@@ -28,7 +28,9 @@ module SystolicCtrl
   input  logic w_fifo_full  [size],
   input  logic w_fifo_empty [size],
   output logic w_fifo_wen   [size],
-  output logic w_fifo_ren   [size]
+  output logic w_fifo_ren   [size],
+
+  output logic [2:0] _state // only for cocotb testing
 );
 
   // Buffer Status
@@ -61,6 +63,8 @@ module SystolicCtrl
       endcase
     end
   end
+
+  assign _state = state; // only for cocotb testing
 
   // Output Logic
 
