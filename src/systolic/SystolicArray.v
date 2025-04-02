@@ -94,6 +94,11 @@ module SystolicArray
     .*
   );
 
+  SystolicCtrl #(size) ctrl
+  (
+    .*
+  );
+
 endmodule
 
 `endif
