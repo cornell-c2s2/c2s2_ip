@@ -7,7 +7,7 @@
 
 module SystolicCtrl
 #(
-  parameter size = 16
+  parameter size = 4 // 4 (testing) 16 (synthesis)
 )(
   input  logic clk,
   input  logic rst,
@@ -30,7 +30,7 @@ module SystolicCtrl
   output logic w_fifo_wen   [size],
   output logic w_fifo_ren   [size],
 
-  output logic [2:0] _state // only for cocotb testing
+  output logic [2:0] trace_state // only for cocotb testing
 );
 
   // Buffer Status
@@ -64,7 +64,7 @@ module SystolicCtrl
     end
   end
 
-  assign _state = state; // only for cocotb testing
+  assign trace_state = state; // only for cocotb testing
 
   // Output Logic
 
