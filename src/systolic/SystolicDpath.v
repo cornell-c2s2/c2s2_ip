@@ -65,9 +65,9 @@ module SystolicDpath
       (
         .clk   (clk),
         .rst   (rst),
-        .wen   (w_fifo_wen[i]),
-        .ren   (w_fifo_ren[i]),
-        .d     (t_w_row_in[i]),
+        .wen   (w_fifo_wen[j]),
+        .ren   (w_fifo_ren[j]),
+        .d     (t_w_row_in[j]),
         .q     (w[0][j]),
         .full  (w_fifo_full[j]),
         .empty (w_fifo_empty[j])
