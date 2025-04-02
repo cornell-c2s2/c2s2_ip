@@ -73,13 +73,11 @@ module SystolicCtrl
     w_send_rdy = (state == `LOAD ? w_send_val : 0);
   end
 
-  always_comb begin
-    mac_en        = ((state == `MAC) | (state == `OUT));
-    x_fifo_ren[0] = (state == `MAC);
-    w_fifo_ren[0] = (state == `MAC);
-  end
+  assign mac_en = ((state == `MAC) | (state == `OUT));
   
   always_ff @(posedge clk) begin
+    x_fifo_ren[0] <= (rst ? 0 : (((state == `LOAD) & full) | (state == `MAC)));
+    w_fifo_ren[0] <= (rst ? 0 : (((state == `LOAD) & full) | (state == `MAC)));
     for(int i = 1; i < size; i++) begin
       x_fifo_ren[i] <= (rst ? 0 : ((state == `MAC) & x_fifo_ren[i-1]));
       w_fifo_ren[i] <= (rst ? 0 : ((state == `MAC) & w_fifo_ren[i-1]));

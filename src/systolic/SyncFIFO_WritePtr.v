@@ -18,7 +18,7 @@ module SyncFIFO_WritePtr
   logic [ptr_width-1:0] _w_ptr;
   logic [ptr_width-1:0] _w_ptr_next;
 
-  assign _w_ptr_next = _w_ptr + (wen & ~_full);
+  assign _w_ptr_next = _w_ptr + {{(ptr_width-1){1'b0}}, (wen & ~_full)};
 
   always_ff @(posedge clk) begin
     _w_ptr <= (rst ? 0 : _w_ptr_next);
