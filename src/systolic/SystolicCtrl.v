@@ -74,7 +74,7 @@ module SystolicCtrl
   end
 
   always_comb begin
-    mac_en        = ((state == `MAC) || (state == `OUT));
+    mac_en        = ((state == `MAC) | (state == `OUT));
     x_fifo_ren[0] = (state == `MAC);
     w_fifo_ren[0] = (state == `MAC);
   end
