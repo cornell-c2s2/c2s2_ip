@@ -35,9 +35,12 @@ async def always_comb(dut, mac_en, x_send_rdy, w_send_rdy, x_fifo_wen, w_fifo_we
     assert (dut.x_fifo_wen[i].value == x_fifo_wen[i])
     assert (dut.w_fifo_wen[i].value == w_fifo_wen[i])
 
-async def always_ff(dut, state):
+async def always_ff(dut, state, x_fifo_ren, w_fifo_ren):
   await RisingEdge(dut.clk)
   assert (dut.trace_state.value == state)
+  for i in range(size):
+    assert (dut.x_fifo_ren[i].value == x_fifo_ren[i])
+    assert (dut.w_fifo_ren[i].value == w_fifo_ren[i])
 
 async def reset(dut):
   dut.rst.value = 1
@@ -52,26 +55,75 @@ async def test_case_1_directed_xw_load_1(dut):
 
   await reset(dut)
 
+  # @ LOAD: FIFOs are initially empty
   await d2c(dut, 0, 0, [0,0,0,0], [1,1,1,1], [0,0,0,0], [1,1,1,1])
   await always_comb(dut, 0, 0, 0, [0,0,0,0], [0,0,0,0])
-  await always_ff(dut, LOAD)
+  await always_ff(dut, LOAD, [0,0,0,0], [0,0,0,0])
 
+  # @ LOAD: Deserializer is full (write FIFOs)
   await d2c(dut, 1, 1, [0,0,0,0], [1,1,1,1], [0,0,0,0], [1,1,1,1])
   await always_comb(dut, 0, 1, 1, [1,1,1,1], [1,1,1,1])
-  await always_ff(dut, LOAD)
+  await always_ff(dut, LOAD, [0,0,0,0], [0,0,0,0])
 
+  # @ LOAD: FIFOs are neither empty nor full
   await d2c(dut, 0, 0, [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0])
   await always_comb(dut, 0, 0, 0, [0,0,0,0], [0,0,0,0])
-  await always_ff(dut, LOAD)
+  await always_ff(dut, LOAD, [0,0,0,0], [0,0,0,0])
 
+  # @ LOAD: Deserializer is full (write FIFOs)
   await d2c(dut, 1, 1, [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0])
   await always_comb(dut, 0, 1, 1, [1,1,1,1], [1,1,1,1])
-  await always_ff(dut, LOAD)
+  await always_ff(dut, LOAD, [0,0,0,0], [0,0,0,0])
 
+  # @ LOAD: FIFOs are full
   await d2c(dut, 0, 0, [1,1,1,1], [0,0,0,0], [1,1,1,1], [0,0,0,0])
   await always_comb(dut, 0, 0, 0, [0,0,0,0], [0,0,0,0])
-  await always_ff(dut, LOAD)
+  await always_ff(dut, LOAD, [0,0,0,0], [0,0,0,0])
+
+  # @ MAC: FIFOs are read-enabled one at a time
+  await d2c(dut, 0, 0, [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0])
+  await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
+  await always_ff(dut, MAC, [1,0,0,0], [1,0,0,0])
 
   await d2c(dut, 0, 0, [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0])
   await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
-  await always_ff(dut, MAC)
+  await always_ff(dut, MAC, [1,1,0,0], [1,1,0,0])
+
+  await d2c(dut, 0, 0, [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0])
+  await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
+  await always_ff(dut, MAC, [1,1,1,0], [1,1,1,0])
+
+  await d2c(dut, 0, 0, [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0])
+  await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
+  await always_ff(dut, MAC, [1,1,1,1], [1,1,1,1])
+
+  # @ MAC: FIFOs start to empty
+  await d2c(dut, 0, 0, [0,0,0,0], [1,0,0,0], [0,0,0,0], [1,0,0,0])
+  await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
+  await always_ff(dut, MAC, [1,1,1,1], [1,1,1,1])
+
+  await d2c(dut, 0, 0, [0,0,0,0], [1,1,0,0], [0,0,0,0], [1,1,0,0])
+  await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
+  await always_ff(dut, MAC, [1,1,1,1], [1,1,1,1])
+
+  await d2c(dut, 0, 0, [0,0,0,0], [1,1,1,0], [0,0,0,0], [1,1,1,0])
+  await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
+  await always_ff(dut, MAC, [1,1,1,1], [1,1,1,1])
+
+  # @ MAC: All FIFOs are empty
+  await d2c(dut, 0, 0, [0,0,0,0], [1,1,1,1], [0,0,0,0], [1,1,1,1])
+  await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
+  await always_ff(dut, MAC, [1,1,1,1], [1,1,1,1])
+
+  # @ OUT
+  await d2c(dut, 0, 0, [0,0,0,0], [1,1,1,1], [0,0,0,0], [1,1,1,1])
+  await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
+  await always_ff(dut, OUT, [1,1,1,1], [1,1,1,1])
+
+  await d2c(dut, 0, 0, [0,0,0,0], [1,1,1,1], [0,0,0,0], [1,1,1,1])
+  await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
+  await always_ff(dut, OUT, [0,0,0,0], [0,0,0,0])
+
+  await d2c(dut, 0, 0, [0,0,0,0], [1,1,1,1], [0,0,0,0], [1,1,1,1])
+  await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
+  await always_ff(dut, OUT, [0,0,0,0], [0,0,0,0])
