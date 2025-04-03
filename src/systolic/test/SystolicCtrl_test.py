@@ -50,7 +50,7 @@ async def reset(dut):
 #===========================================================
 
 @cocotb.test()
-async def test_case_1_directed_xw_load_1(dut):
+async def test_case_1_directed_fsm(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
   await reset(dut)
