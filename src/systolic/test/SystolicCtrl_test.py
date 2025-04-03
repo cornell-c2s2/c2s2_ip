@@ -118,7 +118,7 @@ async def test_case_1_directed_xw_load_1(dut):
   # @ OUT
   await d2c(dut, 0, 0, [0,0,0,0], [1,1,1,1], [0,0,0,0], [1,1,1,1])
   await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
-  await always_ff(dut, OUT, [1,1,1,1], [1,1,1,1])
+  await always_ff(dut, OUT, [0,0,0,0], [0,0,0,0])
 
   await d2c(dut, 0, 0, [0,0,0,0], [1,1,1,1], [0,0,0,0], [1,1,1,1])
   await always_comb(dut, 1, 0, 0, [0,0,0,0], [0,0,0,0])
