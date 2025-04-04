@@ -115,14 +115,14 @@ async def check_output(dut, row, col, ref):
     .format(dut.b_s_out.value, ref.get(), row, col)
 
 #===========================================================
-# test_case_directed_flow
+# test_case_dpath_4x4
 #===========================================================
 
 @cocotb.test()
-async def test_case_directed_flow(dut):
+async def test_case_dpath_4x4(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
-  trials = 2
+  trials = 3
 
   for t in range(trials):
     # randomly initialize 4x4 input and weight
