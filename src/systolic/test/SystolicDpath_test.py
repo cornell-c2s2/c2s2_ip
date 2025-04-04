@@ -43,14 +43,16 @@ def matmul_fp(x:[], w:[]):
 
 #===========================================================
 
-x_fifo_ren = [0, 0, 0, 0]
-w_fifo_ren = [0, 0, 0, 0]
-
 async def reset(dut):
-  dut.rst.value = 1
-  x_fifo_ren = [0, 0, 0, 0]
-  w_fifo_ren = [0, 0, 0, 0]
+  dut.rst.value    = 1
+  dut.mac_en.value = 0
+  for i in range(size):
+    dut.x_fifo_wen[i].value = 0
+    dut.x_fifo_ren[i].value = 0
+    dut.w_fifo_wen[i].value = 0
+    dut.w_fifo_ren[i].value = 0
   await RisingEdge(dut.clk)
+  dut.rst.value = 0
 
 async def write_fifo(dut, l_x_col_in:[], t_w_row_in:[]):
   dut.rst.value    = 0
@@ -67,22 +69,15 @@ async def write_fifo(dut, l_x_col_in:[], t_w_row_in:[]):
 
   await RisingEdge(dut.clk)
 
-async def mac(dut):
+async def mac(dut, x_fifo_ren:[], w_fifo_ren:[]):
   dut.rst.value    = 0
   dut.mac_en.value = 1
-
-  x_fifo_ren[0] = 1
-  w_fifo_ren[0] = 1
 
   for i in range(0, size):
     dut.x_fifo_ren[i].value = x_fifo_ren[i]
     dut.w_fifo_ren[i].value = w_fifo_ren[i]
 
   await RisingEdge(dut.clk)
-
-  for i in range(size-1, 0, -1):
-    x_fifo_ren[i] = x_fifo_ren[i-1]
-    w_fifo_ren[i] = w_fifo_ren[i-1]
 
 async def check_fifo_status(dut, x_fifo_full:[], x_fifo_empty:[], w_fifo_full:[], w_fifo_empty:[]):
   dut.rst.value    = 0
@@ -127,7 +122,7 @@ async def check_output(dut, row, col, ref):
 async def test_case_directed_flow(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
-  trials = 1
+  trials = 2
 
   for t in range(trials):
     # randomly initialize 4x4 input and weight
@@ -151,6 +146,9 @@ async def test_case_directed_flow(dut):
     x_fifo_empty = [1, 1, 1, 1]
     w_fifo_full  = [0, 0, 0, 0]
     w_fifo_empty = [1, 1, 1, 1]
+
+    x_fifo_ren = [0, 0, 0, 0]
+    w_fifo_ren = [0, 0, 0, 0]
 
     await check_fifo_status(dut, x_fifo_full, x_fifo_empty, w_fifo_full, w_fifo_empty)
     await check_fifo_status(dut, x_fifo_full, x_fifo_empty, w_fifo_full, w_fifo_empty)
@@ -177,8 +175,13 @@ async def test_case_directed_flow(dut):
       await check_fifo_status(dut, x_fifo_full, x_fifo_empty, w_fifo_full, w_fifo_empty)
     
     # enable MAC
+    x_fifo_ren[0] = 1
+    w_fifo_ren[0] = 1
     for _t in range(tcycles+size+1):
-      await mac(dut)
+      await mac(dut, x_fifo_ren, w_fifo_ren)
+      for i in range(size-1, 0, -1):
+        x_fifo_ren[i] = x_fifo_ren[i-1]
+        w_fifo_ren[i] = w_fifo_ren[i-1]
     
     await check_fifo_status(dut, [0,0,0,0], [1,1,1,1], [0,0,0,0], [1,1,1,1])
 
