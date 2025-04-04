@@ -70,11 +70,11 @@ module SystolicCtrl
 
   always_comb begin
     for(int i = 0; i < size; i++) begin
-      x_fifo_wen[i] = (state == `LOAD ? x_send_val : 0);
-      w_fifo_wen[i] = (state == `LOAD ? w_send_val : 0);
+      x_fifo_wen[i] = ((state == `LOAD) & x_send_val);
+      w_fifo_wen[i] = ((state == `LOAD) & w_send_val);
     end
-    x_send_rdy = (state == `LOAD ? x_send_val : 0);
-    w_send_rdy = (state == `LOAD ? w_send_val : 0);
+    x_send_rdy = ((state == `LOAD) & ~full);
+    w_send_rdy = ((state == `LOAD) & ~full);
   end
 
   assign mac_en = ((state == `MAC) | (state == `OUT));
