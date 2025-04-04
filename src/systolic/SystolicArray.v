@@ -7,7 +7,7 @@
 
 module SystolicArray
 #(
-  parameter size  = 16,
+  parameter size  = 4,
   parameter nbits = 16,
   parameter dbits = 8
 )(

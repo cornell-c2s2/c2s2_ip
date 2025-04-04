@@ -7,7 +7,7 @@
 
 module SystolicCtrl
 #(
-  parameter size = 4 // 4 (testing) 16 (synthesis)
+  parameter size = 4
 )(
   input  logic clk,
   input  logic rst,

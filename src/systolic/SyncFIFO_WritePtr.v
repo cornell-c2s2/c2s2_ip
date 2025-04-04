@@ -3,7 +3,7 @@
 
 module SyncFIFO_WritePtr
 #(
-  parameter depth     = 16,
+  parameter depth     = 4,
   parameter ptr_width = $clog2(depth) + 1
 )(
   input  logic                 clk,
