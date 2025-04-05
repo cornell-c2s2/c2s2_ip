@@ -1,4 +1,3 @@
-`include "serdes/deserializer.v"
 `include "systolic/SystolicCtrl.v"
 `include "systolic/SystolicDpath.v"
 
