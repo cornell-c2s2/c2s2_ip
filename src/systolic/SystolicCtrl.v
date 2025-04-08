@@ -36,13 +36,24 @@ module SystolicCtrl
   logic full;
   logic empty;
 
+  logic x_full;
+  logic w_full;
+
   always_comb begin
-    full  = (x_fifo_full[0] & w_fifo_full[0]);
-    empty = (x_fifo_empty[0] & w_fifo_empty[0]);
-    for(int i = 1; i < size; i++) begin
-      full  = (full & x_fifo_full[i] & w_fifo_full[i]);
-      empty = (empty & x_fifo_empty[i] & w_fifo_empty[i]);
+    x_full = 1;
+    w_full = 1;
+    for(int i = 0; i < size; i++) begin
+      x_full = (x_full & x_fifo_full[i]);
+      w_full = (w_full & w_fifo_full[i]);
     end
+  end
+
+  assign full = (x_full & w_full);
+
+  always_comb begin
+    empty = 1;
+    for(int i = 0; i < size; i++)
+      empty = (empty & x_fifo_empty[i] & w_fifo_empty[i]);
   end
 
   // State Transition
@@ -66,11 +77,11 @@ module SystolicCtrl
 
   always_comb begin
     for(int i = 0; i < size; i++) begin
-      x_fifo_wen[i] = ((state == `LOAD) & x_recv_val);
-      w_fifo_wen[i] = ((state == `LOAD) & w_recv_val);
+      x_fifo_wen[i] = ((state == `LOAD) & x_recv_val & ~x_full);
+      w_fifo_wen[i] = ((state == `LOAD) & w_recv_val & ~w_full);
     end
-    x_recv_rdy = (state == `LOAD);
-    w_recv_rdy = (state == `LOAD);
+    x_recv_rdy = ((state == `LOAD) & ~x_full);
+    w_recv_rdy = ((state == `LOAD) & ~w_full);
   end
 
   assign mac_en = ((state == `MAC) | (state == `OUT));
