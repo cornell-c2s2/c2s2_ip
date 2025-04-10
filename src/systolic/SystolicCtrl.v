@@ -77,8 +77,8 @@ module SystolicCtrl
 
   always_comb begin
     for(int i = 0; i < size; i++) begin
-      x_fifo_wen[i] = ((state == `LOAD) & x_recv_val & ~x_full);
-      w_fifo_wen[i] = ((state == `LOAD) & w_recv_val & ~w_full);
+      x_fifo_wen[i] = ((state == `LOAD) & ~x_full & x_recv_val);
+      w_fifo_wen[i] = ((state == `LOAD) & ~w_full & x_recv_val);
     end
     x_recv_rdy = ((state == `LOAD) & ~x_full);
     w_recv_rdy = ((state == `LOAD) & ~w_full);
