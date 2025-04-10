@@ -10,38 +10,38 @@ import serial
 
 
 def readserial(ser):  
-  data = ser.readline().decode().strip()
+  data = int(ser.readline().decode().strip())
 
   if data:
-    # print(data)
-    data = data[data.index(": ") + 2 :]
-    data = data.split(" ")
-    print(data)
-    return data[1]
+    return data/1024*65536
 
 
 if __name__ == "__main__":
-  port = "COM7"
+  port1 = "COM7"
+  port2 = "COM18"
 
   # Initialize the USB port to COM7, and set the print mode to print out classifier messages
-  init_usb(port)
+  init_usb(port1)
   show_device_info()
   set_print_mode(2)
 
   # Configure the chip for information from SPI, to FFT, to classifier, to SPI output
-  # spi_write_read(Config.INXBAR_SPI_FFT)
-  # spi_write_read(Config.CLSXBAR_FFT_CLS)
-  # spi_write_read(Config.OUTXBAR_CLS_SPI)
+  spi_write_read(Config.INXBAR_SPI_FFT)
+  spi_write_read(Config.CLSXBAR_FFT_CLS)
+  spi_write_read(Config.OUTXBAR_CLS_SPI)
 
   # Set up the serial monitor
   ser = serial.Serial(
-    port, 115200, timeout=0.1
+    port2, 115200, timeout=0.1
   )  # 1/timeout is the frequency at which the port is read
 
   # Send data to chip
   while (1):
-    # spi_write_read(readserial(ser))
-    print("readserial printed: ", readserial(ser))
+    spi_write_read(readserial(ser))
+    # data = readserial(ser)
+    # if data > max:
+    #   max = data
+    #   print(max)
 
     # spi_write_read(0x00000) # This is dummy data
     # spi_write_read(0x08000)
