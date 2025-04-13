@@ -21,6 +21,8 @@ COCOTB_RESULTS_FILE = logs/$(TESTNAME)/$(TESTSUFFIX)/results.xml
 
 #Add working directory to the Python virtual environment path
 PWD=$(shell pwd)
+C2S2_PATH=$(shell git rev-parse --show-toplevel)
+
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
 WAVEFORM_DIR ?= $(PWD)
 
