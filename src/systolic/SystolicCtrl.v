@@ -28,7 +28,9 @@ module SystolicCtrl
   input  logic w_fifo_full  [size],
   input  logic w_fifo_empty [size],
   output logic w_fifo_wen   [size],
-  output logic w_fifo_ren   [size]
+  output logic w_fifo_ren   [size],
+
+  output logic [2:0] trace_state
 );
 
   // Buffer Status
@@ -59,6 +61,8 @@ module SystolicCtrl
   // State Transition
 
   logic [2:0] state;
+
+  assign trace_state = state;
 
   always_ff @(posedge clk) begin
     if(rst)
