@@ -875,7 +875,7 @@ module tapein1_sp25_top #(
 
   // Input port: 01 - FIFO Packager
   // Each fifo output is 8 bits
-  assign input_xbar_recv_msg[1] = {async_fifo_send_msg, (DATA_BITS-FIFO_ENTRY_BITS){0}};
+  assign input_xbar_recv_msg[1] = {async_fifo_send_msg, {(DATA_BITS-FIFO_ENTRY_BITS){0}}};
   assign input_xbar_recv_val[1] = async_fifo_send_val;
   assign async_fifo_send_rdy = input_xbar_recv_rdy[1];
 
