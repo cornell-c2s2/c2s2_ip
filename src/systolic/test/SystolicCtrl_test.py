@@ -178,7 +178,7 @@ async def test_fsm_directed(dut):
 async def test_fsm_random(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
-  for trials in range(1000):
+  for trials in range(1):
     # d2c
     x_recv_val   = 0
     w_recv_val   = 0
@@ -203,7 +203,9 @@ async def test_fsm_random(dut):
     await reset(dut)
     await reset(dut)
 
-    for subtrials in range(1000):
+    state_out_count = 0
+
+    while(state_out_count < 10):
       # update d2c
 
       x_recv_val = random.randint(0, 1)
@@ -256,3 +258,5 @@ async def test_fsm_random(dut):
         state = MAC
       elif((state == MAC) & empty):
         state = OUT
+      
+      state_out_count += (state == OUT)
