@@ -125,6 +125,15 @@ async def basic_test(dut):
     await ClockCycles(dut.clk, 10)
     assert True
 
+# @cocotb.test()
+# async def print_test(dut):
+#     "this test is simply for print debugging purposes"
+#     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+#     await ClockCycles(dut.clk, 10)
+#     dut._log.info(f"{dut.classifier.BIT_WIDTH.value}")
+#     dut._log.info(f"{dut.classifier.DECIMAL_PT.value}")
+#     dut._log.info(f"{dut.classifier.N_SAMPLES.value}")
+
 class InXbarCfg:
     """
     Represents the message to send to the input crossbar to configure it. For
@@ -498,3 +507,20 @@ factory.add_option("cutoff_freq", cutoff_freq_values)
 factory.add_option("cutoff_mag", cutoff_mag_values)
 factory.add_option("sampling_freq", sampling_freq_values)
 factory.generate_tests()
+
+# Composite test that combines loopback and FFT.
+@cocotb.test()
+async def test_compose(dut):
+    msgs1 = [0x5555, 0xAAAA]
+    inxbar_in_msgs = [mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_ARBITER)] \
+      + [mk_spi_pkt(RouterOut.IN_XBAR, x) for x in msgs1]
+    inxbar_out_msgs = [mk_spi_pkt(ArbiterIn.IN_XBAR, x) for x in msgs1]
+
+
+    msgs2 = [0xAAAA, 0x5555]    
+    clsxbar_in_msgs = [mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.ROUTER_ARBITER)] \
+      + [mk_spi_pkt(RouterOut.CLS_XBAR, x) for x in msgs2]
+    clsxbar_out_msgs = [mk_spi_pkt(ArbiterIn.CLS_XBAR, x) for x in msgs2]
+
+
+    assert False, "to be implemented"
