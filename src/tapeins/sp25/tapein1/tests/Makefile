@@ -32,7 +32,8 @@ WAVEFORM_DIR ?= $(PWD)
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
 #Adding relative path of the Verilog file that contains the top level module to VERILOG_SOURCES
-VERILOG_SOURCES ?= $(PWD)/$(SOURCE)
+# VERILOG_SOURCES ?= $(PWD)/$(SOURCE)
+VERILOG_SOURCES += $(PWD)/../tapein1_sp25_top.v
 
 #Step 1: Add all include directories referenced in the verilog source file
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src -assert svaext
@@ -101,3 +102,7 @@ coverage_report:
 	@urg -dir $(shell find obj_dir -type d -name "*.vdb") -merge_strict -dbname coverage_data -noreport -warn none > /dev/null
 	@urg -dir coverage_data.vdb -format both -report ./coverage
 	@rm -rf coverage_data.vdb
+
+# NOTE: temporary to get coverage report to generate
+coverage_report_temp:
+	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report

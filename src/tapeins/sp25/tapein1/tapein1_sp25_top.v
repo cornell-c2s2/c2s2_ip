@@ -227,19 +227,10 @@ module tapein1_sp25_top #(
 
   // Async FIFO --------------------------------------------------------------------
   // - FIFO_DEPTH:
-  //     Number of FIFO Entries (top level parameter).
+  //     Number of FIFO Entries
   // - FIFO_ENTRY_BITS:
-  //     Bitwidth of each FIFO Entry
+  //     Bitwidth of each FIFO Entry (top level parameter)
   localparam int FIFO_DEPTH = 10;
-
-
-  // FIFO Packager -----------------------------------------------------------------
-  // - PACKAGER_BITS:
-  //     Bitwidth of each packager input message
-  // - PACKAGER_CONCAT:
-  //     Number of valid inputs for the packager to concatanate
-  localparam int PACKAGER_BITS = FIFO_ENTRY_BITS;
-  localparam int PACKAGER_CONCAT = 2;
 
 
   // Posedge Detector --------------------------------------------------------------
@@ -260,7 +251,7 @@ module tapein1_sp25_top #(
   logic                                    router_rdy  [ROUTER_SIZE];
   logic                                    router_val  [ROUTER_SIZE];
 
-  logic [INPUT_XBAR_BITS-1:0]       Router_to_InputXbar_msg;
+  logic [INPUT_XBAR_BITS-1:0]              Router_to_InputXbar_msg;
   logic                                    Router_to_InputXbar_val;
   logic                                    Router_to_InputXbar_rdy;
 
@@ -773,21 +764,6 @@ module tapein1_sp25_top #(
     .ostream_rdy             (async_fifo_send_rdy)
   );
 
-  // FIFO Packager -----------------------------------------------------------------
-  FifoPackager #(
-    .p_bit_width             (PACKAGER_BITS),
-    .p_num_concat            (PACKAGER_CONCAT)
-  ) packager (
-    .clk                     (clk),
-    .reset                   (reset),
-    .req_msg                 (async_fifo_send_msg),
-    .req_val                 (async_fifo_send_val),
-    .req_rdy                 (async_fifo_send_rdy),
-    .resp_msg                (packager_send_msg),
-    .resp_val                (packager_send_val),
-    .resp_rdy                (packager_send_rdy)
-  );
-
   // Posedge Detector --------------------------------------------------------------
   PosedgeDetector posedge_detector (
     .clk(ext_clk),
@@ -899,9 +875,9 @@ module tapein1_sp25_top #(
 
   // Input port: 01 - FIFO Packager
   // Each fifo output is 8 bits
-  assign input_xbar_recv_msg[1] = packager_send_msg;
-  assign input_xbar_recv_val[1] = packager_send_val;
-  assign packager_send_rdy = input_xbar_recv_rdy[1];
+  assign input_xbar_recv_msg[1] = {async_fifo_send_msg, (DATA_BITS-FIFO_ENTRY_BITS){0}};
+  assign input_xbar_recv_val[1] = async_fifo_send_val;
+  assign async_fifo_send_rdy = input_xbar_recv_rdy[1];
 
   // Input port: 10 - Router
   assign input_xbar_recv_msg[2] = Router_to_InputXbar_msg;

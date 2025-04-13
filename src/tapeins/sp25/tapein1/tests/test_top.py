@@ -146,6 +146,8 @@ class InXbarCfg:
     ROUTER_ARBITER = 0b1010
     ROUTER_FFT1    = 0b1000
     ROUTER_FFT2    = 0b1001
+    LFSR_FFT1      = 0b0000
+    LFSR_FFT2      = 0b0001
 
 class ClsXbarCfg:
     """
@@ -157,6 +159,8 @@ class ClsXbarCfg:
     FFT2_ARBITER   = 0b0110
     FFT1_CLS       = 0b0001
     FFT2_CLS       = 0b0101
+    FFT1_MISR      = 0b0000
+    FFT2_MISR      = 0b0100
 
 class OutXbarCfg:
     """
@@ -524,3 +528,45 @@ async def test_compose(dut):
 
 
     assert False, "to be implemented"
+
+"""
+================================================================================
+LBIST TESTS
+================================================================================
+"""
+
+@cocotb.test()
+async def test_lbist_fft1(dut):
+    input_msgs = []
+    
+    # Configure crossbars to send data along this path: LFSR -> FFT1 -> MISR
+    input_msgs += [mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.LFSR_FFT1)]
+    input_msgs += [mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_MISR)]
+
+    # Send 1 to LBIST controller to start LBIST test
+    input_msgs += [mk_spi_pkt(RouterOut.LBIST_CTRL, 1)]
+    
+    # Expect to receive an 8-bit integer of 1s, to signify 8 passed tests
+    output_msgs = [mk_spi_pkt(ArbiterIn.LBIST_CTRL, 0b11111111)]
+
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, input_msgs, output_msgs)
+
+@cocotb.test()
+async def test_lbist_fft2(dut):
+    input_msgs = []
+    
+    # Configure crossbars to send data along this path: LFSR -> FFT2 -> MISR
+    input_msgs += [mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.LFSR_FFT2)]
+    input_msgs += [mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT2_MISR)]
+
+    # Send 1 to LBIST controller to start LBIST test
+    input_msgs += [mk_spi_pkt(RouterOut.LBIST_CTRL, 1)]
+    
+    # Expect to receive an 8-bit integer of 1s, to signify 8 passed tests
+    output_msgs = [mk_spi_pkt(ArbiterIn.LBIST_CTRL, 0b11111111)]
+
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, input_msgs, output_msgs)
