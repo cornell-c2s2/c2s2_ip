@@ -66,6 +66,9 @@ async def check_recv_rdy(dut, x_recv_rdy, w_recv_rdy):
   assert (dut.x_recv_rdy.value == x_recv_rdy)
   assert (dut.w_recv_rdy.value == w_recv_rdy)
 
+async def check_mac_en(dut, mac_en):
+  assert (dut.mac_en.value == mac_en)
+
 #===========================================================
 
 @cocotb.test()
@@ -169,9 +172,12 @@ async def test_case_4_load_xw_random(dut):
     w_recv_rdy = 1
 
     await reset(dut)
+    if(trial > 0):
+      await check_mac_en(dut, 1)
 
     await step(dut)
     await check_recv_rdy(dut, 1, 1)
+    await check_mac_en(dut, 0)
 
     while(x_recv_rdy | w_recv_rdy):
       # randomly choose to load x, w
@@ -197,9 +203,14 @@ async def test_case_4_load_xw_random(dut):
       
       await step(dut)
       await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
+      await check_mac_en(dut, 0)
 
       x_recv_rdy = (l_x_col_in_idx >= 0)
       w_recv_rdy = (t_w_row_in_idx >= 0)
     
     await step(dut)
     await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
+    await check_mac_en(dut, 0)
+
+    await step(dut)
+    await check_mac_en(dut, 1)
