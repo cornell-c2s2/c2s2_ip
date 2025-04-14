@@ -109,3 +109,37 @@ async def test_case_2_load_x(dut):
     
     await step(dut)
     await check_recv_rdy(dut, 0, 1)
+
+#===========================================================
+
+@cocotb.test()
+async def test_case_3_load_w(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
+
+  trials = 100
+
+  for trial in range(trials):
+    w = []
+    for i in range(size):
+      w_row = []
+      for j in range(size):
+        w_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+      w.append(w_row)
+
+    await reset(dut)
+
+    await step(dut)
+    await check_recv_rdy(dut, 1, 1)
+
+    for t in range(size):
+      t_w_row_in = []
+      for i in range(size):
+        t_w_row_in.append(w[t][i])
+      
+      await load_w(dut, t_w_row_in)
+
+      await step(dut)
+      await check_recv_rdy(dut, 1, 1)
+    
+    await step(dut)
+    await check_recv_rdy(dut, 1, 0)
