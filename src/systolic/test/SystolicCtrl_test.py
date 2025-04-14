@@ -178,7 +178,7 @@ async def test_fsm_directed(dut):
 async def test_fsm_random(dut):
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
-  for trials in range(1):
+  for trials in range(100):
     # d2c
     x_recv_val   = 0
     w_recv_val   = 0
