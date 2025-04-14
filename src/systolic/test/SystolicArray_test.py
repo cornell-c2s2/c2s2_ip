@@ -143,3 +143,63 @@ async def test_case_3_load_w(dut):
     
     await step(dut)
     await check_recv_rdy(dut, 1, 0)
+
+#===========================================================
+
+@cocotb.test()
+async def test_case_4_load_xw_random(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
+
+  for trial in range(100):
+    x = []
+    w = []
+    for i in range(size):
+      x_row = []
+      w_row = []
+      for j in range(size):
+        x_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+        w_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+      x.append(x_row)
+      w.append(w_row)
+    
+    l_x_col_in_idx = size-1
+    t_w_row_in_idx = size-1
+
+    x_recv_rdy = 1
+    w_recv_rdy = 1
+
+    await reset(dut)
+
+    await step(dut)
+    await check_recv_rdy(dut, 1, 1)
+
+    while(x_recv_rdy | w_recv_rdy):
+      # randomly choose to load x, w
+      load_x_sel = random.randint(0, 1)
+      load_w_sel = random.randint(0, 1)
+      
+      # select x column, w row
+      l_x_col_in = []
+      t_w_row_in = []
+      for i in range(size):
+        if(x_recv_rdy & load_x_sel):
+          l_x_col_in.append(x[i][l_x_col_in_idx])
+        if(w_recv_rdy & load_w_sel):
+          t_w_row_in.append(w[t_w_row_in_idx][i])
+      
+      # load x, w
+      if(x_recv_rdy & load_x_sel):
+        await load_x(dut, l_x_col_in)
+        l_x_col_in_idx -= 1
+      if(w_recv_rdy & load_w_sel):
+        await load_w(dut, t_w_row_in)
+        t_w_row_in_idx -= 1
+      
+      await step(dut)
+      await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
+
+      x_recv_rdy = (l_x_col_in_idx >= 0)
+      w_recv_rdy = (t_w_row_in_idx >= 0)
+    
+    await step(dut)
+    await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
