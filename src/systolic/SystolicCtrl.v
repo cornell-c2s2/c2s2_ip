@@ -28,7 +28,10 @@ module SystolicCtrl
   input  logic w_fifo_full  [size],
   input  logic w_fifo_empty [size],
   output logic w_fifo_wen   [size],
-  output logic w_fifo_ren   [size]/*,
+  output logic w_fifo_ren   [size],
+  
+  output logic mac_rdy,
+  output logic out_rdy/*,
 
   output logic [2:0] trace_state*/
 );
@@ -98,6 +101,9 @@ module SystolicCtrl
       w_fifo_ren[i] <= (rst ? 0 : ((state == `MAC) & ~empty & w_fifo_ren[i-1]));
     end
   end
+
+  assign mac_rdy = (state == `MAC);
+  assign out_rdy = (state == `OUT);
 
 endmodule
 

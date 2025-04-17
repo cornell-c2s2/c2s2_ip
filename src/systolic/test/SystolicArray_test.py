@@ -66,8 +66,17 @@ async def check_recv_rdy(dut, x_recv_rdy, w_recv_rdy):
   assert (dut.x_recv_rdy.value == x_recv_rdy)
   assert (dut.w_recv_rdy.value == w_recv_rdy)
 
-async def check_mac_en(dut, mac_en):
-  assert (dut.mac_en.value == mac_en)
+async def check_mac_rdy(dut, mac_rdy):
+  assert (dut.mac_rdy.value == mac_rdy)
+
+async def check_out_rdy(dut, out_rdy):
+  assert (dut.out_rdy.value == out_rdy)
+
+async def check_output(dut, row, col, ref):
+  dut.out_rsel.value = row
+  dut.out_csel.value = col
+  await Timer(1, units="ns")
+  assert (dut.b_s_out.value == ref.get())
 
 #===========================================================
 
@@ -172,12 +181,9 @@ async def test_case_4_synchronous_load(dut):
     w_recv_rdy = 1
 
     await reset(dut)
-    if(trial > 0):
-      await check_mac_en(dut, 1)
 
     await step(dut)
     await check_recv_rdy(dut, 1, 1)
-    await check_mac_en(dut, 0)
 
     while(x_recv_rdy | w_recv_rdy):
       # select x column, w row
@@ -199,17 +205,12 @@ async def test_case_4_synchronous_load(dut):
         
       await step(dut)
       await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
-      await check_mac_en(dut, 0)
 
       x_recv_rdy = (l_x_col_in_idx >= 0)
       w_recv_rdy = (t_w_row_in_idx >= 0)
       
     await step(dut)
     await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
-    await check_mac_en(dut, 0)
-
-    await step(dut)
-    await check_mac_en(dut, 1)
 
 #===========================================================
 
@@ -236,12 +237,9 @@ async def test_case_5_asynchronous_load(dut):
     w_recv_rdy = 1
 
     await reset(dut)
-    if(trial > 0):
-      await check_mac_en(dut, 1)
 
     await step(dut)
     await check_recv_rdy(dut, 1, 1)
-    await check_mac_en(dut, 0)
 
     while(x_recv_rdy | w_recv_rdy):
       # randomly choose to load x, w
@@ -267,14 +265,177 @@ async def test_case_5_asynchronous_load(dut):
       
       await step(dut)
       await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
-      await check_mac_en(dut, 0)
 
       x_recv_rdy = (l_x_col_in_idx >= 0)
       w_recv_rdy = (t_w_row_in_idx >= 0)
     
     await step(dut)
     await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
-    await check_mac_en(dut, 0)
+
+#===========================================================
+
+@cocotb.test()
+async def test_case_6_synchronous_load_mac_out(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
+
+  for trial in range(100):
+    x = []
+    w = []
+    for i in range(size):
+      x_row = []
+      w_row = []
+      for j in range(size):
+        x_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+        w_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+      x.append(x_row)
+      w.append(w_row)
+    
+    s_ref = matmul_fp(x, w)
+
+    # LOAD
+
+    l_x_col_in_idx = size-1
+    t_w_row_in_idx = size-1
+
+    x_recv_rdy = 1
+    w_recv_rdy = 1
+
+    await reset(dut)
 
     await step(dut)
-    await check_mac_en(dut, 1)
+    await check_recv_rdy(dut, 1, 1)
+
+    while(x_recv_rdy | w_recv_rdy):
+      # select x column, w row
+      l_x_col_in = []
+      t_w_row_in = []
+      for i in range(size):
+        if(x_recv_rdy):
+          l_x_col_in.append(x[i][l_x_col_in_idx])
+        if(w_recv_rdy):
+          t_w_row_in.append(w[t_w_row_in_idx][i])
+          
+      # load x, w
+      if(x_recv_rdy):
+        await load_x(dut, l_x_col_in)
+        l_x_col_in_idx -= 1
+      if(w_recv_rdy):
+        await load_w(dut, t_w_row_in)
+        t_w_row_in_idx -= 1
+          
+      await step(dut)
+      await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
+
+      x_recv_rdy = (l_x_col_in_idx >= 0)
+      w_recv_rdy = (t_w_row_in_idx >= 0)
+        
+    await step(dut)
+    await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
+    await check_mac_rdy(dut, 0)
+    await check_out_rdy(dut, 0)
+
+    # MAC
+
+    throughput_cycles = (size * 2)
+    for t in range(throughput_cycles):
+      # drive in all of x and w into PEs
+      await step(dut)
+      await check_mac_rdy(dut, 1)
+      await check_out_rdy(dut, 0)
+    
+    for i in range(size):
+      for j in range(size):
+        # combinationally check final summation stored in each PE
+        #   1) outputs become available in diagonal order from (0,0)
+        #   2) last value from last row/col of x and w flows through PEs
+        #   3) outputs unaffected by continuing clock cycles
+        await step(dut)
+        await check_mac_rdy(dut, 0)
+        await check_out_rdy(dut, 1)
+        await check_output(dut, i, j, s_ref[i][j])
+
+#===========================================================
+
+@cocotb.test()
+async def test_case_7_asynchronous_load_mac_out(dut):
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
+
+  for trial in range(100):
+    x = []
+    w = []
+    for i in range(size):
+      x_row = []
+      w_row = []
+      for j in range(size):
+        x_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+        w_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+      x.append(x_row)
+      w.append(w_row)
+    
+    s_ref = matmul_fp(x, w)
+
+    # LOAD
+
+    l_x_col_in_idx = size-1
+    t_w_row_in_idx = size-1
+
+    x_recv_rdy = 1
+    w_recv_rdy = 1
+
+    await reset(dut)
+
+    await step(dut)
+    await check_recv_rdy(dut, 1, 1)
+
+    while(x_recv_rdy | w_recv_rdy):
+      # randomly choose to load x, w
+      load_x_sel = random.randint(0, 1)
+      load_w_sel = random.randint(0, 1)
+
+      # select x column, w row
+      l_x_col_in = []
+      t_w_row_in = []
+      for i in range(size):
+        if(x_recv_rdy & load_x_sel):
+          l_x_col_in.append(x[i][l_x_col_in_idx])
+        if(w_recv_rdy & load_w_sel):
+          t_w_row_in.append(w[t_w_row_in_idx][i])
+          
+      # load x, w
+      if(x_recv_rdy & load_x_sel):
+        await load_x(dut, l_x_col_in)
+        l_x_col_in_idx -= 1
+      if(w_recv_rdy & load_w_sel):
+        await load_w(dut, t_w_row_in)
+        t_w_row_in_idx -= 1
+          
+      await step(dut)
+      await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
+
+      x_recv_rdy = (l_x_col_in_idx >= 0)
+      w_recv_rdy = (t_w_row_in_idx >= 0)
+        
+    await step(dut)
+    await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
+    await check_mac_rdy(dut, 0)
+    await check_out_rdy(dut, 0)
+
+    # MAC
+
+    throughput_cycles = (size * 2)
+    for t in range(throughput_cycles):
+      # drive in all of x and w into PEs
+      await step(dut)
+      await check_mac_rdy(dut, 1)
+      await check_out_rdy(dut, 0)
+    
+    for i in range(size):
+      for j in range(size):
+        # combinationally check final summation stored in each PE
+        #   1) outputs become available in diagonal order from (0,0)
+        #   2) last value from last row/col of x and w flows through PEs
+        #   3) outputs unaffected by continuing clock cycles
+        await step(dut)
+        await check_mac_rdy(dut, 0)
+        await check_out_rdy(dut, 1)
+        await check_output(dut, i, j, s_ref[i][j])
