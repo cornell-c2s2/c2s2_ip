@@ -27,7 +27,7 @@ module drop_unit #(
   output logic                         cfg_drop_rdy
 );
 
-  localparam IDLE = 2'd0, SEND = 2'd1, DROP = 2'd2;
+  localparam SEND = 2'd0, DROP = 2'd1;
   logic [1:0] state, next_state;
   
   logic [$clog2(max_n_cycles)-1:0] n_cycles;
@@ -36,15 +36,8 @@ module drop_unit #(
   // manage state
   always_comb begin
     case (state)
-      IDLE: begin
-        if (req_val == 1) begin
-          next_state = SEND;
-        end else begin
-          next_state = IDLE;
-        end
-      end
       SEND: begin
-        if (enable == 0) begin
+        if (enable == 0 & req_val == 1) begin
           next_state = DROP;
         end else begin
           next_state = SEND;
@@ -58,7 +51,7 @@ module drop_unit #(
         end
       end
       default: begin
-        next_state = IDLE;
+        next_state = SEND;
       end
     endcase
   end
@@ -66,17 +59,11 @@ module drop_unit #(
   // manage data path
   always_comb begin
     case (state)
-      IDLE: begin
-        req_rdy = 0;
-        resp_msg = '0;
-        resp_val = 0;
-        cfg_drop_rdy = 1;
-      end
       SEND: begin
         req_rdy = 1;
         resp_msg = req_msg;
-        resp_val = 1;
-        cfg_drop_rdy = 0;
+        resp_val = req_val;
+        cfg_drop_rdy = 1;
       end
       DROP: begin
         req_rdy = 1;
@@ -92,7 +79,7 @@ module drop_unit #(
   // reset logic
   always_ff @(posedge clk) begin
     if (reset) begin
-      state <= IDLE;
+        state <= SEND;
     end else begin
       state <= next_state;
     end
@@ -100,7 +87,7 @@ module drop_unit #(
   
   // counter
   always_ff @(posedge clk) begin
-    if (state == IDLE || state == SEND) begin
+    if (state == SEND) begin
       counter <= '0;
     end else begin
       counter <= counter + 1;
@@ -109,8 +96,8 @@ module drop_unit #(
 
   // load n_cycles
   always_ff @(posedge clk) begin
-    if (state == IDLE) begin
-      n_cycles <= cfg_drop_val ? cfg_drop_msg : max_n_cycles;
+    if (state == SEND) begin
+      n_cycles <= cfg_drop_val ? cfg_drop_msg : n_cycles;
     end else begin
       n_cycles <= n_cycles;
     end
