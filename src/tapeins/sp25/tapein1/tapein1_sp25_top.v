@@ -27,7 +27,6 @@
 `include "lbist/lfsr/lfsr_galois.v"
 `include "cmn/reset_sync.v"
 `include "async_fifo/AsyncFifo.sv"
-`include "async_fifo/FifoPackager.sv"
 `include "async_fifo/PosedgeDetector.sv"
 
 
@@ -195,7 +194,7 @@ module tapein1_sp25_top #(
   localparam int NUM_SEEDS = 8;
   localparam int NUM_HASHES = 80;
   localparam int MAX_OUTPUTS_TO_HASH = 100;
-  localparam [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
+  localparam bit [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = '{
     16'b1010111010010110,
     16'b1000011100111010,
     16'b1000111110100010,
@@ -205,7 +204,7 @@ module tapein1_sp25_top #(
     16'b1010001110110100,
     16'b1101110001101011
   };
-  localparam [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
+  localparam bit [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = '{
     16'b0010000111000111,
     16'b0000000010011110,
     16'b0101100000100101,
@@ -875,7 +874,7 @@ module tapein1_sp25_top #(
 
   // Input port: 01 - FIFO Packager
   // Each fifo output is 8 bits
-  assign input_xbar_recv_msg[1] = {async_fifo_send_msg, {(DATA_BITS-FIFO_ENTRY_BITS){0}}};
+  assign input_xbar_recv_msg[1] = {async_fifo_send_msg, {(DATA_BITS-FIFO_ENTRY_BITS){1'b0}}};
   assign input_xbar_recv_val[1] = async_fifo_send_val;
   assign async_fifo_send_rdy = input_xbar_recv_rdy[1];
 
