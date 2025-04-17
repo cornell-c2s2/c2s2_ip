@@ -48,7 +48,7 @@ module lbist_controller #(
     parameter int NUM_HASHES = 8,            // Number of outputs from CUT misr should hash
     parameter int MAX_OUTPUTS_TO_HASH = 32,  // Max number of outputs from CUT misr should hash
     parameter int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH),
-    parameter [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
+    parameter bit [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
       32'h0a89687e,
       32'ha87ded5f,
       32'h481c5077,
@@ -58,7 +58,7 @@ module lbist_controller #(
       32'h9913b1fd,
       32'hd8df8ed2
     },
-    parameter [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
+    parameter bit [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
       32'h2435b217,
       32'hb25e4d4c,
       32'h16307bd1,
