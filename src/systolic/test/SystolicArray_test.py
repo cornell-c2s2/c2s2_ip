@@ -6,11 +6,8 @@ from fixedpt import Fixed
 from cocotb.triggers import *
 from cocotb.clock import Clock
 
-size=4 # 4x4 systolic array
 n=16   # Q8.8
 d=8    # Q8.8
-
-tcycles = size*2-1 # throughput cycle count for driving x and w
 
 #===========================================================
 
@@ -23,7 +20,7 @@ def mul_fp(a: Fixed, b: Fixed):
 def add_fp(a: Fixed, b: Fixed):
   return (a + b).resize(None, a._n, a._d)
 
-def matmul_fp(x:[], w:[]):
+def matmul_fp(x:[], w:[], size):
   s = []
   for i in range(size):
     _s = []
@@ -47,12 +44,12 @@ async def reset(dut):
   await RisingEdge(dut.clk)
   dut.rst.value = 0
 
-async def load_x(dut, l_x_col_in:[]):
+async def load_x(dut, l_x_col_in:[], size):
   dut.x_recv_val.value = 1
   for i in range(size):
     dut.l_x_col_in[i].value = l_x_col_in[i].get()
 
-async def load_w(dut, t_w_row_in:[]):
+async def load_w(dut, t_w_row_in:[], size):
   dut.w_recv_val.value = 1
   for i in range(size):
     dut.t_w_row_in[i].value = t_w_row_in[i].get()
@@ -82,6 +79,7 @@ async def check_output(dut, row, col, ref):
 
 @cocotb.test()
 async def test_case_1_reset(dut):
+  size=len(dut.l_x_col_in)
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
   await reset(dut)
@@ -92,6 +90,7 @@ async def test_case_1_reset(dut):
 
 @cocotb.test()
 async def test_case_2_load_x(dut):
+  size=len(dut.l_x_col_in)
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
   trials = 100
@@ -114,7 +113,7 @@ async def test_case_2_load_x(dut):
       for i in range(size):
         l_x_col_in.append(x[i][t])
       
-      await load_x(dut, l_x_col_in)
+      await load_x(dut, l_x_col_in, size)
       
       await step(dut)
       await check_recv_rdy(dut, 1, 1)
@@ -126,6 +125,7 @@ async def test_case_2_load_x(dut):
 
 @cocotb.test()
 async def test_case_3_load_w(dut):
+  size=len(dut.l_x_col_in)
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
   trials = 100
@@ -148,7 +148,7 @@ async def test_case_3_load_w(dut):
       for i in range(size):
         t_w_row_in.append(w[t][i])
       
-      await load_w(dut, t_w_row_in)
+      await load_w(dut, t_w_row_in, size)
 
       await step(dut)
       await check_recv_rdy(dut, 1, 1)
@@ -160,6 +160,7 @@ async def test_case_3_load_w(dut):
 
 @cocotb.test()
 async def test_case_4_synchronous_load(dut):
+  size=len(dut.l_x_col_in)
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
   for trial in range(100):
@@ -197,10 +198,10 @@ async def test_case_4_synchronous_load(dut):
         
       # load x, w
       if(x_recv_rdy):
-        await load_x(dut, l_x_col_in)
+        await load_x(dut, l_x_col_in, size)
         l_x_col_in_idx -= 1
       if(w_recv_rdy):
-        await load_w(dut, t_w_row_in)
+        await load_w(dut, t_w_row_in, size)
         t_w_row_in_idx -= 1
         
       await step(dut)
@@ -216,6 +217,7 @@ async def test_case_4_synchronous_load(dut):
 
 @cocotb.test()
 async def test_case_5_asynchronous_load(dut):
+  size=len(dut.l_x_col_in)
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
   for trial in range(100):
@@ -257,10 +259,10 @@ async def test_case_5_asynchronous_load(dut):
       
       # load x, w
       if(x_recv_rdy & load_x_sel):
-        await load_x(dut, l_x_col_in)
+        await load_x(dut, l_x_col_in, size)
         l_x_col_in_idx -= 1
       if(w_recv_rdy & load_w_sel):
-        await load_w(dut, t_w_row_in)
+        await load_w(dut, t_w_row_in, size)
         t_w_row_in_idx -= 1
       
       await step(dut)
@@ -276,6 +278,7 @@ async def test_case_5_asynchronous_load(dut):
 
 @cocotb.test()
 async def test_case_6_synchronous_load_mac_out(dut):
+  size=len(dut.l_x_col_in)
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
   for trial in range(100):
@@ -290,7 +293,7 @@ async def test_case_6_synchronous_load_mac_out(dut):
       x.append(x_row)
       w.append(w_row)
     
-    s_ref = matmul_fp(x, w)
+    s_ref = matmul_fp(x, w, size)
 
     # LOAD
 
@@ -317,10 +320,10 @@ async def test_case_6_synchronous_load_mac_out(dut):
           
       # load x, w
       if(x_recv_rdy):
-        await load_x(dut, l_x_col_in)
+        await load_x(dut, l_x_col_in, size)
         l_x_col_in_idx -= 1
       if(w_recv_rdy):
-        await load_w(dut, t_w_row_in)
+        await load_w(dut, t_w_row_in, size)
         t_w_row_in_idx -= 1
           
       await step(dut)
@@ -358,6 +361,7 @@ async def test_case_6_synchronous_load_mac_out(dut):
 
 @cocotb.test()
 async def test_case_7_asynchronous_load_mac_out(dut):
+  size=len(dut.l_x_col_in)
   cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
 
   for trial in range(100):
@@ -372,7 +376,7 @@ async def test_case_7_asynchronous_load_mac_out(dut):
       x.append(x_row)
       w.append(w_row)
     
-    s_ref = matmul_fp(x, w)
+    s_ref = matmul_fp(x, w, size)
 
     # LOAD
 
@@ -403,10 +407,10 @@ async def test_case_7_asynchronous_load_mac_out(dut):
           
       # load x, w
       if(x_recv_rdy & load_x_sel):
-        await load_x(dut, l_x_col_in)
+        await load_x(dut, l_x_col_in, size)
         l_x_col_in_idx -= 1
       if(w_recv_rdy & load_w_sel):
-        await load_w(dut, t_w_row_in)
+        await load_w(dut, t_w_row_in, size)
         t_w_row_in_idx -= 1
           
       await step(dut)

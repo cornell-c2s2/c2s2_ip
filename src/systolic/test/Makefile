@@ -7,6 +7,7 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 VERILOG_SOURCES=$(C2S2_PATH)/src/systolic/*.v
 
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
+COMPILE_ARGS += -sverilog
 
 WAVES=1
 COVER=1
@@ -30,3 +31,9 @@ clean_all:
 
 coverage_report:
 	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
+
+test_4x4:
+	$(MAKE) COMPILE_ARGS+="-pvalue+SystolicArray.size=4"
+
+test_8x8:
+	$(MAKE) COMPILE_ARGS+="-pvalue+SystolicArray.size=8"
