@@ -31,9 +31,3 @@ clean_all:
 
 coverage_report:
 	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
-
-test_4x4:
-	$(MAKE) COMPILE_ARGS+="-pvalue+SystolicArray.size=4"
-
-test_8x8:
-	$(MAKE) COMPILE_ARGS+="-pvalue+SystolicArray.size=8"
