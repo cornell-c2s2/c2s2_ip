@@ -6,16 +6,16 @@
 
 module SyncFIFO
 #(
-  parameter depth     = 4,
-  parameter nbits     = 16,
-  parameter ptr_width = $clog2(depth) + 1
+  parameter DEPTH     = 4,
+  parameter NBITS     = 16,
+  parameter PTR_WIDTH = $clog2(DEPTH) + 1
 )(
   input  logic             clk,
   input  logic             rst,
   input  logic             wen,
   input  logic             ren,
-  input  logic [nbits-1:0] d,
-  output logic [nbits-1:0] q,
+  input  logic [NBITS-1:0] d,
+  output logic [NBITS-1:0] q,
   output logic             full,
   output logic             empty
 );
@@ -23,14 +23,14 @@ module SyncFIFO
   logic _full;
   logic _empty;
 
-  logic [ptr_width-1:0] r_ptr;
-  logic [ptr_width-1:0] w_ptr;
+  logic [PTR_WIDTH-1:0] r_ptr;
+  logic [PTR_WIDTH-1:0] w_ptr;
 
-  logic [nbits-1:0] mem [depth];
+  logic [NBITS-1:0] mem [DEPTH];
 
   // Synchronous R/W Pointers
 
-  SyncFIFO_ReadPtr #(depth) r_ptr_blk
+  SyncFIFO_ReadPtr #(DEPTH) r_ptr_blk
   (
     .clk   (clk),
     .rst   (rst),
@@ -40,7 +40,7 @@ module SyncFIFO
     .empty (_empty)
   );
 
-  SyncFIFO_WritePtr #(depth) w_ptr_blk
+  SyncFIFO_WritePtr #(DEPTH) w_ptr_blk
   (
     .clk   (clk),
     .rst   (rst),
@@ -57,10 +57,10 @@ module SyncFIFO
 
   always_ff @(posedge clk) begin
     if(wen & ~_full)
-      mem[w_ptr[ptr_width-2:0]] <= d;
+      mem[w_ptr[PTR_WIDTH-2:0]] <= d;
   end
 
-  assign q = ((ren & ~_empty) ? mem[r_ptr[ptr_width-2:0]] : 0);
+  assign q = ((ren & ~_empty) ? mem[r_ptr[PTR_WIDTH-2:0]] : 0);
 
 endmodule
 

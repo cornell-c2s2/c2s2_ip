@@ -6,44 +6,44 @@
 
 module SystolicDpath
 #(
-  parameter size  = 4,
-  parameter nbits = 16,
-  parameter dbits = 8
+  parameter SIZE  = 4,
+  parameter NBITS = 16,
+  parameter DBITS = 8
 )(
   input  logic                    clk,
   input  logic                    rst,
   input  logic                    mac_en,
 
-  input  logic [nbits-1:0]        l_x_col_in   [size],
-  input  logic                    x_fifo_wen   [size],
-  input  logic                    x_fifo_ren   [size],
-  output logic                    x_fifo_full  [size],
-  output logic                    x_fifo_empty [size],
+  input  logic [NBITS-1:0]        l_x_col_in   [SIZE],
+  input  logic                    x_fifo_wen   [SIZE],
+  input  logic                    x_fifo_ren   [SIZE],
+  output logic                    x_fifo_full  [SIZE],
+  output logic                    x_fifo_empty [SIZE],
 
-  input  logic [nbits-1:0]        t_w_row_in   [size],
-  input  logic                    w_fifo_wen   [size],
-  input  logic                    w_fifo_ren   [size],
-  output logic                    w_fifo_full  [size],
-  output logic                    w_fifo_empty [size],
+  input  logic [NBITS-1:0]        t_w_row_in   [SIZE],
+  input  logic                    w_fifo_wen   [SIZE],
+  input  logic                    w_fifo_ren   [SIZE],
+  output logic                    w_fifo_full  [SIZE],
+  output logic                    w_fifo_empty [SIZE],
 
-  input  logic [$clog2(size)-1:0] out_rsel,
-  input  logic [$clog2(size)-1:0] out_csel,
-  output logic [nbits-1:0]        b_s_out
+  input  logic [$clog2(SIZE)-1:0] out_rsel,
+  input  logic [$clog2(SIZE)-1:0] out_csel,
+  output logic [NBITS-1:0]        b_s_out
 );
 
   genvar i, j;
 
   // Interal Data Flow Wires
 
-  logic [nbits-1:0] w [size+1][size];
-  logic [nbits-1:0] x [size][size+1];
-  logic [nbits-1:0] s [size][size];
+  logic [NBITS-1:0] w [SIZE+1][SIZE];
+  logic [NBITS-1:0] x [SIZE][SIZE+1];
+  logic [NBITS-1:0] s [SIZE][SIZE];
 
   // Tensor FIFO
 
   generate
-    for(i = 0; i < size; i++) begin : g_tensor_fifo
-      SyncFIFO #(size, nbits) TensorFIFO
+    for(i = 0; i < SIZE; i++) begin : g_tensor_fifo
+      SyncFIFO #(SIZE, NBITS) TensorFIFO
       (
         .clk   (clk),
         .rst   (rst),
@@ -60,8 +60,8 @@ module SystolicDpath
   // Weight FIFO
 
   generate
-    for(j = 0; j < size; j++) begin : g_weight_fifo
-      SyncFIFO #(size, nbits) WeightFIFO
+    for(j = 0; j < SIZE; j++) begin : g_weight_fifo
+      SyncFIFO #(SIZE, NBITS) WeightFIFO
       (
         .clk   (clk),
         .rst   (rst),
@@ -78,9 +78,9 @@ module SystolicDpath
   // Systolic Array
 
   generate
-    for (i = 0; i < size; i++) begin : g_pe_rows
-      for (j = 0; j < size; j++) begin : g_pe_cols
-        SystolicPE #(nbits, dbits, 1) PE
+    for (i = 0; i < SIZE; i++) begin : g_pe_rows
+      for (j = 0; j < SIZE; j++) begin : g_pe_cols
+        SystolicPE #(NBITS, DBITS, 1) PE
         (
           .clk   (clk),
           .rst   (rst),

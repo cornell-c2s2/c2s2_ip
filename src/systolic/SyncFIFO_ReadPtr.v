@@ -3,22 +3,22 @@
 
 module SyncFIFO_ReadPtr
 #(
-  parameter depth     = 4,
-  parameter ptr_width = $clog2(depth) + 1
+  parameter DEPTH     = 4,
+  parameter PTR_WIDTH = $clog2(DEPTH) + 1
 )(
   input  logic                 clk,
   input  logic                 rst,
   input  logic                 ren,
-  input  logic [ptr_width-1:0] w_ptr,
-  output logic [ptr_width-1:0] r_ptr,
+  input  logic [PTR_WIDTH-1:0] w_ptr,
+  output logic [PTR_WIDTH-1:0] r_ptr,
   output logic                 empty
 );
 
   logic                 _empty;
-  logic [ptr_width-1:0] _r_ptr;
-  logic [ptr_width-1:0] _r_ptr_next;
+  logic [PTR_WIDTH-1:0] _r_ptr;
+  logic [PTR_WIDTH-1:0] _r_ptr_next;
 
-  assign _r_ptr_next = _r_ptr + {{(ptr_width-1){1'b0}}, (ren & ~_empty)};
+  assign _r_ptr_next = _r_ptr + {{(PTR_WIDTH-1){1'b0}}, (ren & ~_empty)};
 
   always_ff @(posedge clk) begin
     _r_ptr <= (rst ? 0 : _r_ptr_next);

@@ -6,50 +6,47 @@
 
 module SystolicArray
 #(
-  parameter size  = 4,
-  parameter nbits = 16,
-  parameter dbits = 8
+  parameter SIZE  = 4,
+  parameter NBITS = 16,
+  parameter DBITS = 8
 )(
   input  logic                    clk,
   input  logic                    rst,
 
-  input  logic [nbits-1:0]        l_x_col_in [size],
+  input  logic [NBITS-1:0]        l_x_col_in [SIZE],
   input  logic                    x_recv_val,
   output logic                    x_recv_rdy,
 
-  input  logic [nbits-1:0]        t_w_row_in [size],
+  input  logic [NBITS-1:0]        t_w_row_in [SIZE],
   input  logic                    w_recv_val,
   output logic                    w_recv_rdy,
 
   output logic                    mac_rdy,
   output logic                    out_rdy,
 
-  input  logic [$clog2(size)-1:0] out_rsel,
-  input  logic [$clog2(size)-1:0] out_csel,
-  output logic [nbits-1:0]        b_s_out
+  input  logic [$clog2(SIZE)-1:0] out_rsel,
+  input  logic [$clog2(SIZE)-1:0] out_csel,
+  output logic [NBITS-1:0]        b_s_out
 );
 
   logic mac_en;
 
-  logic x_fifo_wen   [size];
-  logic x_fifo_ren   [size];
-  logic x_fifo_full  [size];
-  logic x_fifo_empty [size];
+  logic x_fifo_wen   [SIZE];
+  logic x_fifo_ren   [SIZE];
+  logic x_fifo_full  [SIZE];
+  logic x_fifo_empty [SIZE];
 
-  logic w_fifo_wen   [size];
-  logic w_fifo_ren   [size];
-  logic w_fifo_full  [size];
-  logic w_fifo_empty [size];
+  logic w_fifo_wen   [SIZE];
+  logic w_fifo_ren   [SIZE];
+  logic w_fifo_full  [SIZE];
+  logic w_fifo_empty [SIZE];
 
-  logic mac_rdy;
-  logic out_rdy;
-
-  SystolicDpath #(size, nbits, dbits) dpath
+  SystolicDpath #(SIZE, NBITS, DBITS) dpath
   (
     .*
   );
 
-  SystolicCtrl #(size) ctrl
+  SystolicCtrl #(SIZE) ctrl
   (
     .*
   );

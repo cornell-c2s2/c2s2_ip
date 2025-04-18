@@ -7,7 +7,7 @@
 
 module SystolicCtrl
 #(
-  parameter size = 4
+  parameter SIZE = 4
 )(
   input  logic clk,
   input  logic rst,
@@ -20,15 +20,15 @@ module SystolicCtrl
   input  logic w_recv_val,
   output logic w_recv_rdy,
 
-  input  logic x_fifo_full  [size],
-  input  logic x_fifo_empty [size],
-  output logic x_fifo_wen   [size],
-  output logic x_fifo_ren   [size],
+  input  logic x_fifo_full  [SIZE],
+  input  logic x_fifo_empty [SIZE],
+  output logic x_fifo_wen   [SIZE],
+  output logic x_fifo_ren   [SIZE],
 
-  input  logic w_fifo_full  [size],
-  input  logic w_fifo_empty [size],
-  output logic w_fifo_wen   [size],
-  output logic w_fifo_ren   [size],
+  input  logic w_fifo_full  [SIZE],
+  input  logic w_fifo_empty [SIZE],
+  output logic w_fifo_wen   [SIZE],
+  output logic w_fifo_ren   [SIZE],
   
   output logic mac_rdy,
   output logic out_rdy/*,
@@ -47,7 +47,7 @@ module SystolicCtrl
   always_comb begin
     x_full = 1;
     w_full = 1;
-    for(int i = 0; i < size; i++) begin
+    for(int i = 0; i < SIZE; i++) begin
       x_full = (x_full & x_fifo_full[i]);
       w_full = (w_full & w_fifo_full[i]);
     end
@@ -57,7 +57,7 @@ module SystolicCtrl
 
   always_comb begin
     empty = 1;
-    for(int i = 0; i < size; i++)
+    for(int i = 0; i < SIZE; i++)
       empty = (empty & x_fifo_empty[i] & w_fifo_empty[i]);
   end
 
@@ -83,7 +83,7 @@ module SystolicCtrl
   // Output Logic
 
   always_comb begin
-    for(int i = 0; i < size; i++) begin
+    for(int i = 0; i < SIZE; i++) begin
       x_fifo_wen[i] = ((state == `LOAD) & ~x_full & x_recv_val);
       w_fifo_wen[i] = ((state == `LOAD) & ~w_full & w_recv_val);
     end
@@ -96,7 +96,7 @@ module SystolicCtrl
   always_ff @(posedge clk) begin
     x_fifo_ren[0] <= (rst ? 0 : (((state == `LOAD) & full) | ((state == `MAC) & ~empty)));
     w_fifo_ren[0] <= (rst ? 0 : (((state == `LOAD) & full) | ((state == `MAC) & ~empty)));
-    for(int i = 1; i < size; i++) begin
+    for(int i = 1; i < SIZE; i++) begin
       x_fifo_ren[i] <= (rst ? 0 : ((state == `MAC) & ~empty & x_fifo_ren[i-1]));
       w_fifo_ren[i] <= (rst ? 0 : ((state == `MAC) & ~empty & w_fifo_ren[i-1]));
     end
