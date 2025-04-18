@@ -6,8 +6,9 @@ from fixedpt import Fixed
 from cocotb.triggers import *
 from cocotb.clock import Clock
 
-n=16   # Q8.8
-d=8    # Q8.8
+# FP Q8.8
+NBITS=16
+DBITS=8
 
 #===========================================================
 
@@ -25,7 +26,7 @@ def matmul_fp(x:[], w:[], size):
   for i in range(size):
     _s = []
     for j in range(size):
-      _s.append(Fixed(0, 1, 16, 8))
+      _s.append(Fixed(0, 1, NBITS, DBITS))
     s.append(_s)
 
   for i in range(size):
@@ -100,7 +101,7 @@ async def test_case_2_load_x(dut):
     for i in range(size):
       x_row = []
       for j in range(size):
-        x_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+        x_row.append(Fixed(rand_fp(NBITS, DBITS), 1, NBITS, DBITS))
       x.append(x_row)
 
     await reset(dut)
@@ -135,7 +136,7 @@ async def test_case_3_load_w(dut):
     for i in range(size):
       w_row = []
       for j in range(size):
-        w_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+        w_row.append(Fixed(rand_fp(NBITS, DBITS), 1, NBITS, DBITS))
       w.append(w_row)
 
     await reset(dut)
@@ -170,8 +171,8 @@ async def test_case_4_synchronous_load(dut):
       x_row = []
       w_row = []
       for j in range(size):
-        x_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
-        w_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+        x_row.append(Fixed(rand_fp(NBITS, DBITS), 1, NBITS, DBITS))
+        w_row.append(Fixed(rand_fp(NBITS, DBITS), 1, NBITS, DBITS))
       x.append(x_row)
       w.append(w_row)
       
@@ -227,8 +228,8 @@ async def test_case_5_asynchronous_load(dut):
       x_row = []
       w_row = []
       for j in range(size):
-        x_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
-        w_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+        x_row.append(Fixed(rand_fp(NBITS, DBITS), 1, NBITS, DBITS))
+        w_row.append(Fixed(rand_fp(NBITS, DBITS), 1, NBITS, DBITS))
       x.append(x_row)
       w.append(w_row)
     
@@ -288,8 +289,8 @@ async def test_case_6_synchronous_load_mac_out(dut):
       x_row = []
       w_row = []
       for j in range(size):
-        x_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
-        w_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+        x_row.append(Fixed(rand_fp(NBITS, DBITS), 1, NBITS, DBITS))
+        w_row.append(Fixed(rand_fp(NBITS, DBITS), 1, NBITS, DBITS))
       x.append(x_row)
       w.append(w_row)
     
@@ -343,6 +344,7 @@ async def test_case_6_synchronous_load_mac_out(dut):
     for t in range(throughput_cycles):
       # drive in all of x and w into PEs
       await step(dut)
+      await check_recv_rdy(dut, 0, 0)
       await check_mac_rdy(dut, 1)
       await check_out_rdy(dut, 0)
     
@@ -353,6 +355,7 @@ async def test_case_6_synchronous_load_mac_out(dut):
         #   2) last value from last row/col of x and w flows through PEs
         #   3) outputs unaffected by continuing clock cycles
         await step(dut)
+        await check_recv_rdy(dut, 0, 0)
         await check_mac_rdy(dut, 0)
         await check_out_rdy(dut, 1)
         await check_output(dut, i, j, s_ref[i][j])
@@ -371,8 +374,8 @@ async def test_case_7_asynchronous_load_mac_out(dut):
       x_row = []
       w_row = []
       for j in range(size):
-        x_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
-        w_row.append(Fixed(rand_fp(16, 8), 1, 16, 8))
+        x_row.append(Fixed(rand_fp(NBITS, DBITS), 1, NBITS, DBITS))
+        w_row.append(Fixed(rand_fp(NBITS, DBITS), 1, NBITS, DBITS))
       x.append(x_row)
       w.append(w_row)
     
@@ -430,6 +433,7 @@ async def test_case_7_asynchronous_load_mac_out(dut):
     for t in range(throughput_cycles):
       # drive in all of x and w into PEs
       await step(dut)
+      await check_recv_rdy(dut, 0, 0)
       await check_mac_rdy(dut, 1)
       await check_out_rdy(dut, 0)
     
@@ -440,6 +444,99 @@ async def test_case_7_asynchronous_load_mac_out(dut):
         #   2) last value from last row/col of x and w flows through PEs
         #   3) outputs unaffected by continuing clock cycles
         await step(dut)
+        await check_recv_rdy(dut, 0, 0)
+        await check_mac_rdy(dut, 0)
+        await check_out_rdy(dut, 1)
+        await check_output(dut, i, j, s_ref[i][j])
+
+#===========================================================
+
+@cocotb.test()
+async def test_case_8_asynchronous_load_mac_out_edge(dut):
+  size=len(dut.l_x_col_in)
+  cocotb.start_soon(Clock(dut.clk, 1, units="ns").start(start_high=False))
+
+  for trial in range(100):
+    x = []
+    w = []
+    for i in range(size):
+      x_row = []
+      w_row = []
+      for j in range(size):
+        x_row.append(Fixed(rand_fp(NBITS, DBITS), 1, NBITS, DBITS))
+        w_row.append(Fixed(rand_fp(NBITS, DBITS), 1, NBITS, DBITS))
+      x.append(x_row)
+      w.append(w_row)
+    
+    s_ref = matmul_fp(x, w, size)
+
+    # LOAD
+
+    l_x_col_in_idx = size-1
+    t_w_row_in_idx = size-1
+
+    x_recv_rdy = 1
+    w_recv_rdy = 1
+
+    await reset(dut)
+
+    await step(dut)
+    await check_recv_rdy(dut, 1, 1)
+
+    while(x_recv_rdy | w_recv_rdy):
+      # randomly choose to load x, w
+      load_x_sel = random.randint(0, 1)
+      load_w_sel = random.randint(0, 1)
+
+      # select x column, w row
+      # EDGE CASE: attempt to write FIFOs even if *_recv_rdy=0 (should be ignored)
+      l_x_col_in = []
+      t_w_row_in = []
+      for i in range(size):
+        if(load_x_sel):
+          x_load = (x[i][l_x_col_in_idx] if x_recv_rdy else rand_fp(NBITS, DBITS))
+          l_x_col_in.append(x_load)
+        if(load_w_sel):
+          w_load = (w[t_w_row_in_idx][i] if w_recv_rdy else rand_fp(NBITS, DBITS))
+          t_w_row_in.append(w_load)
+          
+      # load x, w
+      if(load_x_sel):
+        await load_x(dut, l_x_col_in, size)
+        l_x_col_in_idx -= 1
+      if(load_w_sel):
+        await load_w(dut, t_w_row_in, size)
+        t_w_row_in_idx -= 1
+          
+      await step(dut)
+      await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
+
+      x_recv_rdy = (l_x_col_in_idx >= 0)
+      w_recv_rdy = (t_w_row_in_idx >= 0)
+        
+    await step(dut)
+    await check_recv_rdy(dut, x_recv_rdy, w_recv_rdy)
+    await check_mac_rdy(dut, 0)
+    await check_out_rdy(dut, 0)
+
+    # MAC
+
+    throughput_cycles = (size * 2)
+    for t in range(throughput_cycles):
+      # drive in all of x and w into PEs
+      await step(dut)
+      await check_recv_rdy(dut, 0, 0)
+      await check_mac_rdy(dut, 1)
+      await check_out_rdy(dut, 0)
+    
+    for i in range(size):
+      for j in range(size):
+        # combinationally check final summation stored in each PE
+        #   1) outputs become available in diagonal order from (0,0)
+        #   2) last value from last row/col of x and w flows through PEs
+        #   3) outputs unaffected by continuing clock cycles
+        await step(dut)
+        await check_recv_rdy(dut, 0, 0)
         await check_mac_rdy(dut, 0)
         await check_out_rdy(dut, 1)
         await check_output(dut, i, j, s_ref[i][j])
