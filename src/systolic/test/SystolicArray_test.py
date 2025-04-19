@@ -348,6 +348,8 @@ async def test_case_6_synchronous_load_mac_out(dut):
       await check_mac_rdy(dut, 1)
       await check_out_rdy(dut, 0)
     
+    # OUT
+
     for i in range(size):
       for j in range(size):
         # combinationally check final summation stored in each PE
@@ -437,6 +439,8 @@ async def test_case_7_asynchronous_load_mac_out(dut):
       await check_mac_rdy(dut, 1)
       await check_out_rdy(dut, 0)
     
+    # OUT
+
     for i in range(size):
       for j in range(size):
         # combinationally check final summation stored in each PE
@@ -528,6 +532,8 @@ async def test_case_8_asynchronous_load_mac_out_edge(dut):
       await check_recv_rdy(dut, 0, 0)
       await check_mac_rdy(dut, 1)
       await check_out_rdy(dut, 0)
+    
+    # OUT
     
     for i in range(size):
       for j in range(size):
