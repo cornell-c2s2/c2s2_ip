@@ -19,12 +19,10 @@ async def basic_PosedgeDetector_test1(dut):
     # Reset to 0
     dut.reset.value = 0
     dut.req_val = 0
-    dut.resp_rdy = 1
     await ClockCycles(dut.clk, 1)
 
     # Set req_val high
     dut.req_val = 1
-    dut.req_msg = 3
     await ClockCycles(dut.clk, 1)
 
     # resp_val high in same cycle
@@ -48,12 +46,10 @@ async def basic_PosedgeDetector_test2(dut):
     # Reset to 0
     dut.reset.value = 0
     dut.req_val = 0
-    dut.resp_rdy = 1
     await ClockCycles(dut.clk, 1)
 
     # Set req_val high
     dut.req_val = 1
-    dut.req_msg = 4
     await ClockCycles(dut.clk, 1)
 
     # resp_val high in same cycle
@@ -64,7 +60,6 @@ async def basic_PosedgeDetector_test2(dut):
     assert dut.resp_val == 0
     # Deassert req_val
     dut.req_val = 0
-    dut.req_msg = 2
     await ClockCycles(dut.clk, 1)
 
     # assert req_val

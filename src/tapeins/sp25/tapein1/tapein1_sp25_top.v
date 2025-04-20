@@ -34,23 +34,28 @@ module tapein1_sp25_top #(
   parameter int FIFO_ENTRY_BITS = 8
 ) (
   // Clock and Reset Ports
-  input  logic  clk,
-  input  logic  reset,
+  input  logic                         clk,
+  input  logic                         reset,
+  output logic                         clk_out,
 
   // SPI Minion ports
-  input  logic  cs,
-  input  logic  mosi,
-  output logic  miso,
-  input  logic  sclk,
-  output logic  minion_parity,
-  output logic  adapter_parity,
+  input  logic                         cs,
+  input  logic                         mosi,
+  output logic                         miso,
+  input  logic                         sclk,
+  output logic                         minion_parity,
+  output logic                         adapter_parity,
 
   // Async FIFO ports
   input  logic                         ext_clk,
   input  logic [FIFO_ENTRY_BITS-1:0]   async_fifo_recv_msg,
-  // TODO: Might need to add a debounce here
+
   input  logic                         async_fifo_recv_val,
-  output logic                         async_fifo_recv_rdy
+  output logic                         async_fifo_recv_rdy,
+
+  // Classifier ports
+  output logic                         classifier_send_msg,
+  output logic                         classifier_send_val,
 );
 
   //============================LOCAL_PARAMETERS====================================
@@ -159,8 +164,8 @@ module tapein1_sp25_top #(
   // Classifier Deserializer -------------------------------------------------------
   // Classifier --------------------------------------------------------------------
   // - CLASSIFIER_SAMPLES:
-  //     Number of samples by the classifier. Both FFTs generate 32 samples. FFT is
-  //     conjugate symmetric. Therefore, we only need to read 32/2 samples.
+  //     Number of samples inputted to the classifier. Both FFTs generate 32 samples. 
+  //     FFT is conjugate symmetric. Therefore, we only need to read 32/2 samples.
   // - CLASSIFIER_BITS:
   //     Number of classifier input bits.
   // - CLASSIFIER_DECIMAL_PT:
@@ -370,8 +375,8 @@ module tapein1_sp25_top #(
   logic [DATA_BITS-1:0]                    classifier_config_msg [3];
   logic                                    classifier_config_rdy [3];
   logic                                    classifier_config_val [3];
-  logic                                    classifier_send_msg;
-  logic                                    classifier_send_val;
+  // logic                                    classifier_send_msg; (toplevel output pin)
+  // logic                                    classifier_send_val; (toplevel output pin)
   logic                                    classifier_send_rdy;
 
   // LBIST Controller --------------------------------------------------------------
@@ -564,9 +569,8 @@ module tapein1_sp25_top #(
     .recv_msg                (fft1_send_msg[0:FFT1_SAMPLES/2-1])
   );
 
-  // TODO: Update bounds w/ parameters
   generate
-    for (genvar i = 16; i < 32; i = i + 1) begin
+    for (genvar i = FFT1_SAMPLES/2; i < FFT1_SAMPLES; i = i + 1) begin
       wire fft1_msg_unused = &{1'b0, fft1_send_msg[i], 1'b0};
     end
   endgenerate
@@ -619,9 +623,8 @@ module tapein1_sp25_top #(
     .recv_msg                (fft2_send_msg[0:FFT2_SAMPLES/2-1])
   );
 
-  // TODO: Update bounds w/ parameters
   generate
-    for (genvar i = 16; i < 32; i = i + 1) begin
+    for (genvar i = FFT2_SAMPLES/2; i < FFT2_SAMPLES; i = i + 1) begin
       wire fft2_msg_unused = &{1'b0, fft2_send_msg[i], 1'b0};
     end
   endgenerate
@@ -773,6 +776,10 @@ module tapein1_sp25_top #(
 
 
   //===============================ROUTING_LOGIC====================================
+
+  // Clock out ---------------------------------------------------------------------
+  assign clk_out = clk;
+
   // Router ------------------------------------------------------------------------
   // Addressing Scheme:
   // ** Router has 4 address bits. This corresponds to 16 output ports.**
@@ -1033,8 +1040,26 @@ module tapein1_sp25_top #(
 
   //================================ASSERTS=========================================
   // SPI Minion --------------------------------------------------------------------
+  generate
+    if ($clog2(DATA_BITS) != ADDR_BITS) begin
+      $error("ADDR_BITS must be equal to the log2 of DATA_BITS");
+    end
+  endgenerate
+
   // Router ------------------------------------------------------------------------
   // Arbiter -----------------------------------------------------------------------
+  generate
+    if (ARBITER_SIZE != ROUTER_SIZE) begin
+      $error("ARBITER_SIZE must be equal to ROUTER_SIZE");
+    end
+  endgenerate
+  
+  generate
+    if (ROUTER_PACKET_BITS != DATA_BITS) begin
+      $error("ROUTER_PACKET_BITS must be equal to DATA_BITS");
+    end
+  endgenerate
+
   // Input Xbar --------------------------------------------------------------------
   generate
     if (INPUT_XBAR_CONTROL_BITS > DATA_BITS) begin
@@ -1063,6 +1088,31 @@ module tapein1_sp25_top #(
   // FFT Core 2 Serializer ---------------------------------------------------------
   // FFT Core 2 --------------------------------------------------------------------
   // Classifier Deserializer -------------------------------------------------------
+
+  generate
+    if (CLASSIFIER_SAMPLES != FFT1_SAMPLES) begin
+      $error("CLASSIFIER_SAMPLES must be equal to FFT1_SAMPLES");
+    end
+    if (CLASSIFIER_SAMPLES != FFT2_SAMPLES) begin
+      $error("CLASSIFIER_SAMPLES must be equal to FFT2_SAMPLES");
+    end
+  endgenerate
+
+  generate
+    if (CLASSIFIER_BITS != DATA_BITS) begin
+      $error("CLASSIFIER_BITS must be equal to DATA_BITS");
+    end
+  endgenerate
+
+  generate
+    if (CLASSIFIER_DECIMAL_PT != FFT1_DECIMAL_PT) begin
+      $error("CLASSIFIER_DECIMAL_PT must be equal to FFT1_DECIMAL_PT");
+    end
+    if (CLASSIFIER_DECIMAL_PT != FFT2_DECIMAL_PT) begin
+      $error("CLASSIFIER_DECIMAL_PT must be equal to FFT2_DECIMAL_PT");
+    end
+  endgenerate
+
   // Classifier --------------------------------------------------------------------
   // Wishbone Harness --------------------------------------------------------------
   // LBIST Controller --------------------------------------------------------------

@@ -44,8 +44,7 @@ if {[is_project_open]} {
 if {$make_assignments} {
 	set_global_assignment -name FAMILY "Cyclone IV E"
 	set_global_assignment -name DEVICE EP4CE115F29C7
-	set_global_assignment -name TOP_LEVEL_ENTITY FPGA_top
-	set_global_assignment -name VERILOG_FILE FPGA_top.v
+	set_global_assignment -name TOP_LEVEL_ENTITY tapein1_sp25_top
 	set_global_assignment -name VERILOG_FILE interconnect_fpga.v
 	set_global_assignment -name SDC_FILE timing.sdc
   set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files

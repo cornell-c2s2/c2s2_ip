@@ -12,7 +12,7 @@ module FPGA_top (
 assign LEDR0 = GPIO1;
 assign LEDR1 = ~GPIO1;
 
-tapeins_sp24_fpga_emulation2_Interconnect_Fpga dut(
+tapein1_sp25_top dut(
   .clk(CLOCK_50),
   .reset(GPIO1),
   .cs(GPIO6),

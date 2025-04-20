@@ -5,8 +5,8 @@ BUILD_DIR=$(FPGA_DIR)/build
 SCRIPT_DIR=$(TOP_DIR)/fpga_emulation/scripts
 
 # Conversion
-src_emulation_dir = $(SRC_DIR)/tapeins/sp24/fpga_emulation2
-interconnect_file = $(src_emulation_dir)/interconnect_fpga.v
+src_emulation_dir = $(SRC_DIR)/tapeins/sp25/tapein1
+interconnect_file = $(src_emulation_dir)/tapein1_sp25_top.v
 
 # Output files
 pickled_file = $(BUILD_DIR)/Interconnect_Fpga_pickled.v
@@ -23,7 +23,7 @@ output_files_dir = $(FPGA_DIR)/output_files
 
 # Quartus Programming: Requires updating depending on the installation path
 
-qts_bin = ~/intelFPGA_lite/23.1std/quartus/bin/
+qts_bin = /opt/quartus/18.1.0.625/quartus/bin/
 
 QTS_SH = $(qts_bin)/quartus_sh
 QTS_PGM = $(qts_bin)/quartus_pgm

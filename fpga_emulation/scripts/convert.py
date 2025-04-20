@@ -232,7 +232,7 @@ def clean_localparams_from_module(content : List[str]):
     header_end = []
 
     # Is there a parameter declaration
-    params_exits = re.match(r'\s*module\s+\w+\s*#\s*\(', result[0])
+    params_exits = re.match(r'\s*module\s+(\w+)\s*#\s*\(', result[0])
     
     # No parameter declaration, return
     if not params_exits:
@@ -240,13 +240,13 @@ def clean_localparams_from_module(content : List[str]):
 
     # Find the end of the parameter declaration
     for idx in range(len(result)):
-        if re.match(r'\s*\)\s*\(', result[idx]):
+        if re.match(r'\s*\)', result[idx]):
             param_end.append(idx)
             break
 
     # check I only have one parameter declaration    
     if len(param_end) != 1:
-        raise Exception("Parameter declaration not closed")
+        raise Exception(f"Parameter declaration not closed in module {params_exits.group(1)}")
     
     # Find the end of the module header declaration
     for idx in range(len(result)):
@@ -270,7 +270,7 @@ def clean_localparams_from_module(content : List[str]):
     for idx in localparams[::-1]:
         if "," in result[idx]:
             comma_idx = result[idx].find(",")
-            print(f"Found comma in localparam: {result[idx][:comma_idx]}")
+            # print(f"Found comma in localparam: {result[idx][:comma_idx]}")
             result.insert(header_end[0], result.pop(idx)[:comma_idx]+"; \n")
         else:
             result.insert(header_end[0], result.pop(idx)[:-1]+"; \n")
