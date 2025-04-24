@@ -48,10 +48,8 @@ def show_device_info():
   """
   Prints, in the command-line, the current information about the device and USB port.
   """
-  print()
-  print("Your current device is", device)
-  print("You are connected through", port)
-  print()
+  print("\nYour current device is", device)
+  print("You are connected through", port, "\n")
 
 
 def set_print_mode(mode):
@@ -118,6 +116,7 @@ class Config(int):
   OUTXBAR_CLS_WSB = 0x50009  # Classifier to Wishbone
 
 
+@DeprecationWarning
 def send(message, mode="wr"):
   """
   Sends a message to the SPI driver.
@@ -150,8 +149,7 @@ def spi_none():
   """
   send = spi_stream_protocol.nocommand_read_msg()
   recv = spi_write_physical(send)
-  printer(send, recv)
-  return recv
+  return send, recv
   
 
 def spi_read():
@@ -160,8 +158,7 @@ def spi_read():
   """
   send = spi_stream_protocol.read_msg()
   recv = spi_write_physical(send)
-  printer(send, recv)
-  return recv
+  return send, recv
   
 
 def spi_write(message):
@@ -170,8 +167,7 @@ def spi_write(message):
   """
   send = spi_stream_protocol.write_msg(mk_bits(20)(message))
   recv = spi_write_physical(send)
-  printer(send, recv)
-  return recv
+  return send, recv
   
 
 def spi_write_read(message):
@@ -180,8 +176,87 @@ def spi_write_read(message):
   """
   send = spi_stream_protocol.write_read_msg(mk_bits(20)(message))
   recv = spi_write_physical(send)
-  printer(send, recv)
-  return recv
+  return send, recv
+
+
+def spi_none_print():
+  """
+  Sends a message to the SPI driver with instruction "no command read".
+  """
+  send = spi_stream_protocol.nocommand_read_msg()
+  recv = spi_write_physical(send)
+
+  if print_mode == 1:
+    print("Transaction:  " + str(send[0:transaction_print_len]) + "  >  " + 
+        str(recv[0:transaction_print_len]))
+  elif print_mode == 2:
+    if recv[16:20] == mk_bits(4)(0x4):
+      if recv[0] == mk_bits(1)(0x1):
+        print("Classifier: 1")
+      else:
+        print("Classifier: 0")
+
+  return send, recv
+  
+
+def spi_read_print():
+  """
+  Reads a message from the SPI driver.
+  """
+  send = spi_stream_protocol.read_msg()
+  recv = spi_write_physical(send)
+  
+  if print_mode == 1:
+    print("Transaction:  " + str(send[0:transaction_print_len]) + "  >  " + 
+        str(recv[0:transaction_print_len]))
+  elif print_mode == 2:
+    if recv[16:20] == mk_bits(4)(0x4):
+      if recv[0] == mk_bits(1)(0x1):
+        print("Classifier: 1")
+      else:
+        print("Classifier: 0")
+
+  return send, recv
+  
+
+def spi_write_print(message):
+  """
+  Writes a message to the SPI driver.
+  """
+  send = spi_stream_protocol.write_msg(mk_bits(20)(message))
+  recv = spi_write_physical(send)
+  
+  if print_mode == 1:
+    print("Transaction:  " + str(send[0:transaction_print_len]) + "  >  " + 
+        str(recv[0:transaction_print_len]))
+  elif print_mode == 2:
+    if recv[16:20] == mk_bits(4)(0x4):
+      if recv[0] == mk_bits(1)(0x1):
+        print("Classifier: 1")
+      else:
+        print("Classifier: 0")
+
+  return send, recv
+  
+
+def spi_write_read_print(message):
+  """
+  Writes a message and reads the output message from the SPI Driver.
+  """
+  send = spi_stream_protocol.write_read_msg(mk_bits(20)(message))
+  recv = spi_write_physical(send)
+  
+  if print_mode == 1:
+    print("Transaction:  " + str(send[0:transaction_print_len]) + "  >  " + 
+        str(recv[0:transaction_print_len]))
+  elif print_mode == 2:
+    if recv[16:20] == mk_bits(4)(0x4):
+      if recv[0] == mk_bits(1)(0x1):
+        print("Classifier: 1")
+      else:
+        print("Classifier: 0")
+
+  return send, recv
 
 
 
@@ -209,6 +284,7 @@ def spi_write_physical(src_msg):
   return Bits40(int.from_bytes(readbytes, "big") >> 2)
   
 
+@DeprecationWarning
 def print_transaction(send, recv):
   """
   Formats the sent and received message in any given SPI transaction to be readable on the terminal.
@@ -217,6 +293,7 @@ def print_transaction(send, recv):
         str(recv[0:transaction_print_len]))
   
 
+@DeprecationWarning
 def show_classifier(message):
   """
   Interprets whether a message is from the classifier or not. If it is, print what the classifier
@@ -225,11 +302,12 @@ def show_classifier(message):
   """
   if message[16:20] == mk_bits(4)(0x4):
     if message[0] == mk_bits(1)(0x1):
-      print("Classifier: 1 (BIRD)")
+      print("Classifier: 1")
     else:
       print("Classifier: 0")
 
 
+@DeprecationWarning
 def printer(send, recv):
   """
   Function that controls what is printed on terminal. Called by all SPI transaction functions.
