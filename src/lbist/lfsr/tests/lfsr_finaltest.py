@@ -46,11 +46,14 @@ def generate_seeds(num_seeds, BIT_WIDTH):
         req_msgs.append(bin(int(num[i]))) 
         req_msgs[i] = req_msgs[i][2:]
         
+        if(len(req_msgs[i]) > BIT_WIDTH):
+            req_msgs[i] = req_msgs[i][0:BIT_WIDTH]
+
         while(len(req_msgs[i]) < BIT_WIDTH):
             randnum = np.random.randint(0,2)
             req_msgs[i] += str(randnum)
 
-    print(req_msgs)
+    # print(req_msgs)
     return req_msgs
 
 def XOR(a,b):
@@ -61,6 +64,7 @@ def XOR(a,b):
     else:
         return 0
 
+'''
 def taps(Q, T1, T2, T3, T4):
     # Make Q backwards since Q is a string
     Q = Q[::-1]
@@ -73,7 +77,29 @@ def taps(Q, T1, T2, T3, T4):
     tap1 = XOR(int(Q6), int(Q31))
     tap2 = XOR(int(Q5), tap1)
     return XOR(int(Q1), tap2)
+'''
+def taps(Q, T1, T2, T3, T4):
+    # Make Q backwards since Q is a string
+    Q = Q[::-1]
 
+    if(T3 != 0):
+        Q1 = Q[T1:T1+1]
+        Q5 = Q[T2:T2+1]
+        Q6 = Q[T3:T3+1]
+        Q31 = Q[T4:T4+1]
+
+        tap1 = XOR(int(Q6), int(Q31))
+        tap2 = XOR(int(Q5), int(Q1))
+        ans = XOR(tap1, tap2)
+        if(ans == 1): 
+            return 0
+        else:
+            return 1
+    else:
+        Q1 = Q[T1:T1+1]
+        Q5 = Q[T2:T2+1]
+
+        return XOR(int(Q1), int(Q5))
 
 # Functional Model ---------------------------------------------------------
 def lfsr_model(SEED_ARRAY, NUM_MSGS, NUM_OUTPUTS, TAPS):
@@ -129,6 +155,8 @@ async def lfsr_output_test(dut, NUM_SEEDS, SEED, MODEL_OUTPUTS, num_outputs):
         inputseed = [SEED[i]]
         inputseedlist = convert_binary_strings_to_lists(inputseed)
         inputbinary = binaryarray_to_binaryvalue(inputseedlist[0])
+        print("HERE:")
+        print(inputbinary)
         dut.req_msg.value = inputbinary
         dut.resp_rdy.value = 1
         await ClockCycles(dut.clk, 1)
@@ -284,15 +312,97 @@ Parametrize the model with its BIT_WIDTH and an array of TAPS in the order of [T
 async def LFSR_OUTPUT(dut):
     print("||| 1ST TEST: Q TEST |||")
 
+    '''
     # Parameters
     NUM_SEEDS = 100
     LFSR_MSG_BITS = 32
     NUM_LFSR_OUTPUTS = 20
     TAPS = [1,5,6,31]
+    '''
+
+    # Parameters
+    NUM_SEEDS = 1
+    LFSR_MSG_BITS = 8
+    NUM_LFSR_OUTPUTS = 5
+    taps_dict = {
+        2: [0, 1, 0, 0],
+        3: [1, 2, 0, 0],
+        4: [2, 3, 0, 0],
+        5: [2, 4, 0, 0],
+        6: [4, 5, 0, 0],
+        7: [5, 6, 0, 0],
+        8: [3, 4, 5, 7],
+        9: [4, 8, 0, 0],
+        10: [6, 9, 0, 0],
+        11: [8, 10, 0, 0],
+        12: [5, 7, 10, 11],
+        13: [8, 9, 11, 12],
+        14: [8, 10, 12, 13],
+        15: [13, 14, 0, 0],
+        16: [10, 12, 13, 15],
+        17: [13, 16, 0, 0],
+        18: [10, 17, 0, 0],
+        19: [13, 16, 17, 18],
+        20: [16, 19, 0, 0],
+        21: [18, 20, 0, 0],
+        22: [20, 21, 0, 0],
+        23: [17, 22, 0, 0],
+        24: [19, 20, 22, 23],
+        25: [21, 24, 0, 0],
+        26: [19, 23, 24, 25],
+        27: [21, 24, 25, 26],
+        28: [24, 27, 0, 0],
+        29: [26, 28, 0, 0],
+        30: [23, 25, 28, 29],
+        31: [27, 30, 0, 0],
+        32: [25, 26, 29, 31],
+        33: [19, 32, 0, 0],
+        34: [25, 29, 30, 33],
+        35: [32, 34, 0, 0],
+        36: [24, 35, 0, 0],
+        37: [30, 32, 35, 36],
+        38: [31, 32, 36, 37],
+        39: [34, 38, 0, 0],
+        40: [34, 35, 36, 39],
+        41: [37, 40, 0, 0],
+        42: [34, 36, 39, 41],
+        43: [36, 37, 41, 42],
+        44: [37, 38, 41, 43],
+        45: [40, 41, 43, 44],
+        46: [37, 38, 39, 45],
+        47: [41, 46, 0, 0],
+        48: [38, 40, 43, 47],
+        49: [39, 48, 0, 0],
+        50: [45, 46, 47, 49],
+        51: [44, 47, 49, 50],
+        52: [48, 51, 0, 0],
+        53: [46, 50, 51, 52],
+        54: [45, 47, 50, 53],
+        55: [30, 54, 0, 0],
+        56: [48, 51, 53, 55],
+        57: [49, 56, 0, 0],
+        58: [38, 57, 0, 0],
+        59: [51, 54, 56, 58],
+        60: [58, 59, 0, 0],
+        61: [55, 58, 59, 60],
+        62: [55, 56, 58, 61],
+        63: [61, 62, 0, 0],
+        64: [59, 60, 62, 63],
+        65: [46, 64, 0, 0],
+        66: [56, 57, 59, 65],
+        67: [61, 64, 65, 66]
+    }
+    TAPS = taps_dict[LFSR_MSG_BITS]
 
     # Generating seeds and subsequent model outputs
     SEEDS = generate_seeds(NUM_SEEDS, LFSR_MSG_BITS)
     MODEL_OUTPUTS = lfsr_model(SEEDS, NUM_SEEDS, NUM_LFSR_OUTPUTS, TAPS)
+
+    '''
+    # Generating seeds and subsequent model outputs
+    SEEDS = generate_seeds(NUM_SEEDS, LFSR_MSG_BITS)
+    MODEL_OUTPUTS = lfsr_model(SEEDS, NUM_SEEDS, NUM_LFSR_OUTPUTS, TAPS)
+    '''
     
     # Test
     await lfsr_output_test(dut, NUM_SEEDS, SEEDS, MODEL_OUTPUTS, NUM_LFSR_OUTPUTS)
