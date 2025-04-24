@@ -26,16 +26,16 @@ set make_assignments 1
 
 # Check that the right project is open
 if {[is_project_open]} {
-	if {[string compare $quartus(project) "emulation_sp24_tapein2"]} {
-		puts "Project emulation_sp24_tapein2 is not open"
+	if {[string compare $quartus(project) "emulation_sp25_tapein1"]} {
+		puts "Project emulation_sp25_tapein1 is not open"
 		set make_assignments 0
 	}
 } else {
 	# Only open if not already open
-	if {[project_exists emulation_sp24_tapein2]} {
-		project_open -revision emulation_sp24_tapein2 emulation_sp24_tapein2
+	if {[project_exists emulation_sp25_tapein1]} {
+		project_open -revision emulation_sp25_tapein1 emulation_sp25_tapein1
 	} else {
-		project_new -revision emulation_sp24_tapein2 emulation_sp24_tapein2
+		project_new -revision emulation_sp25_tapein1 emulation_sp25_tapein1
 	}
 	set need_to_close_project 1
 }
@@ -66,6 +66,9 @@ if {$make_assignments} {
 	set_location_assignment PIN_AC21 -to GPIO4
 	set_location_assignment PIN_AD21 -to GPIO6
 	set_location_assignment PIN_AC15 -to GPIO1
+	set_location_assignment PIN_Y16 -to GPIO5
+	set_location_assignment PIN_AE16 -to GPIO7
+	set_location_assignment PIN_AE15 -to GPIO9
 	set_location_assignment PIN_G19 -to LEDR0
 	set_location_assignment PIN_F19 -to LEDR1
 	set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

@@ -15,12 +15,19 @@ assign LEDR1 = ~GPIO1;
 tapein1_sp25_top dut(
   .clk(CLOCK_50),
   .reset(GPIO1),
+  .clk_out(GPIO5), //
   .cs(GPIO6),
   .mosi(GPIO4),
   .miso(GPIO2),
   .sclk(GPIO0),
   .minion_parity(),
-  .adapter_parity()
+  .adapter_parity(),
+  .ext_clk(CLOCK_50),
+  .async_fifo_recv_msg(),
+  .async_fifo_recv_val(),
+  .async_fifo_recv_rdy(),
+  .classifier_send_msg(GPIO7),//
+  .classifier_send_val(GPIO9)//
 );
 
 endmodule
