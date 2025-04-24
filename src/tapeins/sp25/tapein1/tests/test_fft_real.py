@@ -8,8 +8,7 @@ then it is averaged down to mono before sending it to the FFT.
 import wave
 import numpy as np
 from scipy.signal import resample
-
-
+"""
 import random
 from enum import Enum
 
@@ -29,7 +28,7 @@ from src.tapeins.sp25.tapein1.tests.spi_driver_sim import (
 from src.classifier.sim import classify
 from src.fft.tests.fft import FFTInterface, FFTPease
 from tools.utils import fixed_bits
-
+"""
 
 # Parse a .wav file to Q8.8 fixed-point format
 def wav_to_q8_8_messages(filename: str, target_rate: int) -> bytes:
