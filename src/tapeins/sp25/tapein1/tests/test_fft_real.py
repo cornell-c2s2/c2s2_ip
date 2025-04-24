@@ -38,11 +38,51 @@ def wav_to_q8_8_messages(filename: str, target_rate: int) -> bytes:
         n_channels = wf.getnchannels()
         sampwidth = wf.getsampwidth()
         n_frames = wf.getnframes()
-        raw = wf.readframes(n_frames)
-    dtype_map = {1: np.uint8, 2: np.int16, 4: np.int32}
-    dtype = dtype_map[sampwidth]
-    samples = np.frombuffer(raw, dtype=dtype)
+        # Read all raw bytes for all channels and frames
+        raw = wf.readframes(n_frames * n_channels)
+
+    # Process raw bytes based on sample width
+    if sampwidth == 3:
+        # Handle 24-bit audio (3 bytes)
+        raw_bytes = np.frombuffer(raw, dtype=np.uint8)
+        if raw_bytes.size % 3 != 0:
+            raise ValueError(f"Raw data size {raw_bytes.size} is not divisible by 3 for 24-bit audio.")
+
+        num_samples_total = raw_bytes.size // 3
+        reshaped_bytes = raw_bytes.reshape(num_samples_total, 3)
+
+        # Convert 3 bytes (little-endian) to signed int32
+        samples_int32 = np.empty(num_samples_total, dtype=np.int32)
+        samples_int32[:] = reshaped_bytes[:, 0]  # LSB
+        samples_int32 |= (reshaped_bytes[:, 1].astype(np.int32) << 8)
+        samples_int32 |= (reshaped_bytes[:, 2].astype(np.int32) << 16) # MSB
+
+        # Sign extend negative values (check MSB of the third byte)
+        negative_mask = reshaped_bytes[:, 2] >= 0x80
+        # Fill the most significant byte with 1s for negative numbers
+        samples_int32[negative_mask] |= np.int32(~0xFFFFFF) # or np.int32(0xFF000000)
+
+        # Assign the processed samples and set dtype for downstream consistency
+        samples = samples_int32
+        dtype = np.int32
+        # Calculate n_frames based on the total samples and channels
+        n_frames = num_samples_total // n_channels
+
+    elif sampwidth in [1, 2, 4]:
+        # Handle standard sample widths
+        dtype_map = {1: np.uint8, 2: np.int16, 4: np.int32}
+        dtype = dtype_map[sampwidth]
+        # Convert raw bytes to samples using the appropriate dtype
+        samples = np.frombuffer(raw, dtype=dtype)
+        # Calculate n_frames based on the total samples and channels
+        n_frames = len(samples) // n_channels
+    else:
+        raise ValueError(f"Unsupported sample width: {sampwidth}")
+
     if n_channels > 1:
+        # Reshape requires the total number of samples to be divisible by n_channels
+        if samples.size % n_channels != 0:
+             raise ValueError(f"Total samples {samples.size} not divisible by number of channels {n_channels}.")
         samples = samples.reshape(-1, n_channels).mean(axis=1).astype(dtype)
     if orig_rate != target_rate:
         new_len = int(len(samples) * target_rate / orig_rate)
