@@ -55,7 +55,7 @@ module tapein1_sp25_top #(
 
   // Classifier ports
   output logic                         classifier_send_msg,
-  output logic                         classifier_send_val,
+  output logic                         classifier_send_val
 );
 
   //============================LOCAL_PARAMETERS====================================
@@ -1055,7 +1055,7 @@ module tapein1_sp25_top #(
   endgenerate
   
   generate
-    if (ROUTER_PACKET_BITS != DATA_BITS) begin
+    if (ROUTER_PACKET_BITS != DATA_BITS + ADDR_BITS) begin
       $error("ROUTER_PACKET_BITS must be equal to DATA_BITS");
     end
   endgenerate
@@ -1090,10 +1090,10 @@ module tapein1_sp25_top #(
   // Classifier Deserializer -------------------------------------------------------
 
   generate
-    if (CLASSIFIER_SAMPLES != FFT1_SAMPLES) begin
+    if (CLASSIFIER_SAMPLES != FFT1_SAMPLES / 2) begin
       $error("CLASSIFIER_SAMPLES must be equal to FFT1_SAMPLES");
     end
-    if (CLASSIFIER_SAMPLES != FFT2_SAMPLES) begin
+    if (CLASSIFIER_SAMPLES != FFT2_SAMPLES / 2) begin
       $error("CLASSIFIER_SAMPLES must be equal to FFT2_SAMPLES");
     end
   endgenerate
