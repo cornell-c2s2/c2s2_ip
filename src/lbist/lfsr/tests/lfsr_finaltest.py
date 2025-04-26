@@ -1,3 +1,4 @@
+
 # Imports needed by cocotb
 import pytest
 import os
@@ -64,7 +65,20 @@ def XOR(a,b):
     else:
         return 0
 
+'''
+def taps(Q, T1, T2, T3, T4):
+    # Make Q backwards since Q is a string
+    Q = Q[::-1]
 
+    Q1 = Q[T1:T1+1]
+    Q5 = Q[T2:T2+1]
+    Q6 = Q[T3:T3+1]
+    Q31 = Q[T4:T4+1]
+
+    tap1 = XOR(int(Q6), int(Q31))
+    tap2 = XOR(int(Q5), tap1)
+    return XOR(int(Q1), tap2)
+'''
 def taps(Q, T1, T2, T3, T4):
     # Make Q backwards since Q is a string
     Q = Q[::-1]
@@ -218,6 +232,20 @@ async def lfsr_FSM_test(dut, BIT_WIDTH):
     assert(dut.req_rdy.value == 1)
     assert(dut.resp_msg.value == '0' * BIT_WIDTH)
 
+    '''
+    # DEFAULT - UNCOMMENT TO CHECK DEFAULT CASE
+    dut.reset.value = 1
+    dut.req_val.value = 0
+    await RisingEdge(dut.clk)
+    dut.reset.value = 0
+    await RisingEdge(dut.clk)
+    assert dut.state.value == dut.IDLE
+    
+    dut.state.value = 0b11  
+    await Timer(1, units="ns")
+    assert dut.next_state.value == 0b00
+    '''
+    
 # Manually checks LFSR outputs and internal states and logic.
 async def lfsr_manual_test(dut):
      # Reset
@@ -285,6 +313,14 @@ Parametrize the model with its BIT_WIDTH and an array of TAPS in the order of [T
 async def LFSR_OUTPUT(dut):
     print("||| 1ST TEST: Q TEST |||")
 
+    '''
+    # Parameters
+    NUM_SEEDS = 100
+    LFSR_MSG_BITS = 32
+    NUM_LFSR_OUTPUTS = 20
+    TAPS = [1,5,6,31]
+    '''
+
     # Parameters
     NUM_SEEDS = 1
     LFSR_MSG_BITS = 8
@@ -320,7 +356,7 @@ async def LFSR_OUTPUT(dut):
         29: [26, 28, 0, 0],
         30: [23, 25, 28, 29],
         31: [27, 30, 0, 0],
-        32: [24, 25, 29, 31],
+        32: [25, 26, 29, 31],
         33: [19, 32, 0, 0],
         34: [25, 29, 30, 33],
         35: [32, 34, 0, 0],
@@ -362,7 +398,36 @@ async def LFSR_OUTPUT(dut):
     # Generating seeds and subsequent model outputs
     SEEDS = generate_seeds(NUM_SEEDS, LFSR_MSG_BITS)
     MODEL_OUTPUTS = lfsr_model(SEEDS, NUM_SEEDS, NUM_LFSR_OUTPUTS, TAPS)
+
+    '''
+    # Generating seeds and subsequent model outputs
+    SEEDS = generate_seeds(NUM_SEEDS, LFSR_MSG_BITS)
+    MODEL_OUTPUTS = lfsr_model(SEEDS, NUM_SEEDS, NUM_LFSR_OUTPUTS, TAPS)
+    '''
     
     # Test
     await lfsr_output_test(dut, NUM_SEEDS, SEEDS, MODEL_OUTPUTS, NUM_LFSR_OUTPUTS)
+
+'''
+This test checks the FSM transitions and ensures that internal logic remains correct through transitions.
+'''
+@cocotb.test()
+async def LFSR_FSM(dut):
+    print("||| 2ND TEST: FSM TEST |||")
+
+    # Parameters
+    LFSR_MSG_BITS = 32
+
+    # Test
+    await lfsr_FSM_test(dut, LFSR_MSG_BITS)
+
+'''
+This test manually checks LFSR outputs and internal states and logic.
+'''
+@cocotb.test()
+async def LFSR_MANUAL(dut):
+    print("||| 3RD TEST: MANUAL TEST |||")
+
+    # Test
+    await lfsr_manual_test(dut)
 
