@@ -4,31 +4,9 @@ Input is a WAV file, the testbench sends the data over SPI and reads the FFT out
 The testbench is parameterizable by sampling rate (in Hz). If the .wav file is multi-channel,
 then it is averaged down to mono before sending it to the FFT.
 """
-
 import wave
 import numpy as np
 from scipy.signal import resample
-"""
-import random
-from enum import Enum
-
-import cocotb
-from cocotb.triggers import Timer, Edge, RisingEdge, FallingEdge, ClockCycles
-from cocotb.clock import Clock
-from cocotb.regression import TestFactory
-from pymtl3 import *
-from fixedpt import Fixed, CFixed
-
-from src.tapeins.sp25.tapein1.tests.test_top import fft1_msg, fft2_msg, reset_dut
-from src.tapeins.sp25.tapein1.tests.spi_driver_sim import (
-    spi_write_read,
-    spi_write,
-    spi_read,
-)
-from src.classifier.sim import classify
-from src.fft.tests.fft import FFTInterface, FFTPease
-from tools.utils import fixed_bits
-"""
 
 # Parse a .wav file to Q8.8 fixed-point format
 def wav_to_q8_8_messages(filename: str, target_rate: int) -> bytes:
