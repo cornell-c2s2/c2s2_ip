@@ -23,6 +23,7 @@ log*/
 sim_build/
 coverage_report/
 waves.vcd
+vcdplus.vpd
 results.xml
 ucli.key
 
