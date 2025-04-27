@@ -32,37 +32,32 @@
 `include "async_fifo/PosedgeDetector.sv"
 
 
-// Steps to update top
-// 1.) Replace classifier xbar with 2d crossbar                                             DONE
-// 2.) connect FFT outputs directly to crossbar, dropping the complex samples               DONE
-// 3.) connect crossbar directly to classifier                                              DONE  
-// 4.) Remove FFT serializers                                                               DONE
-//  .) Remove Classifier serializer                                                         DONE
-// 5.) Add serializer/deserializer to classifier xbar input/output ports to spi minion.     DONE
-// 6.) Add MISR serializer
-
-
 module tapein2_sp25_top #(
   parameter int FIFO_ENTRY_BITS = 8
 ) (
   // Clock and Reset Ports
-  input  logic  clk,
-  input  logic  reset,
+  input  logic                         clk,
+  input  logic                         reset,
+  output logic                         clk_out,
 
   // SPI Minion ports
-  input  logic  cs,
-  input  logic  mosi,
-  output logic  miso,
-  input  logic  sclk,
-  output logic  minion_parity,
-  output logic  adapter_parity,
+  input  logic                         cs,
+  input  logic                         mosi,
+  output logic                         miso,
+  input  logic                         sclk,
+  output logic                         minion_parity,
+  output logic                         adapter_parity,
 
   // Async FIFO ports
   input  logic                         ext_clk,
   input  logic [FIFO_ENTRY_BITS-1:0]   async_fifo_recv_msg,
-  // TODO: Might need to add a debounce here
+
   input  logic                         async_fifo_recv_val,
-  output logic                         async_fifo_recv_rdy
+  output logic                         async_fifo_recv_rdy,
+
+  // Classifier ports
+  output logic                         classifier_send_msg,
+  output logic                         classifier_send_val
 );
 
   //============================LOCAL_PARAMETERS====================================
@@ -242,7 +237,7 @@ module tapein2_sp25_top #(
   //     Number of FIFO Entries
   // - FIFO_ENTRY_BITS:
   //     Bitwidth of each FIFO Entry (top level parameter)
-  localparam int FIFO_DEPTH = 10;
+  localparam int FIFO_DEPTH = 8;
 
 
   // Posedge Detector --------------------------------------------------------------
@@ -314,9 +309,9 @@ module tapein2_sp25_top #(
   logic                                    classifier_xbar_control_rdy;
   logic                                    classifier_xbar_control_val;
 
-  logic [ARBITER_PACKET_BITS-1:0]          ClassifierXbar_to_ClassifierXbarDeserializer_msg [CLASSIFIER_SAMPLES];
-  logic                                    ClassifierXbar_to_ClassifierXbarDeserializer_val;
-  logic                                    ClassifierXbar_to_ClassifierXbarDeserializer_rdy;
+  logic [ARBITER_PACKET_BITS-1:0]          ClassifierXbar_to_ClassifierXbarSerializer_msg [CLASSIFIER_SAMPLES];
+  logic                                    ClassifierXbar_to_ClassifierXbarSerializer_val;
+  logic                                    ClassifierXbar_to_ClassifierXbarSerializer_rdy;
 
   // Classifier Xbar Deserializer --------------------------------------------------
   logic [DATA_BITS-1:0]                    classifier_xbar_deserializer_send_msg [CLASSIFIER_SAMPLES];
@@ -544,15 +539,15 @@ module tapein2_sp25_top #(
   serdes_Serializer #(
     .N_SAMPLES               (CLASSIFIER_SAMPLES),
     .BIT_WIDTH               (DATA_BITS)
-  ) fft1_serializer (
+  ) classifier_xbar_serializer (
     .clk                     (clk),
     .reset                   (reset),
     .send_val                (classifier_xbar_serializer_send_val),
     .send_rdy                (classifier_xbar_serializer_send_rdy),
     .send_msg                (classifier_xbar_serializer_send_msg),
-    .recv_val                (ClassifierXbar_to_ClassifierXbarDeserializer_val),
-    .recv_rdy                (ClassifierXbar_to_ClassifierXbarDeserializer_rdy),
-    .recv_msg                (ClassifierXbar_to_ClassifierXbarDeserializer_msg)
+    .recv_val                (ClassifierXbar_to_ClassifierXbarSerializer_val),
+    .recv_rdy                (ClassifierXbar_to_ClassifierXbarSerializer_rdy),
+    .recv_msg                (ClassifierXbar_to_ClassifierXbarSerializer_msg)
   );
 
   // Output Xbar -------------------------------------------------------------------
@@ -937,10 +932,10 @@ module tapein2_sp25_top #(
   assign classifier_recv_val = classifier_xbar_send_val[1];
   assign classifier_xbar_send_rdy[1] = classifier_recv_rdy;
 
-  // Output port: 10 - Arbiter -- //TODO
-  assign ClassifierXbar_to_ClassifierXbarDeserializer_msg = classifier_xbar_send_msg[2];
-  assign ClassifierXbar_to_ClassifierXbarDeserializer_val = classifier_xbar_send_val[2];
-  assign classifier_xbar_send_rdy[2] = ClassifierXbar_to_ClassifierXbarDeserializer_rdy;
+  // Output port: 10 - Classifier Xbar Serializer_val
+  assign ClassifierXbar_to_ClassifierXbarSerializer_msg = classifier_xbar_send_msg[2];
+  assign ClassifierXbar_to_ClassifierXbarSerializer_val = classifier_xbar_send_val[2];
+  assign classifier_xbar_send_rdy[2] = ClassifierXbar_to_ClassifierXbarSerializer_rdy;
 
 
   // Output Xbar -------------------------------------------------------------------
@@ -1032,8 +1027,26 @@ module tapein2_sp25_top #(
 
   //================================ASSERTS=========================================
   // SPI Minion --------------------------------------------------------------------
+  generate
+    if ($clog2(DATA_BITS) != ADDR_BITS) begin
+      $error("ADDR_BITS must be equal to the log2 of DATA_BITS");
+    end
+  endgenerate
+
   // Router ------------------------------------------------------------------------
   // Arbiter -----------------------------------------------------------------------
+  generate
+    if (ARBITER_SIZE != ROUTER_SIZE) begin
+      $error("ARBITER_SIZE must be equal to ROUTER_SIZE");
+    end
+  endgenerate
+  
+  generate
+    if (ROUTER_PACKET_BITS != DATA_BITS + ADDR_BITS) begin
+      $error("ROUTER_PACKET_BITS must be equal to DATA_BITS");
+    end
+  endgenerate
+
   // Input Xbar --------------------------------------------------------------------
   generate
     if (INPUT_XBAR_CONTROL_BITS > DATA_BITS) begin
@@ -1056,9 +1069,37 @@ module tapein2_sp25_top #(
   endgenerate
 
   // FFT Core 1 Deserializer -------------------------------------------------------
+  // FFT Core 1 Serializer ---------------------------------------------------------
   // FFT Core 1 --------------------------------------------------------------------
   // FFT Core 2 Deserializer -------------------------------------------------------
+  // FFT Core 2 Serializer ---------------------------------------------------------
   // FFT Core 2 --------------------------------------------------------------------
+  // Classifier Deserializer -------------------------------------------------------
+
+  generate
+    if (CLASSIFIER_SAMPLES != FFT1_SAMPLES / 2) begin
+      $error("CLASSIFIER_SAMPLES must be equal to FFT1_SAMPLES");
+    end
+    if (CLASSIFIER_SAMPLES != FFT2_SAMPLES / 2) begin
+      $error("CLASSIFIER_SAMPLES must be equal to FFT2_SAMPLES");
+    end
+  endgenerate
+
+  generate
+    if (CLASSIFIER_BITS != DATA_BITS) begin
+      $error("CLASSIFIER_BITS must be equal to DATA_BITS");
+    end
+  endgenerate
+
+  generate
+    if (CLASSIFIER_DECIMAL_PT != FFT1_DECIMAL_PT) begin
+      $error("CLASSIFIER_DECIMAL_PT must be equal to FFT1_DECIMAL_PT");
+    end
+    if (CLASSIFIER_DECIMAL_PT != FFT2_DECIMAL_PT) begin
+      $error("CLASSIFIER_DECIMAL_PT must be equal to FFT2_DECIMAL_PT");
+    end
+  endgenerate
+
   // Classifier --------------------------------------------------------------------
   // Wishbone Harness --------------------------------------------------------------
   // LBIST Controller --------------------------------------------------------------
