@@ -15,8 +15,11 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 #Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
 VERILOG_SOURCES = $(PWD)/../template.v
 
-#Step 2: Add all include directories referenced in the verilog source file
+#Step 2a: Add all include directories referenced in the verilog source file
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
+
+# Step 2b: Enable systemverilog 
+COMPILE_ARGS += -sverilog
 
 #Step 3: Set top level module and corresponding python test module
 TOPLEVEL = template_Template
@@ -39,6 +42,8 @@ EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
 WAVES ?= 0
 ifeq ($(WAVES), 1)
 	EXTRA_ARGS += +vcs+dumpvars+waves.vcd
+	EXTRA_ARGS += +vcs+vcdpluson
+	EXTRA_ARGS += +vcs+vcdplusmemon
 endif
 
 #Generating line and toggle coverage data (Set environment variable COVER to 1)

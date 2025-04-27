@@ -49,7 +49,6 @@ def spi_write(dut, src_msg: Bits) -> Bits:
         tr(dut, 0, 1, src_msg[packet_size - i - 1])
         tr(dut, 0, 1, 0)
         snk_msg[packet_size - i - 1] = tr(dut, 0, 0, 0)
-        
 
     # pull CS high to end transaction
     tr(dut, 1, 0, 0)

@@ -11,7 +11,6 @@
 //
 // PARAMETERS --------------------------------------------------------
 // - LFSR_MSG_BITS: Bitwidth of LFSR starting seed/LFSR outputs. Must be between 2 and 32 bits.
-// - LFSR_MSG_BITS: Bitwidth of LFSR starting seed/LFSR outputs. Must be between 2 and 32 bits.
 //
 // I/O ---------------------------------------------------------------
 // - clk
@@ -25,7 +24,7 @@
 // ===================================================================
 
 module lfsr_paramver2#(
-    parameter LFSR_MSG_BITS = 32
+    parameter LFSR_MSG_BITS = 64
 )
 (
     input logic clk,
@@ -243,7 +242,7 @@ module lfsr_paramver2#(
             assign T2 = 30;
         end
         else if (LFSR_MSG_BITS == 32) begin
-            assign T1 = 25;
+            assign T1 = 24;
             assign T2 = 26;
             assign T3 = 29;
             assign T4 = 31;
