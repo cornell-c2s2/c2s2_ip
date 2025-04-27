@@ -287,7 +287,7 @@ async def LFSR_OUTPUT(dut):
 
     # Parameters
     NUM_SEEDS = 1
-    LFSR_MSG_BITS = 8
+    LFSR_MSG_BITS = 32
     NUM_LFSR_OUTPUTS = 5
     taps_dict = {
         2: [0, 1, 0, 0],

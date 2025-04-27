@@ -243,8 +243,8 @@ module lfsr_paramver2#(
             assign T2 = 30;
         end
         else if (LFSR_MSG_BITS == 32) begin
-            assign T1 = 25;
-            assign T2 = 26;
+            assign T1 = 24;
+            assign T2 = 25;
             assign T3 = 29;
             assign T4 = 31;
         end
