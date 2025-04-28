@@ -53,7 +53,7 @@ COMPILE_ARGS += +incdir+$(C2S2_PATH)/src -assert svaext
 #Step 2: Add all include directories referenced in the verilog source file
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
 COMPILE_ARGS += -sverilog
-
+SIM_ARGS+="+vcs+lic+wait" #ensure that the tests wait for the license
 
 #Step 3: Set top level module and corresponding python test module
 TOPLEVEL = tapein1_sp25_top
