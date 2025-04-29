@@ -663,7 +663,11 @@ class Synth(SubCommand):
         # ----------------------------------------------------------------
         # Load the design file and propogate the configuration variables
         # ----------------------------------------------------------------
-        designs = propogate(load_config(args.design))
+        designs = load_config(args.design)
+        # Merge the default config with the design file
+        designs = merge_dict(load_config(path.join(path.dirname(__file__), "data", "openlane.json")), designs)
+
+        designs = propogate(designs)
 
         # Move all keys other than a select few into the params dict
         special_keys = set(
@@ -747,7 +751,7 @@ class Synth(SubCommand):
 
             # Replace the top module name
             verilog = re.sub(
-                f"module\\s+{re.escape(design['DESIGN_NAME'])}",
+                f"\bmodule\\s+{re.escape(design['DESIGN_NAME'])}\b",
                 f"module {prefixed_design_name}",
                 verilog,
                 flags=re.MULTILINE,
