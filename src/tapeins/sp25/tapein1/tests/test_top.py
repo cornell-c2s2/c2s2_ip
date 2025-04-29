@@ -94,13 +94,15 @@ async def run_top(
     config_msgs = in_msgs[:num_config]
     fifo_in = [int(x) for x in in_msgs[num_config:]]
     fifo_out = [int(x) for x in out_msgs]
-    dut._log.info(f"fifo_in = {fifo_in}")
+    hex_fifo_in = [hex(i) for i in fifo_in]
+    dut._log.info(f"fifo_in = {hex_fifo_in}")
 
     # access FIFO submodule
     fifo = dut.async_fifo
     fifo_config_done = 0
 
-    dut._log.info(f"fifo_out = {fifo_out}")
+    hex_fifo_out = [hex(i) for i in fifo_out]
+    dut._log.info(f"fifo_out = {hex_fifo_out}")
     dut._log.info(f"use_spi = {use_spi}")
 
     while out_idx < len(out_msgs):
@@ -150,9 +152,7 @@ async def run_top(
                 await ClockCycles(dut.clk, 1)
 
                 for config_idx in range(len(config_msgs)):
-                    spi_status, retmsg = await spi_write_read(
-                        dut, config_msgs[config_idx]
-                    )
+                    spi_status, retmsg = await spi_read(dut)
                     dut._log.info(f"[SPI CONFIG] Sent {hex(config_msgs[config_idx])}")
 
                 # reset FIFO to 1
@@ -188,7 +188,7 @@ async def run_top(
                 dut._log.info(f"[FIFO RX] SPI retmsg: {hex(retmsg)}")
 
                 spc = spi_status[0]
-
+                dut._log.info(f"[FIFO RX] spi_status: {spi_status}")
                 if spi_status[1] == 1:
                     assert (
                         output_msg == out_msgs[out_idx]
@@ -196,6 +196,8 @@ async def run_top(
                     dut._log.info("[FIFO] Correct FIFO output message!")
                     out_idx += 1
                     in_idx += 1  # Only increment here, when round-trip completes
+                else:
+                    dut._log.info("spi_status[1] = 0!!")
 
                 fifo.ostream_rdy.value = 0
             else:
@@ -459,6 +461,12 @@ def fixN(n):
     """Shortcut for creating fixed-point numbers."""
     return Fixed(n, True, 16, 8)
 
+
+def fixN_fifo(n):
+    """Shortcut for creating fixed-point numbers."""
+    return Fixed(n, True, 8, 0)
+
+
 """
 -----------
 FFT1 TESTS
@@ -490,6 +498,45 @@ async def test_fft1_manual(dut, input, output):
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
     await run_top(dut, in_msgs, out_msgs, max_trsns=100)
+
+
+def fft1_fifo_msg(dut, inputs: list[Fixed], outputs: list[Fixed]):
+    """Generate SPI packets for FFT input/output from fixed-point numbers."""
+
+    # ensure that input and output samples are converted from fixed to bits
+    inputs = [fixed_bits(sample) for sample in inputs[0]]
+    outputs = [fixed_bits(sample) for sample in outputs[0]]
+
+    # configure input and output crossbars to send messages to/receive messages from FFT1
+    in_xbar_config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.FIFO_FFT1)
+    out_xbar_config_msg = mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_ARBITER)
+
+    # send fft inputs to router and fft outputs to Arbiter from XBar
+    fft_input_msgs = [x for x in inputs]
+    fft_output_msgs = [mk_spi_pkt(ArbiterIn.CLS_XBAR, int(x << 8)) for x in outputs]
+
+    # complete input and output message configurations
+    in_msgs = [in_xbar_config_msg, out_xbar_config_msg] + fft_input_msgs
+    out_msgs = fft_output_msgs
+    dut._log.info(f"in_msgs: {in_msgs}")
+
+    return in_msgs, out_msgs
+
+
+async def test_fft1_manual_fifo(dut, input, output):
+    """
+    Tests loopback route: fifo -> packager -> input xbar -> fft1 -> cls xbar -> arbiter -> spi.
+
+    the input address is still configured by making SPI packets and setting ctrl bits through router
+    since that's the only way of setting them.
+    """
+    in_msgs, out_msgs = fft1_msg(input, output)
+
+    cocotb.start_soon(Clock(dut.ext_clk, 2, "ns").start())
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, in_msgs, out_msgs, max_trsns=500, use_spi=0, num_config=2)
+
 
 """
 -----------
@@ -537,6 +584,12 @@ output_values = [
     [[fixN(32)] + [fixN(0) for _ in range(15)]]
 ]
 
+# Test Data
+# inputs are 8 bits, lower 0 bits are fractional
+fifo_input_values = [[[fixN_fifo(1) for _ in range(32)]]]
+
+fifo_output_values = [[[fixN_fifo(32)] + [fixN_fifo(0) for _ in range(15)]]]
+
 # Register test factory
 for test in [test_fft1_manual, test_fft2_manual]:
     # for test in [test_fft1_manual, test_fft1_manual_fifo]:
@@ -545,6 +598,11 @@ for test in [test_fft1_manual, test_fft2_manual]:
     factory.add_option("output", output_values)
     factory.generate_tests()
 
+for test in [test_fft1_manual_fifo]:
+    factory = TestFactory(test)
+    factory.add_option("input", fifo_input_values)
+    factory.add_option("output", fifo_output_values)
+    factory.generate_tests()
 
 """
 ================================================================================
