@@ -31,9 +31,7 @@ module SystolicCtrl
   output logic w_fifo_ren   [SIZE],
   
   output logic mac_rdy,
-  output logic out_rdy/*,
-
-  output logic [2:0] trace_state*/
+  output logic out_rdy
 );
 
   // Buffer Status
@@ -63,9 +61,24 @@ module SystolicCtrl
 
   // State Transition
 
-  logic [2:0] state;
+  logic [2:0]              state;
+  logic [$clog2(SIZE)-1:0] out_lat_count;
+  logic                    out_hit;
 
-  //assign trace_state = state;
+  always_ff @(posedge clk) begin
+    if(rst)
+      out_lat_count <= 0;
+    else begin
+      case(state)
+        `LOAD : out_lat_count <= 0;
+        `MAC  : out_lat_count <= (out_lat_count + {{(SIZE-1){1'b0}}, empty});
+        `OUT  : out_lat_count <= out_lat_count;
+        default : out_lat_count <= 0;
+      endcase
+    end
+  end
+
+  assign out_hit = (out_lat_count == $clog2(SIZE)'(SIZE-1));
 
   always_ff @(posedge clk) begin
     if(rst)
@@ -73,7 +86,7 @@ module SystolicCtrl
     else begin
       case(state)
         `LOAD   : state <= (full ? `MAC : `LOAD);
-        `MAC    : state <= (empty ? `OUT : `MAC);
+        `MAC    : state <= (out_hit ? `OUT : `MAC);
         `OUT    : state <= `OUT;
         default : state <= `LOAD;
       endcase

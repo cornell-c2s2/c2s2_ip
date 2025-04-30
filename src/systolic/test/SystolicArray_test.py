@@ -340,8 +340,10 @@ async def test_case_6_synchronous_load_mac_out(dut):
 
     # MAC
 
-    throughput_cycles = (size * 2)
-    for t in range(throughput_cycles):
+    throughput_cycles     = (size * 2)
+    output_latency_cycles = (size - 1)
+
+    for t in range(throughput_cycles + output_latency_cycles):
       # drive in all of x and w into PEs
       await step(dut)
       await check_recv_rdy(dut, 0, 0)
@@ -353,9 +355,6 @@ async def test_case_6_synchronous_load_mac_out(dut):
     for i in range(size):
       for j in range(size):
         # combinationally check final summation stored in each PE
-        #   1) outputs become available in diagonal order from (0,0)
-        #   2) last value from last row/col of x and w flows through PEs
-        #   3) outputs unaffected by continuing clock cycles
         await step(dut)
         await check_recv_rdy(dut, 0, 0)
         await check_mac_rdy(dut, 0)
@@ -431,8 +430,10 @@ async def test_case_7_asynchronous_load_mac_out(dut):
 
     # MAC
 
-    throughput_cycles = (size * 2)
-    for t in range(throughput_cycles):
+    throughput_cycles     = (size * 2)
+    output_latency_cycles = (size - 1)
+
+    for t in range(throughput_cycles + output_latency_cycles):
       # drive in all of x and w into PEs
       await step(dut)
       await check_recv_rdy(dut, 0, 0)
@@ -444,9 +445,6 @@ async def test_case_7_asynchronous_load_mac_out(dut):
     for i in range(size):
       for j in range(size):
         # combinationally check final summation stored in each PE
-        #   1) outputs become available in diagonal order from (0,0)
-        #   2) last value from last row/col of x and w flows through PEs
-        #   3) outputs unaffected by continuing clock cycles
         await step(dut)
         await check_recv_rdy(dut, 0, 0)
         await check_mac_rdy(dut, 0)
@@ -525,8 +523,10 @@ async def test_case_8_asynchronous_load_mac_out_edge(dut):
 
     # MAC
 
-    throughput_cycles = (size * 2)
-    for t in range(throughput_cycles):
+    throughput_cycles     = (size * 2)
+    output_latency_cycles = (size - 1)
+
+    for t in range(throughput_cycles + output_latency_cycles):
       # drive in all of x and w into PEs
       await step(dut)
       await check_recv_rdy(dut, 0, 0)
@@ -538,9 +538,6 @@ async def test_case_8_asynchronous_load_mac_out_edge(dut):
     for i in range(size):
       for j in range(size):
         # combinationally check final summation stored in each PE
-        #   1) outputs become available in diagonal order from (0,0)
-        #   2) last value from last row/col of x and w flows through PEs
-        #   3) outputs unaffected by continuing clock cycles
         await step(dut)
         await check_recv_rdy(dut, 0, 0)
         await check_mac_rdy(dut, 0)
