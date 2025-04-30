@@ -104,7 +104,7 @@ module SystolicCtrl
     w_recv_rdy = ((state == `LOAD) & ~w_full);
   end
 
-  assign mac_en = ((state == `MAC) | (state == `OUT));
+  assign mac_en = (state == `MAC);
   
   always_ff @(posedge clk) begin
     x_fifo_ren[0] <= (rst ? 0 : (((state == `LOAD) & full) | ((state == `MAC) & ~empty)));
