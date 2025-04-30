@@ -87,8 +87,39 @@ test_8_7_7_6:
 			-pvalue+crossbar_2d.N_OUTPUTS=7 \
 			-pvalue+crossbar_2d.ENTRIES=6"
 
+
+test_4_2_3_2:
+	$(MAKE) COMPILE_ARGS+="-pvalue+crossbar_2d.BIT_WIDTH=4 \
+			-pvalue+crossbar_2d.N_INPUTS=2 \
+			-pvalue+crossbar_2d.N_OUTPUTS=3 \
+			-pvalue+crossbar_2d.ENTRIES=2"
+
+test_16_4_2_4:
+	$(MAKE) COMPILE_ARGS+="-pvalue+crossbar_2d.BIT_WIDTH=16 \
+			-pvalue+crossbar_2d.N_INPUTS=4 \
+			-pvalue+crossbar_2d.N_OUTPUTS=2 \
+			-pvalue+crossbar_2d.ENTRIES=4"
+
+test_12_6_6_3:
+	$(MAKE) COMPILE_ARGS+="-pvalue+crossbar_2d.BIT_WIDTH=12 \
+			-pvalue+crossbar_2d.N_INPUTS=6 \
+			-pvalue+crossbar_2d.N_OUTPUTS=6 \
+			-pvalue+crossbar_2d.ENTRIES=3"
+
+test_10_3_5_2:
+	$(MAKE) COMPILE_ARGS+="-pvalue+crossbar_2d.BIT_WIDTH=10 \
+			-pvalue+crossbar_2d.N_INPUTS=3 \
+			-pvalue+crossbar_2d.N_OUTPUTS=5 \
+			-pvalue+crossbar_2d.ENTRIES=2"
+
+test_6_5_3_5:
+	$(MAKE) COMPILE_ARGS+="-pvalue+crossbar_2d.BIT_WIDTH=6 \
+			-pvalue+crossbar_2d.N_INPUTS=5 \
+			-pvalue+crossbar_2d.N_OUTPUTS=3 \
+			-pvalue+crossbar_2d.ENTRIES=5"
+
 # Need to clean between tests... Otherwise, the parameters ARE NOT updated!
-test_all: test_8_7_7_2 clean test_8_7_7_6
+test_all: test_8_7_7_2 clean test_8_7_7_6 test_4_2_3_2 clean test_16_4_2_4 clean test_12_6_6_3 clean test_10_3_5_2 clean test_6_5_3_5 clean
 
 
 
