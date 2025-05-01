@@ -12,7 +12,9 @@ module drop_unit #(
   // Clock and Reset Ports
   input  logic  clk,
   input  logic  reset,
+
   input  logic  enable,                // If 1, disable drop unit (send every req_msg to resp_msg). In this mode, the drop unit acts basically like a wire.
+  input  logic  enable_val,
  
   input  logic [N_BITS-1:0]                req_msg,
   input  logic                             req_val,
@@ -32,19 +34,21 @@ module drop_unit #(
   
   logic [$clog2(MAX_N_CYCLES)-1:0] n_cycles;
   logic [$clog2(MAX_N_CYCLES)-1:0] counter;
+  
+  logic enable_reg;
 
   // manage state
   always_comb begin
     case (state)
       SEND: begin
-        if (enable == 0 & req_val == 1 & req_rdy == 1) begin
+        if (enable_reg == 0 & req_val == 1 & req_rdy == 1) begin
           next_state = DROP;
         end else begin
           next_state = SEND;
         end
       end
       DROP: begin
-        if (counter == n_cycles - 2 || enable == 1) begin
+        if (counter == n_cycles - 2 || enable_reg == 1) begin
           next_state = SEND;
         end else begin
           next_state = DROP;
@@ -103,5 +107,12 @@ module drop_unit #(
     end
   end
   
+  always_ff @(posedge clk) begin
+    if (enable_val) begin
+      enable_reg <= enable;
+    end else begin
+      enable_reg <= enable_reg;
+    end
+  end
 endmodule
 `endif

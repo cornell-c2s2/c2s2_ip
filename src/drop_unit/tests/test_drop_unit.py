@@ -7,10 +7,12 @@ from cocotb.clock import Clock
 async def enable_test(dut, NUM_BITS, NUM_LOOPS, DROP_RATE):
     await ClockCycles(dut.clk, 1)
     dut.reset.value = 1
+    dut.enable.value = 1
+    dut.enable_val.value = 1
     await ClockCycles(dut.clk, 1)
     dut.reset.value = 0
-    
-    dut.enable.value = 1
+    dut.enable.value = 0
+    dut.enable_val.value = 0
     
     for i in range(NUM_LOOPS):
         for j in range(DROP_RATE):
@@ -27,10 +29,13 @@ async def enable_test(dut, NUM_BITS, NUM_LOOPS, DROP_RATE):
 async def drop_test(dut, NUM_BITS, NUM_LOOPS, DROP_RATE):
     await ClockCycles(dut.clk, 1)
     dut.reset.value = 1
+    dut.enable.value = 0
+    dut.enable_val.value = 1
     await ClockCycles(dut.clk, 1)
     dut.reset.value = 0
+    dut.enable.value = 1
+    dut.enable_val.value = 0
 
-    dut.enable.value = 0
     dut.cfg_drop_val.value = 1
     dut.cfg_drop_msg.value = DROP_RATE
 
