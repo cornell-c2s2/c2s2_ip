@@ -4,16 +4,8 @@ TOPLEVEL_LANG ?= verilog
 #RTL Simulator (always Synopsys VCS)
 SIM := vcs
 
-ifeq ($(SIM), vcs)
-	#WAIVER_FILE = vcs_waivers.f
-	VCS_OPTIONS += +error+limit,100
-endif
-
 #Add working directory to the Python virtual environment path
 PWD=$(shell pwd)
-C2S2_PATH=$(shell git rev-parse --show-toplevel)
-
-
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
 
 #Note: If working with functional models, make sure to UNCOMMENT the following line:
@@ -21,18 +13,14 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
 #Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
-VERILOG_SOURCES += $(PWD)/../../crossbar_2d.v
-
+VERILOG_SOURCES = $(PWD)/../demodulator.v
 
 #Step 2: Add all include directories referenced in the verilog source file
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
-COMPILE_ARGS += -sverilog
-DATA_WIDTH ?= 31
-# COMPILE_ARGS += -pvalue+crossbar_2d.BIT_WIDTH=31
 
 #Step 3: Set top level module and corresponding python test module
-TOPLEVEL = crossbar_2d
-MODULE = test_crossbar_2d
+TOPLEVEL = demodulator_Demodulator
+MODULE = test_demodulator_Demodulator
 
 #Step 4: Set environment variables for waveforms and coverage data to 1 if you  \
 would like either waveforms or coverage data to be produced by the simulation. You can \
@@ -51,8 +39,6 @@ EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
 WAVES ?= 0
 ifeq ($(WAVES), 1)
 	EXTRA_ARGS += +vcs+dumpvars+waves.vcd
-	EXTRA_ARGS += +vcs+vcdpluson
-	EXTRA_ARGS += +vcs+vcdplusmemon
 endif
 
 #Generating line and toggle coverage data (Set environment variable COVER to 1)
@@ -74,52 +60,6 @@ clean_all:
 #Generate a coverage report after running a simulation
 coverage_report:
 	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
-
-test_8_7_7_2:
-	$(MAKE) COMPILE_ARGS+="-pvalue+crossbar_2d.BIT_WIDTH=8 \
-			-pvalue+crossbar_2d.N_INPUTS=7 \
-			-pvalue+crossbar_2d.N_OUTPUTS=7 \
-			-pvalue+crossbar_2d.ENTRIES=2"
-
-test_8_7_7_6:
-	$(MAKE) COMPILE_ARGS+="-pvalue+crossbar_2d.BIT_WIDTH=8 \
-			-pvalue+crossbar_2d.N_INPUTS=7 \
-			-pvalue+crossbar_2d.N_OUTPUTS=7 \
-			-pvalue+crossbar_2d.ENTRIES=6"
-
-
-test_4_2_3_2:
-	$(MAKE) COMPILE_ARGS+="-pvalue+crossbar_2d.BIT_WIDTH=4 \
-			-pvalue+crossbar_2d.N_INPUTS=2 \
-			-pvalue+crossbar_2d.N_OUTPUTS=3 \
-			-pvalue+crossbar_2d.ENTRIES=2"
-
-test_16_4_2_4:
-	$(MAKE) COMPILE_ARGS+="-pvalue+crossbar_2d.BIT_WIDTH=16 \
-			-pvalue+crossbar_2d.N_INPUTS=4 \
-			-pvalue+crossbar_2d.N_OUTPUTS=2 \
-			-pvalue+crossbar_2d.ENTRIES=4"
-
-test_12_6_6_3:
-	$(MAKE) COMPILE_ARGS+="-pvalue+crossbar_2d.BIT_WIDTH=12 \
-			-pvalue+crossbar_2d.N_INPUTS=6 \
-			-pvalue+crossbar_2d.N_OUTPUTS=6 \
-			-pvalue+crossbar_2d.ENTRIES=3"
-
-test_10_3_5_2:
-	$(MAKE) COMPILE_ARGS+="-pvalue+crossbar_2d.BIT_WIDTH=10 \
-			-pvalue+crossbar_2d.N_INPUTS=3 \
-			-pvalue+crossbar_2d.N_OUTPUTS=5 \
-			-pvalue+crossbar_2d.ENTRIES=2"
-
-test_6_5_3_5:
-	$(MAKE) COMPILE_ARGS+="-pvalue+crossbar_2d.BIT_WIDTH=6 \
-			-pvalue+crossbar_2d.N_INPUTS=5 \
-			-pvalue+crossbar_2d.N_OUTPUTS=3 \
-			-pvalue+crossbar_2d.ENTRIES=5"
-
-# Need to clean between tests... Otherwise, the parameters ARE NOT updated!
-test_all: test_8_7_7_2 clean test_8_7_7_6 test_4_2_3_2 clean test_16_4_2_4 clean test_12_6_6_3 clean test_10_3_5_2 clean test_6_5_3_5 clean
 
 
 
