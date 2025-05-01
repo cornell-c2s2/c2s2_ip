@@ -25,7 +25,6 @@
 `include "lbist/lfsr/lfsr.v"
 `include "lbist/lbist_toplevel/lbist_toplevel.v"
 `include "lbist/lbist_controller/lbist_controller.v"
-`include "lbist/lfsr/lfsr_galois.v"
 `include "cmn/reset_sync.v"
 `include "async_fifo/AsyncFifo.sv"
 `include "async_fifo/FifoPackager.sv"
@@ -689,7 +688,7 @@ module tapein2_sp25_top #(
   );
 
   // LFSR --------------------------------------------------------------------------
-  lfsr_galois #(
+  lfsr_paramver2 #(
     .LFSR_MSG_BITS           (SEED_BITS)
   ) lfsr (
     .clk                     (clk),
@@ -1027,26 +1026,8 @@ module tapein2_sp25_top #(
 
   //================================ASSERTS=========================================
   // SPI Minion --------------------------------------------------------------------
-  generate
-    if ($clog2(DATA_BITS) != ADDR_BITS) begin
-      $error("ADDR_BITS must be equal to the log2 of DATA_BITS");
-    end
-  endgenerate
-
   // Router ------------------------------------------------------------------------
   // Arbiter -----------------------------------------------------------------------
-  generate
-    if (ARBITER_SIZE != ROUTER_SIZE) begin
-      $error("ARBITER_SIZE must be equal to ROUTER_SIZE");
-    end
-  endgenerate
-  
-  generate
-    if (ROUTER_PACKET_BITS != DATA_BITS + ADDR_BITS) begin
-      $error("ROUTER_PACKET_BITS must be equal to DATA_BITS");
-    end
-  endgenerate
-
   // Input Xbar --------------------------------------------------------------------
   generate
     if (INPUT_XBAR_CONTROL_BITS > DATA_BITS) begin
@@ -1069,37 +1050,9 @@ module tapein2_sp25_top #(
   endgenerate
 
   // FFT Core 1 Deserializer -------------------------------------------------------
-  // FFT Core 1 Serializer ---------------------------------------------------------
   // FFT Core 1 --------------------------------------------------------------------
   // FFT Core 2 Deserializer -------------------------------------------------------
-  // FFT Core 2 Serializer ---------------------------------------------------------
   // FFT Core 2 --------------------------------------------------------------------
-  // Classifier Deserializer -------------------------------------------------------
-
-  generate
-    if (CLASSIFIER_SAMPLES != FFT1_SAMPLES / 2) begin
-      $error("CLASSIFIER_SAMPLES must be equal to FFT1_SAMPLES");
-    end
-    if (CLASSIFIER_SAMPLES != FFT2_SAMPLES / 2) begin
-      $error("CLASSIFIER_SAMPLES must be equal to FFT2_SAMPLES");
-    end
-  endgenerate
-
-  generate
-    if (CLASSIFIER_BITS != DATA_BITS) begin
-      $error("CLASSIFIER_BITS must be equal to DATA_BITS");
-    end
-  endgenerate
-
-  generate
-    if (CLASSIFIER_DECIMAL_PT != FFT1_DECIMAL_PT) begin
-      $error("CLASSIFIER_DECIMAL_PT must be equal to FFT1_DECIMAL_PT");
-    end
-    if (CLASSIFIER_DECIMAL_PT != FFT2_DECIMAL_PT) begin
-      $error("CLASSIFIER_DECIMAL_PT must be equal to FFT2_DECIMAL_PT");
-    end
-  endgenerate
-
   // Classifier --------------------------------------------------------------------
   // Wishbone Harness --------------------------------------------------------------
   // LBIST Controller --------------------------------------------------------------
