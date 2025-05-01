@@ -18,7 +18,10 @@ from src.classifier.sim import classify
 from src.fft.tests.fft import FFTInterface, FFTPease
 from tools.utils import fixed_bits
 
-from src.tapeins.sp25.tapein1.tests.test_top import run_top, reset_dut, fft1_msg
+from src.tapeins.sp25.tapein1.tests.test_top import (
+    run_top, reset_dut, fft1_msg, mk_spi_pkt, RouterOut,
+    InXbarCfg, ClsXbarCfg, OutXbarCfg, ArbiterIn
+)
 
 # Parse a .wav file to Q8.8 fixed-point format
 def wav_to_q8_8_messages(filename: str, target_rate: int) -> bytes:
@@ -132,3 +135,90 @@ async def test_fft1_with_wav(dut):
     # run the transaction‐level SPI harness
     # Note: run_top already logs the actual DUT output messages as they are received.
     await run_top(dut, in_msgs, out_msgs, max_trsns=200)
+
+
+@cocotb.test()
+async def test_fft1_classifier_with_wav(dut):
+    """Test classifier on real-world audio input."""
+    # drive clock and reset
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+
+    # load & quantize the first 32 samples as Q8.8 int16
+    raw_bytes = wav_to_q8_8_messages("input.wav", target_rate=48000)
+    raw_bytes = raw_bytes[:32]
+    fixed_inputs = [Fixed(s, True, 16, 8) for s in raw_bytes]
+
+    # compute golden FFT output
+    model = FFTPease(16, 8, 32)
+    golden = model.transform([CFixed(v=(s, 0), n=16, d=8) for s in raw_bytes])
+    fft_reals = [x.real for x in golden]
+
+    # classifier parameters
+    cutoff_freq = 1000
+    cutoff_mag = Fixed(0.7, True, 16, 8)
+    sampling_freq = 48000
+
+    # compute expected classifier outputs
+    classifier_outputs = classify(fft_reals, cutoff_freq, cutoff_mag, sampling_freq)
+
+    # build SPI message lists for FFT1->Classifier->Arbiter pipeline
+    in_msgs = [
+        mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT1),
+        mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_CLS),
+        mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.CLS_ARBITER),
+        mk_spi_pkt(RouterOut.CLS_CUT_FREQ_CTRL, cutoff_freq),
+        mk_spi_pkt(RouterOut.CLS_MAG_CTRL, int(cutoff_mag)),
+        mk_spi_pkt(RouterOut.CLS_SAMP_FREQ_CTRL, sampling_freq),
+    ] + [mk_spi_pkt(RouterOut.IN_XBAR, int(fixed_bits(x))) for x in fixed_inputs]
+
+    # Classifier output is a single boolean, convert to int and wrap in a list
+    out_msgs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, int(classifier_outputs))]
+
+    # run the transaction-level SPI harness with ample cycles
+    await run_top(dut, in_msgs, out_msgs, max_trsns=2000)
+
+    # log expected classifier output
+    dut._log.info(f"Expected classifier output: {classifier_outputs}")
+
+
+@cocotb.test()
+async def test_fft1_classifier_with_ffff_input(dut):
+    """Test classifier when all FFT inputs are zero."""
+    # drive clock and reset
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+
+    # prepare 32 zero samples as Fixed(16,8)
+    fixed_inputs = [Fixed(0, True, 16, 8) for _ in range(32)]
+    dut._log.info(f"Zero inputs (fixed-point): {fixed_inputs}")
+
+    # expected classifier input is zeros -> FFT output all zeros real part
+    fft_reals_float = [0.0]*32
+    # Convert floats to Fixed(16, 8) for the classifier
+    fft_reals_fixed = [Fixed(x, True, 16, 8) for x in fft_reals_float]
+    cutoff_freq = 10
+    cutoff_mag  = Fixed(v=0xFFFF, signed=False, n=16, d=8)  # Set to a negative value to ensure no output
+    #Fixed(0.7, True, 16, 8)
+    sampling_freq = 44100
+
+    # compute expected classifier result
+    expected = classify(fft_reals_fixed, cutoff_freq, cutoff_mag, sampling_freq)
+
+    # expect 0xFFFF = 255
+    dut._log.info(f"int(cutoff_mag): {int(cutoff_mag)}")
+    # build SPI packets
+    in_msgs = [
+        mk_spi_pkt(RouterOut.IN_XBAR_CTRL,    InXbarCfg.ROUTER_FFT1),
+        mk_spi_pkt(RouterOut.CLS_XBAR_CTRL,   ClsXbarCfg.FFT1_CLS),
+        mk_spi_pkt(RouterOut.OUT_XBAR_CTRL,   OutXbarCfg.CLS_ARBITER),
+        mk_spi_pkt(RouterOut.CLS_CUT_FREQ_CTRL, cutoff_freq),
+        mk_spi_pkt(RouterOut.CLS_MAG_CTRL,    int(cutoff_mag)),
+        mk_spi_pkt(RouterOut.CLS_SAMP_FREQ_CTRL, sampling_freq),
+    ] + [mk_spi_pkt(RouterOut.IN_XBAR, int(fixed_bits(x))) for x in fixed_inputs]
+
+    out_msgs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, int(expected))]
+
+    await run_top(dut, in_msgs, out_msgs, max_trsns=2000)
+
+    dut._log.info(f"Expected classifier output (zero inputs): {expected}")
