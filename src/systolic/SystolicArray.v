@@ -30,6 +30,7 @@ module SystolicArray
 );
 
   logic mac_en;
+  logic out_en;
 
   logic x_fifo_wen   [SIZE];
   logic x_fifo_ren   [SIZE];
@@ -40,6 +41,8 @@ module SystolicArray
   logic w_fifo_ren   [SIZE];
   logic w_fifo_full  [SIZE];
   logic w_fifo_empty [SIZE];
+
+  assign out_en = out_rdy;
 
   SystolicDpath #(SIZE, NBITS, DBITS) dpath
   (

@@ -26,6 +26,7 @@ module SystolicDpath
   output logic                    w_fifo_full  [SIZE],
   output logic                    w_fifo_empty [SIZE],
 
+  input  logic                    out_en,
   input  logic [$clog2(SIZE)-1:0] out_rsel,
   input  logic [$clog2(SIZE)-1:0] out_csel,
   output logic [NBITS-1:0]        b_s_out
@@ -97,7 +98,7 @@ module SystolicDpath
 
   // Output Logic
 
-  assign b_s_out = s[out_rsel][out_csel];
+  assign b_s_out = (s[out_rsel][out_csel] & {{(NBITS-1){out_en}}, out_en});
 
 endmodule
 
