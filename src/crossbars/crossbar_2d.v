@@ -32,35 +32,40 @@
 `define CROSSBAR_2D_V
 `define VL_RD
 
-module crossbar_2d#(
-    parameter int BIT_WIDTH = 32,
-    parameter int N_INPUTS = 2,
-    parameter int N_OUTPUTS = 2,
-    parameter int ENTRIES = 2,
-    localparam int CONTROL_BIT_WIDTH = $clog2(N_INPUTS * N_OUTPUTS)
-  ) (
-    input logic                   clk,
-    input logic                   reset,
+module crossbar_2d #(
+  parameter int BIT_WIDTH = 32,
+  parameter int N_INPUTS = 2,
+  parameter int N_OUTPUTS = 2,
+  parameter int ENTRIES = 2,
+  localparam int CONTROL_BIT_WIDTH = $clog2(N_INPUTS) + $clog2(N_OUTPUTS)
+) (
+  input logic clk,
+  input logic reset,
 
-    input  logic [BIT_WIDTH - 1:0] recv_msg [N_INPUTS][ENTRIES],
-    input  logic                   recv_val [N_INPUTS],
-    output logic                   recv_rdy [N_INPUTS],
-  
-    output logic [BIT_WIDTH - 1:0] send_msg [N_OUTPUTS][ENTRIES],
-    output logic                   send_val [N_OUTPUTS],
-    input  logic                   send_rdy [N_OUTPUTS],
+  input  logic [BIT_WIDTH - 1:0] recv_msg[N_INPUTS][ENTRIES],
+  input  logic                   recv_val[N_INPUTS],
+  output logic                   recv_rdy[N_INPUTS],
 
-    input  logic [CONTROL_BIT_WIDTH - 1:0] control,
-    input  logic                           control_val,
-    output logic                           control_rdy
-  );
+  output logic [BIT_WIDTH - 1:0] send_msg[N_OUTPUTS][ENTRIES],
+  output logic                   send_val[N_OUTPUTS],
+  input  logic                   send_rdy[N_OUTPUTS],
 
-//============================LOCAL_PARAMETERS=================================
+  input  logic [CONTROL_BIT_WIDTH - 1:0] control,
+  input  logic                           control_val,
+  output logic                           control_rdy
+);
+
+  //============================LOCAL_PARAMETERS=================================
   logic [CONTROL_BIT_WIDTH - 1:0] stored_control;
   logic [$clog2(N_INPUTS)  - 1:0] input_sel;
   logic [$clog2(N_OUTPUTS) - 1:0] output_sel;
 
-//================================DATAPATH=====================================
+  // logic [3:0][3:0] test_arr;
+  // assign test_arr = '0;
+
+  // logic [3:0] test_arr2[3:0];
+  //assign test_arr2 = '0;
+  //================================DATAPATH=====================================
   // Control logic
   always_ff @(posedge clk) begin
     if (reset) begin
@@ -96,7 +101,7 @@ module crossbar_2d#(
         send_val[i] = recv_val[input_sel];
       end
     end
-  
+
     for (int i = 0; i < N_INPUTS; i = i + 1) begin
       if ((i != input_sel)) begin
         recv_rdy[i] = 0;
