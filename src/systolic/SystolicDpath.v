@@ -98,7 +98,7 @@ module SystolicDpath
 
   // Output Logic
 
-  assign b_s_out = (s[out_rsel][out_csel] & {{(NBITS-1){out_en}}, out_en});
+  assign b_s_out = (out_en ? s[out_rsel][out_csel] : 0);
 
 endmodule
 
