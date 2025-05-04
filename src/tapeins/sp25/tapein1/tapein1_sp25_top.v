@@ -24,7 +24,7 @@
 `include "lbist/lfsr/lfsr.v"
 `include "lbist/lbist_toplevel/lbist_toplevel.v"
 `include "lbist/lbist_controller/lbist_controller.v"
-`include "lbist/lfsr/lfsr_galois.v"
+`include "lbist/lfsr/lfsr.v"
 `include "cmn/reset_sync.v"
 `include "async_fifo/AsyncFifo.sv"
 `include "async_fifo/PosedgeDetector.sv"
@@ -716,7 +716,7 @@ module tapein1_sp25_top #(
   );
 
   // LFSR --------------------------------------------------------------------------
-  lfsr_galois #(
+  lfsr_paramver2 #(
     .LFSR_MSG_BITS           (SEED_BITS)
   ) lfsr (
     .clk                     (clk),
