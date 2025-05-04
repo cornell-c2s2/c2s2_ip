@@ -73,16 +73,19 @@ def wav_to_q8_8_messages(filename: str, normalization: int) -> bytes:
 
     return fixed.tolist()
 
-raw_bytes = wav_to_q8_8_messages("input.wav", 0)
-raw_bytes = raw_bytes[:32]
-print("BYTES:")
-for bytes in raw_bytes:
-    print(hex(bytes))
+def drop_bytes(bytes, n_cycles):
+    return [byte for i, byte in enumerate(bytes) if i % n_cycles == 0]
 
-N_CYCLES = 10
+# raw_bytes = wav_to_q8_8_messages("input.wav", 0)
+# raw_bytes = raw_bytes[:32]
+# print("BYTES:")
+# for bytes in raw_bytes:
+#     print(hex(bytes))
 
-filtered_bytes = [byte for i, byte in enumerate(raw_bytes, start=1) if i % N_CYCLES != 0]
+# N_CYCLES = 10
 
-print("FILTERED BYTES:")
-for filtered in filtered_bytes:
-    print(hex(filtered))
+# filtered_bytes = drop_bytes(raw_bytes, N_CYCLES)
+
+# print("FILTERED BYTES:")
+# for filtered in filtered_bytes:
+#     print(hex(filtered))
