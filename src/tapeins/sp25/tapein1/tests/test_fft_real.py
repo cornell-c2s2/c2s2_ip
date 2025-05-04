@@ -4,6 +4,7 @@ Input is a WAV file, the testbench sends the data over SPI and reads the FFT out
 The testbench is parameterizable by sampling rate (in Hz). If the .wav file is multi-channel,
 then it is averaged down to mono before sending it to the FFT.
 """
+
 import wave
 import numpy as np
 from scipy.signal import resample
@@ -19,9 +20,17 @@ from src.fft.tests.fft import FFTInterface, FFTPease
 from tools.utils import fixed_bits
 
 from src.tapeins.sp25.tapein1.tests.test_top import (
-    run_top, reset_dut, fft1_msg, mk_spi_pkt, RouterOut,
-    InXbarCfg, ClsXbarCfg, OutXbarCfg, ArbiterIn
+    run_top,
+    reset_dut,
+    fft1_msg,
+    mk_spi_pkt,
+    RouterOut,
+    InXbarCfg,
+    ClsXbarCfg,
+    OutXbarCfg,
+    ArbiterIn,
 )
+
 
 # Parse a .wav file to Q8.8 fixed-point format
 def wav_to_q8_8_messages(filename: str, target_rate: int) -> bytes:
@@ -39,7 +48,9 @@ def wav_to_q8_8_messages(filename: str, target_rate: int) -> bytes:
         # Handle 24-bit audio (3 bytes)
         raw_bytes = np.frombuffer(raw, dtype=np.uint8)
         if raw_bytes.size % 3 != 0:
-            raise ValueError(f"Raw data size {raw_bytes.size} is not divisible by 3 for 24-bit audio.")
+            raise ValueError(
+                f"Raw data size {raw_bytes.size} is not divisible by 3 for 24-bit audio."
+            )
 
         num_samples_total = raw_bytes.size // 3
         reshaped_bytes = raw_bytes.reshape(num_samples_total, 3)
@@ -47,13 +58,13 @@ def wav_to_q8_8_messages(filename: str, target_rate: int) -> bytes:
         # Convert 3 bytes (little-endian) to signed int32
         samples_int32 = np.empty(num_samples_total, dtype=np.int32)
         samples_int32[:] = reshaped_bytes[:, 0]  # LSB
-        samples_int32 |= (reshaped_bytes[:, 1].astype(np.int32) << 8)
-        samples_int32 |= (reshaped_bytes[:, 2].astype(np.int32) << 16) # MSB
+        samples_int32 |= reshaped_bytes[:, 1].astype(np.int32) << 8
+        samples_int32 |= reshaped_bytes[:, 2].astype(np.int32) << 16  # MSB
 
         # Sign extend negative values (check MSB of the third byte)
         negative_mask = reshaped_bytes[:, 2] >= 0x80
         # Fill the most significant byte with 1s for negative numbers
-        samples_int32[negative_mask] |= np.int32(~0xFFFFFF) # or np.int32(0xFF000000)
+        samples_int32[negative_mask] |= np.int32(~0xFFFFFF)  # or np.int32(0xFF000000)
 
         # Assign the processed samples and set dtype for downstream consistency
         samples = samples_int32
@@ -75,7 +86,9 @@ def wav_to_q8_8_messages(filename: str, target_rate: int) -> bytes:
     if n_channels > 1:
         # Reshape requires the total number of samples to be divisible by n_channels
         if samples.size % n_channels != 0:
-             raise ValueError(f"Total samples {samples.size} not divisible by number of channels {n_channels}.")
+            raise ValueError(
+                f"Total samples {samples.size} not divisible by number of channels {n_channels}."
+            )
         samples = samples.reshape(-1, n_channels).mean(axis=1).astype(dtype)
     if orig_rate != target_rate:
         new_len = int(len(samples) * target_rate / orig_rate)
@@ -96,6 +109,24 @@ def wav_to_q8_8_messages(filename: str, target_rate: int) -> bytes:
     # return raw little‑endian bytes, or list(fixed) for Python ints
     return fixed.tolist()
 
+
+# Generate a sine wave at a given frequency and duration, then save it as a mono 16-bit WAV file.
+def generate_sine_wav(filename, freq, duration, sampling_rate, amplitude=1):
+    # Create time axis
+    t = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
+    # Generate sine wave samples
+    samples = amplitude * np.sin(2 * np.pi * freq * t)
+    # Convert to 16-bit WAV
+    audio = np.int16(samples * 32767)
+
+    # Write to WAV file
+    with wave.open(filename, "w") as wf:
+        wf.setnchannels(1)  # mono
+        wf.setsampwidth(2)  # 2 bytes for int16
+        wf.setframerate(sampling_rate)
+        wf.writeframes(audio.tobytes())
+
+
 """
 ================================================================================
 FFT REAL DATA TESTS
@@ -105,6 +136,7 @@ FFT REAL DATA TESTS
 
 @cocotb.test()
 async def test_fft1_with_wav(dut):
+    generate_sine_wav("input.wav", freq=1000, duration=0.01, sampling_rate=48000)
     # drive the clock and reset
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
@@ -113,14 +145,12 @@ async def test_fft1_with_wav(dut):
     raw_bytes = wav_to_q8_8_messages("input.wav", target_rate=48000)
     raw_bytes = raw_bytes[:32]
     # wrap them as Fixed(16,8) so fft1_msg can bit‑pack them
-    fixed_inputs = [Fixed(s , True, 16, 8) for s in raw_bytes]
+    fixed_inputs = [Fixed(s, True, 16, 8) for s in raw_bytes]
     dut._log.info(f"FFT inputs (fixed-point): {fixed_inputs}")
 
     # compute golden with FFTPease
     model = FFTPease(16, 8, 32)
-    golden = model.transform(
-        [CFixed(v=(s, 0), n=16, d=8) for s in raw_bytes]
-    )
+    golden = model.transform([CFixed(v=(s, 0), n=16, d=8) for s in raw_bytes])
     # we only compare the real part here, cast back into Fixed(16,8)
     fixed_outputs = [Fixed(x.real, True, 16, 8) for x in golden]
     fixed_outputs = fixed_outputs[:16]
@@ -139,6 +169,7 @@ async def test_fft1_with_wav(dut):
 
 @cocotb.test()
 async def test_fft1_classifier_with_wav(dut):
+    generate_sine_wav("input.wav", freq=2000, duration=0.01, sampling_rate=48000)
     """Test classifier on real-world audio input."""
     # drive clock and reset
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
@@ -194,12 +225,14 @@ async def test_fft1_classifier_with_ffff_input(dut):
     dut._log.info(f"Zero inputs (fixed-point): {fixed_inputs}")
 
     # expected classifier input is zeros -> FFT output all zeros real part
-    fft_reals_float = [0.0]*32
+    fft_reals_float = [0.0] * 32
     # Convert floats to Fixed(16, 8) for the classifier
     fft_reals_fixed = [Fixed(x, True, 16, 8) for x in fft_reals_float]
     cutoff_freq = 10
-    cutoff_mag  = Fixed(v=0xFFFF, signed=False, n=16, d=8)  # Set to a negative value to ensure no output
-    #Fixed(0.7, True, 16, 8)
+    cutoff_mag = Fixed(
+        v=0xFFFF, signed=False, n=16, d=8
+    )  # Set to a negative value to ensure no output
+    # Fixed(0.7, True, 16, 8)
     sampling_freq = 44100
 
     # compute expected classifier result
@@ -209,11 +242,11 @@ async def test_fft1_classifier_with_ffff_input(dut):
     dut._log.info(f"int(cutoff_mag): {int(cutoff_mag)}")
     # build SPI packets
     in_msgs = [
-        mk_spi_pkt(RouterOut.IN_XBAR_CTRL,    InXbarCfg.ROUTER_FFT1),
-        mk_spi_pkt(RouterOut.CLS_XBAR_CTRL,   ClsXbarCfg.FFT1_CLS),
-        mk_spi_pkt(RouterOut.OUT_XBAR_CTRL,   OutXbarCfg.CLS_ARBITER),
+        mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT1),
+        mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_CLS),
+        mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.CLS_ARBITER),
         mk_spi_pkt(RouterOut.CLS_CUT_FREQ_CTRL, cutoff_freq),
-        mk_spi_pkt(RouterOut.CLS_MAG_CTRL,    int(cutoff_mag)),
+        mk_spi_pkt(RouterOut.CLS_MAG_CTRL, int(cutoff_mag)),
         mk_spi_pkt(RouterOut.CLS_SAMP_FREQ_CTRL, sampling_freq),
     ] + [mk_spi_pkt(RouterOut.IN_XBAR, int(fixed_bits(x))) for x in fixed_inputs]
 
