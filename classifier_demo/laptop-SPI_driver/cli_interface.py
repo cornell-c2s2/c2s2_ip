@@ -9,6 +9,7 @@ Author: Simeon Turner
 from pymtl3 import *
 from spidriver import SPIDriver
 import spi_stream_protocol
+import time
 
 
 """
@@ -115,32 +116,11 @@ class Config(int):
   OUTXBAR_CLS_SPI = 0x50008  # Classifier to SPI
   OUTXBAR_CLS_WSB = 0x50009  # Classifier to Wishbone
 
-
-@DeprecationWarning
-def send(message, mode="wr"):
-  """
-  Sends a message to the SPI driver.
-
-  Valid mode strings are: 
-    "w"   - write to SPI Driver
-    "r"   - read from SPI Driver
-    "wr"  - write & read from SPI Driver
-    "no"  - send "no command read" to SPI Driver
-  """
-  assert message < 2**20
-
-  message = mk_bits(20)(message)
-
-  if mode == "wr":
-    return spi_write_read(message)
-  elif mode == "w":
-    return spi_write(message)
-  elif mode == "r":
-    return spi_read()
-  elif mode == "no":
-    return spi_none()
-  else:
-    raise Exception("Not a valid read or write mode.")
+  # Classifier cutoff configuration messages
+  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO: CONVERT TO FUNCTIONS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  CLS_CUTOFF_FREQ = 0x60000
+  CLS_CUTOFF_MAG = 0x70000
+  CLS_SAMP_FREQ = 0x80000
 
 
 def spi_none():
@@ -259,6 +239,28 @@ def spi_write_read_print(message):
   return send, recv
 
 
+def spi_trigger_a(duration):
+    """
+    Sets the A signal on the SPI Driver high for duration seconds, and 
+    sets it low for duration seconds
+    """
+    device.seta(1)
+    time.sleep(duration)
+    device.seta(0)
+    time.sleep(duration)
+
+
+def spi_trigger_b(duration):
+    """
+    Sets the A signal on the SPI Driver high for duration seconds, and 
+    sets it low for duration seconds
+    """
+    device.setb(1)
+    time.sleep(duration)
+    device.setb(0)
+    time.sleep(duration)
+
+
 
 # ===================================== Helper Functions =====================================
 
@@ -282,37 +284,4 @@ def spi_write_physical(src_msg):
   device.unsel()
 
   return Bits40(int.from_bytes(readbytes, "big") >> 2)
-  
 
-@DeprecationWarning
-def print_transaction(send, recv):
-  """
-  Formats the sent and received message in any given SPI transaction to be readable on the terminal.
-  """
-  print("Transaction:  " + str(send[0:transaction_print_len]) + "  >  " + 
-        str(recv[0:transaction_print_len]))
-  
-
-@DeprecationWarning
-def show_classifier(message):
-  """
-  Interprets whether a message is from the classifier or not. If it is, print what the classifier
-  is outputting. Prints 'no bird' if the classifier outputs a 0. Prints 'BIRD DETECTED' if the
-  classifier outputs a 1.
-  """
-  if message[16:20] == mk_bits(4)(0x4):
-    if message[0] == mk_bits(1)(0x1):
-      print("Classifier: 1")
-    else:
-      print("Classifier: 0")
-
-
-@DeprecationWarning
-def printer(send, recv):
-  """
-  Function that controls what is printed on terminal. Called by all SPI transaction functions.
-  """
-  if print_mode == 1:
-    print_transaction(send, recv)
-  elif print_mode == 2:
-    show_classifier(recv)
