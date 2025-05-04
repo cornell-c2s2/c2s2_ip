@@ -238,10 +238,10 @@ for TEST in $TESTS; do
         cd - >/dev/null
 
         # Check if the log contains a line with "PASS "
-        if grep -A 10 "TEST" $LOG_DIR/$TEST.log | grep -E "PASS " >/dev/null; then
-            echo "Test $TEST PASSED"
+        if grep -A 10 "TEST" "$LOG_DIR/$TEST.log" | grep -E "PASS " >/dev/null; then
+            echo -e "Test $TEST \e[32mPASSED\e[0m"
         else
-            echo "Test $TEST FAILED"
+            echo -e "Test $TEST \e[31mFAILED\e[0m"
         fi
     ) &
 done
