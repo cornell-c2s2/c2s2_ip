@@ -234,7 +234,7 @@ module tapein1_sp25_top #(
   //     Number of FIFO Entries
   // - FIFO_ENTRY_BITS:
   //     Bitwidth of each FIFO Entry (top level parameter)
-  localparam int FIFO_DEPTH = 10;
+  localparam int FIFO_DEPTH = 8;
 
 
   // Posedge Detector --------------------------------------------------------------
