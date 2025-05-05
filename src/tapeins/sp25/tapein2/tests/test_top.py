@@ -47,7 +47,8 @@ from pymtl3 import *
 from fixedpt import Fixed, CFixed
 
 from src.tapeins.sp25.tapein2.tests.spi_driver_sim import spi_write_read, spi_write, spi_read
-from src.classifier.sim import classify
+from src.classifier.sim import classify, frequency_bins
+from src.classifier.tests_cocotb.classifier_model import classify
 from src.fft.tests.fft import FFTInterface, FFTPease
 from tools.utils import fixed_bits
 

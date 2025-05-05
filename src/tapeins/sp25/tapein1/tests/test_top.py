@@ -1064,7 +1064,7 @@ for test in [test_fft_classifier_random, test_fft_classifier_random_fifo]:
     factory.add_option("cutoff_freq", cutoff_freq_values)
     factory.add_option("cutoff_mag", cutoff_mag_values)
     factory.add_option("sampling_freq", sampling_freq_values)
-    # factory.generate_tests()
+    factory.generate_tests()
 
 # Composite test that combines loopback and FFT.
 @cocotb.test()
