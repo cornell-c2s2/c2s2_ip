@@ -191,9 +191,11 @@ async def run_top(
                 dut._log.info(f"[FIFO TX] Sending msg: {hex(fifo_in[in_idx] & 0xFF)}")
                 fifo.istream_msg.value = fifo_in[in_idx] & 0xFF
                 fifo.istream_val.value = 1
-                await ClockCycles(dut.ext_clk, 1)
+                await ClockCycles(dut.ext_clk, 2)
                 in_idx += 1
                 fifo.istream_val.value = 0
+            else:
+                await ClockCycles(dut.clk, 1)
 
             # wait for output from router
             spi_status, retmsg = await spi_read(dut)
@@ -209,8 +211,6 @@ async def run_top(
                 ), f"Output mismatch: got {hex(int(output_msg))}, expected {hex(int(out_msgs[out_idx]))}"
                 dut._log.info("[FIFO] Correct FIFO output message!")
                 out_idx += 1
-
-            await ClockCycles(dut.clk, 1)
 
         trsns += 1
 
@@ -1050,8 +1050,6 @@ cutoff_freq_values = [0, 1000, 1400, 2000, 10000]
 cutoff_mag_values = [0.33, 1, 63.32]
 # sampling_freq_values = [44800, 44100, 25000]
 sampling_freq_values = [44800, 25000, 0xffff]
-
-
 
 
 for test in [test_fft_classifier_random, test_fft_classifier_random_fifo]:
