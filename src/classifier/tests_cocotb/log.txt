@@ -1,0 +1,803 @@
+rm -f results.xml
+"make" -f Makefile results.xml
+make[1]: Entering directory '/home/jjm469/c2s2/updated_classifier/src/classifier/tests_new'
+rm -f results.xml
+MODULE=test_classifier TESTCASE= TOPLEVEL=classifier_Classifier TOPLEVEL_LANG=verilog \
+ sim_build/simv +define+COCOTB_SIM=1 -cm line+tgl +vcs+dumpvars+waves.vcd +vcs+vcdpluson +vcs+vcdplusmemon -full64  
+Info: [VCS_SAVE_RESTORE_INFO] ASLR (Address Space Layout Randomization) is detected on the machine. To enable $save functionality, ASLR will be switched off and simv re-executed.
+Please use '-no_save' simv switch to avoid re-execution or '-suppress=ASLR_DETECTED_INFO' to suppress this message.
+
+Warning-[RT_UO] Unsupported option
+  Unsupported option '-full64' is ignored
+
+Chronologic VCS simulator copyright 1991-2023
+Contains Synopsys proprietary information.
+Compiler version V-2023.12-SP2-1_Full64; Runtime version V-2023.12-SP2-1_Full64;  May  5 01:36 2025
+     -.--ns INFO     gpi                                ..mbed/gpi_embed.cpp:79   in set_program_name_in_venv        Did not detect Python virtual environment. Using system-wide Python interpreter
+     -.--ns INFO     gpi                                ../gpi/GpiCommon.cpp:101  in gpi_print_registered_impl       VPI registered
+
+ VCS Coverage Metrics Release V-2023.12-SP2-1_Full64 Copyright (c) 1991-2023 by Synopsys Inc.
+     0.00ns INFO     cocotb                             Running on Chronologic Simulation VCS Release version V-2023.12-SP2-1_Full64
+     0.00ns INFO     cocotb                             Running tests with cocotb v1.9.2 from /classes/c2s2/easybuild-rhel/software/C2S2PythonPackages/2024.10-foss-2023b/lib/python3.11/site-packages/cocotb
+     0.00ns INFO     cocotb                             Seeding Python random module with 1746423394
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_001
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_002
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_003
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_004
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_005
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_006
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_007
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_008
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_009
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_010
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_011
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_012
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_013
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_014
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_015
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_016
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_017
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_018
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_019
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_020
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_021
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_022
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_023
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_024
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_025
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_026
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_027
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_028
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_029
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_030
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_031
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_032
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_033
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_034
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_035
+     0.00ns INFO     cocotb.regression                  Found test test_classifier.test_classifier_036
+     0.00ns INFO     cocotb.regression                  running test_classifier_001 (1/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 0
+                                                          cutoff_mag: 3
+                                                          sampling_freq: 44800
+     0.00ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+     0.00ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+     0.00ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+VCD+ Writer V-2023.12-SP2-1_Full64 Copyright (c) 1991-2023 by Synopsys Inc.
+     5.00ns INFO     cocotb.classifier_Classifier       ==================================================
+     5.00ns INFO     cocotb.classifier_Classifier       ----
+     5.00ns INFO     cocotb.regression                  test_classifier_001 passed
+     5.00ns INFO     cocotb.regression                  running test_classifier_002 (2/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 0
+                                                          cutoff_mag: 3
+                                                          sampling_freq: 44100
+     5.00ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+     5.00ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+     5.00ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    11.00ns INFO     cocotb.classifier_Classifier       ==================================================
+    11.00ns INFO     cocotb.classifier_Classifier       ----
+    11.00ns INFO     cocotb.regression                  test_classifier_002 passed
+    11.00ns INFO     cocotb.regression                  running test_classifier_003 (3/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 0
+                                                          cutoff_mag: 3
+                                                          sampling_freq: 25000
+    11.00ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    11.00ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    11.00ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    17.00ns INFO     cocotb.classifier_Classifier       ==================================================
+    17.00ns INFO     cocotb.classifier_Classifier       ----
+    17.00ns INFO     cocotb.regression                  test_classifier_003 passed
+    17.00ns INFO     cocotb.regression                  running test_classifier_004 (4/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 0
+                                                          cutoff_mag: 4
+                                                          sampling_freq: 44800
+    17.00ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    17.00ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    17.00ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    23.00ns INFO     cocotb.classifier_Classifier       ==================================================
+    23.00ns INFO     cocotb.classifier_Classifier       ----
+    23.00ns INFO     cocotb.regression                  test_classifier_004 passed
+    23.00ns INFO     cocotb.regression                  running test_classifier_005 (5/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 0
+                                                          cutoff_mag: 4
+                                                          sampling_freq: 44100
+    23.00ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    23.00ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    23.00ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    29.00ns INFO     cocotb.classifier_Classifier       ==================================================
+    29.00ns INFO     cocotb.classifier_Classifier       ----
+    29.00ns INFO     cocotb.regression                  test_classifier_005 passed
+    29.00ns INFO     cocotb.regression                  running test_classifier_006 (6/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 0
+                                                          cutoff_mag: 4
+                                                          sampling_freq: 25000
+    29.00ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    29.00ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    29.00ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    35.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    35.01ns INFO     cocotb.classifier_Classifier       ----
+    35.01ns INFO     cocotb.regression                  test_classifier_006 passed
+    35.01ns INFO     cocotb.regression                  running test_classifier_007 (7/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 0
+                                                          cutoff_mag: 7
+                                                          sampling_freq: 44800
+    35.01ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    35.01ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    35.01ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    41.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    41.01ns INFO     cocotb.classifier_Classifier       ----
+    41.01ns INFO     cocotb.regression                  test_classifier_007 passed
+    41.01ns INFO     cocotb.regression                  running test_classifier_008 (8/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 0
+                                                          cutoff_mag: 7
+                                                          sampling_freq: 44100
+    41.01ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    41.01ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    41.01ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    47.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    47.01ns INFO     cocotb.classifier_Classifier       ----
+    47.01ns INFO     cocotb.regression                  test_classifier_008 passed
+    47.01ns INFO     cocotb.regression                  running test_classifier_009 (9/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 0
+                                                          cutoff_mag: 7
+                                                          sampling_freq: 25000
+    47.01ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    47.01ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    47.01ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    53.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    53.01ns INFO     cocotb.classifier_Classifier       ----
+    53.01ns INFO     cocotb.regression                  test_classifier_009 passed
+    53.01ns INFO     cocotb.regression                  running test_classifier_010 (10/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 0
+                                                          cutoff_mag: 10
+                                                          sampling_freq: 44800
+    53.01ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    53.01ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    53.01ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    59.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    59.01ns INFO     cocotb.classifier_Classifier       ----
+    59.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    59.01ns INFO     cocotb.classifier_Classifier       Frequency bins
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 0, Frequency Valid: 1, Frequency Value: 0
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 1, Frequency Valid: 1, Frequency Value: 1400
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 2, Frequency Valid: 1, Frequency Value: 2800
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 3, Frequency Valid: 1, Frequency Value: 4200
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 4, Frequency Valid: 1, Frequency Value: 5600
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 5, Frequency Valid: 1, Frequency Value: 7000
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 6, Frequency Valid: 1, Frequency Value: 8400
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 7, Frequency Valid: 1, Frequency Value: 9800
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 8, Frequency Valid: 1, Frequency Value: 11200
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 9, Frequency Valid: 1, Frequency Value: 12600
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 10, Frequency Valid: 1, Frequency Value: 14000
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 11, Frequency Valid: 1, Frequency Value: 15400
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 12, Frequency Valid: 1, Frequency Value: 16800
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 13, Frequency Valid: 1, Frequency Value: 18200
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 14, Frequency Valid: 1, Frequency Value: 19600
+    59.01ns INFO     cocotb.classifier_Classifier       Bin Index: 15, Frequency Valid: 1, Frequency Value: 21000
+    59.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    59.01ns INFO     cocotb.classifier_Classifier       Cutoff Magnitude: 10
+    59.01ns INFO     cocotb.classifier_Classifier       Cutoff freq: 0
+    59.01ns INFO     cocotb.classifier_Classifier       Actual
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 0, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 5
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 0, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 5
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 1, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 1, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 2, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 2, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 3, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 1
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 3, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 1
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 4, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 4, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 5, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 3
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 5, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 3
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 6, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 6, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 7, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 7, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 8, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 8, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 9, Bin Freq Valid: 1, Bin Cutoff mag met: 1, Bin Valid: 1, Bin Value: 10
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 9, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 10
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 10, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 10, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 11, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 8
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 11, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 8
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 12, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 6
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 12, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 6
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 13, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 13, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 14, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 14, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+    59.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 15, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 8
+    59.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 15, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 8
+    59.01ns INFO     cocotb.regression                  test_classifier_010 failed
+                                                        Traceback (most recent call last):
+                                                          File "/classes/c2s2/easybuild-rhel/software/C2S2PythonPackages/2024.10-foss-2023b/lib/python3.11/site-packages/cocotb/regression.py", line 728, in _my_test
+                                                            await function(dut, *args, **kwargs)
+                                                          File "/home/jjm469/c2s2/updated_classifier/src/classifier/tests_new/test_classifier.py", line 115, in test_classifier
+                                                            dut._log.info(f"Actual  : {dut.comparison.compare_outs.value[::-1]}")
+                                                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+                                                          File "/classes/c2s2/easybuild-rhel/software/C2S2PythonPackages/2024.10-foss-2023b/lib/python3.11/site-packages/cocotb/binary.py", line 748, in __getitem__
+                                                            if first < 0 or second < 0:
+                                                               ^^^^^^^^^
+                                                        TypeError: '<' not supported between instances of 'NoneType' and 'int'
+    59.01ns INFO     cocotb.regression                  running test_classifier_011 (11/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 0
+                                                          cutoff_mag: 10
+                                                          sampling_freq: 44100
+    59.01ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    59.01ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    59.01ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    65.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    65.01ns INFO     cocotb.classifier_Classifier       ----
+    65.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    65.01ns INFO     cocotb.classifier_Classifier       Frequency bins
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 0, Frequency Valid: 1, Frequency Value: 0
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 1, Frequency Valid: 1, Frequency Value: 1378
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 2, Frequency Valid: 1, Frequency Value: 2756
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 3, Frequency Valid: 1, Frequency Value: 4134
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 4, Frequency Valid: 1, Frequency Value: 5512
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 5, Frequency Valid: 1, Frequency Value: 6890
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 6, Frequency Valid: 1, Frequency Value: 8268
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 7, Frequency Valid: 1, Frequency Value: 9646
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 8, Frequency Valid: 1, Frequency Value: 11025
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 9, Frequency Valid: 1, Frequency Value: 12403
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 10, Frequency Valid: 1, Frequency Value: 13781
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 11, Frequency Valid: 1, Frequency Value: 15159
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 12, Frequency Valid: 1, Frequency Value: 16537
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 13, Frequency Valid: 1, Frequency Value: 17915
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 14, Frequency Valid: 1, Frequency Value: 19293
+    65.01ns INFO     cocotb.classifier_Classifier       Bin Index: 15, Frequency Valid: 1, Frequency Value: 20671
+    65.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    65.01ns INFO     cocotb.classifier_Classifier       Cutoff Magnitude: 10
+    65.01ns INFO     cocotb.classifier_Classifier       Cutoff freq: 0
+    65.01ns INFO     cocotb.classifier_Classifier       Actual
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 0, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 6
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 0, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 6
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 1, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 1, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 2, Bin Freq Valid: 1, Bin Cutoff mag met: 1, Bin Valid: 1, Bin Value: 10
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 2, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 10
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 3, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 3, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 4, Bin Freq Valid: 1, Bin Cutoff mag met: 1, Bin Valid: 1, Bin Value: 10
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 4, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 10
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 5, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 5, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 6, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 6, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 7, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 8
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 7, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 8
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 8, Bin Freq Valid: 1, Bin Cutoff mag met: 1, Bin Valid: 1, Bin Value: 10
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 8, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 10
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 9, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 9, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 10, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 10, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 11, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 11, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 12, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 12, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 13, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 13, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 14, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 14, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+    65.01ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 15, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 5
+    65.01ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 15, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 5
+    65.01ns INFO     cocotb.regression                  test_classifier_011 failed
+                                                        Traceback (most recent call last):
+                                                          File "/classes/c2s2/easybuild-rhel/software/C2S2PythonPackages/2024.10-foss-2023b/lib/python3.11/site-packages/cocotb/regression.py", line 728, in _my_test
+                                                            await function(dut, *args, **kwargs)
+                                                          File "/home/jjm469/c2s2/updated_classifier/src/classifier/tests_new/test_classifier.py", line 115, in test_classifier
+                                                            dut._log.info(f"Actual  : {dut.comparison.compare_outs.value[::-1]}")
+                                                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+                                                          File "/classes/c2s2/easybuild-rhel/software/C2S2PythonPackages/2024.10-foss-2023b/lib/python3.11/site-packages/cocotb/binary.py", line 748, in __getitem__
+                                                            if first < 0 or second < 0:
+                                                               ^^^^^^^^^
+                                                        TypeError: '<' not supported between instances of 'NoneType' and 'int'
+    65.01ns INFO     cocotb.regression                  running test_classifier_012 (12/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 0
+                                                          cutoff_mag: 10
+                                                          sampling_freq: 25000
+    65.01ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    65.01ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    65.01ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    71.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    71.01ns INFO     cocotb.classifier_Classifier       ----
+    71.01ns INFO     cocotb.regression                  test_classifier_012 passed
+    71.01ns INFO     cocotb.regression                  running test_classifier_013 (13/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 2000
+                                                          cutoff_mag: 3
+                                                          sampling_freq: 44800
+    71.01ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    71.01ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    71.01ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    77.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    77.01ns INFO     cocotb.classifier_Classifier       ----
+    77.01ns INFO     cocotb.regression                  test_classifier_013 passed
+    77.01ns INFO     cocotb.regression                  running test_classifier_014 (14/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 2000
+                                                          cutoff_mag: 3
+                                                          sampling_freq: 44100
+    77.01ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    77.01ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    77.01ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    83.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    83.01ns INFO     cocotb.classifier_Classifier       ----
+    83.01ns INFO     cocotb.regression                  test_classifier_014 passed
+    83.01ns INFO     cocotb.regression                  running test_classifier_015 (15/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 2000
+                                                          cutoff_mag: 3
+                                                          sampling_freq: 25000
+    83.01ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    83.01ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    83.01ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    89.01ns INFO     cocotb.classifier_Classifier       ==================================================
+    89.01ns INFO     cocotb.classifier_Classifier       ----
+    89.02ns INFO     cocotb.regression                  test_classifier_015 passed
+    89.02ns INFO     cocotb.regression                  running test_classifier_016 (16/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 2000
+                                                          cutoff_mag: 4
+                                                          sampling_freq: 44800
+    89.02ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    89.02ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    89.02ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+    95.02ns INFO     cocotb.classifier_Classifier       ==================================================
+    95.02ns INFO     cocotb.classifier_Classifier       ----
+    95.02ns INFO     cocotb.regression                  test_classifier_016 passed
+    95.02ns INFO     cocotb.regression                  running test_classifier_017 (17/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 2000
+                                                          cutoff_mag: 4
+                                                          sampling_freq: 44100
+    95.02ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+    95.02ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+    95.02ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   101.02ns INFO     cocotb.classifier_Classifier       ==================================================
+   101.02ns INFO     cocotb.classifier_Classifier       ----
+   101.02ns INFO     cocotb.regression                  test_classifier_017 passed
+   101.02ns INFO     cocotb.regression                  running test_classifier_018 (18/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 2000
+                                                          cutoff_mag: 4
+                                                          sampling_freq: 25000
+   101.02ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   101.02ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   101.02ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   107.02ns INFO     cocotb.classifier_Classifier       ==================================================
+   107.02ns INFO     cocotb.classifier_Classifier       ----
+   107.02ns INFO     cocotb.regression                  test_classifier_018 passed
+   107.02ns INFO     cocotb.regression                  running test_classifier_019 (19/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 2000
+                                                          cutoff_mag: 7
+                                                          sampling_freq: 44800
+   107.02ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   107.02ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   107.02ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   113.02ns INFO     cocotb.classifier_Classifier       ==================================================
+   113.02ns INFO     cocotb.classifier_Classifier       ----
+   113.02ns INFO     cocotb.regression                  test_classifier_019 passed
+   113.02ns INFO     cocotb.regression                  running test_classifier_020 (20/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 2000
+                                                          cutoff_mag: 7
+                                                          sampling_freq: 44100
+   113.02ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   113.02ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   113.02ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   119.02ns INFO     cocotb.classifier_Classifier       ==================================================
+   119.02ns INFO     cocotb.classifier_Classifier       ----
+   119.02ns INFO     cocotb.regression                  test_classifier_020 passed
+   119.02ns INFO     cocotb.regression                  running test_classifier_021 (21/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 2000
+                                                          cutoff_mag: 7
+                                                          sampling_freq: 25000
+   119.02ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   119.02ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   119.02ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   125.02ns INFO     cocotb.classifier_Classifier       ==================================================
+   125.02ns INFO     cocotb.classifier_Classifier       ----
+   125.02ns INFO     cocotb.regression                  test_classifier_021 passed
+   125.02ns INFO     cocotb.regression                  running test_classifier_022 (22/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 2000
+                                                          cutoff_mag: 10
+                                                          sampling_freq: 44800
+   125.02ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   125.02ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   125.02ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   131.02ns INFO     cocotb.classifier_Classifier       ==================================================
+   131.02ns INFO     cocotb.classifier_Classifier       ----
+   131.02ns INFO     cocotb.classifier_Classifier       ==================================================
+   131.02ns INFO     cocotb.classifier_Classifier       Frequency bins
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 0, Frequency Valid: 0, Frequency Value: 0
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 1, Frequency Valid: 0, Frequency Value: 1400
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 2, Frequency Valid: 1, Frequency Value: 2800
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 3, Frequency Valid: 1, Frequency Value: 4200
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 4, Frequency Valid: 1, Frequency Value: 5600
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 5, Frequency Valid: 1, Frequency Value: 7000
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 6, Frequency Valid: 1, Frequency Value: 8400
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 7, Frequency Valid: 1, Frequency Value: 9800
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 8, Frequency Valid: 1, Frequency Value: 11200
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 9, Frequency Valid: 1, Frequency Value: 12600
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 10, Frequency Valid: 1, Frequency Value: 14000
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 11, Frequency Valid: 1, Frequency Value: 15400
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 12, Frequency Valid: 1, Frequency Value: 16800
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 13, Frequency Valid: 1, Frequency Value: 18200
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 14, Frequency Valid: 1, Frequency Value: 19600
+   131.02ns INFO     cocotb.classifier_Classifier       Bin Index: 15, Frequency Valid: 1, Frequency Value: 21000
+   131.02ns INFO     cocotb.classifier_Classifier       ==================================================
+   131.02ns INFO     cocotb.classifier_Classifier       Cutoff Magnitude: 10
+   131.02ns INFO     cocotb.classifier_Classifier       Cutoff freq: 2000
+   131.02ns INFO     cocotb.classifier_Classifier       Actual
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 0, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 8
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 0, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 8
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 1, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 1, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 2, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 2, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 3, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 3
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 3, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 3
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 4, Bin Freq Valid: 1, Bin Cutoff mag met: 1, Bin Valid: 1, Bin Value: 10
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 4, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 10
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 5, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 5, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 6, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 6, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 7, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 6
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 7, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 6
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 8, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 3
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 8, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 3
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 9, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 9, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 10, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 10, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 11, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 5
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 11, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 5
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 12, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 12, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 13, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 13, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 14, Bin Freq Valid: 1, Bin Cutoff mag met: 1, Bin Valid: 1, Bin Value: 10
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 14, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 10
+   131.02ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 15, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 1
+   131.02ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 15, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 1
+   131.02ns INFO     cocotb.regression                  test_classifier_022 failed
+                                                        Traceback (most recent call last):
+                                                          File "/classes/c2s2/easybuild-rhel/software/C2S2PythonPackages/2024.10-foss-2023b/lib/python3.11/site-packages/cocotb/regression.py", line 728, in _my_test
+                                                            await function(dut, *args, **kwargs)
+                                                          File "/home/jjm469/c2s2/updated_classifier/src/classifier/tests_new/test_classifier.py", line 115, in test_classifier
+                                                            dut._log.info(f"Actual  : {dut.comparison.compare_outs.value[::-1]}")
+                                                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+                                                          File "/classes/c2s2/easybuild-rhel/software/C2S2PythonPackages/2024.10-foss-2023b/lib/python3.11/site-packages/cocotb/binary.py", line 748, in __getitem__
+                                                            if first < 0 or second < 0:
+                                                               ^^^^^^^^^
+                                                        TypeError: '<' not supported between instances of 'NoneType' and 'int'
+   131.02ns INFO     cocotb.regression                  running test_classifier_023 (23/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 2000
+                                                          cutoff_mag: 10
+                                                          sampling_freq: 44100
+   131.02ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   131.02ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   131.02ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   137.02ns INFO     cocotb.classifier_Classifier       ==================================================
+   137.02ns INFO     cocotb.classifier_Classifier       ----
+   137.02ns INFO     cocotb.regression                  test_classifier_023 passed
+   137.02ns INFO     cocotb.regression                  running test_classifier_024 (24/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 2000
+                                                          cutoff_mag: 10
+                                                          sampling_freq: 25000
+   137.02ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   137.02ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   137.02ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   143.02ns INFO     cocotb.classifier_Classifier       ==================================================
+   143.02ns INFO     cocotb.classifier_Classifier       ----
+   143.02ns INFO     cocotb.regression                  test_classifier_024 passed
+   143.02ns INFO     cocotb.regression                  running test_classifier_025 (25/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 10000
+                                                          cutoff_mag: 3
+                                                          sampling_freq: 44800
+   143.02ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   143.02ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   143.02ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   149.02ns INFO     cocotb.classifier_Classifier       ==================================================
+   149.02ns INFO     cocotb.classifier_Classifier       ----
+   149.03ns INFO     cocotb.regression                  test_classifier_025 passed
+   149.03ns INFO     cocotb.regression                  running test_classifier_026 (26/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 10000
+                                                          cutoff_mag: 3
+                                                          sampling_freq: 44100
+   149.03ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   149.03ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   149.03ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   155.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   155.03ns INFO     cocotb.classifier_Classifier       ----
+   155.03ns INFO     cocotb.regression                  test_classifier_026 passed
+   155.03ns INFO     cocotb.regression                  running test_classifier_027 (27/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 10000
+                                                          cutoff_mag: 3
+                                                          sampling_freq: 25000
+   155.03ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   155.03ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   155.03ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   161.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   161.03ns INFO     cocotb.classifier_Classifier       ----
+   161.03ns INFO     cocotb.regression                  test_classifier_027 passed
+   161.03ns INFO     cocotb.regression                  running test_classifier_028 (28/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 10000
+                                                          cutoff_mag: 4
+                                                          sampling_freq: 44800
+   161.03ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   161.03ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   161.03ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   167.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   167.03ns INFO     cocotb.classifier_Classifier       ----
+   167.03ns INFO     cocotb.regression                  test_classifier_028 passed
+   167.03ns INFO     cocotb.regression                  running test_classifier_029 (29/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 10000
+                                                          cutoff_mag: 4
+                                                          sampling_freq: 44100
+   167.03ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   167.03ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   167.03ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   173.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   173.03ns INFO     cocotb.classifier_Classifier       ----
+   173.03ns INFO     cocotb.regression                  test_classifier_029 passed
+   173.03ns INFO     cocotb.regression                  running test_classifier_030 (30/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 10000
+                                                          cutoff_mag: 4
+                                                          sampling_freq: 25000
+   173.03ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   173.03ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   173.03ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   179.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   179.03ns INFO     cocotb.classifier_Classifier       ----
+   179.03ns INFO     cocotb.regression                  test_classifier_030 passed
+   179.03ns INFO     cocotb.regression                  running test_classifier_031 (31/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 10000
+                                                          cutoff_mag: 7
+                                                          sampling_freq: 44800
+   179.03ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   179.03ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   179.03ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   185.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   185.03ns INFO     cocotb.classifier_Classifier       ----
+   185.03ns INFO     cocotb.regression                  test_classifier_031 passed
+   185.03ns INFO     cocotb.regression                  running test_classifier_032 (32/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 10000
+                                                          cutoff_mag: 7
+                                                          sampling_freq: 44100
+   185.03ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   185.03ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   185.03ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   191.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   191.03ns INFO     cocotb.classifier_Classifier       ----
+   191.03ns INFO     cocotb.regression                  test_classifier_032 passed
+   191.03ns INFO     cocotb.regression                  running test_classifier_033 (33/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 10000
+                                                          cutoff_mag: 7
+                                                          sampling_freq: 25000
+   191.03ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   191.03ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   191.03ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   197.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   197.03ns INFO     cocotb.classifier_Classifier       ----
+   197.03ns INFO     cocotb.regression                  test_classifier_033 passed
+   197.03ns INFO     cocotb.regression                  running test_classifier_034 (34/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 10000
+                                                          cutoff_mag: 10
+                                                          sampling_freq: 44800
+   197.03ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   197.03ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   197.03ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   203.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   203.03ns INFO     cocotb.classifier_Classifier       ----
+   203.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   203.03ns INFO     cocotb.classifier_Classifier       Frequency bins
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 0, Frequency Valid: 0, Frequency Value: 0
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 1, Frequency Valid: 0, Frequency Value: 1400
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 2, Frequency Valid: 0, Frequency Value: 2800
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 3, Frequency Valid: 0, Frequency Value: 4200
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 4, Frequency Valid: 0, Frequency Value: 5600
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 5, Frequency Valid: 0, Frequency Value: 7000
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 6, Frequency Valid: 0, Frequency Value: 8400
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 7, Frequency Valid: 0, Frequency Value: 9800
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 8, Frequency Valid: 1, Frequency Value: 11200
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 9, Frequency Valid: 1, Frequency Value: 12600
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 10, Frequency Valid: 1, Frequency Value: 14000
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 11, Frequency Valid: 1, Frequency Value: 15400
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 12, Frequency Valid: 1, Frequency Value: 16800
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 13, Frequency Valid: 1, Frequency Value: 18200
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 14, Frequency Valid: 1, Frequency Value: 19600
+   203.03ns INFO     cocotb.classifier_Classifier       Bin Index: 15, Frequency Valid: 1, Frequency Value: 21000
+   203.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   203.03ns INFO     cocotb.classifier_Classifier       Cutoff Magnitude: 10
+   203.03ns INFO     cocotb.classifier_Classifier       Cutoff freq: 10000
+   203.03ns INFO     cocotb.classifier_Classifier       Actual
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 0, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 0, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 7
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 1, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 1, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 2, Bin Freq Valid: 0, Bin Cutoff mag met: 1, Bin Valid: 0, Bin Value: 10
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 2, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 10
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 3, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 3, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 2
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 4, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 4, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 5, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 6
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 5, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 6
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 6, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 6, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 9
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 7, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 5
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 7, Bin Freq Valid: 0, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 5
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 8, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 6
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 8, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 6
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 9, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 6
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 9, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 6
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 10, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 10, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 11, Bin Freq Valid: 1, Bin Cutoff mag met: 1, Bin Valid: 1, Bin Value: 10
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 11, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 10
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 12, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 12, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 13, Bin Freq Valid: 1, Bin Cutoff mag met: 1, Bin Valid: 1, Bin Value: 10
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 13, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 10
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 14, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 14, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 4
+   203.03ns INFO     cocotb.classifier_Classifier       ACTUAL: Bin Index: 15, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 5
+   203.03ns INFO     cocotb.classifier_Classifier       EXPECTED: Bin Index: 15, Bin Freq Valid: 1, Bin Cutoff mag met: 0, Bin Valid: 0, Bin Value: 5
+   203.03ns INFO     cocotb.regression                  test_classifier_034 failed
+                                                        Traceback (most recent call last):
+                                                          File "/classes/c2s2/easybuild-rhel/software/C2S2PythonPackages/2024.10-foss-2023b/lib/python3.11/site-packages/cocotb/regression.py", line 728, in _my_test
+                                                            await function(dut, *args, **kwargs)
+                                                          File "/home/jjm469/c2s2/updated_classifier/src/classifier/tests_new/test_classifier.py", line 115, in test_classifier
+                                                            dut._log.info(f"Actual  : {dut.comparison.compare_outs.value[::-1]}")
+                                                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+                                                          File "/classes/c2s2/easybuild-rhel/software/C2S2PythonPackages/2024.10-foss-2023b/lib/python3.11/site-packages/cocotb/binary.py", line 748, in __getitem__
+                                                            if first < 0 or second < 0:
+                                                               ^^^^^^^^^
+                                                        TypeError: '<' not supported between instances of 'NoneType' and 'int'
+   203.03ns INFO     cocotb.regression                  running test_classifier_035 (35/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 10000
+                                                          cutoff_mag: 10
+                                                          sampling_freq: 44100
+   203.03ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   203.03ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   203.03ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   209.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   209.03ns INFO     cocotb.classifier_Classifier       ----
+   209.03ns INFO     cocotb.regression                  test_classifier_035 passed
+   209.03ns INFO     cocotb.regression                  running test_classifier_036 (36/36)
+                                                          Automatically generated test
+                                                          
+                                                          cutoff_freq: 10000
+                                                          cutoff_mag: 10
+                                                          sampling_freq: 25000
+   209.03ns INFO     cocotb.classifier_Classifier       DUT parameters (BIT_WIDTH): 16
+   209.03ns INFO     cocotb.classifier_Classifier       DUT parameters (FREQ_BIT_WIDTH): 16
+   209.03ns INFO     cocotb.classifier_Classifier       DUT parameters (N_SAMPLES): 16
+   215.03ns INFO     cocotb.classifier_Classifier       ==================================================
+   215.03ns INFO     cocotb.classifier_Classifier       ----
+   215.04ns INFO     cocotb.regression                  test_classifier_036 passed
+   215.04ns INFO     cocotb.regression                  *********************************************************************************************
+                                                        ** TEST                                 STATUS  SIM TIME (ns)  REAL TIME (s)  RATIO (ns/s) **
+                                                        *********************************************************************************************
+                                                        ** test_classifier.test_classifier_001   PASS           5.00           0.11         45.54  **
+                                                        ** test_classifier.test_classifier_002   PASS           6.00           0.00       3832.22  **
+                                                        ** test_classifier.test_classifier_003   PASS           6.00           0.00       2791.71  **
+                                                        ** test_classifier.test_classifier_004   PASS           6.00           0.00       5900.14  **
+                                                        ** test_classifier.test_classifier_005   PASS           6.00           0.00       3529.66  **
+                                                        ** test_classifier.test_classifier_006   PASS           6.00           0.00       5947.55  **
+                                                        ** test_classifier.test_classifier_007   PASS           6.00           0.00       4436.03  **
+                                                        ** test_classifier.test_classifier_008   PASS           6.00           0.00       5907.07  **
+                                                        ** test_classifier.test_classifier_009   PASS           6.00           0.00       4502.69  **
+                                                        ** test_classifier.test_classifier_010   FAIL           6.00           0.01        745.84  **
+                                                        ** test_classifier.test_classifier_011   FAIL           6.00           0.04        142.44  **
+                                                        ** test_classifier.test_classifier_012   PASS           6.00           0.00       3863.39  **
+                                                        ** test_classifier.test_classifier_013   PASS           6.00           0.00       3905.96  **
+                                                        ** test_classifier.test_classifier_014   PASS           6.00           0.00       3046.85  **
+                                                        ** test_classifier.test_classifier_015   PASS           6.00           0.00       5242.66  **
+                                                        ** test_classifier.test_classifier_016   PASS           6.00           0.00       4007.33  **
+                                                        ** test_classifier.test_classifier_017   PASS           6.00           0.00       3887.26  **
+                                                        ** test_classifier.test_classifier_018   PASS           6.00           0.00       3921.79  **
+                                                        ** test_classifier.test_classifier_019   PASS           6.00           0.00       5347.36  **
+                                                        ** test_classifier.test_classifier_020   PASS           6.00           0.00       3938.35  **
+                                                        ** test_classifier.test_classifier_021   PASS           6.00           0.00       3957.55  **
+                                                        ** test_classifier.test_classifier_022   FAIL           6.00           0.01        877.37  **
+                                                        ** test_classifier.test_classifier_023   PASS           6.00           0.00       4872.25  **
+                                                        ** test_classifier.test_classifier_024   PASS           6.00           0.00       3083.81  **
+                                                        ** test_classifier.test_classifier_025   PASS           6.00           0.00       3955.06  **
+                                                        ** test_classifier.test_classifier_026   PASS           6.00           0.00       2083.09  **
+                                                        ** test_classifier.test_classifier_027   PASS           6.00           0.00       5181.15  **
+                                                        ** test_classifier.test_classifier_028   PASS           6.00           0.00       3007.53  **
+                                                        ** test_classifier.test_classifier_029   PASS           6.00           0.00       2750.22  **
+                                                        ** test_classifier.test_classifier_030   PASS           6.00           0.00       5500.44  **
+                                                        ** test_classifier.test_classifier_031   PASS           6.00           0.00       3663.22  **
+                                                        ** test_classifier.test_classifier_032   PASS           6.00           0.00       3143.50  **
+                                                        ** test_classifier.test_classifier_033   PASS           6.00           0.00       1740.67  **
+                                                        ** test_classifier.test_classifier_034   FAIL           6.00           0.10         60.06  **
+                                                        ** test_classifier.test_classifier_035   PASS           6.00           0.00       3659.50  **
+                                                        ** test_classifier.test_classifier_036   PASS           6.00           0.00       5766.33  **
+                                                        *********************************************************************************************
+                                                        ** TESTS=36 PASS=32 FAIL=4 SKIP=0                     215.04           0.64        333.53  **
+                                                        *********************************************************************************************
+                                                        
+$finish at simulation time               215036
+
+---------------------------------------------------------------------------
+VCS Coverage Metrics: during simulation line, tgl was monitored
+---------------------------------------------------------------------------
+
+ Coverage status: End of All Coverages ...
+
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 215036 ps
+CPU Time:      0.750 seconds;       Data structure size:   8.0Mb
+Mon May  5 01:36:35 2025
+make[1]: Leaving directory '/home/jjm469/c2s2/updated_classifier/src/classifier/tests_new'
