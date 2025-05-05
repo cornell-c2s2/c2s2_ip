@@ -401,6 +401,9 @@ def clean_function_from_all(content : List[str], lookup_file : str):
 Removes all unsed declarations from the module
 
 comments out every line that starts with `logic unused` or `wire unused`
+
+Also comment out "assign packed_sine_wave_in = {<<SIZE_FFT{sine_wave_in}};"
+ - the '<<SIZE_FFT{sine_wave_in}' operator is not suported in Quartus
 """
 def remove_unused_declarations(content : List[str]):
     result = content
@@ -409,6 +412,8 @@ def remove_unused_declarations(content : List[str]):
     for idx in range(len(result)):
         line = result[idx]
         if re.match(r"\s+logic\s*\w*unused", line) or re.match(r"\s+wire\s+\w*unused", line) or re.match(r"\s+assign\s+\w*unused", line):
+            content_ok = False
+        elif re.match(r"\s+assign packed_sine_wave_in = {<<SIZE_FFT{sine_wave_in}};", line):
             content_ok = False
         if (not content_ok):
             result[idx] = "// " + line

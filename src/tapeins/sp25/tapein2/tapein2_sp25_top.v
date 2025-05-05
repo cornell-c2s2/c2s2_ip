@@ -8,8 +8,8 @@
 // I/O -----------------------------------------------------------------------------
 // =================================================================================
 
-`ifndef TAPEIN1_SP25_TOP_V
-`define TAPEIN1_SP25_TOP_V
+`ifndef TAPEIN2_SP25_TOP_V
+`define TAPEIN2_SP25_TOP_V
 
 `include "spi/minion.v"
 `include "arbiter_router/router.v"
@@ -18,19 +18,20 @@
 `include "serdes/deserializer.v"
 `include "serdes/serializer.v"
 `include "crossbars/blocking.v"
+`include "crossbars/crossbar_2d.v"
 `include "classifier/classifier.v"
 `include "wishbone/wishbone.v"
 `include "lbist/misr/misr.v"
 `include "lbist/lfsr/lfsr.v"
 `include "lbist/lbist_toplevel/lbist_toplevel.v"
 `include "lbist/lbist_controller/lbist_controller.v"
-`include "lbist/lfsr/lfsr.v"
 `include "cmn/reset_sync.v"
 `include "async_fifo/AsyncFifo.sv"
+`include "async_fifo/FifoPackager.sv"
 `include "async_fifo/PosedgeDetector.sv"
 
 
-module tapein1_sp25_top #(
+module tapein2_sp25_top #(
   parameter int FIFO_ENTRY_BITS = 8
 ) (
   // Clock and Reset Ports
@@ -124,6 +125,8 @@ module tapein1_sp25_top #(
   localparam int CLASSIFIER_XBAR_CONTROL_BITS = $clog2( CLASSIFIER_XBAR_INPUTS *
                                                         CLASSIFIER_XBAR_OUTPUTS );
 
+  // Classifier Xbar Deserializer --------------------------------------------------
+  // Classifier Xbar Derializer ----------------------------------------------------                                             
   // Output Xbar -------------------------------------------------------------------
   // - OUTPUT_XBAR_INPUTS:
   //     Number of output crossbar input ports
@@ -141,7 +144,6 @@ module tapein1_sp25_top #(
                                                     OUTPUT_XBAR_OUTPUTS );
 
   // FFT Core 1 Deserializer -------------------------------------------------------
-  // FFT Core 1 Serializer ---------------------------------------------------------
   // FFT Core 1 --------------------------------------------------------------------
   // - FFT1_SAMPLES
   //     Number of samples from FFT 1.
@@ -152,7 +154,6 @@ module tapein1_sp25_top #(
 
 
   // FFT Core 2 Deserializer -------------------------------------------------------
-  // FFT Core 2 Serializer ---------------------------------------------------------
   // FFT Core 2 --------------------------------------------------------------------
   // - FFT2_SAMPLES
   //     Number of samples from FFT 2.
@@ -161,11 +162,10 @@ module tapein1_sp25_top #(
   localparam int FFT2_SAMPLES = 32;
   localparam int FFT2_DECIMAL_PT = 8;
 
-  // Classifier Deserializer -------------------------------------------------------
   // Classifier --------------------------------------------------------------------
   // - CLASSIFIER_SAMPLES:
-  //     Number of samples inputted to the classifier. Both FFTs generate 32 samples. 
-  //     FFT is conjugate symmetric. Therefore, we only need to read 32/2 samples.
+  //     Number of samples by the classifier. Both FFTs generate 32 samples. FFT is
+  //     conjugate symmetric. Therefore, we only need to read 32/2 samples.
   // - CLASSIFIER_BITS:
   //     Number of classifier input bits.
   // - CLASSIFIER_DECIMAL_PT:
@@ -199,7 +199,7 @@ module tapein1_sp25_top #(
   localparam int NUM_SEEDS = 8;
   localparam int NUM_HASHES = 80;
   localparam int MAX_OUTPUTS_TO_HASH = 100;
-  localparam bit [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = '{
+  localparam [SEED_BITS-1:0] LFSR_SEEDS [NUM_SEEDS-1:0] = {
     16'b1010111010010110,
     16'b1000011100111010,
     16'b1000111110100010,
@@ -209,7 +209,7 @@ module tapein1_sp25_top #(
     16'b1010001110110100,
     16'b1101110001101011
   };
-  localparam bit [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = '{
+  localparam [SIGNATURE_BITS-1:0] EXPECTED_SIGNATURES [NUM_SEEDS-1:0] = {
     16'b0010000111000111,
     16'b0000000010011110,
     16'b0101100000100101,
@@ -228,6 +228,8 @@ module tapein1_sp25_top #(
   //     Bitwidth of MISR signatures.
   localparam int MISR_SEED = '0;
   localparam int MISR_MSG_BITS = $clog2(MAX_OUTPUTS_TO_HASH);
+
+  // MISR Serializer ---------------------------------------------------------------
 
   // Async FIFO --------------------------------------------------------------------
   // - FIFO_DEPTH:
@@ -259,9 +261,9 @@ module tapein1_sp25_top #(
   logic                                    Router_to_InputXbar_val;
   logic                                    Router_to_InputXbar_rdy;
 
-  logic [CLASSIFIER_XBAR_BITS-1:0]         Router_to_ClassifierXbar_msg;
-  logic                                    Router_to_ClassifierXbar_val;
-  logic                                    Router_to_ClassifierXbar_rdy;
+  logic [CLASSIFIER_XBAR_BITS-1:0]         Router_to_ClassifierXbarDeserializer_msg;
+  logic                                    Router_to_ClassifierXbarDeserializer_val;
+  logic                                    Router_to_ClassifierXbarDeserializer_rdy;
 
   logic [OUTPUT_XBAR_BITS-1:0]             Router_to_OutputXbar_msg;
   logic                                    Router_to_OutputXbar_rdy;
@@ -294,11 +296,11 @@ module tapein1_sp25_top #(
   logic                                    InputXbar_to_Arbiter_rdy;
 
   // Classifier Xbar ---------------------------------------------------------------
-  logic [CLASSIFIER_XBAR_BITS-1:0]         classifier_xbar_recv_msg [CLASSIFIER_XBAR_INPUTS];
+  logic [CLASSIFIER_XBAR_BITS-1:0]         classifier_xbar_recv_msg [CLASSIFIER_XBAR_INPUTS][CLASSIFIER_SAMPLES];
   logic                                    classifier_xbar_recv_val [CLASSIFIER_XBAR_INPUTS];
   logic                                    classifier_xbar_recv_rdy [CLASSIFIER_XBAR_INPUTS];
 
-  logic [CLASSIFIER_XBAR_BITS-1:0]         classifier_xbar_send_msg [CLASSIFIER_XBAR_OUTPUTS];
+  logic [CLASSIFIER_XBAR_BITS-1:0]         classifier_xbar_send_msg [CLASSIFIER_XBAR_OUTPUTS][CLASSIFIER_SAMPLES];
   logic                                    classifier_xbar_send_val [CLASSIFIER_XBAR_OUTPUTS];
   logic                                    classifier_xbar_send_rdy [CLASSIFIER_XBAR_OUTPUTS];
 
@@ -306,9 +308,19 @@ module tapein1_sp25_top #(
   logic                                    classifier_xbar_control_rdy;
   logic                                    classifier_xbar_control_val;
 
-  logic [ARBITER_PACKET_BITS-1:0]          ClassifierXbar_to_Arbiter_msg;
-  logic                                    ClassifierXbar_to_Arbiter_val;
-  logic                                    ClassifierXbar_to_Arbiter_rdy;
+  logic [ARBITER_PACKET_BITS-1:0]          ClassifierXbar_to_ClassifierXbarSerializer_msg [CLASSIFIER_SAMPLES];
+  logic                                    ClassifierXbar_to_ClassifierXbarSerializer_val;
+  logic                                    ClassifierXbar_to_ClassifierXbarSerializer_rdy;
+
+  // Classifier Xbar Deserializer --------------------------------------------------
+  logic [DATA_BITS-1:0]                    classifier_xbar_deserializer_send_msg [CLASSIFIER_SAMPLES];
+  logic                                    classifier_xbar_deserializer_send_val;
+  logic                                    classifier_xbar_deserializer_send_rdy;
+
+  // Classifier Xbar Serializer ----------------------------------------------------
+  logic [DATA_BITS-1:0]                    classifier_xbar_serializer_send_msg;
+  logic                                    classifier_xbar_serializer_send_val;
+  logic                                    classifier_xbar_serializer_send_rdy;
 
   // Output Xbar -------------------------------------------------------------------
   logic                                    output_xbar_recv_msg [OUTPUT_XBAR_INPUTS];
@@ -332,11 +344,6 @@ module tapein1_sp25_top #(
   logic                                    fft1_deserializer_recv_val;
   logic                                    fft1_deserializer_recv_rdy;
 
-  // FFT Core 1 Serializer ---------------------------------------------------------
-  logic [DATA_BITS-1:0]                    fft1_serializer_send_msg;
-  logic                                    fft1_serializer_send_val;
-  logic                                    fft1_serializer_send_rdy;
-
   // FFT Core 1 --------------------------------------------------------------------
   logic [DATA_BITS-1:0]                    fft1_recv_msg [FFT1_SAMPLES];
   logic                                    fft1_recv_val;
@@ -350,11 +357,6 @@ module tapein1_sp25_top #(
   logic                                    fft2_deserializer_recv_val;
   logic                                    fft2_deserializer_recv_rdy;
 
-  // FFT Core 2 Serializer ---------------------------------------------------------
-  logic [DATA_BITS-1:0]                    fft2_serializer_send_msg;
-  logic                                    fft2_serializer_send_val;
-  logic                                    fft2_serializer_send_rdy;
-
   // FFT Core 2 --------------------------------------------------------------------
   logic [DATA_BITS-1:0]                    fft2_recv_msg [FFT2_SAMPLES];
   logic                                    fft2_recv_val;
@@ -363,11 +365,6 @@ module tapein1_sp25_top #(
   logic                                    fft2_send_val;
   logic                                    fft2_send_rdy;
 
-  // Classifier Deserializer -------------------------------------------------------
-  logic [DATA_BITS-1:0]                    classifier_deserializer_recv_msg;
-  logic                                    classifier_deserializer_recv_val;
-  logic                                    classifier_deserializer_recv_rdy;
-
   // Classifier --------------------------------------------------------------------
   logic [DATA_BITS-1:0]                    classifier_recv_msg [CLASSIFIER_SAMPLES];
   logic                                    classifier_recv_val;
@@ -375,8 +372,8 @@ module tapein1_sp25_top #(
   logic [DATA_BITS-1:0]                    classifier_config_msg [3];
   logic                                    classifier_config_rdy [3];
   logic                                    classifier_config_val [3];
-  // logic                                    classifier_send_msg; (toplevel output pin)
-  // logic                                    classifier_send_val; (toplevel output pin)
+  logic                                    classifier_send_msg;
+  logic                                    classifier_send_val;
   logic                                    classifier_send_rdy;
 
   // LBIST Controller --------------------------------------------------------------
@@ -410,6 +407,12 @@ module tapein1_sp25_top #(
   logic [SIGNATURE_BITS-1:0]               misr_resp_msg;
   logic                                    misr_resp_rdy;
 
+  // MISR Serializer ---------------------------------------------------------------
+  logic [SIGNATURE_BITS-1:0]               misr_serializer_req_msg [CLASSIFIER_SAMPLES];
+  logic                                    misr_serializer_req_val;
+  logic                                    misr_serializer_req_rdy;
+
+
   // Async FIFO --------------------------------------------------------------------
   logic [FIFO_ENTRY_BITS-1:0]              async_fifo_send_msg;
   logic                                    async_fifo_send_val;
@@ -422,8 +425,6 @@ module tapein1_sp25_top #(
 
   // Posedge Detector --------------------------------------------------------------
   logic                                    toggle_val;
-
-
 
 
 
@@ -499,10 +500,11 @@ module tapein1_sp25_top #(
   );
 
   // Classifier Xbar ---------------------------------------------------------------
-  crossbars_Blocking #(
+  crossbar_2d #(
     .BIT_WIDTH               (CLASSIFIER_XBAR_BITS),
     .N_INPUTS                (CLASSIFIER_XBAR_INPUTS),
-    .N_OUTPUTS               (CLASSIFIER_XBAR_OUTPUTS)
+    .N_OUTPUTS               (CLASSIFIER_XBAR_OUTPUTS),
+    .ENTRIES                 (CLASSIFIER_SAMPLES)           // TODO: confirm correct...
   ) classifier_xbar (
     .clk                     (clk),
     .reset                   (reset),
@@ -515,6 +517,36 @@ module tapein1_sp25_top #(
     .control                 (classifier_xbar_control_msg),
     .control_rdy             (classifier_xbar_control_rdy),
     .control_val             (classifier_xbar_control_val)
+  );
+
+  // Classifier Xbar Deserializer --------------------------------------------------
+  serdes_Deserializer #(
+    .N_SAMPLES               (CLASSIFIER_SAMPLES),
+    .BIT_WIDTH               (DATA_BITS)
+  ) classifier_xbar_deserializer (
+    .clk                     (clk),
+    .reset                   (reset),
+    .recv_val                (Router_to_ClassifierXbarDeserializer_val),
+    .recv_rdy                (Router_to_ClassifierXbarDeserializer_rdy),
+    .recv_msg                (Router_to_ClassifierXbarDeserializer_msg),
+    .send_val                (classifier_xbar_deserializer_send_val),
+    .send_rdy                (classifier_xbar_deserializer_send_rdy),
+    .send_msg                (classifier_xbar_deserializer_send_msg)
+  );
+
+  // Classifier Xbar Serializer ----------------------------------------------------
+  serdes_Serializer #(
+    .N_SAMPLES               (CLASSIFIER_SAMPLES),
+    .BIT_WIDTH               (DATA_BITS)
+  ) classifier_xbar_serializer (
+    .clk                     (clk),
+    .reset                   (reset),
+    .send_val                (classifier_xbar_serializer_send_val),
+    .send_rdy                (classifier_xbar_serializer_send_rdy),
+    .send_msg                (classifier_xbar_serializer_send_msg),
+    .recv_val                (ClassifierXbar_to_ClassifierXbarSerializer_val),
+    .recv_rdy                (ClassifierXbar_to_ClassifierXbarSerializer_rdy),
+    .recv_msg                (ClassifierXbar_to_ClassifierXbarSerializer_msg)
   );
 
   // Output Xbar -------------------------------------------------------------------
@@ -552,29 +584,6 @@ module tapein1_sp25_top #(
     .send_msg                (fft1_recv_msg)
   );
 
-  // FFT Core 1 Serializer ---------------------------------------------------------
-  // FFT1_SAMPLES is halved here as the upper half of the result of the FFT is just
-  // the complex conjugate of the lower half.
-  serdes_Serializer #(
-    .N_SAMPLES               (FFT1_SAMPLES/2),
-    .BIT_WIDTH               (DATA_BITS)
-  ) fft1_serializer (
-    .clk                     (clk),
-    .reset                   (reset || lfsr_cut_reset),
-    .send_val                (fft1_serializer_send_val),
-    .send_rdy                (fft1_serializer_send_rdy),
-    .send_msg                (fft1_serializer_send_msg),
-    .recv_val                (fft1_send_val),
-    .recv_rdy                (fft1_send_rdy),
-    .recv_msg                (fft1_send_msg[0:FFT1_SAMPLES/2-1])
-  );
-
-  generate
-    for (genvar i = FFT1_SAMPLES/2; i < FFT1_SAMPLES; i = i + 1) begin
-      wire fft1_msg_unused = &{1'b0, fft1_send_msg[i], 1'b0};
-    end
-  endgenerate
-
   // FFT Core 1 --------------------------------------------------------------------
   fft_pease_FFT #(
     .BIT_WIDTH               (DATA_BITS),
@@ -590,7 +599,6 @@ module tapein1_sp25_top #(
     .send_val                (fft1_send_val),
     .send_rdy                (fft1_send_rdy)
   );
-
 
   // FFT Core 2 Deserializer -------------------------------------------------------
 
@@ -608,27 +616,6 @@ module tapein1_sp25_top #(
     .send_msg                (fft2_recv_msg)
   );
 
-  // FFT Core 2 Serializer ---------------------------------------------------------
-  serdes_Serializer #(
-    .N_SAMPLES               (FFT2_SAMPLES/2),
-    .BIT_WIDTH               (DATA_BITS)
-  ) fft2_serializer (
-    .clk                     (clk),
-    .reset                   (reset || lfsr_cut_reset),
-    .send_val                (fft2_serializer_send_val),
-    .send_rdy                (fft2_serializer_send_rdy),
-    .send_msg                (fft2_serializer_send_msg),
-    .recv_val                (fft2_send_val),
-    .recv_rdy                (fft2_send_rdy),
-    .recv_msg                (fft2_send_msg[0:FFT2_SAMPLES/2-1])
-  );
-
-  generate
-    for (genvar i = FFT2_SAMPLES/2; i < FFT2_SAMPLES; i = i + 1) begin
-      wire fft2_msg_unused = &{1'b0, fft2_send_msg[i], 1'b0};
-    end
-  endgenerate
-
   // FFT Core 2 --------------------------------------------------------------------
   fft_pease_FFT #(
     .BIT_WIDTH               (DATA_BITS),
@@ -643,21 +630,6 @@ module tapein1_sp25_top #(
     .send_msg                (fft2_send_msg),
     .send_val                (fft2_send_val),
     .send_rdy                (fft2_send_rdy)
-  );
-
-  // Classifier Deserializer -------------------------------------------------------
-  serdes_Deserializer #(
-    .N_SAMPLES               (CLASSIFIER_SAMPLES),
-    .BIT_WIDTH               (DATA_BITS)
-  )classifier_deserializer(
-    .clk                     (clk),
-    .reset                   (reset),
-    .recv_val                (classifier_deserializer_recv_val),
-    .recv_rdy                (classifier_deserializer_recv_rdy),
-    .recv_msg                (classifier_deserializer_recv_msg),
-    .send_val                (classifier_recv_val),
-    .send_rdy                (classifier_recv_rdy),
-    .send_msg                (classifier_recv_msg)
   );
 
   // Classifier --------------------------------------------------------------------
@@ -750,6 +722,22 @@ module tapein1_sp25_top #(
     .lbist_resp_rdy          (misr_resp_rdy)
   );
 
+  // MISR Serializer ---------------------------------------------------------------
+  serdes_Serializer #(
+    .N_SAMPLES               (CLASSIFIER_SAMPLES),
+    .BIT_WIDTH               (DATA_BITS)
+  ) misr_serializer (
+    .clk                     (clk),
+    .reset                   (reset),
+    .send_val                (cut_misr_resp_val),
+    .send_rdy                (cut_misr_resp_rdy),
+    .send_msg                (cut_misr_resp_msg),
+    .recv_val                (misr_serializer_req_val),
+    .recv_rdy                (misr_serializer_req_rdy),
+    .recv_msg                (misr_serializer_req_msg)
+  );
+
+
   // Async FIFO --------------------------------------------------------------------
   AsyncFifo #(
     .p_num_entries           (FIFO_DEPTH),
@@ -776,17 +764,13 @@ module tapein1_sp25_top #(
 
 
   //===============================ROUTING_LOGIC====================================
-
-  // Clock out ---------------------------------------------------------------------
-  assign clk_out = clk;
-
   // Router ------------------------------------------------------------------------
   // Addressing Scheme:
   // ** Router has 4 address bits. This corresponds to 16 output ports.**
   // 0000 - LBIST Controller
   // 0001 - Input XBar
   // 0010 - Input XBar Ctrl
-  // 0011 - Classifier Xbar
+  // 0011 - Classifier Xbar Deserializer
   // 0100 - Classifier Xbar Ctrl
   // 0101 - Classifier Cutoff Frequency Ctrl
   // 0110 - Classifier Cutoff Magnetude Ctrl
@@ -814,10 +798,10 @@ module tapein1_sp25_top #(
   assign input_xbar_control_val = router_val[2];
   assign router_rdy[2] = input_xbar_control_rdy;
 
-  // Address: 0011 - Classifier Xbar
-  assign Router_to_ClassifierXbar_msg = router_msg[3][ROUTER_PACKET_BITS-1:0];
-  assign Router_to_ClassifierXbar_val = router_val[3];
-  assign router_rdy[3] = Router_to_ClassifierXbar_rdy;
+  // Address: 0011 - Classifier Xbar Deserializer
+  assign Router_to_ClassifierXbarDeserializer_msg = router_msg[3][ROUTER_PACKET_BITS-1:0];
+  assign Router_to_ClassifierXbarDeserializer_val = router_val[3];
+  assign router_rdy[3] = Router_to_ClassifierXbarDeserializer_rdy;
 
   // Address: 0100 - Classifier Xbar Ctrl
   assign classifier_xbar_control_msg = router_msg[4][CLASSIFIER_XBAR_CONTROL_BITS-1:0];
@@ -881,7 +865,7 @@ module tapein1_sp25_top #(
 
   // Input port: 01 - FIFO Packager
   // Each fifo output is 8 bits
-  assign input_xbar_recv_msg[1] = {async_fifo_send_msg, {(DATA_BITS-FIFO_ENTRY_BITS){1'b0}}};
+  assign input_xbar_recv_msg[1] = {async_fifo_send_msg, {(DATA_BITS-FIFO_ENTRY_BITS){0}}};
   assign input_xbar_recv_val[1] = async_fifo_send_val;
   assign async_fifo_send_rdy = input_xbar_recv_rdy[1];
 
@@ -911,44 +895,46 @@ module tapein1_sp25_top #(
   // Addressing Scheme:
   // **Classifier Xbar has 3 input ports and 3 output ports.**
   // Inputs:
-  // 00 - FFT1 Serializer
-  // 01 - FFT2 Serializer
-  // 10 - Router
+  // 00 - FFT1
+  // 01 - FFT2
+  // 10 - Classifier Xbar Deserializer
   // Outputs:
-  // 00 - MISR
-  // 01 - Classifier Deserializer
-  // 10 - Arbiter
+  // 00 - MISR Serializer
+  // 01 - Classifier
+  // 10 - Classifier Xbar Serializer
 
-  // Input port: 00 - FFT1 Serializer
-  assign classifier_xbar_recv_msg[0] = fft1_serializer_send_msg;
-  assign classifier_xbar_recv_val[0] = fft1_serializer_send_val;
-  assign fft1_serializer_send_rdy = classifier_xbar_recv_rdy[0];
+  // Input port: 00 - FFT1
+  // *** We drop the complex component of the FFT output
+  assign classifier_xbar_recv_msg[0] = fft1_send_msg[0:FFT1_SAMPLES/2-1];
+  assign classifier_xbar_recv_val[0] = fft1_send_val;
+  assign fft1_send_rdy = classifier_xbar_recv_rdy[0];
 
-  // Input port: 01 - FFT2 Serializer
-  assign classifier_xbar_recv_msg[1] = fft2_serializer_send_msg;
-  assign classifier_xbar_recv_val[1] = fft2_serializer_send_val;
-  assign fft2_serializer_send_rdy = classifier_xbar_recv_rdy[1];
+  // Input port: 01 - FFT2
+  // *** We drop the complex component of the FFT output
+  assign classifier_xbar_recv_msg[1] = fft2_send_msg[0:FFT1_SAMPLES/2-1];
+  assign classifier_xbar_recv_val[1] = fft2_send_val;
+  assign fft2_send_rdy = classifier_xbar_recv_rdy[1];
 
-  // Input port: 10 - Router
-  assign classifier_xbar_recv_msg[2] = Router_to_ClassifierXbar_msg;
-  assign classifier_xbar_recv_val[2] = Router_to_ClassifierXbar_val;
-  assign Router_to_ClassifierXbar_rdy = classifier_xbar_recv_rdy[2];
+  // Input port: 10 - Classifier Xbar Deserializer
+  assign classifier_xbar_recv_msg[2] = classifier_xbar_deserializer_send_msg;
+  assign classifier_xbar_recv_val[2] = classifier_xbar_deserializer_send_val;
+  assign classifier_xbar_deserializer_send_rdy = classifier_xbar_recv_rdy[2];
 
 
   // Output port: 00 - MISR
-  assign cut_misr_resp_msg = classifier_xbar_send_msg[0];
-  assign cut_misr_resp_val = classifier_xbar_send_val[0];
-  assign classifier_xbar_send_rdy[0] = cut_misr_resp_rdy;
+  assign misr_serializer_req_msg = classifier_xbar_send_msg[0];
+  assign misr_serializer_req_val = classifier_xbar_send_val[0];
+  assign classifier_xbar_send_rdy[0] = misr_serializer_req_rdy;
 
-  // Output port: 01 - Classifier Deserializer
-  assign classifier_deserializer_recv_msg = classifier_xbar_send_msg[1];
-  assign classifier_deserializer_recv_val = classifier_xbar_send_val[1];
-  assign classifier_xbar_send_rdy[1] = classifier_deserializer_recv_rdy;
+  // Output port: 01 - Classifier
+  assign classifier_recv_msg = classifier_xbar_send_msg[1];
+  assign classifier_recv_val = classifier_xbar_send_val[1];
+  assign classifier_xbar_send_rdy[1] = classifier_recv_rdy;
 
-  // Output port: 10 - Arbiter
-  assign ClassifierXbar_to_Arbiter_msg = classifier_xbar_send_msg[2];
-  assign ClassifierXbar_to_Arbiter_val = classifier_xbar_send_val[2];
-  assign classifier_xbar_send_rdy[2] = ClassifierXbar_to_Arbiter_rdy;
+  // Output port: 10 - Classifier Xbar Serializer_val
+  assign ClassifierXbar_to_ClassifierXbarSerializer_msg = classifier_xbar_send_msg[2];
+  assign ClassifierXbar_to_ClassifierXbarSerializer_val = classifier_xbar_send_val[2];
+  assign classifier_xbar_send_rdy[2] = ClassifierXbar_to_ClassifierXbarSerializer_rdy;
 
 
   // Output Xbar -------------------------------------------------------------------
@@ -988,7 +974,7 @@ module tapein1_sp25_top #(
   // Outputs (highest priority)
   // 0 - Router (loopback)
   // 1 - Input Xbar
-  // 2 - Classifier Xbar
+  // 2 - Classifier Xbar Serializer
   // 3 - Output Xbar
   // 4 - LBIST Controller
   // 5 - Unused
@@ -1014,10 +1000,10 @@ module tapein1_sp25_top #(
   assign arbiter_val[1] = InputXbar_to_Arbiter_val;
   assign InputXbar_to_Arbiter_rdy = arbiter_rdy[1];
 
-  // Port 2: Classifier Xbar
-  assign arbiter_msg[2] = ClassifierXbar_to_Arbiter_msg;
-  assign arbiter_val[2] = ClassifierXbar_to_Arbiter_val;
-  assign ClassifierXbar_to_Arbiter_rdy = arbiter_rdy[2];
+  // Port 2: Classifier Xbar Serializer
+  assign arbiter_msg[2] = classifier_xbar_serializer_send_msg;
+  assign arbiter_val[2] = classifier_xbar_serializer_send_val;
+  assign classifier_xbar_serializer_send_rdy = arbiter_rdy[2];
 
   // Port 3: Output Xbar
   assign arbiter_msg[3] = OutputXbar_to_Arbiter_msg;
@@ -1040,26 +1026,8 @@ module tapein1_sp25_top #(
 
   //================================ASSERTS=========================================
   // SPI Minion --------------------------------------------------------------------
-  generate
-    if ($clog2(DATA_BITS) != ADDR_BITS) begin
-      $error("ADDR_BITS must be equal to the log2 of DATA_BITS");
-    end
-  endgenerate
-
   // Router ------------------------------------------------------------------------
   // Arbiter -----------------------------------------------------------------------
-  generate
-    if (ARBITER_SIZE != ROUTER_SIZE) begin
-      $error("ARBITER_SIZE must be equal to ROUTER_SIZE");
-    end
-  endgenerate
-  
-  generate
-    if (ROUTER_PACKET_BITS != DATA_BITS + ADDR_BITS) begin
-      $error("ROUTER_PACKET_BITS must be equal to DATA_BITS");
-    end
-  endgenerate
-
   // Input Xbar --------------------------------------------------------------------
   generate
     if (INPUT_XBAR_CONTROL_BITS > DATA_BITS) begin
@@ -1082,37 +1050,9 @@ module tapein1_sp25_top #(
   endgenerate
 
   // FFT Core 1 Deserializer -------------------------------------------------------
-  // FFT Core 1 Serializer ---------------------------------------------------------
   // FFT Core 1 --------------------------------------------------------------------
   // FFT Core 2 Deserializer -------------------------------------------------------
-  // FFT Core 2 Serializer ---------------------------------------------------------
   // FFT Core 2 --------------------------------------------------------------------
-  // Classifier Deserializer -------------------------------------------------------
-
-  generate
-    if (CLASSIFIER_SAMPLES != FFT1_SAMPLES / 2) begin
-      $error("CLASSIFIER_SAMPLES must be equal to FFT1_SAMPLES");
-    end
-    if (CLASSIFIER_SAMPLES != FFT2_SAMPLES / 2) begin
-      $error("CLASSIFIER_SAMPLES must be equal to FFT2_SAMPLES");
-    end
-  endgenerate
-
-  generate
-    if (CLASSIFIER_BITS != DATA_BITS) begin
-      $error("CLASSIFIER_BITS must be equal to DATA_BITS");
-    end
-  endgenerate
-
-  generate
-    if (CLASSIFIER_DECIMAL_PT != FFT1_DECIMAL_PT) begin
-      $error("CLASSIFIER_DECIMAL_PT must be equal to FFT1_DECIMAL_PT");
-    end
-    if (CLASSIFIER_DECIMAL_PT != FFT2_DECIMAL_PT) begin
-      $error("CLASSIFIER_DECIMAL_PT must be equal to FFT2_DECIMAL_PT");
-    end
-  endgenerate
-
   // Classifier --------------------------------------------------------------------
   // Wishbone Harness --------------------------------------------------------------
   // LBIST Controller --------------------------------------------------------------

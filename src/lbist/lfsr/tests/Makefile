@@ -19,8 +19,8 @@ VERILOG_SOURCES := $(PWD)/../lfsr.v
 COMPILE_ARGS += +incdir+/home/jjm469/c2s2/demo_fa24/src
 
 #Step 3: Set top level module and corresponding python test module
-TOPLEVEL := lfsr  
-MODULE := lfsr_test2
+TOPLEVEL := lfsr_paramver2
+MODULE := lfsr_test
 
 # send test build outputs to build folder
 # SIM_BUILD = ../../build/convolution_block/iterative

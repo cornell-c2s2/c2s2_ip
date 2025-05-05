@@ -19,13 +19,7 @@ module fft_pease_helpers_TwiddleGenerator #(
         assign twiddle_real[i] = {{BIT_WIDTH - DECIMAL_PT - 1{1'b0}}, 1'b1, {DECIMAL_PT{1'b0}}};
         assign twiddle_imaginary[i] = 0;
       end
-      // TODO: Fix!
       // logic unused = &sine_wave_in;
-
-      logic [(BIT_WIDTH * SIZE_FFT) - 1: 0] packed_sine_wave_in;
-      assign packed_sine_wave_in = {<<SIZE_FFT{sine_wave_in}};
-      logic unused = &packed_sine_wave_in;
-
     end else begin
 
       for (genvar m = 0; m < 2 ** STAGE_FFT; m = m + 1) begin

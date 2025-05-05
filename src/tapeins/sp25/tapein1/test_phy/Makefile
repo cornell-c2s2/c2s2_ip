@@ -7,7 +7,7 @@ SIM := vcs
 #Sets location for sim_build directory depending on if tests are run with the Makefile or with the bash script
 ifneq ($(TESTSUFFIX),)
 	TEST_DIR = obj_dir/$(TESTNAME)/$(TESTSUFFIX)
-else 
+else
 	TEST_DIR = obj_dir/individual/$(TESTNAME)
 endif
 
@@ -23,6 +23,7 @@ COCOTB_RESULTS_FILE = logs/$(TESTNAME)/$(TESTSUFFIX)/results.xml
 PWD=$(shell pwd)
 C2S2_PATH=$(shell git rev-parse --show-toplevel)
 
+
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
 WAVEFORM_DIR ?= $(PWD)
 
@@ -31,17 +32,32 @@ WAVEFORM_DIR ?= $(PWD)
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
 #Adding relative path of the Verilog file that contains the top level module to VERILOG_SOURCES
-VERILOG_SOURCES ?= $(PWD)/$(SOURCE)
+# VERILOG_SOURCES ?= $(PWD)/$(SOURCE)
+VERILOG_SOURCES += $(PWD)/../tapein1_sp25_top.v
 
-#Step 2a: Add all include directories referenced in the verilog source file
+#Step 1: Add all include directories referenced in the verilog source file
+COMPILE_ARGS += +incdir+$(C2S2_PATH)/src -assert svaext
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/spi -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/arbiter_router -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/fft/pease/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/serdes/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/classifier/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/wishbone/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/lbist/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/async_fifo/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/crossbars/ -type f \( -name "*.v" -o -name "*.sv" \))
+# VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/cmn/ -type f \( -name "*.v" -o -name "*.sv" \))
+
+
+
+#Step 2: Add all include directories referenced in the verilog source file
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
-
-# Step 2b: Enable systemverilog 
 COMPILE_ARGS += -sverilog
+SIM_ARGS+="+vcs+lic+wait" #ensure that the tests wait for the license
 
 #Step 3: Set top level module and corresponding python test module
-TOPLEVEL = template_Template
-MODULE = test_template_Template
+TOPLEVEL = tapein1_sp25_top
+MODULE = test_top
 
 #Step 4: Set environment variables for waveforms and coverage data to 1 if you  \
 would like either waveforms or coverage data to be produced by the simulation. You can \
@@ -87,5 +103,6 @@ coverage_report:
 	@urg -dir coverage_data.vdb -format both -report ./coverage
 	@rm -rf coverage_data.vdb
 
-
-
+# NOTE: temporary to get coverage report to generate
+coverage_report_temp:
+	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
