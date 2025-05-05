@@ -118,8 +118,6 @@ module classifier_Classifier #(
   // Do comparison mag > cutoff_mag
   logic out_comparison;
 
-
-  // ONLY FOR amplitude comparison
   comparison_Comparison #(
     .BIT_WIDTH(BIT_WIDTH),
     .N_SAMPLES(N_SAMPLES)

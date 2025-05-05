@@ -5,7 +5,7 @@ from src.tapeins.sp24.tapein2.tests.spi_stream_protocol import *
 from fixedpt import Fixed, CFixed
 from tools.utils import fixed_bits, mk_test_matrices
 from src.fft.tests.fft import FFTInterface, FFTPease
-from src.classifier.sim import classify
+from src.classifier_bak.sim import classify
 import random
 from pymtl3 import *
 from pymtl3.stdlib.stream.ifcs import valrdy_to_str
