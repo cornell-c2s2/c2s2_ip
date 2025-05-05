@@ -920,13 +920,19 @@ input_mag_values = [1, 10]
 # input_num_values = [1, 10]
 # input_num_values = [10]
 input_num_values = [1]
+# generic = [0x0000, 0xFFFF, 0x5555,  0xAAAA]
+# generic = [0x0000, 0xFFFF]
+# cutoff_freq_values = [0, 1000, 1400, 2000, 10000, 0xffff]
 cutoff_freq_values = [0, 1000, 1400, 2000, 10000]
 # cutoff_freq_values = [0, 1000, 2000, 10000]
 # cutoff_freq_values = [0, 1000, 10000]
 # cutoff_mag_values = [0.33, 0.7, 1, 2.3, 63.32]
 cutoff_mag_values = [0.33, 1, 63.32]
 # sampling_freq_values = [44800, 44100, 25000]
-sampling_freq_values = [44800, 25000]
+sampling_freq_values = [44800, 25000, 0xffff]
+
+
+
 
 factory = TestFactory(test_fft_classifier_random)
 factory.add_option("input_mag", input_mag_values)
