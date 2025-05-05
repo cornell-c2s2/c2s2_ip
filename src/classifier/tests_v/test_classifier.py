@@ -8,6 +8,11 @@ from cocotb.clock import Clock
 import pdb
 
 
+CUTOFF_FREQ = 0
+CUTOFF_MAG = 0xfff5
+SAMP_FREQ = 44100
+
+
 @cocotb.test()
 async def basic_test(dut):
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
@@ -33,19 +38,19 @@ async def basic_test(dut):
     # Issue: bin zero always not valid.
     # Aside from that, this works!
     dut.cutoff_freq_val.value = 1
-    dut.cutoff_freq_msg.value = 0
+    dut.cutoff_freq_msg.value = CUTOFF_FREQ
 
     # Set the cutoff mag
     # Unsigned
     # Magnitude threshold: bins below this are rejected
     # NOT INCLUSIVE (i.e. if cutoff = 19 and bin has amplitude 19 it wont be valid)
     dut.cutoff_mag_val.value = 1
-    dut.cutoff_mag_msg.value = 0xfffd
+    dut.cutoff_mag_msg.value = CUTOFF_MAG
 
     # Set the sampling freq
     # Used to convert bin index to real frequency
     dut.sampling_freq_val.value = 1
-    dut.sampling_freq_msg.value = 44100
+    dut.sampling_freq_msg.value = SAMP_FREQ
 
     await ClockCycles(dut.clk, 1)
 
@@ -107,7 +112,7 @@ async def basic_test(dut):
         0x0013,
         0x001a,
         0x003c,
-        0xfffe]
+        0x0042]
 
     bv = 0
     word_width = 16
