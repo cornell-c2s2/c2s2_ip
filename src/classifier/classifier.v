@@ -12,7 +12,6 @@
 
 module classifier_Classifier #(
   parameter int BIT_WIDTH = 32,
-  parameter int DECIMAL_PT = 16,
   // bit width used for frequency calculations
   // this should be large enough to handle the sampling frequency
   parameter int FREQ_BIT_WIDTH = 16,

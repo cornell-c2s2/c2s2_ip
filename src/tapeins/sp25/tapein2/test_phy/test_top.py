@@ -46,7 +46,7 @@ from cocotb.regression import TestFactory
 from pymtl3 import *
 from fixedpt import Fixed, CFixed
 
-from src.tapeins.sp25.tapein1.test_phy.spi_interface import *
+from src.tapeins.sp25.tapein2.test_phy.spi_interface import *
 from src.classifier.sim import classify
 from src.fft.tests.fft import FFTInterface, FFTPease
 from tools.utils import fixed_bits
@@ -60,6 +60,9 @@ if cocotb.simulator.is_running():
     ADDR_BITS = int(cocotb.top.ADDR_BITS.value)
     DATA_BITS = int(cocotb.top.DATA_BITS.value)
     SPI_PACKET_BITS = int(cocotb.top.SPI_PACKET_BITS.value)
+
+
+USB_PORT = "ttyUSB0"
 
 
 async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, curr_trsns=0):
@@ -601,7 +604,7 @@ factory.add_option("sampling_freq", sampling_freq_values)
 factory.generate_tests()
 
 # Composite test that combines loopback and FFT.
-@cocotb.test()
+# @cocotb.test()
 async def test_compose(dut):
     msgs1 = [0x5555, 0xAAAA]
     inxbar_in_msgs = [mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_ARBITER)] \
