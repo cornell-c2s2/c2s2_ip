@@ -57,7 +57,16 @@ if cocotb.simulator.is_running():
     SPI_PACKET_BITS = int(cocotb.top.SPI_PACKET_BITS.value)
 
 
-async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, curr_trsns=0):
+async def run_top(
+    dut,
+    in_msgs: list[int],
+    out_msgs: list[int],
+    max_trsns=30,
+    curr_trsns=0,
+    use_spi=1,
+    num_config=0,
+    peek=None,
+):
     """
     Run src/sink testing. src/snk msgs are converted to SPI protocol transactions.
     Testing is done at the transaction level.
@@ -70,16 +79,42 @@ async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, cu
       simulations take too long
     curr_trsns: the current transaction number (note from Tean: I've ported this
       over from previous testbenches for now, but I'm thinking of possibly removing it)
+    peel: optional parameter to peek at the output messages (DO NOT REMOVE THIS - Johnny Martinez JJM469)
     """
+    # SPI messages
+    dut._log.info(f"in_msgs = {in_msgs}")
+    dut._log.info(f"out_msgs = {out_msgs}")
     mk = mk_bits(SPI_PACKET_BITS)
-    in_msgs = [mk(x) for x in in_msgs]
-    out_msgs = [mk(x) for x in out_msgs]
-
+    config_msgs = []
+    in_msgs_fifo = []
+    if use_spi:
+        in_msgs = [mk(x) for x in in_msgs]
+        out_msgs = [mk(x) for x in out_msgs]
+    else:
+        mk_fifo_config = mk_bits(8)
+        config_msgs = [mk(x) for x in in_msgs[:num_config]]
+        in_msgs_fifo = [mk_fifo_config(x) for x in in_msgs[num_config:]]
+    dut._log.info(f"config_msgs = {config_msgs}")
+    dut._log.info(f"in_msgs_fifo = {in_msgs_fifo}")
     in_idx = 0
     out_idx = 0
     trsns = curr_trsns + 1
 
     spc = 0
+
+    # FIFO messages
+    fifo_in = [int(x) for x in in_msgs_fifo]
+    fifo_out = [int(x) for x in out_msgs]
+    hex_fifo_in = [hex(i) for i in fifo_in]
+    dut._log.info(f"fifo_in = {hex_fifo_in}")
+
+    # access FIFO submodule
+    fifo = dut.async_fifo
+    fifo_config_done = 0
+
+    hex_fifo_out = [hex(i) for i in fifo_out]
+    dut._log.info(f"fifo_out = {hex_fifo_out}")
+    dut._log.info(f"use_spi = {use_spi}")
 
     while out_idx < len(out_msgs):
         if trsns > max_trsns:
@@ -87,30 +122,94 @@ async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, cu
 
         # The following logging statements are for debugging purposes. Feel free
         # to modify them as needed.
-        # dut._log.info("\nnew loop!")
-        # dut._log.info(f"in_idx is {in_idx}, out_idx is {out_idx}")
-        # dut._log.info(f"spc = {spc}")
-        # dut._log.info(f"router_2_clsxbar_val = {dut.Router_to_ClassifierXbarDeserializer_val.value}")
-        # dut._log.info(f"router_2_clsxbar_rdy = {dut.Router_to_ClassifierXbarDeserializer_rdy.value}")
+        dut._log.info("\nnew loop!")
+        dut._log.info(
+            f"in_idx is {in_idx}, out_idx is {out_idx}, len(fifo_in): {len(fifo_in)}"
+        )
+        dut._log.info(f"spc = {spc}")
+        # dut._log.info(
+        #     f"router_2_clsxbar_val = {dut.Router_to_ClassifierXbar_val.value}"
+        # )
+        # dut._log.info(
+        #     f"router_2_clsxbar_rdy = {dut.Router_to_ClassifierXbar_rdy.value}"
+        # )
 
+        # use SPI to send and receive data
+        if use_spi:
+            if in_idx < len(in_msgs) and spc == 1:
+                spi_status, retmsg = await spi_write_read(dut, in_msgs[in_idx])
 
-        if in_idx < len(in_msgs) and spc == 1:
-            spi_status, retmsg = await spi_write_read(dut, in_msgs[in_idx])
+                dut._log.info(
+                    f"Trns {trsns}: {bin(spi_status)} | {hex(retmsg)}, sending in {hex(in_msgs[in_idx])}"
+                )
+                spc = spi_status[0]
 
-            dut._log.info(f"Trns {trsns}: {bin(spi_status)} | {hex(retmsg)}, sending in {hex(in_msgs[in_idx])}")
-            spc = spi_status[0]
+                if spi_status[1] == 1:
+                    assert retmsg == out_msgs[out_idx]
+                    out_idx += 1
+                in_idx += 1
 
-            if spi_status[1] == 1:
-                assert retmsg == out_msgs[out_idx]
-                out_idx += 1
-            in_idx += 1
+            else:
+                spi_status, retmsg = await spi_read(dut)
+                dut._log.info(f"Trns {trsns}: {bin(spi_status)} | {hex(retmsg)}")
+                spc = spi_status[0]
+                if spi_status[1] == 1:
+                    assert retmsg == out_msgs[out_idx]
+                    out_idx += 1
 
+        # use ASYNC FIFO to sent input data, router to send configuration messages, arbiter to receive messages
         else:
+
+            # send in the SPI configuration messages for the path (only need to do this once!)
+            if not fifo_config_done:
+                # reset FIFO to 0
+                fifo.async_rst.value = 0
+                await ClockCycles(dut.clk, 1)
+
+                for config_idx in range(len(config_msgs)):
+                    spi_status, retmsg = await spi_write(dut, config_msgs[config_idx])
+                    dut._log.info(
+                        f"[CONFIG] Sent {hex(config_msgs[config_idx])}, got {hex(retmsg)}"
+                    )
+
+                # reset FIFO to 1
+                fifo.async_rst.value = 1
+                await ClockCycles(dut.clk, 1)
+
+                # reset FIFO to 0
+                fifo.async_rst.value = 0
+
+                # This needs to be 4 cycles to allow for values to change in the reg file
+                await ClockCycles(dut.clk, 4)
+                dut._log.info(f"[SPI CONFIG] Completed!")
+
+                # only need to configure once
+                fifo_config_done = 1
+
+            # Send input FIFO msg if ready and haven't already sent current msg
+            if fifo.istream_rdy.value == 1 and in_idx < len(fifo_in):
+                dut._log.info(f"[FIFO TX] Sending msg: {hex(fifo_in[in_idx] & 0xFF)}")
+                fifo.istream_msg.value = fifo_in[in_idx] & 0xFF
+                fifo.istream_val.value = 1
+                await ClockCycles(dut.ext_clk, 2)
+                in_idx += 1
+                fifo.istream_val.value = 0
+            else:
+                await ClockCycles(dut.clk, 1)
+
+            # wait for output from router
             spi_status, retmsg = await spi_read(dut)
-            dut._log.info(f"Trns {trsns}: {bin(spi_status)} | {hex(retmsg)}")
+            output_msg = mk(retmsg)
+            dut._log.info(f"SPI retmsg: {hex(output_msg)}")
+
             spc = spi_status[0]
+
+            # if SPI minion is valid
             if spi_status[1] == 1:
-                assert retmsg == out_msgs[out_idx]
+                assert (
+                    output_msg == out_msgs[out_idx]
+                ), f"Output mismatch: got {hex(int(output_msg))}, expected {hex(int(out_msgs[out_idx]))}"
+                dut._log.info("[FIFO] Correct FIFO output message!")
                 out_idx += 1
 
         trsns += 1
@@ -148,6 +247,9 @@ class InXbarCfg:
     ROUTER_FFT2    = 0b1001
     LFSR_FFT1      = 0b0000
     LFSR_FFT2      = 0b0001
+    FIFO_ARBITER = 0b0110
+    FIFO_FFT1 = 0b0100
+    FIFO_FFT2 = 0b0101
 
 class ClsXbarCfg:
     """
@@ -310,6 +412,50 @@ for test in [test_loopback_noXbar, test_loopback_inXbar, test_loopback_outXbar]:
     factory.add_option("msgs", msgs_values)
     factory.generate_tests()
 
+"""
+FIFO LOOPBACK TEST
+"""
+
+
+async def test_fifo_loopback_inXbar(dut, msgs):
+    """
+    Tests loopback route: fifo -> packager -> input xbar -> arbiter -> spi.
+
+    the input address is still configured by making SPI packets and setting ctrl bits through router
+    since that's the only way of setting them.
+    """
+    config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.FIFO_ARBITER)
+
+    in_msgs = [config_msg] + [msg for msg in msgs]
+    out_msgs = [mk_spi_pkt(ArbiterIn.IN_XBAR, (msg << 8)) for msg in msgs]
+
+    cocotb.start_soon(Clock(dut.ext_clk, 2, "ns").start())  # input clk
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())  # output clk
+    await reset_dut(dut)
+    await run_top(dut, in_msgs, out_msgs, use_spi=0, num_config=1, max_trsns=32)
+
+
+"""
+Generate tests here using test factory to test for different messages, kind of
+like with pytest parameters
+"""
+# FIFO only takes in 8-bit messages
+fifo_msgs_values = [
+    [0xFF, 0xFF],
+    [0x00, 0x00],
+    [0x55, 0x55, 0xAA, 0xAA],
+    [0xAA, 0xAA, 0x55, 0x55],
+    [0xDE, 0xAD, 0xBE, 0xEF, 0xCA],
+    [0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE],
+    [0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE, 0xAB],
+    [0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE, 0xBA, 0xBE],
+]
+
+for test in [test_fifo_loopback_inXbar]:
+    factory = TestFactory(test)
+    factory.add_option("msgs", fifo_msgs_values)
+    factory.generate_tests()
+
 
 msgs_values_classifier_xbar = [
     # As of 04/24/2025, CLASSIFIER_SAMPLES = 16
@@ -383,8 +529,8 @@ msgs_values_classifier_xbar = [
 ]
 
 
-# Classifier loopback uses different input messages due to classifier xbar deserializer. The deserializer 
-# will only send a valid output after receiving CLASSIFIER_SAMPLES number of messages. 
+# Classifier loopback uses different input messages due to classifier xbar deserializer. The deserializer
+# will only send a valid output after receiving CLASSIFIER_SAMPLES number of messages.
 for test in [test_loopback_clsXbar]:
     factory = TestFactory(test)
     factory.add_option("msgs", msgs_values_classifier_xbar)
@@ -401,92 +547,389 @@ def fixN(n):
     """Shortcut for creating fixed-point numbers."""
     return Fixed(n, True, 16, 8)
 
+
+def fixN_fifo(n):
+    """Shortcut for creating fixed-point numbers."""
+    return Fixed(n, True, 8, 0)
+
+
+def fft_msg(inputs: list[Fixed], outputs: list[Fixed], fft_num, config=True):
+    """Generate SPI packets for FFT input/output from fixed-point numbers."""
+
+    assert fft_num in [1, 2]
+
+    # ensure that input and output samples are converted from fixed to bits
+    inputs = [fixed_bits(sample) for sample in inputs]
+    outputs = [fixed_bits(sample) for sample in outputs]
+
+    # configure input and output crossbars to send messages to/receive messages from FFT2
+    if fft_num == 1:
+        in_xbar_config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT1)
+        out_xbar_config_msg = mk_spi_pkt(
+            RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_ARBITER
+        )
+    else:
+        in_xbar_config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT2)
+        out_xbar_config_msg = mk_spi_pkt(
+            RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT2_ARBITER
+        )
+
+    # send fft inputs to router and fft outputs to Arbiter from XBar
+    in_msgs = [mk_spi_pkt(RouterOut.IN_XBAR, int(x)) for x in inputs]
+    out_msgs = [mk_spi_pkt(ArbiterIn.CLS_XBAR, int(x)) for x in outputs]
+
+    # complete input and output message configurations
+    if config:
+        in_msgs = [in_xbar_config_msg, out_xbar_config_msg] + in_msgs
+
+    return in_msgs, out_msgs
+
+
+def fft_fifo_msg(dut, inputs: list[Fixed], outputs: list[Fixed], fft_num):
+    """Generate SPI packets for FFT input/output from fixed-point numbers."""
+
+    # ensure that input and output samples are converted from fixed to bits
+    inputs = [fixed_bits(sample) for sample in inputs[0]]
+    outputs = [fixed_bits(sample) for sample in outputs[0]]
+
+    # configure input and output crossbars to send messages to/receive messages from FFT1
+    if fft_num == 1:
+        in_xbar_config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.FIFO_FFT1)
+        out_xbar_config_msg = mk_spi_pkt(
+            RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_ARBITER
+        )
+    else:
+        in_xbar_config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.FIFO_FFT2)
+        out_xbar_config_msg = mk_spi_pkt(
+            RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT2_ARBITER
+        )
+
+    # send fft inputs to router and fft outputs to Arbiter from XBar
+    fft_input_msgs = [x for x in inputs]
+    fft_output_msgs = [mk_spi_pkt(ArbiterIn.CLS_XBAR, int(x)) for x in outputs]
+
+    # complete input and output message configurations
+    in_msgs = [in_xbar_config_msg, out_xbar_config_msg] + fft_input_msgs
+    out_msgs = fft_output_msgs
+    dut._log.info(f"in_msgs: {in_msgs}")
+
+    return in_msgs, out_msgs
+
+
+def flatten_list(lst):
+    return [item for sub in lst for item in sub]
+
+
+def test_fft_random_msg(dut, fft_num):
+    random.seed(0xFEEDBABA)
+    input_mag = 2**31
+    input_num = 50
+
+    inputs = [
+        [CFixed((random.uniform(-(2**32), 2**31 - 1), 0), 16, 8) for i in range(32)]
+        for _ in range(input_num)
+    ]
+
+    model: FFTInterface = FFTPease(16, 8, 32)
+    outputs = [model.transform(x) for x in inputs]
+
+    fft_inputs = []
+    fft_outputs = []
+    count = 0
+    for _ in range(input_num):
+        # while count < input_num:
+        inputs = [
+            CFixed((random.uniform(-input_mag, input_mag), 0), 16, 8) for i in range(32)
+        ]
+        # inputs = [[x.real for x in sample] for sample in inputs]
+        outputs = model.transform(inputs)
+
+        inputs = [x.real for x in inputs]
+        outputs = [x.real for x in outputs][:16]
+        outputs = [int(x.bin(), 2) for x in outputs]
+        # dut._log.info(f"outputs: {[int(x.bin(), 2) for x in outputs]}")
+
+        # outputs = [[x.real for x in sample][:16] for sample in outputs]
+        # for o in outputs:
+        #     if int(o) >> 16:
+        #         break
+        # else:
+
+        fft_inputs.extend(inputs)
+        fft_outputs.extend(outputs)
+        count += 1
+        # dut._log.info(f"We have {count} tests")
+
+    # dut._log.info(f"We have {count} tests")
+
+    assert count > 0
+
+    # dut._log.info(f"{type(fft_inputs[0])}")
+    # dut._log.info(f"{type(fft_outputs[0])}")
+
+    if fft_num == 1:
+        inputs = [  # First, configure the crossbars
+            mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT1),
+            mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_ARBITER),
+        ] + [  # Finally, send the fft inputs
+            mk_spi_pkt(RouterOut.IN_XBAR, int(fixed_bits(x)))
+            for x in fft_inputs
+            # int(fixed_bits(x)) for sample in fft_inputs for x in sample
+        ]
+    else:
+        inputs = [  # First, configure the crossbars
+            mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT2),
+            mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT2_ARBITER),
+        ] + [  # Finally, send the fft inputs
+            mk_spi_pkt(RouterOut.IN_XBAR, int(fixed_bits(x)))
+            for x in fft_inputs
+            # int(fixed_bits(x)) for sample in fft_inputs for x in sample
+        ]
+
+    # some random irrelevant message we can add for some delays
+    # dummy = mk_spi_pkt(RouterOut.OUT_XBAR, OutXbarCfg.CLS_ARBITER)
+    # for x in fft_inputs:
+    #     inputs.append(mk_spi_pkt(RouterOut.IN_XBAR, int(fixed_bits(x))))
+    #     for _ in range(random.randint(0, 3)):
+    #         inputs.append(dummy)
+
+    outputs = [mk_spi_pkt(ArbiterIn.CLS_XBAR, int(x)) for x in fft_outputs]
+
+    return inputs, outputs
+    # cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    # await reset_dut(dut)
+    # await run_top(dut, inputs, outputs, max_trsns=3000)
+
+
 """
 -----------
 FFT1 TESTS
 -----------
 """
-def fft1_msg(inputs: list[Fixed], outputs: list[Fixed]):
-    """Generate SPI packets for FFT input/output from fixed-point numbers."""
-    
-    #ensure that input and output samples are converted from fixed to bits
-    inputs = [fixed_bits(sample) for sample in inputs[0]]
-    outputs = [fixed_bits(sample) for sample in outputs[0]]
 
-    #configure input and output crossbars to send messages to/receive messages from FFT1
-    in_xbar_config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT1)
-    out_xbar_config_msg = mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_ARBITER)
-    
-    # send fft inputs to router and fft outputs to Arbiter from XBar
-    fft_input_msgs = [mk_spi_pkt(RouterOut.IN_XBAR, int(x)) for x in inputs]
-    fft_output_msgs = [mk_spi_pkt(ArbiterIn.CLS_XBAR, int(x)) for x in outputs]
 
-    #complete input and output message configurations
-    in_msgs = [in_xbar_config_msg, out_xbar_config_msg] + fft_input_msgs
-    out_msgs =  fft_output_msgs
-    
-    return in_msgs, out_msgs
-
-async def test_fft1_manual(dut, input, output):
-    in_msgs, out_msgs = fft1_msg(input, output)
+async def test_fft1_manual(dut, input_output):
+    inputs, outputs = input_output
+    in_msgs, out_msgs = fft_msg(inputs, outputs, 1)
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
     await run_top(dut, in_msgs, out_msgs, max_trsns=100)
+
+
+async def test_fft1_manual_fifo(dut, input, output):
+    """
+    Tests loopback route: fifo -> packager -> input xbar -> fft1 -> cls xbar -> arbiter -> spi.
+
+    the input address is still configured by making SPI packets and setting ctrl bits through router
+    since that's the only way of setting them.
+    """
+    # input, output = input_output
+    in_msgs, out_msgs = fft_fifo_msg(dut, input, output, 1)
+
+    cocotb.start_soon(Clock(dut.ext_clk, 2, "ns").start())
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, in_msgs, out_msgs, max_trsns=150, use_spi=0, num_config=2)
+
+
+@cocotb.test()
+async def test_fft1_random(dut):
+    # input, output = input_output
+    in_msgs, out_msgs = test_fft_random_msg(dut, 1)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, in_msgs, out_msgs, max_trsns=3000)
+
 
 """
 -----------
 FFT2 TESTS
 -----------
 """
-def fft2_msg(inputs: list[Fixed], outputs: list[Fixed]):
-    """Generate SPI packets for FFT input/output from fixed-point numbers."""
-    
-    #ensure that input and output samples are converted from fixed to bits
-    inputs = [fixed_bits(sample) for sample in inputs[0]]
-    outputs = [fixed_bits(sample) for sample in outputs[0]]
-
-    #configure input and output crossbars to send messages to/receive messages from FFT2
-    in_xbar_config_msg = mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT2)
-    out_xbar_config_msg = mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT2_ARBITER)
-    
-    # send fft inputs to router and fft outputs to Arbiter from XBar
-    fft_input_msgs = [mk_spi_pkt(RouterOut.IN_XBAR, int(x)) for x in inputs]
-    fft_output_msgs = [mk_spi_pkt(ArbiterIn.CLS_XBAR, int(x)) for x in outputs]
-
-    #complete input and output message configurations
-    in_msgs = [in_xbar_config_msg, out_xbar_config_msg] + fft_input_msgs
-    out_msgs =  fft_output_msgs
-    
-    return in_msgs, out_msgs
-
-async def test_fft2_manual(dut, input, output):
-    in_msgs, out_msgs = fft2_msg(input, output)
+async def test_fft2_manual(dut, input_output):
+    inputs, outputs = input_output
+    in_msgs, out_msgs = fft_msg(inputs, outputs, 2)
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
     await run_top(dut, in_msgs, out_msgs, max_trsns=100)
+
+
+async def test_fft2_manual_fifo(dut, input, output):
+    """
+    Tests loopback route: fifo -> packager -> input xbar -> fft1 -> cls xbar -> arbiter -> spi.
+
+    the input address is still configured by making SPI packets and setting ctrl bits through router
+    since that's the only way of setting them.
+    """
+    in_msgs, out_msgs = fft_fifo_msg(dut, input, output, 2)
+
+    cocotb.start_soon(Clock(dut.ext_clk, 2, "ns").start())
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, in_msgs, out_msgs, max_trsns=150, use_spi=0, num_config=2)
+
+
+@cocotb.test()
+async def test_fft2_random(dut):
+    # input, output = input_output
+    in_msgs, out_msgs = test_fft_random_msg(dut, 2)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, in_msgs, out_msgs, max_trsns=3000)
+
+
+"""
+-----------
+Alternating FFT tests
+-----------
+"""
+
+
+def gen_periodic(magnitude, period, n_samples):
+    """
+    Idea is:
+    gen_periodic(4, 2, 8) would make [4, 0, 4, 0, 4, 0, 4, 0]
+    gen_periodic(2, 1, 4) would make [2, 2, 2, 2]
+    gen_periodic(1, 4, 4) would make [1, 0, 0, 0]
+    """
+    return [fixN(magnitude if x % period == 0 else 0) for x in range(n_samples)]
+
+
+# Test Data
+fft_io_values = [
+    # ([[fixN(1) for _ in range(32)]], [[fixN(32)] + [fixN(0) for _ in range(15)]]),
+    # ([[fixN(1 if x % 2 == 0 else 0) for x in range(32)]], [[fixN(1 if x % 16 == 0 else 0) for x in range(32)]]),
+    # ([[fixN(1)] + [fixN(0) for _ in range(31)]], [[fixN(1) for _ in range(16)]]),
+    (
+        gen_periodic(1, 1, 32),
+        gen_periodic(32, 32, 16),
+    ),  # 1, 1, 1, 1, ... -> 32, 0, 0, 0, ...
+    (
+        gen_periodic(1, 1, 32) + gen_periodic(1, 1, 32),
+        gen_periodic(32, 32, 16) + gen_periodic(32, 32, 16),
+    ),  # 1, 1, 1, 1, ... -> 32, 0, 0, 0, ...
+    (
+        gen_periodic(1, 2, 32),
+        gen_periodic(16, 16, 16),
+    ),  # 1, 0, 1, 0, ... -> 16, 0, 0, 0, 0, 0
+    (
+        gen_periodic(1, 4, 32),
+        gen_periodic(8, 8, 16),
+    ),  # 1, 0, 0, 0, 1, 0, 0, 0, ... -> 8, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, ....
+    (gen_periodic(1, 8, 32), gen_periodic(4, 4, 16)),
+    (gen_periodic(1, 16, 32), gen_periodic(2, 2, 16)),
+    (
+        gen_periodic(1, 32, 32),
+        gen_periodic(1, 1, 16),
+    ),  # 1, 0, 0, 0, ... -> 1, 1, 1, 1, ...
+]
+
+
+def gen_periodic_fifo(magnitude, period, n_samples):
+    """
+    Idea is:
+    gen_periodic(4, 2, 8) would make [4, 0, 4, 0, 4, 0, 4, 0]
+    gen_periodic(2, 1, 4) would make [2, 2, 2, 2]
+    gen_periodic(1, 4, 4) would make [1, 0, 0, 0]
+    """
+    return [fixN_fifo(magnitude if x % period == 0 else 0) for x in range(n_samples)]
+
+
+# Test Data
+fft_io_values_fifo = [
+    # ([[fixN(1) for _ in range(32)]], [[fixN(32)] + [fixN(0) for _ in range(15)]]),
+    # ([[fixN(1 if x % 2 == 0 else 0) for x in range(32)]], [[fixN(1 if x % 16 == 0 else 0) for x in range(32)]]),
+    # ([[fixN(1)] + [fixN(0) for _ in range(31)]], [[fixN(1) for _ in range(16)]]),
+    (
+        gen_periodic_fifo(1, 1, 32),
+        gen_periodic_fifo(32, 32, 16),
+    ),  # 1, 1, 1, 1, ... -> 32, 0, 0, 0, ...
+    (
+        gen_periodic_fifo(1, 1, 32) + gen_periodic_fifo(1, 1, 32),
+        gen_periodic_fifo(32, 32, 16) + gen_periodic_fifo(32, 32, 16),
+    ),  # 1, 1, 1, 1, ... -> 32, 0, 0, 0, ...
+    (
+        gen_periodic_fifo(1, 2, 32),
+        gen_periodic_fifo(16, 16, 16),
+    ),  # 1, 0, 1, 0, ... -> 16, 0, 0, 0, 0, 0
+    (
+        gen_periodic_fifo(1, 4, 32),
+        gen_periodic_fifo(8, 8, 16),
+    ),  # 1, 0, 0, 0, 1, 0, 0, 0, ... -> 8, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, ....
+    (gen_periodic_fifo(1, 8, 32), gen_periodic_fifo(4, 4, 16)),
+    (gen_periodic_fifo(1, 16, 32), gen_periodic_fifo(2, 2, 16)),
+    (
+        gen_periodic_fifo(1, 32, 32),
+        gen_periodic_fifo(1, 1, 16),
+    ),  # 1, 0, 0, 0, ... -> 1, 1, 1, 1, ...
+]
+
+
+@cocotb.test
+async def test_fft_alternation(dut):
+    """
+    This test might be useless for the current version.
+    The idea is send some to fft1 and then send some to fft2. The problem is you
+    can't send inputs to fft1 while fft2 is not done sending outputs and vice
+    versa.
+    """
+
+    random.seed(0xFEEDBABA)
+
+    iterations = 2
+    in_msgs = []
+    out_msgs = []
+
+    # assert len(inputs) == len(outputs)
+    current_fft = None
+    for i in range(iterations):
+        new_fft = random.randint(1, 2)
+
+        config = False
+        if current_fft != new_fft:
+            config = True
+            current_fft = new_fft
+
+        # test_in, test_out = fft_io_values[i % len(fft_io_values)]
+        test_in, test_out = fft_io_values[0]
+        # dut._log.info(f"test_in = {len(test_in)}, test_out = {len(test_out)}")
+        # dut._log.info(f"sending to fft {current_fft}")
+        test_in, test_out = fft_msg(test_in, test_out, current_fft, config=True)
+        in_msgs.extend(test_in)
+        out_msgs.extend(test_out)
+
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, in_msgs, out_msgs, max_trsns=600)
+
 
 """
 -----------
 RUN FFT TESTS
 -----------
 """
-# Test Data
-input_values = [
-    [[fixN(1) for _ in range(32)]]
-]
 
-output_values = [
-    [[fixN(32)] + [fixN(0) for _ in range(15)]]
-]
+
+# Test Data
+# inputs are 8 bits, lower 0 bits are fractional
+fifo_input_values = [[[fixN_fifo(1) for _ in range(32)]]]
+
+fifo_output_values = [[[fixN(32)] + [fixN(0) for _ in range(15)]]]
 
 # Register test factory
+# for test in [test_fft1_manual, test_fft2_manual, test_fft_alternation]:
 for test in [test_fft1_manual, test_fft2_manual]:
     factory = TestFactory(test)
-    factory.add_option("input", input_values)
-    factory.add_option("output", output_values)
+    factory.add_option("input_output", fft_io_values)
+    # factory.add_option("output", output_values)
     factory.generate_tests()
 
-
+for test in [test_fft1_manual_fifo, test_fft2_manual_fifo]:
+    factory = TestFactory(test)
+    # factory.add_option("input_output", fft_io_values_fifo)
+    factory.add_option("input", fifo_input_values)
+    factory.add_option("output", fifo_output_values)
+    factory.generate_tests()
 
 """
 ================================================================================
@@ -518,7 +961,7 @@ def classifier_msg(inputs: list[Fixed], outputs: list[int]):
 
     return in_msgs, out_msgs
 
-@cocotb.test()
+# @cocotb.test()
 async def test_classifier_manual(dut):
     in_msgs, out_msgs = classifier_msg([[fixN(1) for _ in range(16)]], [0x0000])
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
@@ -592,7 +1035,7 @@ factory.add_option("sampling_freq", sampling_freq_values)
 factory.generate_tests()
 
 # Composite test that combines loopback and FFT.
-@cocotb.test()
+# @cocotb.test()
 async def test_compose(dut):
     msgs1 = [0x5555, 0xAAAA]
     inxbar_in_msgs = [mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_ARBITER)] \
@@ -617,14 +1060,14 @@ LBIST TESTS
 @cocotb.test()
 async def test_lbist_fft1(dut):
     input_msgs = []
-    
+
     # Configure crossbars to send data along this path: LFSR -> FFT1 -> MISR
     input_msgs += [mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.LFSR_FFT1)]
     input_msgs += [mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_MISR)]
 
     # Send 1 to LBIST controller to start LBIST test
     input_msgs += [mk_spi_pkt(RouterOut.LBIST_CTRL, 1)]
-    
+
     # Expect to receive an 8-bit integer of 1s, to signify 8 passed tests
     output_msgs = [mk_spi_pkt(ArbiterIn.LBIST_CTRL, 0b11111111)]
 
