@@ -4,6 +4,23 @@ from src.fixed_point.sim import butterfly
 import math
 
 
+def butterfly(a: CFixed, b: CFixed, w: CFixed) -> tuple[CFixed, CFixed]:
+    assert a.real._n == b.real._n
+    assert a.real._d == b.real._d
+    assert a.real._n == w.real._n
+    assert a.real._d == w.real._d
+
+    n = a.real._n
+    d = a.real._d
+
+    # t = complex_multiply(b, w)
+    arXbr = w.real.__mul__(b.real).resize(True, n, d)
+    acXbc = w.imag.__mul__(b.imag).resize(True, n, d)
+    arcXbrc = (w.real + w.imag).resize(True, n, d).__mul__((b.real + b.imag).resize(True, n, d)).resize(True, n, d)
+    t = CFixed(((arXbr - acXbc).resize(True, n, d).get(True), (arcXbrc - arXbr - acXbc).resize(True, n, d).get(True)), n, d, True)
+    
+    return ((a + t).resize(n, d), (a - t).resize(n, d))
+
 def stride_permutation(n_samples: int, cbar_in: list[any]) -> list[any]:
     assert len(cbar_in) == n_samples
     return [
