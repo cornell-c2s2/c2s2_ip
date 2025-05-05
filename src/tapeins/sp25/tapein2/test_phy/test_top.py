@@ -54,7 +54,7 @@ from tools.utils import fixed_bits
 import src.tapeins.sp25.tapein2.test_phy.phy_helpers as phy
 
 random.seed("C2S2")
-USB_PORT = "/dev/ttyUSB0"
+USB_PORT = "/dev/ttyUSB1"
 
 if cocotb.simulator.is_running():
     ADDR_BITS = int(cocotb.top.ADDR_BITS.value)
@@ -104,7 +104,7 @@ async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, cu
 
 
         if in_idx < len(in_msgs) and spc == 1:
-            spi_status, send, retmsg = spi_write_read(dut, in_msgs[in_idx])
+            spi_status, send, retmsg = spi_write_read(in_msgs[in_idx])
 
             dut._log.info(f"Trns {trsns}: {bin(spi_status)} | {hex(retmsg)}, sending in {hex(in_msgs[in_idx])}")
             spc = spi_status[0]
@@ -115,7 +115,7 @@ async def run_top(dut, in_msgs: list[int], out_msgs: list[int], max_trsns=30, cu
             in_idx += 1
 
         else:
-            spi_status, send, retmsg = spi_read(dut)
+            spi_status, send, retmsg = spi_read()
             dut._log.info(f"Trns {trsns}: {bin(spi_status)} | {hex(retmsg)}")
             spc = spi_status[0]
             if spi_status[1] == 1:

@@ -4,6 +4,7 @@ incremental_db/
 db/
 *.cdf
 *.qpf
+*.qdf
 *.qsf
 *.qws
 
