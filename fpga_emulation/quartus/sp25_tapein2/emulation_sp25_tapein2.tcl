@@ -26,16 +26,16 @@ set make_assignments 1
 
 # Check that the right project is open
 if {[is_project_open]} {
-	if {[string compare $quartus(project) "emulation_sp25_tapein1"]} {
-		puts "Project emulation_sp25_tapein1 is not open"
+	if {[string compare $quartus(project) "emulation_sp25_tapein2"]} {
+		puts "Project emulation_sp25_tapein2 is not open"
 		set make_assignments 0
 	}
 } else {
 	# Only open if not already open
-	if {[project_exists emulation_sp25_tapein1]} {
-		project_open -revision emulation_sp25_tapein1 emulation_sp25_tapein1
+	if {[project_exists emulation_sp25_tapein2]} {
+		project_open -revision emulation_sp25_tapein2 emulation_sp25_tapein2
 	} else {
-		project_new -revision emulation_sp25_tapein1 emulation_sp25_tapein1
+		project_new -revision emulation_sp25_tapein2 emulation_sp25_tapein2
 	}
 	set need_to_close_project 1
 }
@@ -46,8 +46,9 @@ if {$make_assignments} {
 	set_global_assignment -name DEVICE EP4CE115F29C7
 	set_global_assignment -name TOP_LEVEL_ENTITY FPGA_top
 	set_global_assignment -name VERILOG_FILE FPGA_top.v
+	set_global_assignment -name VERILOG_FILE interconnect_fpga.v
 	set_global_assignment -name SDC_FILE timing.sdc
-  set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+    set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 	set_global_assignment -name ORIGINAL_QUARTUS_VERSION 18.1.0
 	set_global_assignment -name PROJECT_CREATION_TIME_DATE "17:28:04  DECEMBER 05, 2024"
 	# set_global_assignment -name LAST_QUARTUS_VERSION "23.1std.1 Lite Edition"

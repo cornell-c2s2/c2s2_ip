@@ -10,12 +10,12 @@ SIM := verilator
 SIM_BUILD := sim_build
 
 # Define the top-level Verilog module and corresponding Python test module
-TOPLEVEL = tapein1_sp25_top
+TOPLEVEL = tapein2_sp25_top
 MODULE = test_top
 
 # Verilog source files
 C2S2_PATH=$(shell git rev-parse --show-toplevel)
-VERILOG_SOURCES += $(PWD)/../tapein1_sp25_top.v
+VERILOG_SOURCES += $(PWD)/../tapein2_sp25_top.v
 COMPILE_ARGS += -I$(C2S2_PATH)/src
 
 

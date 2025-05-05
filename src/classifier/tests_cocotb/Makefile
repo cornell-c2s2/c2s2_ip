@@ -11,7 +11,7 @@ endif
 
 #Add working directory to the Python virtual environment path
 PWD=$(shell pwd)
-C2S2_PATH=$(HOME)/c2s2/sp25_tapein1
+C2S2_PATH=$(shell git rev-parse --show-toplevel)
 
 
 export PYTHONPATH := $(PWD):$(PYTHONPATH)
@@ -21,17 +21,17 @@ export PYTHONPATH := $(PWD):$(PYTHONPATH)
 #export PYTHONPATH := $(PWD)/../models:$(PYTHONPATH)
 
 #Step 1: Add relative/full path of the Verilog file that contains the top level module to VERILOG_SOURCES
-VERILOG_SOURCES += $(shell find $(C2S2_PATH)/src/async_fifo/ -type f \( -name "*.v" -o -name "*.sv" \))
-
+VERILOG_SOURCES += $(PWD)/../classifier.v
 
 
 
 #Step 2: Add all include directories referenced in the verilog source file
 COMPILE_ARGS += +incdir+$(C2S2_PATH)/src
+COMPILE_ARGS += -sverilog
 
 #Step 3: Set top level module and corresponding python test module
-TOPLEVEL = FifoPackager
-MODULE = test_FifoPackager
+TOPLEVEL = classifier_Classifier
+MODULE = test_classifier
 
 #Step 4: Set environment variables for waveforms and coverage data to 1 if you  \
 would like either waveforms or coverage data to be produced by the simulation. You can \
@@ -40,16 +40,21 @@ the next step.
 WAVES = 1
 COVER = 1
 
-#Step 5: Set model parameters by appending them to EXTRA_ARGS (if neccessary)\
-#Examples (from multiplier example): \
-EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.n=$N \
-EXTRA_ARGS += -pvalue+fixed_point_iterative_Multiplier.d=$D
+#Step 5: Set model parameters by appending them to EXTRA_ARGS (if neccessary)
+COMPILE_ARGS+=-pvalue+classifier_Classifier.N_SAMPLES=16
+COMPILE_ARGS+=-pvalue+classifier_Classifier.BIT_WIDTH=16
+COMPILE_ARGS+=-pvalue+classifier_Classifier.DECIMAL_PT=8
+
+
+
 
 #Generating waveform files (Set environment variable WAVES to 1)
 #Resulting waveform will be called waves.vcd and will be in the working directory
 WAVES ?= 0
 ifeq ($(WAVES), 1)
 	EXTRA_ARGS += +vcs+dumpvars+waves.vcd
+	EXTRA_ARGS += +vcs+vcdpluson
+	EXTRA_ARGS += +vcs+vcdplusmemon
 endif
 
 #Generating line and toggle coverage data (Set environment variable COVER to 1)
@@ -71,6 +76,4 @@ clean_all:
 #Generate a coverage report after running a simulation
 coverage_report:
 	urg -dir ./sim_build/simv.vdb -format both -report ./coverage_report
-
-
 

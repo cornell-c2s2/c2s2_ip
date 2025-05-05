@@ -25,7 +25,7 @@ clock_divider #(
   .clk_out(ext_clk)
 );
 
-tapein1_sp25_top dut(
+tapein2_sp25_top dut(
   .clk(CLOCK_50),
   .reset(GPIO1),
   .clk_out(GPIO5), //
