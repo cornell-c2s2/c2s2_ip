@@ -7,7 +7,7 @@
 
 module drop_unit #(
   parameter int N_BITS = 8,
-  parameter int MAX_N_CYCLES = 10  // The max number of cycles the unit waits for before sending a sample
+  parameter int MAX_N_CYCLES = 32  // The max number of cycles the unit waits for before sending a sample
 ) (
   // Clock and Reset Ports
   input  logic  clk,

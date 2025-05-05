@@ -13,7 +13,7 @@
 module drop_unit_demo #(
   parameter int N_BITS = 16,
   parameter int DECIMAL_BITS = 8,
-  parameter int MAX_N_CYCLES = 10,
+  parameter int MAX_N_CYCLES = 20,
   parameter int FFT_ARRAY_LENGTH = 32
 ) (
   input  logic  clk,
