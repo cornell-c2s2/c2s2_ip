@@ -51,6 +51,8 @@ from src.classifier.sim import classify, frequency_bins
 from src.fft.tests.fft import FFTInterface, FFTPease
 from tools.utils import fixed_bits
 
+random.seed("C2S2")
+
 if cocotb.simulator.is_running():
     ADDR_BITS = int(cocotb.top.ADDR_BITS.value)
     DATA_BITS = int(cocotb.top.DATA_BITS.value)

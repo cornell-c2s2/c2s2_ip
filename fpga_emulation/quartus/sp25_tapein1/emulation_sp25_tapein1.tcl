@@ -44,13 +44,13 @@ if {[is_project_open]} {
 if {$make_assignments} {
 	set_global_assignment -name FAMILY "Cyclone IV E"
 	set_global_assignment -name DEVICE EP4CE115F29C7
-	set_global_assignment -name TOP_LEVEL_ENTITY tapein1_sp25_top
-	set_global_assignment -name VERILOG_FILE interconnect_fpga.v
+	set_global_assignment -name TOP_LEVEL_ENTITY FPGA_top
+	set_global_assignment -name VERILOG_FILE FPGA_top.v
 	set_global_assignment -name SDC_FILE timing.sdc
   set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 	set_global_assignment -name ORIGINAL_QUARTUS_VERSION 18.1.0
 	set_global_assignment -name PROJECT_CREATION_TIME_DATE "17:28:04  DECEMBER 05, 2024"
-	set_global_assignment -name LAST_QUARTUS_VERSION "23.1std.1 Lite Edition"
+	# set_global_assignment -name LAST_QUARTUS_VERSION "23.1std.1 Lite Edition"
 	set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 	set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 	set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top

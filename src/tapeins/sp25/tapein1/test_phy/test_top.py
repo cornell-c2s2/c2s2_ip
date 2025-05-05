@@ -37,6 +37,7 @@ tests for different input values. This is similar to how pytest parameters work.
 Author: Tean Lai, Akshati Vaishnav
 """
 import random
+import pdb
 from enum import Enum
 
 import cocotb
@@ -53,7 +54,9 @@ from tools.utils import fixed_bits
 
 import src.tapeins.sp25.tapein1.test_phy.phy_helpers as phy
 
-USB_PORT = "ttyUSB0"
+random.seed("C2S2")
+USB_PORT = "/dev/ttyUSB0"
+
 
 if cocotb.simulator.is_running():
     ADDR_BITS = int(cocotb.top.ADDR_BITS.value)
@@ -83,6 +86,10 @@ async def run_top(
     curr_trsns: the current transaction number (note from Tean: I've ported this
       over from previous testbenches for now, but I'm thinking of possibly removing it)
     """
+
+    init_usb(USB_PORT)
+    spi_trigger_a(0.05)
+
     # SPI messages
     mk = mk_bits(SPI_PACKET_BITS)
     in_msgs = [mk(x) for x in in_msgs]
@@ -129,7 +136,7 @@ async def run_top(
 
         if use_spi:
             if in_idx < len(in_msgs) and spc == 1:
-                spi_status, retmsg = await spi_write_read(in_msgs[in_idx])
+                spi_status, send, retmsg = spi_write_read(in_msgs[in_idx])
 
                 dut._log.info(
                     f"Trns {trsns}: {bin(spi_status)} | {hex(retmsg)}, sending in {hex(in_msgs[in_idx])}"
@@ -142,7 +149,10 @@ async def run_top(
                 in_idx += 1
 
             else:
-                spi_status, retmsg = await spi_read()
+                # spi_status, retmsg = await spi_read()
+                # pdb.set_trace()
+                spi_status, send, retmsg =  spi_read()
+
                 dut._log.info(f"Trns {trsns}: {bin(spi_status)} | {hex(retmsg)}")
                 spc = spi_status[0]
                 if spi_status[1] == 1:
@@ -156,7 +166,7 @@ async def run_top(
                 await ClockCycles(dut.clk, 1)
 
                 for config_idx in range(len(config_msgs)):
-                    spi_status, retmsg = await spi_read(dut)
+                    spi_status, send, retmsg = spi_read()
                     dut._log.info(f"[SPI CONFIG] Sent {hex(config_msgs[config_idx])}")
 
                 # reset FIFO to 1
@@ -187,7 +197,7 @@ async def run_top(
                 fifo_out_val = fifo.ostream_msg.value.integer
                 dut._log.info(f"[FIFO RX] Received msg: {hex(fifo_out_val)}")
 
-                spi_status, retmsg = await spi_write_read(dut, mk(fifo_out_val))
+                spi_status, send, retmsg = spi_write_read(dut, mk(fifo_out_val))
                 output_msg = mk(retmsg)
                 dut._log.info(f"[FIFO RX] SPI retmsg: {hex(retmsg)}")
 
@@ -517,7 +527,7 @@ async def test_fft1_manual(dut, input_output):
 def flatten_list(lst):
     return [item for sub in lst for item in sub]
 
-@cocotb.test()
+# @cocotb.test()
 async def test_fft1_random(dut):
     random.seed(0xfeedbaba)
     input_mag = 2 ** 31

@@ -138,7 +138,9 @@ def spi_read():
   """
   send = spi_stream_protocol.read_msg()
   recv = spi_write_physical(send)
-  return send, recv
+  spi_status = recv[20:22]
+  retmsg = recv[:20]
+  return spi_status, send, retmsg
   
 
 def spi_write(message):
@@ -147,7 +149,9 @@ def spi_write(message):
   """
   send = spi_stream_protocol.write_msg(mk_bits(20)(message))
   recv = spi_write_physical(send)
-  return send, recv
+  spi_status = recv[20:22]
+  retmsg = recv[:20]
+  return spi_status, send, retmsg
   
 
 def spi_write_read(message):
@@ -156,7 +160,9 @@ def spi_write_read(message):
   """
   send = spi_stream_protocol.write_read_msg(mk_bits(20)(message))
   recv = spi_write_physical(send)
-  return send, recv
+  spi_status = recv[20:22]
+  retmsg = recv[:20]
+  return spi_status, send, retmsg
 
 
 def spi_none_print():

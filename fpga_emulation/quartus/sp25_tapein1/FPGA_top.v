@@ -5,6 +5,9 @@ module FPGA_top (
 	inout logic GPIO2,
 	inout logic GPIO4,
 	inout logic GPIO6,
+  inout logic GPIO5,
+  inout logic GPIO7,
+  inout logic GPIO9,
 	output logic LEDR0,
 	output logic LEDR1
 );
