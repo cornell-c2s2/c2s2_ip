@@ -7,13 +7,16 @@ import pdb
 # sampling_freq: Sampling freq of audio data
 # recv_msg: Input bins from FFT
 # parameters: An array of classifier parameter values (Set to default params by default)
-# [BIT_WIDTH, FREQ_BIT_WIDTH,N_SAMPLES]
+# [BIT_WIDTH, DECIMAL_BIT, FREQ_BIT_WIDTH, N_SAMPLES]
 
-def classify (cutoff_freq, cutoff_mag, sampling_freq, recv_msg, parameters=[32,16,8]):
+def classify (cutoff_freq, cutoff_mag, sampling_freq, recv_msg, parameters=[32,16,8,8]):
     # Extract parameters (half of them aren't used, thanks tomas...)
     BIT_WIDTH = parameters[0]
-    FREQ_BIT_WIDTH = parameters[1]
-    N_SAMPLES = parameters[2]
+    DECIMAL_BIT = parameters[1]
+    FREQ_BIT_WIDTH = parameters[2]
+    N_SAMPLES = parameters[3]
+
+    cutoff_mag = cutoff_mag / 2**(DECIMAL_BIT) # Convert to fixed point
 
     bin_resolution = sampling_freq/(N_SAMPLES*2)
 

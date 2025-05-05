@@ -67,7 +67,7 @@ async def run_top(
     max_trsns=30,
     curr_trsns=0,
     use_spi=1,
-    num_config=0,
+    num_config=0, peek=None
 ):
     """
     Run src/sink testing. src/snk msgs are converted to SPI protocol transactions.
@@ -81,6 +81,7 @@ async def run_top(
       simulations take too long
     curr_trsns: the current transaction number (note from Tean: I've ported this
       over from previous testbenches for now, but I'm thinking of possibly removing it)
+    peel: optional parameter to peek at the output messages (DO NOT REMOVE THIS - Johnny Martinez JJM469)
     """
     # SPI messages
     dut._log.info(f"in_msgs = {in_msgs}")
@@ -960,9 +961,8 @@ async def test_fft_classifier_random(dut, input_mag, input_num, cutoff_freq, cut
 
     cutoff_mag = Fixed(cutoff_mag, True, 16, 8)
 
-    classifier_outputs = [
-        classify(x, cutoff_freq, cutoff_mag, sampling_freq) for x in fft_outputs
-    ]
+    params = [16,8, 16,16]
+    classifier_output = classify(cutoff_freq, cutoff_mag, sampling_freq, fft_outputs[0], params)[0]
 
     inputs = (
         [  # First, configure the crossbars
@@ -972,7 +972,7 @@ async def test_fft_classifier_random(dut, input_mag, input_num, cutoff_freq, cut
         ]
         + [  # Next, configure the classifier
             mk_spi_pkt(RouterOut.CLS_CUT_FREQ_CTRL, cutoff_freq),
-            mk_spi_pkt(RouterOut.CLS_MAG_CTRL, int(cutoff_mag)),
+            mk_spi_pkt(RouterOut.CLS_MAG_CTRL, abs(int(cutoff_mag))),
             mk_spi_pkt(RouterOut.CLS_SAMP_FREQ_CTRL, sampling_freq),
         ]
         + [  # Finally, send the fft inputs
@@ -981,7 +981,7 @@ async def test_fft_classifier_random(dut, input_mag, input_num, cutoff_freq, cut
         ]
     )
 
-    outputs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, x) for x in classifier_outputs]
+    outputs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, classifier_output)]
 
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
@@ -1006,9 +1006,8 @@ async def test_fft_classifier_random_fifo(
 
     cutoff_mag = Fixed(cutoff_mag, True, 16, 8)
 
-    classifier_outputs = [
-        classify(x, cutoff_freq, cutoff_mag, sampling_freq) for x in fft_outputs
-    ]
+    params = [16,8, 16,16]
+    classifier_output = classify(cutoff_freq, cutoff_mag, sampling_freq, fft_outputs[0], params)[0]
 
     inputs = (
         [  # First, configure the crossbars
@@ -1018,7 +1017,7 @@ async def test_fft_classifier_random_fifo(
         ]
         + [  # Next, configure the classifier
             mk_spi_pkt(RouterOut.CLS_CUT_FREQ_CTRL, cutoff_freq),
-            mk_spi_pkt(RouterOut.CLS_MAG_CTRL, int(cutoff_mag)),
+            mk_spi_pkt(RouterOut.CLS_MAG_CTRL, abs(int(cutoff_mag))),
             mk_spi_pkt(RouterOut.CLS_SAMP_FREQ_CTRL, sampling_freq),
         ]
         + [  # Finally, send the fft inputs, split into two 8-bit chunks
@@ -1032,7 +1031,7 @@ async def test_fft_classifier_random_fifo(
         ]
     )
 
-    outputs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, x) for x in classifier_outputs]
+    outputs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, classifier_output)]
 
     cocotb.start_soon(Clock(dut.ext_clk, 2, "ns").start())
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
@@ -1052,7 +1051,8 @@ cutoff_freq_values = [0, 1000, 1400, 2000, 10000]
 # cutoff_freq_values = [0, 1000, 2000, 10000]
 # cutoff_freq_values = [0, 1000, 10000]
 # cutoff_mag_values = [0.33, 0.7, 1, 2.3, 63.32]
-cutoff_mag_values = [0.33, 1, 63.32]
+cutoff_mag_values = [0x0842, 0x7EAD, 0xC2FF]
+#cutoff_mag_values = [0x0100, 0x0501, 0x0031]
 # sampling_freq_values = [44800, 44100, 25000]
 sampling_freq_values = [44800, 25000, 0xffff]
 
