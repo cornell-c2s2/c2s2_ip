@@ -7,6 +7,7 @@ then it is averaged down to mono before sending it to the FFT.
 import wave
 import numpy as np
 from scipy.signal import resample
+import matplotlib.pyplot as plt
 
 import cocotb
 from cocotb.triggers import Timer, Edge, RisingEdge, FallingEdge, ClockCycles
@@ -96,6 +97,68 @@ def wav_to_q8_8_messages(filename: str, target_rate: int) -> bytes:
     # return raw little‑endian bytes, or list(fixed) for Python ints
     return fixed.tolist()
 
+# Generate a sine wave at a given frequency and duration, then save it as a mono 16-bit WAV file.
+def generate_sine_wav(filename, freq, duration, sampling_rate, amplitude=1):
+    # Create time axis
+    t = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
+    # Generate sine wave samples
+    samples = amplitude * np.sin(2 * np.pi * freq * t)
+    # Convert to 16-bit WAV
+    audio = np.int16(samples * 32767)
+
+    # Write to WAV file
+    with wave.open(filename, "w") as wf:
+        wf.setnchannels(1)  # mono
+        wf.setsampwidth(2)  # 2 bytes for int16
+        wf.setframerate(sampling_rate)
+        wf.writeframes(audio.tobytes())
+
+
+# Helper to plot FFT outputs
+def plot_fft_outputs(fixed_outputs, title="FFT Outputs", filename=None):
+    values = [float(x) for x in fixed_outputs]
+    plt.figure()
+    plt.stem(range(len(values)), values)
+    plt.title(title)
+    plt.xlabel("Bin")
+    plt.ylabel("Amplitude")
+    plt.grid(True)
+    plt.tight_layout()
+    if filename:
+        plt.savefig(filename)
+        plt.close()
+    else:
+        plt.show()
+
+# Helper to plot FFT outputs and SPI output messages on separate graphs
+def plot_fft_outputs_dual(fixed_inputs, fixed_outputs, title="FFT Outputs", filename_prefix=None):
+    values1 = [int(x) for x in fixed_inputs]
+    values2 = [int(x) for x in fixed_outputs]
+
+    fig, axs = plt.subplots(2, 1, figsize=(8, 6))
+    fig.suptitle(title)
+
+    # Plot input amplitudes
+    axs[0].plot(range(len(values1)), values1, 'b-o', label='Input')
+    axs[0].set_xlabel("Sample Number")
+    axs[0].set_ylabel("Input Amplitude")
+    axs[0].set_title("Inputs")
+    axs[0].grid(True)
+
+    # Plot output amplitudes
+    axs[1].plot(range(len(values2)), values2, 'r-x', label='Output')
+    axs[1].set_xlabel("Bin Number")
+    axs[1].set_ylabel("Output Amplitude")
+    axs[1].set_title("Outputs")
+    axs[1].grid(True)
+
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    if filename_prefix:
+        plt.savefig(f"{filename_prefix}_dual.png")
+        plt.close()
+    else:
+        plt.show()
+
 """
 ================================================================================
 FFT REAL DATA TESTS
@@ -105,12 +168,14 @@ FFT REAL DATA TESTS
 
 @cocotb.test()
 async def test_fft1_with_wav(dut):
+    # generate_sine_wav("input.wav", 5000, 0.01, 48000, amplitude=0.01)
     # drive the clock and reset
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
 
     # load & quantize the first 32 samples as Q8.8 int16
     raw_bytes = wav_to_q8_8_messages("input.wav", target_rate=48000)
+    dut._log.info(f"Number of samples: {len(raw_bytes)}")
     raw_bytes = raw_bytes[:32]
     # wrap them as Fixed(16,8) so fft1_msg can bit‑pack them
     fixed_inputs = [Fixed(s , True, 16, 8) for s in raw_bytes]
@@ -126,11 +191,12 @@ async def test_fft1_with_wav(dut):
     fixed_outputs = fixed_outputs[:16]
     dut._log.info(f"Golden FFT outputs (fixed-point): {fixed_outputs}")
 
+
     # build your SPI‐packed in/out message lists
     in_msgs, out_msgs = fft1_msg([fixed_inputs], [fixed_outputs])
 
-    # Log the SPI output messages before running the test
-    # dut._log.info(f"DUT output messages: {[hex(m) for m in out_msgs]}")
+    # Plot the FFT inputs and outputs on separate graphs
+    plot_fft_outputs_dual(fixed_inputs, fixed_outputs, title="Golden FFT vs SPI Output Messages", filename_prefix="fft_outputs_dual")
 
     # run the transaction‐level SPI harness
     # Note: run_top already logs the actual DUT output messages as they are received.
@@ -183,8 +249,8 @@ async def test_fft1_classifier_with_wav(dut):
 
 
 @cocotb.test()
-async def test_fft1_classifier_with_ffff_input(dut):
-    """Test classifier when all FFT inputs are zero."""
+async def test_fft1_classifier_with_ffff_cutoff_mag(dut):
+    """Test classifier when cutoff is maximized. Expected output is false."""
     # drive clock and reset
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
