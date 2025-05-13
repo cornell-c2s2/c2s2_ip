@@ -462,23 +462,6 @@ module tapeins_sp24_tapein2_Interconnect2 (
       assign router_rdy[i] = 1'b0;
     end
   endgenerate
-
-  // config messages for the classifiers shorter than 16 bits
-  wire unused_xbar_cfg_bits = &{
-    1'b0,
-    router_msg[1][DATA_BITS-1:XBAR_CTRL_BITS],
-    router_msg[3][DATA_BITS-1:XBAR_CTRL_BITS],
-    router_msg[5][DATA_BITS-1:XBAR_CTRL_BITS],
-    1'b0
-  };
-  // output xbar inject is 1 bit wide
-  wire unused_output_xbar_msg = &{1'b0, router_msg[4][DATA_BITS-1:1], 1'b0};
-  // address bits are retained by the router but we don't use them
-  generate
-    for (genvar i = 0; i <= 9; i = i + 1) begin
-      wire unused_router_addr = &{1'b0, router_msg[i][DATA_BITS+ADDR_BITS-1:DATA_BITS], 1'b0};
-    end
-  endgenerate
   //wire unused_router_val = &{1'b0, router_val[10:ROUTER_ARBITER_SIZE-1], 1'b0};
   //wire unused_router_msg = &{1'b0, router_msg[10:ROUTER_ARBITER_SIZE-1], 1'b0};
 

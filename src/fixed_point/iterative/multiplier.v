@@ -74,7 +74,7 @@ module FXPIterMultControl #(
   output logic do_add,
   output logic do_carry
 );
-  logic [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
+  localparam logic [1:0] IDLE = 2'd0, CALC = 2'd1, DONE = 2'd2;
 
   logic [1:0] state, next_state;
   logic [$clog2(n)-1:0] counter;

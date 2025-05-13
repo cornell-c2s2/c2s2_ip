@@ -174,7 +174,6 @@ module wishbone_Wishbone #(
 
 
   // Unused Net
-  logic unused = &{1'b0, wbs_sel_i, adr_sub, 1'b0};
 endmodule
 
 `endif  /* REG_ARRAY_V */

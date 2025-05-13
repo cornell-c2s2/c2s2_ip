@@ -48,8 +48,8 @@ module lfsr_paramver2#(
     // State macros
     // IDLE: LFSR is waiting for a valid seed to start generating test vectors
     // GEN_VAL: LFSR computes test vector using shifts + XORs (via taps)
-    logic [1:0] IDLE = 2'b00;
-    logic [1:0] GEN_VAL = 2'b01;
+    localparam logic [1:0] IDLE = 2'b00;
+    localparam logic [1:0] GEN_VAL = 2'b01;
 
     // State variables
     logic [1:0] state;
@@ -311,9 +311,6 @@ module lfsr_paramver2#(
             assign T4 = 63;
         end
         
-        else begin
-            initial $fatal("Unsupported LFSR_MSG_BITS value: %d", LFSR_MSG_BITS);
-        end
     endgenerate
 
     generate
@@ -322,9 +319,6 @@ module lfsr_paramver2#(
         end 
         else if(NUM_TAPS == 1'b0) begin
             assign final_tap = (Q[T2] ^ Q[T1]);
-        end
-        else begin
-            initial $fatal("Unsupported NUM_TAPS value: %d", NUM_TAPS);
         end
     endgenerate
         

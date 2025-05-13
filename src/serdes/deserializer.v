@@ -25,8 +25,6 @@ module serdes_Deserializer #(
       assign recv_rdy = send_rdy;
       assign send_val = recv_val;
       assign send_msg[0] = recv_msg;
-
-      logic unused = {1'b0, clk, reset, 1'b0};
     end else begin
       logic [N_SAMPLES - 1:0] en_sel;
 
@@ -74,7 +72,7 @@ module DeserializerControl #(
   input logic reset,
   input logic clk
 );
-  logic INIT = 1'b0, DONE = 1'b1;
+  localparam logic INIT = 1'b0, DONE = 1'b1;
 
   localparam int C_WIDTH = $clog2(N_SAMPLES) - 1;
   // Necessary because counter_next can go up to (including) N_SAMPLES

@@ -88,9 +88,5 @@ module arbiter_router_Router #(
       assign ostream_msg[i] = payload_msg;
     end
   endgenerate
-
-  /* verilator lint_off UNUSED */
-  logic unused = &{1'b0, num_free_entries, 1'b0};
-  /* verilator lint_on UNUSED */
 endmodule
 `endif

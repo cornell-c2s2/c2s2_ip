@@ -23,8 +23,6 @@ module serdes_Serializer #(
       assign recv_rdy = send_rdy;
       assign send_val = recv_val;
       assign send_msg = recv_msg[0];
-
-      logic unused = {1'b0, clk, reset, 1'b0};
     end else begin
       logic [$clog2(N_SAMPLES) - 1:0] mux_sel;
       logic reg_en;
@@ -75,7 +73,7 @@ module SerializerControl #(
   input logic reset
 );
 
-  logic INIT = 1'b0, OUTPUT_START = 1'b1;
+  localparam logic INIT = 1'b0, OUTPUT_START = 1'b1;
 
   logic next_state;
   logic state;

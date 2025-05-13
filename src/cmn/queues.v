@@ -150,7 +150,6 @@ module cmn_QueueDpath1 #(
       );
 
     else begin
-      logic unused = &{1'b0, bypass_mux_sel, 1'b0};
       assign deq_msg = qstore;
     end
   endgenerate
@@ -359,7 +358,6 @@ module cmn_QueueDpath #(
       );
 
     else begin
-      logic unused = 1'b0 & bypass_mux_sel;
       assign deq_msg = read_data;
     end
   endgenerate

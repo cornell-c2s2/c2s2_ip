@@ -183,7 +183,6 @@ module tapeins_sp24_tapein1_Interconnect1 (
 
   // input 0 is unused (for now)
   // TODO: change this to wishbone
-  logic unused_input_xbar = &{1'b0, input_xbar_recv_rdy[1], 1'b0};
   assign input_xbar_recv_msg[1] = 16'b0;
   assign input_xbar_recv_val[1] = 1'b0;
 
@@ -300,7 +299,6 @@ module tapeins_sp24_tapein1_Interconnect1 (
   assign output_xbar_send_rdy[0] = arbiter_rdy[1];
   // output 1 is unused (for now)
   // TODO: Change this to wishbone
-  logic unused_output_xbar = &{1'b0, output_xbar_send_msg[1], output_xbar_send_val[1], 1'b0};
   assign output_xbar_send_rdy[1] = 1'b0;
 
   // configuration message for the crossbar

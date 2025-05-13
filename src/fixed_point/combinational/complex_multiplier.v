@@ -189,19 +189,15 @@ module fixed_point_combinational_ComplexMultiplier #(
       assign recv_rdy = send_rdy;
       assign send_val = recv_val;
 
-      logic unused = &({clk, reset});
-
       // 1 multiplier implementation, completes computations in three cycles.
     end else if (num_mults == 1) begin
       // State machine to control the 3-cycle computation
-      logic [2:0] IDLE = 3'd0, MUL1 = 3'd1, MUL2 = 3'd2, MUL3 = 3'd3, DONE = 3'd4;
+      localparam logic [2:0] IDLE = 3'd0, MUL1 = 3'd1, MUL2 = 3'd2, MUL3 = 3'd3, DONE = 3'd4;
       logic [2:0] state;
       logic [2:0] next_state;
 
       // Intermediate results
       logic [n-1:0] mul_a, mul_b, mul_c;
-
-      logic unused = &({IDLE, MUL1, MUL2, MUL3, DONE});
 
       always_ff @(posedge clk) begin
         if (reset) begin

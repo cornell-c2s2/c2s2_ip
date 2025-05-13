@@ -29,6 +29,49 @@
 `include "async_fifo/AsyncFifo.sv"
 `include "async_fifo/PosedgeDetector.sv"
 
+module tapein1_sp25_top_single_bit (
+  input  logic clk,
+  input  logic reset,
+  output logic clk_out,
+  input  logic cs,
+  input  logic mosi,
+  output logic miso,
+  input  logic sclk,
+  output logic minion_parity,
+  output logic adapter_parity,
+  input  logic ext_clk,
+  input  logic async_fifo_recv_msg_0,
+  input  logic async_fifo_recv_msg_1,
+  input  logic async_fifo_recv_msg_2,
+  input  logic async_fifo_recv_msg_3,
+  input  logic async_fifo_recv_msg_4,
+  input  logic async_fifo_recv_msg_5,
+  input  logic async_fifo_recv_msg_6,
+  input  logic async_fifo_recv_msg_7,
+  input  logic async_fifo_recv_val,
+  output logic async_fifo_recv_rdy,
+  output logic classifier_send_msg,
+  output logic classifier_send_val
+);
+
+  logic [7:0] async_fifo_recv_msg;
+  assign async_fifo_recv_msg = {async_fifo_recv_msg_7,
+                                async_fifo_recv_msg_6,
+                                async_fifo_recv_msg_5,
+                                async_fifo_recv_msg_4,
+                                async_fifo_recv_msg_3,
+                                async_fifo_recv_msg_2,
+                                async_fifo_recv_msg_1,
+                                async_fifo_recv_msg_0};
+
+  tapein1_sp25_top #(
+    .FIFO_ENTRY_BITS(8)
+  ) tapein1_sp25_top (
+    .*
+  );
+
+endmodule
+
 
 module tapein1_sp25_top #(
   parameter int FIFO_ENTRY_BITS = 8
@@ -569,12 +612,6 @@ module tapein1_sp25_top #(
     .recv_msg                (fft1_send_msg[0:FFT1_SAMPLES/2-1])
   );
 
-  generate
-    for (genvar i = FFT1_SAMPLES/2; i < FFT1_SAMPLES; i = i + 1) begin
-      wire fft1_msg_unused = &{1'b0, fft1_send_msg[i], 1'b0};
-    end
-  endgenerate
-
   // FFT Core 1 --------------------------------------------------------------------
   fft_pease_FFT #(
     .BIT_WIDTH               (DATA_BITS),
@@ -623,12 +660,6 @@ module tapein1_sp25_top #(
     .recv_msg                (fft2_send_msg[0:FFT2_SAMPLES/2-1])
   );
 
-  generate
-    for (genvar i = FFT2_SAMPLES/2; i < FFT2_SAMPLES; i = i + 1) begin
-      wire fft2_msg_unused = &{1'b0, fft2_send_msg[i], 1'b0};
-    end
-  endgenerate
-
   // FFT Core 2 --------------------------------------------------------------------
   fft_pease_FFT #(
     .BIT_WIDTH               (DATA_BITS),
@@ -663,7 +694,7 @@ module tapein1_sp25_top #(
   // Classifier --------------------------------------------------------------------
   classifier_Classifier #(
     .BIT_WIDTH               (CLASSIFIER_BITS),
-    .DECIMAL_PT              (CLASSIFIER_DECIMAL_PT),
+    .FREQ_BIT_WIDTH          (CLASSIFIER_BITS),
     .N_SAMPLES               (CLASSIFIER_SAMPLES)
   ) classifier (
     .clk                     (clk),

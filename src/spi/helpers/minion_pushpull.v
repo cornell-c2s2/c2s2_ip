@@ -161,11 +161,6 @@ module spi_helpers_Minion_PushPull #(
   assign push_msg            = shreg_in_out;
   assign parity              = (^push_msg[nbits-3:0]) & push_en;
 
-
-  // unused net
-  logic unused;
-  assign unused = &{1'b0, mosi_sync_negedge_, mosi_sync_posedge_, sclk_sync_out, 1'b0};
-
 endmodule
 
 `endif  /* SPI_HELPERS_MINION_PUSHPULL */

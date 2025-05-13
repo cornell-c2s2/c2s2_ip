@@ -27,17 +27,6 @@ module fixed_point_combinational_Multiplier #(
 
   assign c = prod[n+d-1:d];
 
-
-  // The upper n bits of prod are discarded.
-  generate
-    if (d > 0) begin
-      /* verilator lint_off UNUSED */
-      logic unused;
-      /* verilator lint_on UNUSED */
-      assign unused = &{1'b0, prod[d-1:0], 1'b0};
-    end
-  endgenerate
-
 endmodule
 
 `endif

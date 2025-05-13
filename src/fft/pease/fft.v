@@ -25,11 +25,11 @@ module fft_pease_FFT #(
   input logic clk
 );
 
-  logic [2:0] IDLE = 3'd0, COMP = 3'd1, DONE = 3'd2;
+  localparam logic [2:0] IDLE = 3'd0, COMP = 3'd1, DONE = 3'd2;
 
   localparam int BstageBits = (N_SAMPLES > 2) ? $clog2($clog2(N_SAMPLES)) : 1;
   localparam int log = $clog2(N_SAMPLES) - 1;
-  logic [BstageBits-1:0] max_bstage = log[BstageBits-1:0];
+  localparam logic [BstageBits-1:0] max_bstage = log[BstageBits-1:0];
 
   logic [2:0] state;
   logic [2:0] next_state;

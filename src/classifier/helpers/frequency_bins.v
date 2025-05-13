@@ -32,8 +32,6 @@ module classifier_helpers_FrequencyBins #(
     for (genvar i = 0; i < N_SAMPLES; i++) begin : gen_freq
       wire [LOG2_N_SAMPLES + BIT_WIDTH - 1:0] wide_freq_out = (i * wide_sampling_freq) >> (LOG2_N_SAMPLES + 1);
       assign frequency_out[i] = wide_freq_out[BIT_WIDTH-1:0];
-
-      wire unused = &{1'b0, wide_freq_out[LOG2_N_SAMPLES+BIT_WIDTH-1:BIT_WIDTH], 1'b0};
     end
   endgenerate
 

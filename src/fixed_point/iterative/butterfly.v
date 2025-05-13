@@ -61,9 +61,6 @@ module fixed_point_iterative_Butterfly #(
       // | 1 -1 | * | b | = | a - b |
       1: begin
         // ignores the omega value when an optimization parameter is present
-        /* verilator lint_off UNUSED */
-        logic unused = &{1'd0, wr, wc, 1'd0};
-        /* verilator lint_on UNUSED */
         always_ff @(posedge clk) begin
           if (reset) begin
             cr <= 0;
@@ -95,7 +92,6 @@ module fixed_point_iterative_Butterfly #(
       2: begin
         // ignores the omega value when an optimization parameter is present
         /* verilator lint_off UNUSED */
-        logic unused = &{1'd0, wr, wc, 1'd0};
         /* verilator lint_on UNUSED */
         always_ff @(posedge clk) begin
           if (reset) begin
@@ -128,7 +124,6 @@ module fixed_point_iterative_Butterfly #(
       3: begin
         // ignores the omega value when an optimization parameter is present
         /* verilator lint_off UNUSED */
-        logic unused = &{1'd0, wr, wc, 1'd0};
         /* verilator lint_on UNUSED */
         always_ff @(posedge clk) begin
           if (reset) begin
@@ -160,9 +155,6 @@ module fixed_point_iterative_Butterfly #(
       // | 1  i | * | b | = | a + bi |
       4: begin
         // ignores the omega value when an optimization parameter is present
-        /* verilator lint_off UNUSED */
-        logic unused = &{1'd0, wr, wc, 1'd0};
-        /* verilator lint_on UNUSED */
         always_ff @(posedge clk) begin
           if (reset) begin
             cr <= 0;

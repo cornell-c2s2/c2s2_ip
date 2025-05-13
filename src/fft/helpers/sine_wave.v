@@ -22,7 +22,7 @@ module fft_helpers_SineWave #(
     for (genvar i = 0; i < N; i++) begin
       localparam real sinvalue = $sin(2 * PI * i / N);
       /* verilator lint_off UNUSED */
-      int fixedptvalue = int'(sinvalue * 2.0 ** D);
+      localparam int fixedptvalue = int'(sinvalue * 2.0 ** D);
       /* lint_on */
 
       assign out[i] = {{(W - D - 1) {fixedptvalue[31]}}, fixedptvalue[D:0]};
