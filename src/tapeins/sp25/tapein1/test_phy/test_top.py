@@ -516,7 +516,7 @@ def flatten_list(lst):
     return [item for sub in lst for item in sub]
 
 def test_fft_random_msg(dut, fft_num):
-    random.seed(0xfeedbaba)
+    # random.seed(0xfeedbaba)
     input_mag = 2 ** 31
     input_num = 50
 
@@ -679,7 +679,7 @@ async def test_fft_alternation(dut):
     versa.
     """
 
-    random.seed(0xfeedbaba)
+    # random.seed(0xfeedbaba)
 
     iterations = 2
     in_msgs = []
@@ -853,7 +853,7 @@ Tests for:
 ================================================================================
 """
 async def test_fft_classifier_random(dut, input_mag, input_num, cutoff_freq, cutoff_mag, sampling_freq):
-    random.seed(0xfeedbaba)
+    # random.seed(0xfeedbaba)
     
     inputs = [
         [
