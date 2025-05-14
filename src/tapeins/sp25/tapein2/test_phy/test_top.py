@@ -438,7 +438,7 @@ def fft_msg(inputs: list[Fixed], outputs: list[Fixed], fft_num: int):
     return in_msgs, out_msgs
 
 def test_fft_random_msg(dut, fft_num):
-    random.seed(0xFEEDBABA)
+    # random.seed(0xFEEDBABA)
     input_mag = 2**31
     input_num = 50
 
@@ -639,9 +639,8 @@ async def test_fft_classifier_random(dut, input_mag, input_num, cutoff_freq, cut
 
     cutoff_mag = Fixed(cutoff_mag, True, 16, 8)
 
-    classifier_outputs = [
-        classify(x, cutoff_freq, cutoff_mag, sampling_freq) for x in fft_outputs
-    ]
+    params = [16,8, 16,16]
+    classifier_output = classify(cutoff_freq, cutoff_mag, sampling_freq, fft_outputs[0], params)[0]
 
     inputs = (
         [  # First, configure the crossbars
@@ -660,7 +659,7 @@ async def test_fft_classifier_random(dut, input_mag, input_num, cutoff_freq, cut
         ]
     )
 
-    outputs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, x) for x in classifier_outputs]
+    outputs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, classifier_output)]
 
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
