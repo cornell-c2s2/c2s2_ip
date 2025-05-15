@@ -1,0 +1,62 @@
+
+# HDL Language (always Verilog)
+TOPLEVEL_LANG ?= verilog
+
+# RTL Simulator (use Icarus Verilog)
+# SIM := icarus
+SIM := verilator
+
+# Directory where the compiled files and simulation results will go
+SIM_BUILD := sim_build
+
+# Define the top-level Verilog module and corresponding Python test module
+TOPLEVEL = tapein1_sp25_top
+MODULE = test_top
+
+# Verilog source files
+C2S2_PATH=$(shell git rev-parse --show-toplevel)
+VERILOG_SOURCES += $(PWD)/../tapein1_sp25_top.v
+COMPILE_ARGS += -I$(C2S2_PATH)/src
+
+
+# Compiler flags for Verilog compilation
+COMPILE_ARGS += -I$(PWD)/../src    # Include necessary directories
+COMPILE_ARGS += -Wno-WIDTHEXPAND -Wno-MODDUP -Wno-WIDTHTRUNC -Wno-UNOPTFLAT
+# COMPILE_ARGS += -Wall -g2005-sv  # Enable all warnings, SystemVerilog, and 2005 standard
+
+# Set environment variables for waveforms and coverage data
+WAVES = 1
+COVER = 0
+
+
+# Generating waveform files (Set environment variable WAVES to 1)
+WAVES ?= 0
+ifeq ($(WAVES), 1)
+	EXTRA_ARGS += -vcd
+endif
+
+include $(shell cocotb-config --makefiles)/Makefile.sim
+
+
+# Icarus Verilog simulation command
+run: 
+	@echo "Compiling Verilog sources..."
+	$(SIM) $(COMPILE_ARGS) -o $(SIM_BUILD)/$(TOPLEVEL) $(VERILOG_SOURCES)
+	@echo "Running simulation..."
+	vvp $(SIM_BUILD)/$(TOPLEVEL) $(EXTRA_ARGS)
+
+# Clean up simulation files
+clean::
+	@echo "Cleaning simulation files..."
+	rm -rf $(SIM_BUILD)
+	rm -rf waves
+	rm -rf coverage
+	rm -rf logs
+
+# Generate a coverage report after running a simulation
+coverage_report:
+	@echo "Icarus Verilog does not support coverage reporting directly."
+
+# NOTE: temporary to get coverage report to generate
+coverage_report_temp:
+	@echo "Icarus Verilog does not support coverage reporting directly."
