@@ -663,7 +663,6 @@ module tapein1_sp25_top #(
   // Classifier --------------------------------------------------------------------
   classifier_Classifier #(
     .BIT_WIDTH               (CLASSIFIER_BITS),
-    .DECIMAL_PT              (CLASSIFIER_DECIMAL_PT),
     .N_SAMPLES               (CLASSIFIER_SAMPLES)
   ) classifier (
     .clk                     (clk),
