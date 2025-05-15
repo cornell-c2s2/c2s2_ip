@@ -665,19 +665,67 @@ async def test_fft_classifier_random(dut, input_mag, input_num, cutoff_freq, cut
     await reset_dut(dut)
     await run_top(dut, inputs, outputs, max_trsns=1000)
 
+async def test_fft_classifier_random_fifo(
+    dut, input_mag, input_num, cutoff_freq, cutoff_mag, sampling_freq
+):
+    inputs = [
+        [CFixed((random.uniform(-input_mag, input_mag), 0), 16, 8) for i in range(32)]
+        for _ in range(input_num)
+    ]
+
+    model: FFTInterface = FFTPease(16, 8, 32)
+    outputs = [model.transform(x) for x in inputs]
+
+    fft_inputs = [[x.real for x in sample] for sample in inputs]
+    fft_outputs = [[x.real for x in sample][:16] for sample in outputs]
+
+    cutoff_mag = Fixed(cutoff_mag, True, 16, 8)
+
+    params = [16,8, 16,16]
+    classifier_output = classify(cutoff_freq, cutoff_mag, sampling_freq, fft_outputs[0], params)[0]
+
+    inputs = (
+        [  # First, configure the crossbars
+            mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.FIFO_FFT1),
+            mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_CLS),
+            mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.CLS_ARBITER),
+        ]
+        + [  # Next, configure the classifier
+            mk_spi_pkt(RouterOut.CLS_CUT_FREQ_CTRL, cutoff_freq),
+            mk_spi_pkt(RouterOut.CLS_MAG_CTRL, abs(int(cutoff_mag))),
+            mk_spi_pkt(RouterOut.CLS_SAMP_FREQ_CTRL, sampling_freq),
+        ]
+        + [  # Finally, send the fft inputs, split into two 8-bit chunks
+            byte
+            for sample in fft_inputs
+            for x in sample
+            for byte in [
+                (int(fixed_bits(x)) >> 8) & 0xFF,
+                int(fixed_bits(x)) & 0xFF,
+            ]  # MSB, LSB
+        ]
+    )
+
+    outputs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, classifier_output)]
+
+    cocotb.start_soon(Clock(dut.ext_clk, 2, "ns").start())
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+    await run_top(dut, inputs, outputs, max_trsns=1000, use_spi=0, num_config=6)
+
 input_mag_values =[1, 10]
 input_num_values =[1, 10]
 cutoff_freq_values = [0, 2000]
 cutoff_mag_values = [0.7, 2.3]
 sampling_freq_values = [44800, 44100, 25000]
 
-factory = TestFactory(test_fft_classifier_random)
-factory.add_option("input_mag", input_mag_values)
-factory.add_option("input_num", input_num_values)
-factory.add_option("cutoff_freq", cutoff_freq_values)
-factory.add_option("cutoff_mag", cutoff_mag_values)
-factory.add_option("sampling_freq", sampling_freq_values)
-factory.generate_tests()
+for test in [test_fft_classifier_random, test_fft_classifier_random_fifo]:
+    factory = TestFactory(test)factory.add_option("input_mag", input_mag_values)
+    factory.add_option("input_num", input_num_values)
+    factory.add_option("cutoff_freq", cutoff_freq_values)
+    factory.add_option("cutoff_mag", cutoff_mag_values)
+    factory.add_option("sampling_freq", sampling_freq_values)
+    factory.generate_tests()
 
 # Composite test that combines loopback and FFT.
 # @cocotb.test()
