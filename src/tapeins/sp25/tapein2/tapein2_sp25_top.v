@@ -29,6 +29,48 @@
 `include "async_fifo/AsyncFifo.sv"
 `include "async_fifo/PosedgeDetector.sv"
 
+module tapein2_sp25_top_single_bit (
+  input  logic clk,
+  input  logic reset,
+  output logic clk_out,
+  input  logic cs,
+  input  logic mosi,
+  output logic miso,
+  input  logic sclk,
+  output logic minion_parity,
+  output logic adapter_parity,
+  input  logic ext_clk,
+  input  logic async_fifo_recv_msg_0,
+  input  logic async_fifo_recv_msg_1,
+  input  logic async_fifo_recv_msg_2,
+  input  logic async_fifo_recv_msg_3,
+  input  logic async_fifo_recv_msg_4,
+  input  logic async_fifo_recv_msg_5,
+  input  logic async_fifo_recv_msg_6,
+  input  logic async_fifo_recv_msg_7,
+  input  logic async_fifo_recv_val,
+  output logic async_fifo_recv_rdy,
+  output logic classifier_send_msg,
+  output logic classifier_send_val
+);
+
+  logic [7:0] async_fifo_recv_msg;
+  assign async_fifo_recv_msg = {async_fifo_recv_msg_7,
+                                async_fifo_recv_msg_6,
+                                async_fifo_recv_msg_5,
+                                async_fifo_recv_msg_4,
+                                async_fifo_recv_msg_3,
+                                async_fifo_recv_msg_2,
+                                async_fifo_recv_msg_1,
+                                async_fifo_recv_msg_0};
+
+  tapein2_sp25_top #(
+    .FIFO_ENTRY_BITS(8)
+  ) tapein2_sp25_top (
+    .*
+  );
+
+endmodule
 
 module tapein2_sp25_top #(
   parameter int FIFO_ENTRY_BITS = 8
