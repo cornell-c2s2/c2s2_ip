@@ -24,16 +24,8 @@ COMPILE_ARGS += -I$(PWD)/../src    # Include necessary directories
 COMPILE_ARGS += -Wno-WIDTHEXPAND -Wno-MODDUP -Wno-WIDTHTRUNC -Wno-UNOPTFLAT
 # COMPILE_ARGS += -Wall -g2005-sv  # Enable all warnings, SystemVerilog, and 2005 standard
 
-# Set environment variables for waveforms and coverage data
-WAVES = 1
-COVER = 0
-
 
 # Generating waveform files (Set environment variable WAVES to 1)
-WAVES ?= 0
-ifeq ($(WAVES), 1)
-	EXTRA_ARGS += -vcd
-endif
 
 include $(shell cocotb-config --makefiles)/Makefile.sim
 
@@ -52,11 +44,3 @@ clean::
 	rm -rf waves
 	rm -rf coverage
 	rm -rf logs
-
-# Generate a coverage report after running a simulation
-coverage_report:
-	@echo "Icarus Verilog does not support coverage reporting directly."
-
-# NOTE: temporary to get coverage report to generate
-coverage_report_temp:
-	@echo "Icarus Verilog does not support coverage reporting directly."
