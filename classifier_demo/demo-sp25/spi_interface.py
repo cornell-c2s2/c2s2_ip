@@ -1,5 +1,5 @@
 """
-cli_interface.py
+spi_interface.py
 
 A file dedicated for the command-line interface between the SPI driver and the digital SP24 tape-out.
 
