@@ -180,50 +180,83 @@ FFT REAL DATA TESTS
 
 
 @cocotb.test()
-async def test_fft1_with_wav(dut):
-    # generate_sine_wav("input.wav", 5000, 0.01, 48000, amplitude=0.01)
-    # drive the clock and reset
+async def test_fft1_with_0_wav(dut):
+    """Test FFT with all-zero input (0.wav)."""
+    # Optionally generate a zero .wav file here if needed
+    # generate_sine_wav("0.wav", freq=0, duration=0.01, sampling_rate=48000, amplitude=0)
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
 
-    # load & quantize the first 32 samples as Q8.8 int16
-    raw_bytes = wav_to_q8_8_messages("input.wav", target_rate=48000)
+    raw_bytes = wav_to_q8_8_messages("0.wav", target_rate=48000)
     dut._log.info(f"Number of samples: {len(raw_bytes)}")
     raw_bytes = raw_bytes[:32]
-    # wrap them as Fixed(16,8) so fft1_msg can bit‑pack them
     fixed_inputs = [Fixed(s, True, 16, 8) for s in raw_bytes]
     dut._log.info(f"FFT inputs (fixed-point): {fixed_inputs}")
 
-    # compute golden with FFTPease
     model = FFTPease(16, 8, 32)
     golden = model.transform([CFixed(v=(s, 0), n=16, d=8) for s in raw_bytes])
-    # we only compare the real part here, cast back into Fixed(16,8)
-    fixed_outputs = [Fixed(x.real, True, 16, 8) for x in golden]
-    fixed_outputs = fixed_outputs[:16]
+    fixed_outputs = [Fixed(x.real, True, 16, 8) for x in golden][:16]
     dut._log.info(f"Golden FFT outputs (fixed-point): {fixed_outputs}")
 
-
-    # build your SPI‐packed in/out message lists
     in_msgs, out_msgs = fft1_msg([fixed_inputs], [fixed_outputs])
-
-    # Plot the FFT inputs and outputs on separate graphs
-    plot_fft_outputs_dual(fixed_inputs, fixed_outputs, title="Golden FFT vs SPI Output Messages", filename_prefix="fft_outputs_dual")
-
-    # run the transaction‐level SPI harness
-    # Note: run_top already logs the actual DUT output messages as they are received.
+    plot_fft_outputs_dual(fixed_inputs, fixed_outputs, title="FFT 0.wav Inputs/Outputs", filename_prefix="fft_0wav")
     await run_top(dut, in_msgs, out_msgs, max_trsns=200)
 
 
 @cocotb.test()
-async def test_fft1_classifier_with_wav(dut):
-    generate_sine_wav("input.wav", freq=2000, duration=0.01, sampling_rate=48000)
-    """Test classifier on real-world audio input."""
+async def test_fft1_with_bird_wav(dut):
+    """Test FFT with bird.wav input."""
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+
+    raw_bytes = wav_to_q8_8_messages("bird.wav", target_rate=48000)
+    dut._log.info(f"Number of samples: {len(raw_bytes)}")
+    raw_bytes = raw_bytes[80000:80032]
+    fixed_inputs = [Fixed(s, True, 16, 8) for s in raw_bytes]
+    dut._log.info(f"FFT inputs (fixed-point): {fixed_inputs}")
+
+    model = FFTPease(16, 8, 32)
+    golden = model.transform([CFixed(v=(s, 0), n=16, d=8) for s in raw_bytes])
+    fixed_outputs = [Fixed(x.real, True, 16, 8) for x in golden][:16]
+    dut._log.info(f"Golden FFT outputs (fixed-point): {fixed_outputs}")
+
+    in_msgs, out_msgs = fft1_msg([fixed_inputs], [fixed_outputs])
+    plot_fft_outputs_dual(fixed_inputs, fixed_outputs, title="FFT bird.wav Inputs/Outputs", filename_prefix="fft_birdwav")
+    await run_top(dut, in_msgs, out_msgs, max_trsns=200)
+
+
+@cocotb.test()
+async def test_fft1_with_sine_wav(dut):
+    """Test FFT with generated sine.wav input."""
+    generate_sine_wav("sine.wav", freq=5000, duration=0.01, sampling_rate=48000, amplitude=0.01)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+
+    raw_bytes = wav_to_q8_8_messages("sine.wav", target_rate=48000)
+    dut._log.info(f"Number of samples: {len(raw_bytes)}")
+    raw_bytes = raw_bytes[:32]
+    fixed_inputs = [Fixed(s, True, 16, 8) for s in raw_bytes]
+    dut._log.info(f"FFT inputs (fixed-point): {fixed_inputs}")
+
+    model = FFTPease(16, 8, 32)
+    golden = model.transform([CFixed(v=(s, 0), n=16, d=8) for s in raw_bytes])
+    fixed_outputs = [Fixed(x.real, True, 16, 8) for x in golden][:16]
+    dut._log.info(f"Golden FFT outputs (fixed-point): {fixed_outputs}")
+
+    in_msgs, out_msgs = fft1_msg([fixed_inputs], [fixed_outputs])
+    plot_fft_outputs_dual(fixed_inputs, fixed_outputs, title="FFT sine.wav Inputs/Outputs", filename_prefix="fft_sinewav")
+    await run_top(dut, in_msgs, out_msgs, max_trsns=200)
+
+
+@cocotb.test()
+async def test_fft1_classifier_with_bird_wav(dut):
+    """Test classifier on real-world audio input (bird.wav)."""
     # drive clock and reset
     cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
     await reset_dut(dut)
 
-    # load & quantize the first 32 samples as Q8.8 int16
-    raw_bytes = wav_to_q8_8_messages("input.wav", target_rate=48000)
+    # load & quantize the first 32 samples as Q8.8 int16 from bird.wav
+    raw_bytes = wav_to_q8_8_messages("bird.wav", target_rate=48000)
     raw_bytes = raw_bytes[:32]
     fixed_inputs = [Fixed(s, True, 16, 8) for s in raw_bytes]
 
@@ -257,7 +290,52 @@ async def test_fft1_classifier_with_wav(dut):
     await run_top(dut, in_msgs, out_msgs, max_trsns=2000)
 
     # log expected classifier output
-    dut._log.info(f"Expected classifier output: {classifier_outputs}")
+    dut._log.info(f"Expected classifier output (bird.wav): {classifier_outputs}")
+
+
+@cocotb.test()
+async def test_fft1_classifier_with_sine_wav(dut):
+    """Test classifier on generated sine.wav input."""
+    generate_sine_wav("sine.wav", freq=2000, duration=0.01, sampling_rate=48000)
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+
+    # load & quantize the first 32 samples as Q8.8 int16 from sine.wav
+    raw_bytes = wav_to_q8_8_messages("sine.wav", target_rate=48000)
+    raw_bytes = raw_bytes[:32]
+    fixed_inputs = [Fixed(s, True, 16, 8) for s in raw_bytes]
+
+    # compute golden FFT output
+    model = FFTPease(16, 8, 32)
+    golden = model.transform([CFixed(v=(s, 0), n=16, d=8) for s in raw_bytes])
+    fft_reals = [x.real for x in golden]
+
+    # classifier parameters
+    cutoff_freq = 1000
+    cutoff_mag = Fixed(0.7, True, 16, 8)
+    sampling_freq = 48000
+
+    # compute expected classifier outputs
+    classifier_outputs = classify(fft_reals, cutoff_freq, cutoff_mag, sampling_freq)
+
+    # build SPI message lists for FFT1->Classifier->Arbiter pipeline
+    in_msgs = [
+        mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT1),
+        mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_CLS),
+        mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.CLS_ARBITER),
+        mk_spi_pkt(RouterOut.CLS_CUT_FREQ_CTRL, cutoff_freq),
+        mk_spi_pkt(RouterOut.CLS_MAG_CTRL, int(cutoff_mag)),
+        mk_spi_pkt(RouterOut.CLS_SAMP_FREQ_CTRL, sampling_freq),
+    ] + [mk_spi_pkt(RouterOut.IN_XBAR, int(fixed_bits(x))) for x in fixed_inputs]
+
+    # Classifier output is a single boolean, convert to int and wrap in a list
+    out_msgs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, int(classifier_outputs))]
+
+    # run the transaction-level SPI harness with ample cycles
+    await run_top(dut, in_msgs, out_msgs, max_trsns=2000)
+
+    # log expected classifier output
+    dut._log.info(f"Expected classifier output (sine.wav): {classifier_outputs}")
 
 
 @cocotb.test()
@@ -301,4 +379,39 @@ async def test_fft1_classifier_with_ffff_cutoff_mag(dut):
 
     await run_top(dut, in_msgs, out_msgs, max_trsns=2000)
 
+    dut._log.info(f"Expected classifier output (zero inputs): {expected}")
+
+
+@cocotb.test()
+async def test_fft1_classifier_with_0_input(dut):
+    """Test classifier when all FFT inputs are zero."""
+    cocotb.start_soon(Clock(dut.clk, 1, "ns").start())
+    await reset_dut(dut)
+
+    fixed_inputs = [Fixed(0, True, 16, 8) for _ in range(32)]
+    dut._log.info(f"Zero inputs (fixed-point): {fixed_inputs}")
+
+    model = FFTPease(16, 8, 32)
+    golden = model.transform([CFixed(v=(0, 0), n=16, d=8) for _ in range(32)])
+    fft_reals = [x.real for x in golden]
+
+    # classifier parameters
+    cutoff_freq = 1000
+    cutoff_mag = Fixed(0.7, True, 16, 8)
+    sampling_freq = 48000
+
+    expected = classify(fft_reals, cutoff_freq, cutoff_mag, sampling_freq)
+
+    in_msgs = [
+        mk_spi_pkt(RouterOut.IN_XBAR_CTRL, InXbarCfg.ROUTER_FFT1),
+        mk_spi_pkt(RouterOut.CLS_XBAR_CTRL, ClsXbarCfg.FFT1_CLS),
+        mk_spi_pkt(RouterOut.OUT_XBAR_CTRL, OutXbarCfg.CLS_ARBITER),
+        mk_spi_pkt(RouterOut.CLS_CUT_FREQ_CTRL, cutoff_freq),
+        mk_spi_pkt(RouterOut.CLS_MAG_CTRL, int(cutoff_mag)),
+        mk_spi_pkt(RouterOut.CLS_SAMP_FREQ_CTRL, sampling_freq),
+    ] + [mk_spi_pkt(RouterOut.IN_XBAR, int(fixed_bits(x))) for x in fixed_inputs]
+
+    out_msgs = [mk_spi_pkt(ArbiterIn.OUT_XBAR, int(expected))]
+
+    await run_top(dut, in_msgs, out_msgs, max_trsns=2000)
     dut._log.info(f"Expected classifier output (zero inputs): {expected}")
