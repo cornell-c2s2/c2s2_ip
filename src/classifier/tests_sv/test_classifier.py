@@ -9,7 +9,7 @@ import pdb
 
 
 CUTOFF_FREQ = 0
-CUTOFF_MAG = 0xfff5
+CUTOFF_MAG = 0xfffe
 SAMP_FREQ = 44100
 
 
@@ -96,23 +96,25 @@ async def basic_test(dut):
     #     539      # 2.10546875
     # ]
 
-    test =[
-        0xfc33,
-        0x01e2,
-        0xff7c,
-        0x0026,
-        0x006d,
-        0x000c,
-        0xffc6,
-        0xffc4,
-        0x001e,
-        0xfff6,
-        0xffda,
-        0xff71,
-        0x0013,
-        0x001a,
-        0x003c,
-        0x0042]
+    # test =[
+    #     0xfc33,
+    #     0x01e2,
+    #     0xff7c,
+    #     0x0026,
+    #     0x006d,
+    #     0x000c,
+    #     0xffc6,
+    #     0xffc4,
+    #     0x001e,
+    #     0xfff6,
+    #     0xffda,
+    #     0xff71,
+    #     0x0013,
+    #     0x001a,
+    #     0x003c,
+    #     0x0042]
+    test = [0 for _ in range(16)]
+    test[3] = 0xffff
 
     bv = 0
     word_width = 16
